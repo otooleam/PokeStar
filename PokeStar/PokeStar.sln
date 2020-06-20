@@ -3,29 +3,23 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29326.143
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "PokeStar", "PokeStar\PokeStar.vcxproj", "{1C2BA1D8-9B1C-4B64-9FF9-E91EAD6107FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PokeStar", "PokeStar\PokeStar.csproj", "{6DE676EE-09A5-4991-8C28-FCF3EF059A24}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
-		Debug|x64 = Debug|x64
-		Debug|x86 = Debug|x86
-		Release|x64 = Release|x64
-		Release|x86 = Release|x86
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{1C2BA1D8-9B1C-4B64-9FF9-E91EAD6107FF}.Debug|x64.ActiveCfg = Debug|x64
-		{1C2BA1D8-9B1C-4B64-9FF9-E91EAD6107FF}.Debug|x64.Build.0 = Debug|x64
-		{1C2BA1D8-9B1C-4B64-9FF9-E91EAD6107FF}.Debug|x86.ActiveCfg = Debug|Win32
-		{1C2BA1D8-9B1C-4B64-9FF9-E91EAD6107FF}.Debug|x86.Build.0 = Debug|Win32
-		{1C2BA1D8-9B1C-4B64-9FF9-E91EAD6107FF}.Release|x64.ActiveCfg = Release|x64
-		{1C2BA1D8-9B1C-4B64-9FF9-E91EAD6107FF}.Release|x64.Build.0 = Release|x64
-		{1C2BA1D8-9B1C-4B64-9FF9-E91EAD6107FF}.Release|x86.ActiveCfg = Release|Win32
-		{1C2BA1D8-9B1C-4B64-9FF9-E91EAD6107FF}.Release|x86.Build.0 = Release|Win32
+		{6DE676EE-09A5-4991-8C28-FCF3EF059A24}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6DE676EE-09A5-4991-8C28-FCF3EF059A24}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6DE676EE-09A5-4991-8C28-FCF3EF059A24}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6DE676EE-09A5-4991-8C28-FCF3EF059A24}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {5E826236-F4BE-4DD8-823A-E156B9D3B99C}
+		SolutionGuid = {6251B90F-5A9D-4917-A078-E8BDAE179D85}
 	EndGlobalSection
 EndGlobal
