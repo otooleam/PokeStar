@@ -6,7 +6,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
-
+using Newtonsoft.Json.Linq;
 
 namespace PokeStar
 {
@@ -20,6 +20,8 @@ namespace PokeStar
       private CommandService _commands;
       private IServiceProvider _services;
 
+      private string prefix;
+
       public async Task MainAsync()
       {
          _client = new DiscordSocketClient();
@@ -32,8 +34,12 @@ namespace PokeStar
 
          _client.Log += Log;
 
-         //TODO something more secure than token.txt lmao
-         var token = File.ReadAllText("token.txt");
+         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+         var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
+
+         var token = json.First.First.ToString();
+         prefix = json.Last.First.ToString();
 
          await RegisterCommandsAsync();
          await _client.LoginAsync(TokenType.Bot, token);
@@ -63,7 +69,7 @@ namespace PokeStar
          if (message.Author.IsBot) return;
 
          int argPos = 0;
-         if (message.HasStringPrefix("!", ref argPos))
+         if (message.HasStringPrefix(prefix, ref argPos))
          {
             var result = await _commands.ExecuteAsync(context, argPos, _services);
             if (!result.IsSuccess) Console.WriteLine(result.ErrorReason);
