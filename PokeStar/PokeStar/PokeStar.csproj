@@ -82,7 +82,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Player.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="Raid.cs" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.VersionCheckAnalyzer.resources.dll" />
