@@ -41,10 +41,5 @@ namespace PokeStar.Modules
 
          await ReplyAsync($"{user.Username} now has the Trainer role and the {roleName} role");
       }
-      [Command("rolePicture")]
-      public async Task RolePicture()
-      {
-         var test = 0;
-      }
    }
 }
