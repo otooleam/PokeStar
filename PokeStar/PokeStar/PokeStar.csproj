@@ -146,6 +146,7 @@
     <Compile Include="ImageProcessors\ImageProcess.cs" />
     <Compile Include="ImageProcessors\RollImageProcess.cs" />
     <Compile Include="Modules\BasicCommands.cs" />
+    <Compile Include="Modules\RaidCommand.cs" />
     <Compile Include="Modules\RoleCommand.cs" />
     <Compile Include="Modules\SetupCommand.cs" />
     <Compile Include="DataModels\Player.cs" />

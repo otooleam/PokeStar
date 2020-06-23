@@ -9,7 +9,7 @@ namespace PokeStar.Modules
     class RaidCommand : ModuleBase<SocketCommandContext>
     {
         [Command("raid")]
-        public async Task Role(IGuildUser user)
+        public async Task Raid(IGuildUser user)
         {
 
         }
