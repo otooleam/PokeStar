@@ -11,7 +11,7 @@ namespace PokeStar.DataModels
         private string Gym { get; set; }
         private short Tier
         {
-            get;
+            get { return Tier; }
             set { if (value <= 5) { Tier = value; }; }
         }
         private RaidBoss Boss { get; set; }
@@ -26,7 +26,7 @@ namespace PokeStar.DataModels
         
         public void SetPlayerArrived(Player player)
         {
-            Arrived.Add(player, Players[player]);
+            Arrived.Add(player, Attending[player]);
             Attending.Remove(player);
         }
     }
