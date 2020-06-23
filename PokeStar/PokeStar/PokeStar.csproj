@@ -148,7 +148,11 @@
     <Compile Include="Modules\BasicCommands.cs" />
     <Compile Include="Modules\RoleCommand.cs" />
     <Compile Include="Modules\SetupCommand.cs" />
+    <Compile Include="DataModels\Player.cs" />
+    <Compile Include="DataModels\RaidBoss.cs" />
+    <Compile Include="DataModels\RaidCounter.cs" />
     <Compile Include="Program.cs" />
+    <Compile Include="DataModels\Raid.cs" />
   </ItemGroup>
   <ItemGroup>
     <Analyzer Include="..\packages\Microsoft.CodeAnalysis.VersionCheckAnalyzer.3.0.0\analyzers\dotnet\cs\Microsoft.CodeAnalysis.VersionCheckAnalyzer.resources.dll" />
