@@ -8,17 +8,18 @@ namespace PokeStar.DataModels
 {
     public class RaidBoss
     {
-        private string Name { get; set; }
-        private string[] Type { get; set; }
-        private List<string> Weakness { get; }
-        private List<string> Resistances { get; }
+        public string Name { get; set; }
+        public string[] Type { get; set; }
+        public List<string> Weakness { get; }
+        public List<string> Resistances { get; }
 
-        private int CPLow { get; set; }
-        private int CPHigh { get; set; }
-        private int CPLowBoosted { get; set; }
-        private int CPHighBoosted { get; set; }
+        public int CPLow { get; set; }
+        public int CPHigh { get; set; }
+        public int CPLowBoosted { get; set; }
+        public int CPHighBoosted { get; set; }
 
-        private RaidCounter[] counters { get; }
+        public RaidCounter[] counters { get; }
+
 
 
     }

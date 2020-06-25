@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace PokeStar.DataModels
 {
-    class RaidCounter
+    public class RaidCounter
     {
         private string Name { get; set; }
         private string FastAttack { get; set; }
