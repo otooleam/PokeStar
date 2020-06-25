@@ -14,7 +14,7 @@ namespace PokeStar
    public class Program
    {
       // Allows System to run Asynchronously
-      public static void Main(string[] args) 
+      public static void Main() 
          => new Program().MainAsync().GetAwaiter().GetResult(); //Any Exceptions get thrown here
 
       private DiscordSocketClient _client;
@@ -42,9 +42,10 @@ namespace PokeStar
          var token = json.First.First.ToString();
          prefix = json.Last.First.ToString();
 
-         await RegisterCommandsAsync();
-         await _client.LoginAsync(TokenType.Bot, token);
-         await _client.StartAsync();
+         await RegisterCommandsAsync().ConfigureAwait(false);
+         HookReactionAdded();
+         await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
+         await _client.StartAsync().ConfigureAwait(false);
 
          Environment.SetEnvironmentVariable("SETUP_ROLES", "FALSE");
          Environment.SetEnvironmentVariable("SETUP_RAIDS", "FALSE");
@@ -52,7 +53,7 @@ namespace PokeStar
          Environment.SetEnvironmentVariable("SETUP_DEX", "FALSE");
 
          // Block this task until the program is closed.
-         await Task.Delay(-1);
+         await Task.Delay(-1).ConfigureAwait(false);
       }
 
       //TODO set up proper logging framework
@@ -88,6 +89,18 @@ namespace PokeStar
             var result = await _commands.ExecuteAsync(context, argPos, _services).ConfigureAwait(false);
             if (!result.IsSuccess) Console.WriteLine(result.ErrorReason);
          }
+      }
+
+      public void HookReactionAdded()
+         => _client.ReactionAdded += HandleReactionAddedAsync;
+
+      public static async Task HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
+          ISocketMessageChannel originChannel, SocketReaction reaction)
+      {
+         var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
+         if (message != null && reaction.User.IsSpecified)
+            Console.WriteLine($"{reaction.User.Value} just added a reaction '{reaction.Emote}' " +
+                              $"to {message.Author}'s message ({message.Id}).");
       }
    }
 }
