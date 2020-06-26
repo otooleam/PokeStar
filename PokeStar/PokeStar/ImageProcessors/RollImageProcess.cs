@@ -51,12 +51,12 @@ namespace PokeStar.ImageProcessors
                string nickname = plainText.Substring(0, nameEndIndex);
                await user.ModifyAsync(x => { x.Nickname = nickname; }).ConfigureAwait(false);
 
-               await user.SendMessageAsync($"{user.Username} now has the nickname {nickname}").ConfigureAwait(false);
+               await context.Channel.SendMessageAsync($"{user.Username} now has the nickname {nickname}").ConfigureAwait(false);
             }
-            catch(Discord.Net.HttpException e)
+            catch(Exception e)
             {
                Console.WriteLine(e.Message);
-               await user.SendMessageAsync($"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{context.Guild.Name}\"").ConfigureAwait(false);
+               await context.Channel.SendMessageAsync($"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{context.Guild.Name}\"").ConfigureAwait(false);
             }
          }
 
@@ -86,7 +86,7 @@ namespace PokeStar.ImageProcessors
             var role = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Trainer", StringComparison.OrdinalIgnoreCase));
             await user.AddRoleAsync(role).ConfigureAwait(false);
 
-            await user.SendMessageAsync($"{user.Username} now has the Trainer role and the {teamName} role").ConfigureAwait(false);
+            await context.Channel.SendMessageAsync($"{user.Username} now has the Trainer role and the {teamName} role").ConfigureAwait(false);
          }
       }
 
