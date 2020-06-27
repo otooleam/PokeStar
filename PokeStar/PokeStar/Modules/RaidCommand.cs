@@ -5,18 +5,36 @@ using System.Text;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using PokeStar.DataModels;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
-    class RaidCommand : ModuleBase<SocketCommandContext>
+    public class RaidCommand : ModuleBase<SocketCommandContext>
     {
         [Command("raid")]
-        public async Task Raid(IGuildUser user)
+        public async Task Raid(int tier, string time, string location)
         {
-            var embed = new EmbedBuilder();
+            EmbedBuilder embed = new EmbedBuilder();
+            Emoji[] emojis = {
+                new Emoji("1️⃣"),
+                new Emoji("2️⃣"),
+                new Emoji("3️⃣"),
+                new Emoji("4️⃣"),
+                new Emoji("5️⃣"),
+                new Emoji("✅"),
+                new Emoji("🚫"),
+                new Emoji("❓")
+            };
 
+            embed.WithTitle($"Raid");
+            embed.AddField("Time", time, true);
+            embed.AddField("Location", location, true);
 
-            await Context.Channel.SendMessageAsync("", false, embed.Build());
+            var raid = await Context.Channel.SendMessageAsync("", false, embed.Build());
+            await raid.AddReactionsAsync(emojis);
         }
+
+
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.DataModels
 {
@@ -20,7 +21,11 @@ namespace PokeStar.DataModels
 
         public RaidCounter[] counters { get; }
 
+        public RaidBoss(string boss)
+        {
+            
 
+        }
 
     }
 }

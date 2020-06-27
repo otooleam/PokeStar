@@ -8,7 +8,14 @@ namespace PokeStar.DataModels
 {
     class Raid
     {
-        private string Gym { get; set; }
+        public Raid(string time, string location)
+        {
+            Time = time;
+            Gym = location;
+        }
+
+        public string Gym { get; set; }
+        public string Time { get; set; }
         private short Tier
         {
             get { return Tier; }
@@ -16,8 +23,8 @@ namespace PokeStar.DataModels
         }
         private RaidBoss Boss { get; set; }
 
-        private Dictionary<Player, int> Attending;
-        private Dictionary<Player, int> Arrived;
+        public Dictionary<Player, int> Attending;
+        public Dictionary<Player, int> Here;
 
         public void AddNewPlayer(Player player, int partySize)
         {
@@ -26,7 +33,7 @@ namespace PokeStar.DataModels
         
         public void SetPlayerArrived(Player player)
         {
-            Arrived.Add(player, Attending[player]);
+            Here.Add(player, Attending[player]);
             Attending.Remove(player);
         }
     }
