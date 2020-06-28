@@ -7,6 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
+using PokeStar.ConnectionInterface;
 using PokeStar.ImageProcessors;
 
 namespace PokeStar
@@ -39,8 +40,9 @@ namespace PokeStar
 
          var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
 
-         var token = json.First.First.ToString();
-         prefix = json.Last.First.ToString();
+         var token = json.GetValue("token").ToString();
+         Environment.SetEnvironmentVariable("DB_CONNECTION_STRING", json.GetValue("sql").ToString());
+         prefix = json.GetValue("prefix").ToString();
 
          await RegisterCommandsAsync().ConfigureAwait(false);
          HookReactionAdded();
@@ -51,6 +53,8 @@ namespace PokeStar
          Environment.SetEnvironmentVariable("SETUP_RAIDS", "FALSE");
          Environment.SetEnvironmentVariable("SETUP_TRADE", "FALSE");
          Environment.SetEnvironmentVariable("SETUP_DEX", "FALSE");
+
+         var connectors = Connections.Instance();
 
          // Block this task until the program is closed.
          await Task.Delay(-1).ConfigureAwait(false);
@@ -98,7 +102,8 @@ namespace PokeStar
           ISocketMessageChannel originChannel, SocketReaction reaction)
       {
          var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
-         if (message != null && reaction.User.IsSpecified)
+         var user = reaction.User.Value;
+         if (message != null && reaction.User.IsSpecified && !user.IsBot)
             Console.WriteLine($"{reaction.User.Value} just added a reaction '{reaction.Emote}' " +
                               $"to {message.Author}'s message ({message.Id}).");
       }

@@ -21,8 +21,8 @@ namespace PokeStar.ConnectionInterface
          bool tierStart = false;
          bool nextInTier = false;
          var web = new HtmlWeb();
-         var doc = web.Load(Connections.RAID_BOSS_URL);
-         var bosses = doc.DocumentNode.SelectNodes(Connections.RAID_BOSS_HTML);
+         var doc = web.Load(Connections.Instance().RAID_BOSS_URL);
+         var bosses = doc.DocumentNode.SelectNodes(Connections.Instance().RAID_BOSS_HTML);
 
          List<RaidBossListElement> raidBossList = new List<RaidBossListElement>();
          int tier = -1;
