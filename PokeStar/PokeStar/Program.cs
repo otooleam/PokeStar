@@ -98,9 +98,11 @@ namespace PokeStar
           ISocketMessageChannel originChannel, SocketReaction reaction)
       {
          var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
-         if (message != null && reaction.User.IsSpecified)
-            Console.WriteLine($"{reaction.User.Value} just added a reaction '{reaction.Emote}' " +
-                              $"to {message.Author}'s message ({message.Id}).");
+            if (message != null && reaction.User.IsSpecified)
+            {
+                //Console.WriteLine($"{reaction.User.Value} just added a reaction '{reaction.Emote}' to {message.Author}'s message ({message.Id}).");
+
+            }
       }
    }
 }

@@ -15,6 +15,11 @@ namespace PokeStar.Modules
         [Command("raid")]
         public async Task Raid(int tier, string time, string location)
         {
+            int attendingCount = 0;
+            int hereCount = 0;
+            string attending = "\0";
+            string here = "\0";
+
             EmbedBuilder embed = new EmbedBuilder();
             Emoji[] emojis = {
                 new Emoji("1️⃣"),
@@ -30,11 +35,12 @@ namespace PokeStar.Modules
             embed.WithTitle($"Raid");
             embed.AddField("Time", time, true);
             embed.AddField("Location", location, true);
+            embed.AddField($"Here ({hereCount}/{attendingCount})", attending);
+            embed.AddField("Attending", here);
 
             var raid = await Context.Channel.SendMessageAsync("", false, embed.Build());
             await raid.AddReactionsAsync(emojis);
+            
         }
-
-
     }
 }
