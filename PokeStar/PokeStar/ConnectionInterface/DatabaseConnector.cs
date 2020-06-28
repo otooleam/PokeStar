@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data.SqlClient;
 using PokeStar.DataModels;
 
@@ -56,7 +55,7 @@ namespace PokeStar.ConnectionInterface
          using (var conn = GetConnection())
          {
             conn.Open();
-            foreach (string type in raidboss.Weather)
+            foreach (string type in raidboss.Type)
             {
                string queryString = $@"SELECT weather 
                                     from weather 
