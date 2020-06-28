@@ -94,15 +94,14 @@ namespace PokeStar
       public void HookReactionAdded()
          => _client.ReactionAdded += HandleReactionAddedAsync;
 
-      public static async Task HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
-          ISocketMessageChannel originChannel, SocketReaction reaction)
-      {
-         var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
-            if (message != null && reaction.User.IsSpecified)
-            {
-                //Console.WriteLine($"{reaction.User.Value} just added a reaction '{reaction.Emote}' to {message.Author}'s message ({message.Id}).");
-
-            }
-      }
-   }
+        public static async Task HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
+            ISocketMessageChannel originChannel, SocketReaction reaction)
+        {
+            var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
+            var user = reaction.User.Value;
+            if (message != null && reaction.User.IsSpecified && !user.IsBot)
+                Console.WriteLine($"{reaction.User.Value} just added a reaction '{reaction.Emote}' " +
+                                  $"to {message.Author}'s message ({message.Id}).");
+        }
+    }
 }
