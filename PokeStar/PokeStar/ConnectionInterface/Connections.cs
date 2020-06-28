@@ -7,7 +7,6 @@ namespace PokeStar.ConnectionInterface
    public class Connections
    {
       private const string raidBossHTML = "//*[@class = 'col-md-4']";
-      private const string connectionString = @"Data Source=BRANDON-PC\POGO_DB;Initial Catalog=POGO_DB;Integrated Security=True";
 
       public Uri RAID_BOSS_URL { get; } = new Uri("https://thesilphroad.com/raid-bosses");
       public string RAID_BOSS_HTML => raidBossHTML;
@@ -18,7 +17,7 @@ namespace PokeStar.ConnectionInterface
 
       private Connections() 
       {
-         dbConnector = new DatabaseConnector(connectionString);
+         dbConnector = new DatabaseConnector(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
       }
 
       public static Connections Instance()

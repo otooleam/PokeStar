@@ -40,8 +40,9 @@ namespace PokeStar
 
          var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
 
-         var token = json.First.First.ToString();
-         prefix = json.Last.First.ToString();
+         var token = json.GetValue("token").ToString();
+         Environment.SetEnvironmentVariable("DB_CONNECTION_STRING", json.GetValue("sql").ToString());
+         prefix = json.GetValue("prefix").ToString();
 
          await RegisterCommandsAsync().ConfigureAwait(false);
          HookReactionAdded();
