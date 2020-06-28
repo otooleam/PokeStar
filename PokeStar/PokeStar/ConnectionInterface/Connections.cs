@@ -6,6 +6,7 @@ namespace PokeStar.ConnectionInterface
 {
    public class Connections
    {
+
       private const string raidBossHTML = "//*[@class = 'col-md-4']";
 
       public Uri RAID_BOSS_URL { get; } = new Uri("https://thesilphroad.com/raid-bosses");

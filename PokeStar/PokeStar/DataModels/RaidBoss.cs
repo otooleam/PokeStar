@@ -1,4 +1,11 @@
-﻿using System.Collections.Generic;
+
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using PokeStar.ConnectionInterface;
+
 
 namespace PokeStar.DataModels
 {
@@ -19,5 +26,15 @@ namespace PokeStar.DataModels
         public int CPHigh { get; set; }
         public int CPLowBoosted { get; set; }
         public int CPHighBoosted { get; set; }
+
+        public RaidCounter[] counters { get; }
+
+        public RaidBoss(string boss)
+        {
+            
+
+        }
+
+
     }
 }
