@@ -1,18 +1,26 @@
-﻿using System;
+
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using PokeStar.ConnectionInterface;
 
+
 namespace PokeStar.DataModels
 {
     public class RaidBoss
     {
         public string Name { get; set; }
-        public string[] Type { get; set; }
-        public List<string> Weakness { get; }
-        public List<string> Resistances { get; }
+        public int Attack { get; set; }
+        public int Defense { get; set; }
+        public int Stamina { get; set; }
+
+        public List<string> Type { get; } = new List<string>();
+        public List<string> Weather { get; } = new List<string>();
+        public List<string> Weakness { get; } = new List<string>();
+        public List<string> Resistances { get; } = new List<string>();
+        public List<RaidCounter> Counters { get; } = new List<RaidCounter>();
 
         public int CPLow { get; set; }
         public int CPHigh { get; set; }
@@ -26,6 +34,7 @@ namespace PokeStar.DataModels
             
 
         }
+
 
     }
 }
