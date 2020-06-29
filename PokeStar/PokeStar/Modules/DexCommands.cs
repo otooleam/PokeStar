@@ -1,7 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
+using PokeStar.Calculators;
+using PokeStar.ConnectionInterface;
+using PokeStar.DataModels;
 
 namespace PokeStar.Modules
 {
@@ -9,6 +13,50 @@ namespace PokeStar.Modules
    {
       [Command("dex")]
       public async Task Dex([Remainder] string text)
+      {
+         var name = GetPokemon(text);
+         Pokemon pokemon = Connections.Instance().GetPokemon(name);
+
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithTitle($@"#{pokemon.Number} {pokemon.Name}");
+         embed.WithDescription("Descriptions Not Implemented");
+         embed.AddField("Type", pokemon.TypeToString(), true);
+         embed.AddField("Weather Boosts", pokemon.WeatherToString(), true);
+         embed.AddField("Details", pokemon.DetailsToString(), true);
+         embed.AddField("Stats", pokemon.StatsToString(), true);
+         embed.AddField("Resistances", pokemon.ResistanceToString(), true);
+         embed.AddField("Weaknesses", pokemon.WeaknessToString(), true);
+         embed.AddField("Fast Moves", pokemon.FastMoveToString(), true);
+         embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
+         embed.AddField("Counters", pokemon.CounterToString(), false);
+         embed.WithColor(Color.Red);
+         embed.WithFooter("* denotes STAB move ! denotes Legacy move");
+
+         await Context.Channel.SendMessageAsync("", false, embed.Build()).ConfigureAwait(false);
+      }
+      [Command("cp")]
+      public async Task CP([Remainder] string text)
+      {
+         var name = GetPokemon(text);
+         Pokemon pokemon = Connections.Instance().GetPokemon(name);
+         Connections.Instance().CalcAllCP(ref pokemon);
+
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
+         embed.WithDescription($"Max CP values for {pokemon.Name}");
+         embed.AddField($"Max CP (Level 40)", pokemon.CPMax, true);
+         embed.AddField($"Max Buddy CP (Level 41)", pokemon.CPBestBuddy, true);
+         embed.AddField($"Raid CP (Level 20)", pokemon.RaidCPToString(), false);
+         embed.AddField($"Quest CP (Level 20)", pokemon.QuestCPToString(), false);
+         embed.AddField($"Hatch CP (Level 15)", pokemon.HatchCPToString(), false);
+         embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
+         embed.WithColor(Color.Blue);
+         embed.WithFooter("* denotes Weather Boosted CP");
+
+         await Context.Channel.SendMessageAsync("", false, embed.Build()).ConfigureAwait(false);
+      }
+
+      private string GetPokemon(string text)
       {
          List<string> words = new List<string>(text.Split(' '));
 
@@ -23,13 +71,7 @@ namespace PokeStar.Modules
             name += str + " ";
          name = name.TrimEnd(' ');
 
-         string fullName = GetFullName(name, form);
-
-
-
-
-
-         await ReplyAsync($"{fullName}");
+         return GetFullName(name, form);
       }
 
       /*
