@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using PokeStar.Calculators;
 using PokeStar.ConnectionInterface;
 using PokeStar.DataModels;
 
@@ -16,10 +15,13 @@ namespace PokeStar.Modules
       {
          var name = GetPokemon(text);
          Pokemon pokemon = Connections.Instance().GetPokemon(name);
+         var fileName = $"{pokemon.Name}.png";
+         Connections.CopyFile(fileName);
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithTitle($@"#{pokemon.Number} {pokemon.Name}");
          embed.WithDescription("Descriptions Not Implemented");
+         embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Type", pokemon.TypeToString(), true);
          embed.AddField("Weather Boosts", pokemon.WeatherToString(), true);
          embed.AddField("Details", pokemon.DetailsToString(), true);
@@ -32,7 +34,10 @@ namespace PokeStar.Modules
          embed.WithColor(Color.Red);
          embed.WithFooter("* denotes STAB move ! denotes Legacy move");
 
-         await Context.Channel.SendMessageAsync("", false, embed.Build()).ConfigureAwait(false);
+         await Context.Channel.SendFileAsync(fileName, embed:embed.Build()).ConfigureAwait(false);
+
+         Connections.DeleteFile(fileName);
+
       }
       [Command("cp")]
       public async Task CP([Remainder] string text)
@@ -40,10 +45,14 @@ namespace PokeStar.Modules
          var name = GetPokemon(text);
          Pokemon pokemon = Connections.Instance().GetPokemon(name);
          Connections.Instance().CalcAllCP(ref pokemon);
+         var fileName = $"{pokemon.Name}.png";
+         Connections.CopyFile(fileName);
+
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
          embed.WithDescription($"Max CP values for {pokemon.Name}");
+         embed.WithThumbnailUrl($@"attachment:PokemonImages//{fileName}");
          embed.AddField($"Max CP (Level 40)", pokemon.CPMax, true);
          embed.AddField($"Max Buddy CP (Level 41)", pokemon.CPBestBuddy, true);
          embed.AddField($"Raid CP (Level 20)", pokemon.RaidCPToString(), false);
@@ -53,8 +62,12 @@ namespace PokeStar.Modules
          embed.WithColor(Color.Blue);
          embed.WithFooter("* denotes Weather Boosted CP");
 
-         await Context.Channel.SendMessageAsync("", false, embed.Build()).ConfigureAwait(false);
+         await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
+
+         Connections.CopyFile(fileName);
       }
+
+
 
       private string GetPokemon(string text)
       {

@@ -28,6 +28,18 @@ namespace PokeStar.ConnectionInterface
          return connections;
       }
 
+      public static void CopyFile(string fileName)
+      {
+         var location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+         System.IO.File.Copy($"{location}\\PokemonImages\\{fileName}", $"{location}\\{fileName}", true);
+      }
+
+      public static void DeleteFile(string fileName)
+      {
+         var location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+         System.IO.File.Delete($"{location}\\{fileName}");
+      }
+
       public RaidBoss GetRaidBoss(string raidBossName)
       {
          string name = ReformatName(raidBossName);
