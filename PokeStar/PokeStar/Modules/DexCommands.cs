@@ -15,28 +15,40 @@ namespace PokeStar.Modules
       {
          var name = GetPokemon(text);
          Pokemon pokemon = Connections.Instance().GetPokemon(name);
-         var fileName = $"{pokemon.Name}.png";
-         Connections.CopyFile(fileName);
+         if (pokemon == null)
+         {
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.WithTitle("PokeDex Command Error");
+            embed.WithDescription($"Pokemon {name} cannot be found.");
+            embed.WithColor(Color.DarkRed);
+            await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+         }
+         else
+         {
+            var fileName = GetPokemonPicture(pokemon.Name);
+            Connections.CopyFile(fileName);
 
-         EmbedBuilder embed = new EmbedBuilder();
-         embed.WithTitle($@"#{pokemon.Number} {pokemon.Name}");
-         embed.WithDescription("Descriptions Not Implemented");
-         embed.WithThumbnailUrl($"attachment://{fileName}");
-         embed.AddField("Type", pokemon.TypeToString(), true);
-         embed.AddField("Weather Boosts", pokemon.WeatherToString(), true);
-         embed.AddField("Details", pokemon.DetailsToString(), true);
-         embed.AddField("Stats", pokemon.StatsToString(), true);
-         embed.AddField("Resistances", pokemon.ResistanceToString(), true);
-         embed.AddField("Weaknesses", pokemon.WeaknessToString(), true);
-         embed.AddField("Fast Moves", pokemon.FastMoveToString(), true);
-         embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
-         embed.AddField("Counters", pokemon.CounterToString(), false);
-         embed.WithColor(Color.Red);
-         embed.WithFooter("* denotes STAB move ! denotes Legacy move");
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.WithTitle($@"#{pokemon.Number} {pokemon.Name}");
+            embed.WithDescription("Descriptions Not Implemented");
+            embed.WithThumbnailUrl($"attachment://{fileName}");
+            embed.AddField("Type", pokemon.TypeToString(), true);
+            embed.AddField("Weather Boosts", pokemon.WeatherToString(), true);
+            embed.AddField("Details", pokemon.DetailsToString(), true);
+            embed.AddField("Stats", pokemon.StatsToString(), true);
+            embed.AddField("Resistances", pokemon.ResistanceToString(), true);
+            embed.AddField("Weaknesses", pokemon.WeaknessToString(), true);
+            embed.AddField("Fast Moves", pokemon.FastMoveToString(), true);
+            embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
+            embed.AddField("Counters", pokemon.CounterToString(), false);
 
-         await Context.Channel.SendFileAsync(fileName, embed:embed.Build()).ConfigureAwait(false);
+            embed.WithColor(Color.Red);
+            embed.WithFooter("* denotes STAB move ! denotes Legacy move");
 
-         Connections.DeleteFile(fileName);
+            await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
+
+            Connections.DeleteFile(fileName);
+         }
 
       }
       [Command("cp")]
@@ -44,32 +56,48 @@ namespace PokeStar.Modules
       {
          var name = GetPokemon(text);
          Pokemon pokemon = Connections.Instance().GetPokemon(name);
-         Connections.Instance().CalcAllCP(ref pokemon);
-         var fileName = $"{pokemon.Name}.png";
-         Connections.CopyFile(fileName);
+         if (pokemon == null)
+         {
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.WithTitle("CP Command Error");
+            embed.WithDescription($"Pokemon {name} cannot be found.");
+            embed.WithColor(Color.DarkRed);
+            await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+         }
+         else
+         {
+            Connections.Instance().CalcAllCP(ref pokemon);
+            var fileName = GetPokemonPicture(pokemon.Name);
+            Connections.CopyFile(fileName);
+
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
+            embed.WithDescription($"Max CP values for {pokemon.Name}");
+            embed.WithThumbnailUrl($"attachment://{fileName}");
+            embed.AddField($"Max CP (Level 40)", pokemon.CPMax, true);
+            embed.AddField($"Max Buddy CP (Level 41)", pokemon.CPBestBuddy, true);
+            embed.AddField($"Raid CP (Level 20)", pokemon.RaidCPToString(), false);
+            embed.AddField($"Quest CP (Level 20)", pokemon.QuestCPToString(), false);
+            embed.AddField($"Hatch CP (Level 15)", pokemon.HatchCPToString(), false);
+            embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
+            embed.WithColor(Color.Blue);
+            embed.WithFooter("* denotes Weather Boosted CP");
 
 
-         EmbedBuilder embed = new EmbedBuilder();
-         embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
-         embed.WithDescription($"Max CP values for {pokemon.Name}");
-         embed.WithThumbnailUrl($@"attachment:PokemonImages//{fileName}");
-         embed.AddField($"Max CP (Level 40)", pokemon.CPMax, true);
-         embed.AddField($"Max Buddy CP (Level 41)", pokemon.CPBestBuddy, true);
-         embed.AddField($"Raid CP (Level 20)", pokemon.RaidCPToString(), false);
-         embed.AddField($"Quest CP (Level 20)", pokemon.QuestCPToString(), false);
-         embed.AddField($"Hatch CP (Level 15)", pokemon.HatchCPToString(), false);
-         embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
-         embed.WithColor(Color.Blue);
-         embed.WithFooter("* denotes Weather Boosted CP");
+            await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
 
-         await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
-
-         Connections.CopyFile(fileName);
+            Connections.CopyFile(fileName);
+         }
       }
 
+      private static string GetPokemonPicture(string pokemonName)
+      {
+         pokemonName = pokemonName.Replace(" ", "_");
+         pokemonName = pokemonName.Replace(".", "");
+         return pokemonName + ".png";
+      }
 
-
-      private string GetPokemon(string text)
+      private static string GetPokemon(string text)
       {
          List<string> words = new List<string>(text.Split(' '));
 
@@ -105,7 +133,7 @@ namespace PokeStar.Modules
        Meloetta   default Aria
        */
 
-      private string GetFullName(string pokemonName, string form = "")
+      private static string GetFullName(string pokemonName, string form = "")
       {
          // Alolan
          if (form.Equals("-alola", StringComparison.OrdinalIgnoreCase))
@@ -120,6 +148,11 @@ namespace PokeStar.Modules
             return $"Mega {pokemonName} X";
          else if (form.Equals("-megay", StringComparison.OrdinalIgnoreCase))
             return $"Mega {pokemonName} Y";
+         // Nidoran
+         else if (form.Equals("-female", StringComparison.OrdinalIgnoreCase) || form.Equals("-F", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} F";
+         else if (form.Equals("-male", StringComparison.OrdinalIgnoreCase) || form.Equals("-M", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} M";
          // Mewtwo
          else if (form.Equals("-armor", StringComparison.OrdinalIgnoreCase))
             return $"Armored {pokemonName}";
