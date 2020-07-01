@@ -67,14 +67,17 @@ namespace PokeStar.ConnectionInterface
                   {
                      Number = Convert.ToInt32(reader["number"]),
                      Name = Convert.ToString(reader["name"]),
+                     Description = Convert.ToString(reader["description"]),
                      Attack = Convert.ToInt32(reader["attack"]),
                      Defense = Convert.ToInt32(reader["defense"]),
                      Stamina = Convert.ToInt32(reader["stamina"]),
                      Region = Convert.ToString(reader["region"]),
                      Category = Convert.ToString(reader["category"]),
+                     BuddyDistance = Convert.ToInt32(reader["buddy_distance"]),
                      Shadow = Convert.ToInt32(reader["shadow"]) == TRUE,
                      Shiny = Convert.ToInt32(reader["shiny"]) == TRUE,
-                     Obtainable = Convert.ToInt32(reader["obtainable"]) == TRUE
+                     Obtainable = Convert.ToInt32(reader["obtainable"]) == TRUE,
+                     Regional = Convert.ToInt32(reader["obtainable"]) == TRUE
                   };
 
                   pokemon.Type.Add(Convert.ToString(reader["type_1"]));
@@ -128,7 +131,7 @@ namespace PokeStar.ConnectionInterface
                while (reader.Read())
                {
                   int modifier = Convert.ToInt32(reader["total_relation"]);
-                  if ((weaknesses && modifier < 0) || !weaknesses && modifier > 0)
+                  if ((weaknesses && modifier > 0) || !weaknesses && modifier < 0)
                      relations.Add(Convert.ToString(reader["attacker"]));
                }
             }

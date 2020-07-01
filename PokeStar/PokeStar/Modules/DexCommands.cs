@@ -30,7 +30,7 @@ namespace PokeStar.Modules
 
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithTitle($@"#{pokemon.Number} {pokemon.Name}");
-            embed.WithDescription("Descriptions Not Implemented");
+            embed.WithDescription(pokemon.Description);
             embed.WithThumbnailUrl($"attachment://{fileName}");
             embed.AddField("Type", pokemon.TypeToString(), true);
             embed.AddField("Weather Boosts", pokemon.WeatherToString(), true);
