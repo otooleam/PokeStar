@@ -44,6 +44,7 @@ namespace PokeStar.ConnectionInterface
       {
          string name = ReformatName(raidBossName);
          RaidBoss raidBoss = dbConnector.GetRaidBoss(name);
+         if (raidBoss == null) return null;
 
          raidBoss.Weather = dbConnector.GetWeather(raidBoss.Type);
          raidBoss.Weakness = dbConnector.GetTypeRelations(raidBoss.Type, true);
@@ -79,6 +80,7 @@ namespace PokeStar.ConnectionInterface
       {
          string name = ReformatName(pokemonName);
          Pokemon pokemon = dbConnector.GetPokemon(name);
+         if (pokemon == null) return null;
 
          pokemon.Weather = dbConnector.GetWeather(pokemon.Type);
          pokemon.Weakness = dbConnector.GetTypeRelations(pokemon.Type, true);
@@ -150,7 +152,6 @@ namespace PokeStar.ConnectionInterface
                CPCalculator.MAX_IV, CPCalculator.MAX_IV,
                CPCalculator.MAX_IV, level));
       }
-
 
       private static string ReformatName(string originalName)
       {

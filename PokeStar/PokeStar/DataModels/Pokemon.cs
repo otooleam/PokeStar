@@ -95,6 +95,9 @@ namespace PokeStar.DataModels
 
       public string FastMoveToString()
       {
+         if (FastMove.Count == 0)
+            return "No Fast Move Data";
+
          string str = "";
          foreach (Move fastMove in FastMove)
          {
@@ -108,6 +111,9 @@ namespace PokeStar.DataModels
 
       public string ChargeMoveToString()
       {
+         if (ChargeMove.Count == 0)
+            return "No Charge Move Data";
+
          string str = "";
          foreach (Move chargeMove in ChargeMove)
          {
