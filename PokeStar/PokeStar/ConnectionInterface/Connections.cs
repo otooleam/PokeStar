@@ -158,6 +158,5 @@ namespace PokeStar.ConnectionInterface
          int index = originalName.IndexOf('\'');
          return index == -1 ? originalName : originalName.Insert(index, "\'");
       }
-
    }
 }

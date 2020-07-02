@@ -9,7 +9,7 @@ namespace PokeStar.Modules
    public class RoleCommand : ModuleBase<SocketCommandContext>
    {
       [Command("role")]
-      public async Task Role(IGuildUser user, string roleName)
+      public async Task Role(IGuildUser user, string nickname, string roleName)
       {
          if (Environment.GetEnvironmentVariable("SETUP_ROLES").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
          {
@@ -23,6 +23,16 @@ namespace PokeStar.Modules
          {
             await ReplyAsync($"Error: {roleName} is not a valid role");
             return;
+         }
+
+         try
+         {
+            await user.ModifyAsync(x => { x.Nickname = nickname; }).ConfigureAwait(false);
+         }
+         catch (Exception e)
+         {
+            Console.WriteLine(e.Message);
+            await ReplyAsync($"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{Context.Guild.Name}\"").ConfigureAwait(false);
          }
 
          var valor = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase));
@@ -39,7 +49,7 @@ namespace PokeStar.Modules
          var role = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Trainer", StringComparison.OrdinalIgnoreCase));
          await user.AddRoleAsync(role);
 
-         await ReplyAsync($"{user.Username} now has the Trainer role and the {roleName} role");
+         await ReplyAsync($"{user.Username} nickname set to {nickname} and now has the Trainer and {roleName} roles");
       }
    }
 }
