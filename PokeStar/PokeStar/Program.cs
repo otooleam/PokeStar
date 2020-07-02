@@ -95,10 +95,10 @@ namespace PokeStar
          }
       }
 
-      public void HookReactionAdded()
+      private void HookReactionAdded()
          => _client.ReactionAdded += HandleReactionAddedAsync;
 
-      public static async Task HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
+      private static async Task HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
           ISocketMessageChannel originChannel, SocketReaction reaction)
       {
          var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);

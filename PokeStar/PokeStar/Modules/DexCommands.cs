@@ -16,6 +16,39 @@ namespace PokeStar.Modules
       {
          var name = GetPokemon(text);
          Pokemon pokemon = Connections.Instance().GetPokemon(name);
+         if (pokemon == null)
+         {
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.WithTitle("PokeDex Command Error");
+            embed.WithDescription($"Pokemon {name} cannot be found.");
+            embed.WithColor(Color.DarkRed);
+            await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+         }
+         else
+         {
+            var fileName = GetPokemonPicture(pokemon.Name);
+            Connections.CopyFile(fileName);
+
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.WithTitle($@"#{pokemon.Number} {pokemon.Name}");
+            embed.WithDescription(pokemon.Description);
+            embed.WithThumbnailUrl($"attachment://{fileName}");
+            embed.AddField("Type", pokemon.TypeToString(), true);
+            embed.AddField("Weather Boosts", pokemon.WeatherToString(), true);
+            embed.AddField("Details", pokemon.DetailsToString(), true);
+            embed.AddField("Stats", pokemon.StatsToString(), true);
+            embed.AddField("Resistances", pokemon.ResistanceToString(), true);
+            embed.AddField("Weaknesses", pokemon.WeaknessToString(), true);
+            embed.AddField("Fast Moves", pokemon.FastMoveToString(), true);
+            embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
+            embed.AddField("Counters", pokemon.CounterToString(), false);
+            embed.WithColor(Color.Red);
+            embed.WithFooter("* denotes STAB move ! denotes Legacy move");
+
+            await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
+
+            Connections.DeleteFile(fileName);
+         }
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithTitle($@"#{pokemon.Number} {pokemon.Name}");

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Discord;
+using System;
 using System.Collections.Generic;
 
 namespace PokeStar.DataModels
@@ -65,7 +66,7 @@ namespace PokeStar.DataModels
       {
          string str = "";
          foreach (string type in Type)
-            str += type + "\n";
+            str += Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")) + " ";
          return str.Trim();
       }
 
@@ -81,7 +82,7 @@ namespace PokeStar.DataModels
       {
          string str = "";
          foreach (string weakness in Weakness)
-            str += weakness + "\n";
+            str += Emote.Parse(Environment.GetEnvironmentVariable($"{weakness.ToUpper()}_EMOTE")) + " ";
          return str.Trim();
       }
 
@@ -89,7 +90,7 @@ namespace PokeStar.DataModels
       {
          string str = "";
          foreach (string resistance in Resistance)
-            str += resistance + "\n";
+            str += Emote.Parse(Environment.GetEnvironmentVariable($"{resistance.ToUpper()}_EMOTE")) + " ";
          return str.Trim();
       }
 
