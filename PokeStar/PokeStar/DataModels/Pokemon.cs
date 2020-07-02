@@ -10,9 +10,11 @@ namespace PokeStar.DataModels
       public int Attack { get; set; }
       public int Defense { get; set; }
       public int Stamina { get; set; }
+      public int BuddyDistance { get; set; }
       public bool Shiny { get; set; }
       public bool Shadow { get; set; }
       public bool Obtainable { get; set; }
+      public bool Regional { get; set; }
       public string Name { get; set; }
       public string Description { get; set; }
       public string Region { get; set; }
@@ -44,11 +46,13 @@ namespace PokeStar.DataModels
       public string DetailsToString()
       {
          string str = "";
-         str += $"Region     : {Region}\n";
-         str += $"Obtainable : {Obtainable}\n";
-         str += $"Shiniable  : {Shiny}\n";
-         str += $"Shadowable : {Shadow}\n";
-         str += $"Category   : {Category}\n";
+         str += $"Region           : {Region}\n";
+         str += $"Category         : {Category}\n";
+         str += $"Buddy Distance   : {BuddyDistance} km\n";
+         str += $"Can be Obtained  : {Obtainable}\n";
+         str += $"Can be Shiny     : {Shiny}\n";
+         str += $"Can be Shadow    : {Shadow}\n";
+         str += $"Is a Regional    : {Regional}\n";
          return str.Trim();
       }
 
@@ -96,6 +100,9 @@ namespace PokeStar.DataModels
 
       public string FastMoveToString()
       {
+         if (FastMove.Count == 0)
+            return "No Fast Move Data";
+
          string str = "";
          foreach (Move fastMove in FastMove)
          {
@@ -109,6 +116,9 @@ namespace PokeStar.DataModels
 
       public string ChargeMoveToString()
       {
+         if (ChargeMove.Count == 0)
+            return "No Charge Move Data";
+
          string str = "";
          foreach (Move chargeMove in ChargeMove)
          {
