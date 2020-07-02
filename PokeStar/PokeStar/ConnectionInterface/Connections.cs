@@ -28,10 +28,23 @@ namespace PokeStar.ConnectionInterface
          return connections;
       }
 
+      public static void CopyFile(string fileName)
+      {
+         var location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+         System.IO.File.Copy($"{location}\\PokemonImages\\{fileName}", $"{location}\\{fileName}", true);
+      }
+
+      public static void DeleteFile(string fileName)
+      {
+         var location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+         System.IO.File.Delete($"{location}\\{fileName}");
+      }
+
       public RaidBoss GetRaidBoss(string raidBossName)
       {
          string name = ReformatName(raidBossName);
          RaidBoss raidBoss = dbConnector.GetRaidBoss(name);
+         if (raidBoss == null) return null;
 
          raidBoss.Weather = dbConnector.GetWeather(raidBoss.Type);
          raidBoss.Weakness = dbConnector.GetTypeRelations(raidBoss.Type, true);
@@ -67,6 +80,7 @@ namespace PokeStar.ConnectionInterface
       {
          string name = ReformatName(pokemonName);
          Pokemon pokemon = dbConnector.GetPokemon(name);
+         if (pokemon == null) return null;
 
          pokemon.Weather = dbConnector.GetWeather(pokemon.Type);
          pokemon.Weakness = dbConnector.GetTypeRelations(pokemon.Type, true);
@@ -139,12 +153,10 @@ namespace PokeStar.ConnectionInterface
                CPCalculator.MAX_IV, level));
       }
 
-
       private static string ReformatName(string originalName)
       {
          int index = originalName.IndexOf('\'');
          return index == -1 ? originalName : originalName.Insert(index, "\'");
       }
-
    }
 }

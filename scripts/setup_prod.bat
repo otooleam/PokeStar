@@ -6,6 +6,9 @@ mkdir PokeStar_Production
 echo "Copy env.json..."
 copy ..\PokeStar\env.json .\PokeStar_Production\env.json
 
+echo "Copy Pokemon Images..."
+xcopy ..\PokeStar\Images\PokemonImages .\PokeStar_Production\PokemonImages
+
 echo "Copy PokeStar.exe..."
 copy ..\PokeStar\PokeStar\bin\Debug\PokeStar.exe .\PokeStar_Production\PokeStar.exe
 
