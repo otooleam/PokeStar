@@ -37,21 +37,31 @@ namespace PokeStar.DataModels
       {
          if (Attending.ContainsKey(player))
          {
-            if ((PlayerCount += (partySize - Attending[player])) <= playerLimit) //TODO doesnt enforce limit and numbers get confused
+            int newPlayerCount = PlayerCount + (partySize - Attending[player]);
+            if (newPlayerCount <= playerLimit)
+            {
                Attending[player] = partySize;
+               PlayerCount = newPlayerCount;
+            }
          }
          else if (Here.ContainsKey(player))
          {
-            if ((PlayerCount += (partySize - Here[player])) <= playerLimit)
+            int newPlayerCount = PlayerCount + (partySize - Here[player]);
+            if (newPlayerCount <= playerLimit)
             {
                HereCount += partySize - Here[player];
+               PlayerCount = newPlayerCount;
                Here[player] = partySize;
             }
          }
          else
          {
-            if ((PlayerCount += partySize) <= 20)
+            int newPlayerCount = PlayerCount + partySize;
+            if (newPlayerCount <= 20)
+            {
                Attending.Add(player, partySize);
+               PlayerCount = newPlayerCount;
+            }
          }
       }
 
