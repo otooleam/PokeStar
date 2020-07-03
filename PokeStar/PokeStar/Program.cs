@@ -8,6 +8,7 @@ using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using PokeStar.ImageProcessors;
+using PokeStar.Modules;
 
 namespace PokeStar
 {
@@ -103,11 +104,11 @@ namespace PokeStar
       {
          var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
          var user = reaction.User.Value;
-         if (message != null && reaction.User.IsSpecified && !user.IsBot)
+         if (message != null && reaction.User.IsSpecified && !user.IsBot && RaidCommand.IsCurrentRaid(message.Id))
          {
-            Console.WriteLine($"{reaction.User.Value} just added a reaction '{reaction.Emote}' " +
-                              $"to {message.Author}'s message ({message.Id}).");
+            //Console.WriteLine($"{reaction.User.Value} just added a reaction '{reaction.Emote}' to {message.Author}'s message ({message.Id}).");
             
+            await RaidCommand.RaidReaction(message, reaction);
          }
       }
    }
