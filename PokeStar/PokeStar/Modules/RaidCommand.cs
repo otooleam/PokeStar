@@ -91,7 +91,7 @@ namespace PokeStar.Modules
             var msg = (SocketUserMessage)message;
             await msg.ModifyAsync(x =>
             {
-               x.Embed = BuildEmbed(raid);
+               x.Embed = BuildEmbed(raid); //TODO field by field update
             });
          }
       }
@@ -105,7 +105,7 @@ namespace PokeStar.Modules
          embed.AddField("Location", raid.Location, true);
          embed.AddField($"Here ({raid.HereCount}/{raid.PlayerCount})", $"{BuildPlayerList(raid.Here)}");
          embed.AddField("Attending", $"{BuildPlayerList(raid.Attending)}");
-         embed.WithDescription($"Press {emojis[7]} for help");
+         //embed.WithDescription($"Press {emojis[7]} for help");
 
          return embed.Build();
       }
