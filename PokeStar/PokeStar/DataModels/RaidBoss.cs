@@ -32,9 +32,9 @@ namespace PokeStar.DataModels
       public RaidBoss() //for raid attendance testing
       {
          Name = "Tyranitar";
-         Type = new string[] { "Rock", "Dark"};
-         Weaknesses = new List<string> { "weaknesses" };
-         Resistances = new List<string> { "resistances" };
+         Type = new List<string> { "Rock", "Dark"};
+         Weakness = new List<string> { "weaknesses" };
+         Resistance = new List<string> { "resistances" };
          CPLow = 1;
          CPHigh = 2;
          CPLowBoosted = 3;
