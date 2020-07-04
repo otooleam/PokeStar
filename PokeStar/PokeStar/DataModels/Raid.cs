@@ -1,4 +1,5 @@
 ﻿using Discord.WebSocket;
+using PokeStar.ConnectionInterface;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -98,7 +99,7 @@ namespace PokeStar.DataModels
       private List<RaidBoss> GetBossData(short tier)
       {
          //query magic yay
-         return new List<RaidBoss> { new RaidBoss() };
+         return new List<RaidBoss> { Connections.Instance().GetRaidBoss("Arcanine") };
       }
 
       private RaidBoss SetBoss(short tier)

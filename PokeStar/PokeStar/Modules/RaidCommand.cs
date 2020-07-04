@@ -35,7 +35,7 @@ namespace PokeStar.Modules
       {
          Raid raid = new Raid(tier, time, location);
 
-         var raidMsg = await Context.Channel.SendMessageAsync("", false, BuildEmbed(raid));
+         var raidMsg = await Context.Channel.SendFileAsync(GetPokemonPicture(raid.Boss.Name), embed: BuildEmbed(raid));
          await raidMsg.AddReactionsAsync(emojis);
          currentRaids.Add(raidMsg.Id, raid);
       }
@@ -98,9 +98,13 @@ namespace PokeStar.Modules
 
       private static Embed BuildEmbed(Raid raid)
       {
+         var fileName = GetPokemonPicture(raid.Boss.Name);
+         Connections.CopyFile(fileName);
          EmbedBuilder embed = new EmbedBuilder();
+         embed.Color = Color.DarkBlue;
 
-         embed.WithTitle($"{BuildRaidTitle(raid.Tier)}");
+         embed.WithTitle($"{raid.Boss.Name} {BuildRaidTitle(raid.Tier)}");
+         embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Time", raid.Time, true);
          embed.AddField("Location", raid.Location, true);
          embed.AddField($"Here ({raid.HereCount}/{raid.PlayerCount})", $"{BuildPlayerList(raid.Here)}");
@@ -108,6 +112,13 @@ namespace PokeStar.Modules
          //embed.WithDescription($"Press {emojis[7]} for help");
 
          return embed.Build();
+      }
+
+      private static string GetPokemonPicture(string pokemonName)
+      {
+         pokemonName = pokemonName.Replace(" ", "_");
+         pokemonName = pokemonName.Replace(".", "");
+         return pokemonName + ".png";
       }
 
       private static string BuildRaidTitle(int tier)
