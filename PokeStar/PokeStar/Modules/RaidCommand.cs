@@ -139,7 +139,7 @@ namespace PokeStar.Modules
             else if (reaction.Emote.Equals(emojis[7]))
             {
                //help message - needs no update
-               //not implemented
+               await player.SendMessageAsync(BuildRaidHelpMessage());
                needsUpdate = false;
             }
             else
@@ -231,6 +231,21 @@ namespace PokeStar.Modules
 
          foreach (KeyValuePair<SocketGuildUser, int> player in list)
             sb.AppendLine($"{emojis[player.Value - 1]} {(player.Key.Nickname != null ? player.Key.Nickname : player.Key.Username)}");
+
+         return sb.ToString();
+      }
+
+      private static string BuildRaidHelpMessage()
+      {
+         StringBuilder sb = new StringBuilder();
+
+         sb.AppendLine("Raid Help");
+         sb.AppendLine();
+         sb.AppendLine("The numbers represent the number of accounts that you have with you." +
+            " React with one of the numbers to show that you intend to participate in the raid");
+         sb.AppendLine($"Once you arrive at the raid, react with {emojis[5]} to show others that you have arrived." +
+            $" When all plays have marked that they have arrived, Nona will send a message to the group");
+         sb.AppendLine($"If you wish to remove yourself from the raid, react with {emojis[6]}");
 
          return sb.ToString();
       }
