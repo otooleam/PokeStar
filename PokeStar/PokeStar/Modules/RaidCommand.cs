@@ -14,6 +14,7 @@ namespace PokeStar.Modules
    public class RaidCommand : ModuleBase<SocketCommandContext>
    {
       static Dictionary<ulong, Raid> currentRaids = new Dictionary<ulong, Raid>();
+      static Dictionary<ulong, List<string>> selections = new Dictionary<ulong, List<string>>();
       static Emoji[] emojis = {
                 new Emoji("1️⃣"),
                 new Emoji("2️⃣"),
@@ -25,6 +26,8 @@ namespace PokeStar.Modules
                 new Emoji("❓")
             };
 
+      private const string selectPic = "Pikachu.png";
+
       public static bool IsCurrentRaid(ulong id)
       {
          return currentRaids.Keys.ToList<ulong>().Contains(id);
@@ -33,11 +36,24 @@ namespace PokeStar.Modules
       [Command("raid")]
       public async Task Raid(short tier, string time, [Remainder]string location)
       {
-         Raid raid = new Raid(tier, time, location);
+         List<string> potentials = Connections.Instance().GetBossList(tier);
+         string boss = null;
+         if (potentials.Count != 1)
+         {
+            var selectMsg = await Context.Channel.SendFileAsync(selectPic, embed: BuildBossSelectEmbed(potentials));
+            await selectMsg.AddReactionsAsync(emojis); //TODO limit emojis
+            currentRaids.Add(selectMsg.Id, new Raid(tier, time, location));
+            selections.Add(selectMsg.Id, potentials);
+         }
+         else
+         {
+            boss = potentials.First<string>();
+            Raid raid = new Raid(tier, time, location, boss);
 
-         var raidMsg = await Context.Channel.SendFileAsync(GetPokemonPicture(raid.Boss.Name), embed: BuildEmbed(raid));
-         await raidMsg.AddReactionsAsync(emojis);
-         currentRaids.Add(raidMsg.Id, raid);
+            var raidMsg = await Context.Channel.SendFileAsync(GetPokemonPicture(raid.Boss.Name), embed: BuildEmbed(raid));
+            await raidMsg.AddReactionsAsync(emojis);
+            currentRaids.Add(raidMsg.Id, raid);
+         }
       }
 
       public static async Task RaidReaction(IMessage message, SocketReaction reaction)
@@ -46,52 +62,96 @@ namespace PokeStar.Modules
          SocketGuildUser player = (SocketGuildUser)reaction.User;
          bool needsUpdate = true;
 
-         if (reaction.Emote.Equals(emojis[0]))
+         if (raid.Boss == null)
          {
-            raid.PlayerAdd(player, 1);
-         }
-         else if (reaction.Emote.Equals(emojis[1]))
-         {
-            raid.PlayerAdd(player, 2);
-         }
-         else if (reaction.Emote.Equals(emojis[2]))
-         {
-            raid.PlayerAdd(player, 3);
-         }
-         else if (reaction.Emote.Equals(emojis[3]))
-         {
-            raid.PlayerAdd(player, 4);
-         }
-         else if (reaction.Emote.Equals(emojis[4]))
-         {
-            raid.PlayerAdd(player, 5);
-         }
-         else if (reaction.Emote.Equals(emojis[5]))
-         {
-            if (raid.PlayerHere(player)) //true if all players are marked here
+            if (reaction.Emote.Equals(emojis[0]))
             {
-               await reaction.Channel.SendMessageAsync(BuildPingList(raid.Here.Keys.ToList<SocketGuildUser>()));
+               raid.SetBoss(selections[message.Id][0]);
             }
-         }
-         else if (reaction.Emote.Equals(emojis[6]))
-         {
-            raid.RemovePlayer(player);
-         }
-         else if (reaction.Emote.Equals(emojis[7]))
-         {
-            //help message - needs no update
-            //not implemented
+            else if (reaction.Emote.Equals(emojis[1]))
+            {
+               raid.SetBoss(selections[message.Id][1]);
+            }
+            else if (reaction.Emote.Equals(emojis[2]))
+            {
+               raid.SetBoss(selections[message.Id][2]);
+            }
+            else if (reaction.Emote.Equals(emojis[3]))
+            {
+               raid.SetBoss(selections[message.Id][3]);
+            }
+            else if (reaction.Emote.Equals(emojis[4]))
+            {
+               raid.SetBoss(selections[message.Id][4]);
+            }
+            else if (reaction.Emote.Equals(emojis[5]))
+            {
+               raid.SetBoss(selections[message.Id][5]);
+            }
+            else if (reaction.Emote.Equals(emojis[6])) //assumes no more than 7 bosses in a tier at a time
+            {
+               raid.SetBoss(selections[message.Id][6]);
+            }
+            else
+            {
+               return;
+            }
+            await reaction.Channel.DeleteMessageAsync(message);
+
+            var raidMsg = await reaction.Channel.SendFileAsync(GetPokemonPicture(raid.Boss.Name), embed: BuildEmbed(raid));
+            await raidMsg.AddReactionsAsync(emojis);
+            currentRaids.Add(raidMsg.Id, raid);
             needsUpdate = false;
          }
          else
-            needsUpdate = false;
+         {
+            if (reaction.Emote.Equals(emojis[0]))
+            {
+               raid.PlayerAdd(player, 1);
+            }
+            else if (reaction.Emote.Equals(emojis[1]))
+            {
+               raid.PlayerAdd(player, 2);
+            }
+            else if (reaction.Emote.Equals(emojis[2]))
+            {
+               raid.PlayerAdd(player, 3);
+            }
+            else if (reaction.Emote.Equals(emojis[3]))
+            {
+               raid.PlayerAdd(player, 4);
+            }
+            else if (reaction.Emote.Equals(emojis[4]))
+            {
+               raid.PlayerAdd(player, 5);
+            }
+            else if (reaction.Emote.Equals(emojis[5]))
+            {
+               if (raid.PlayerHere(player)) //true if all players are marked here
+               {
+                  await reaction.Channel.SendMessageAsync(BuildPingList(raid.Here.Keys.ToList<SocketGuildUser>()));
+               }
+            }
+            else if (reaction.Emote.Equals(emojis[6]))
+            {
+               raid.RemovePlayer(player);
+            }
+            else if (reaction.Emote.Equals(emojis[7]))
+            {
+               //help message - needs no update
+               //not implemented
+               needsUpdate = false;
+            }
+            else
+               needsUpdate = false;
+         }
 
          if (needsUpdate)
          {
             var msg = (SocketUserMessage)message;
             await msg.ModifyAsync(x =>
             {
-               x.Embed = BuildEmbed(raid); //TODO field by field update
+               x.Embed = BuildEmbed(raid);
             });
          }
       }
@@ -110,6 +170,23 @@ namespace PokeStar.Modules
          embed.AddField($"Here ({raid.HereCount}/{raid.PlayerCount})", $"{BuildPlayerList(raid.Here)}");
          embed.AddField("Attending", $"{BuildPlayerList(raid.Attending)}");
          //embed.WithDescription($"Press {emojis[7]} for help");
+
+         return embed.Build();
+      }
+
+      private static Embed BuildBossSelectEmbed(List<string> potentials)
+      {
+         StringBuilder sb = new StringBuilder();
+         for (int i = 0; i < potentials.Count; i++)
+         {
+            sb.AppendLine($"{emojis[i]} {potentials[i]}");
+         }
+
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.Color = Color.DarkBlue;
+         embed.WithTitle("Raid");
+         embed.WithThumbnailUrl($"attachment://{selectPic}");
+         embed.AddField("Please Select Boss", sb.ToString());
 
          return embed.Build();
       }

@@ -12,14 +12,14 @@ namespace PokeStar.DataModels
    {
       private const int playerLimit = 20;
 
-      public Raid(short tier, string time, string location)
+      public Raid(short tier, string time, string location, string boss = null)
       {
          Tier = tier;
          Time = time;
          Location = location;
          PlayerCount = 0;
          HereCount = 0;
-         Boss = SetBoss(tier);
+         SetBoss(boss);
          Attending = new Dictionary<SocketGuildUser, int>();
          Here = new Dictionary<SocketGuildUser, int>();
       }
@@ -96,18 +96,15 @@ namespace PokeStar.DataModels
          }
       }
 
-      private List<RaidBoss> GetBossData(short tier)
+      private List<string> GetBossData(short tier)
       {
-         //query magic yay
-         return new List<RaidBoss> { Connections.Instance().GetRaidBoss("Arcanine") };
+         return Connections.Instance().GetBossList(tier);
       }
 
-      private RaidBoss SetBoss(short tier)
+      public void SetBoss(string bossName)
       {
-         List<RaidBoss> potentials = GetBossData(tier);
-         if (potentials.Count == 1)
-            return potentials.First<RaidBoss>();
-         return null; //TODO this needs more logic
+         if (bossName != null)
+            Boss = Connections.Instance().GetRaidBoss(bossName);
       }
    }
 }
