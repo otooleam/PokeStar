@@ -90,7 +90,6 @@ namespace PokeStar.ConnectionInterface
          return pokemon;
       }
 
-
       public List<string> GetWeather(List<string> types)
       {
          List<string> weather = new List<string>();

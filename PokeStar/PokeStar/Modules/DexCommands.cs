@@ -85,7 +85,7 @@ namespace PokeStar.Modules
 
             await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
 
-            Connections.CopyFile(fileName);
+            Connections.DeleteFile(fileName);
          }
       }
 
