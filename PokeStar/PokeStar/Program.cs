@@ -9,13 +9,14 @@ using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
 using PokeStar.ConnectionInterface;
 using PokeStar.ImageProcessors;
+using PokeStar.Modules;
 
 namespace PokeStar
 {
    public class Program
    {
       // Allows System to run Asynchronously
-      public static void Main() 
+      public static void Main()
          => new Program().MainAsync().GetAwaiter().GetResult(); //Any Exceptions get thrown here
 
       private DiscordSocketClient _client;
@@ -28,6 +29,10 @@ namespace PokeStar
       {
          _client = new DiscordSocketClient();
          _commands = new CommandService();
+
+         //sets cache for reaction events
+         var _config = new DiscordSocketConfig { MessageCacheSize = 100 };
+         _client = new DiscordSocketClient(_config);
 
          _services = new ServiceCollection()
              .AddSingleton(_client)
@@ -103,10 +108,10 @@ namespace PokeStar
       {
          var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
          var user = reaction.User.Value;
-         if (message != null && reaction.User.IsSpecified && !user.IsBot)
-            Console.WriteLine($"{reaction.User.Value} just added a reaction '{reaction.Emote}' " +
-                              $"to {message.Author}'s message ({message.Id}).");
+         if (message != null && reaction.User.IsSpecified && !user.IsBot && RaidCommand.IsCurrentRaid(message.Id))
+         {         
+            await RaidCommand.RaidReaction(message, reaction);
+         }
       }
    }
-
 }

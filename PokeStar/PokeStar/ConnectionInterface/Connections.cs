@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using PokeStar.Calculators;
 using PokeStar.DataModels;
 
@@ -38,6 +39,11 @@ namespace PokeStar.ConnectionInterface
       {
          var location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
          System.IO.File.Delete($"{location}\\{fileName}");
+      }
+
+      public List<string> GetBossList(short tier)
+      {
+         return SilphData.GetRaidBossesTier(tier);
       }
 
       public RaidBoss GetRaidBoss(string raidBossName)

@@ -20,5 +20,12 @@ namespace PokeStar.DataModels
       public int CPHigh { get; set; }
       public int CPLowBoosted { get; set; }
       public int CPHighBoosted { get; set; }
+
+      public RaidCounter[] counters { get; }
+
+      public RaidBoss()
+      {
+
+      }
    }
 }
