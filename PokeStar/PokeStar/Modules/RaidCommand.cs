@@ -28,11 +28,6 @@ namespace PokeStar.Modules
 
       private const string selectPic = "Pikachu.png";
 
-      public static bool IsCurrentRaid(ulong id)
-      {
-         return currentRaids.Keys.ToList<ulong>().Contains(id);
-      }
-
       [Command("raid")]
       public async Task Raid(short tier, string time, [Remainder]string location)
       {
@@ -40,19 +35,27 @@ namespace PokeStar.Modules
          string boss = null;
          if (potentials.Count != 1)
          {
+            Connections.CopyFile(selectPic);
             var selectMsg = await Context.Channel.SendFileAsync(selectPic, embed: BuildBossSelectEmbed(potentials));
-            await selectMsg.AddReactionsAsync(emojis); //TODO limit emojis
+            await selectMsg.AddReactionsAsync(emojis); //TODO limit emojis (would then need to add full set on update)
+
             currentRaids.Add(selectMsg.Id, new Raid(tier, time, location));
             selections.Add(selectMsg.Id, potentials);
+
+            Connections.DeleteFile(selectPic);
          }
          else
          {
             boss = potentials.First<string>();
             Raid raid = new Raid(tier, time, location, boss);
+            var fileName = GetPokemonPicture(raid.Boss.Name);
+            Connections.CopyFile(fileName);
 
-            var raidMsg = await Context.Channel.SendFileAsync(GetPokemonPicture(raid.Boss.Name), embed: BuildEmbed(raid));
+            var raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildEmbed(raid));
             await raidMsg.AddReactionsAsync(emojis);
             currentRaids.Add(raidMsg.Id, raid);
+
+            Connections.DeleteFile(fileName);
          }
       }
 
@@ -239,15 +242,19 @@ namespace PokeStar.Modules
       {
          StringBuilder sb = new StringBuilder();
 
-         sb.AppendLine("Raid Help");
-         sb.AppendLine();
+         sb.AppendLine("Raid Help:");
          sb.AppendLine("The numbers represent the number of accounts that you have with you." +
             " React with one of the numbers to show that you intend to participate in the raid");
          sb.AppendLine($"Once you arrive at the raid, react with {emojis[5]} to show others that you have arrived." +
-            $" When all plays have marked that they have arrived, Nona will send a message to the group");
+            $" When all players have marked that they have arrived, Nona will send a message to the group");
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {emojis[6]}");
 
          return sb.ToString();
+      }
+
+      public static bool IsCurrentRaid(ulong id)
+      {
+         return currentRaids.Keys.ToList<ulong>().Contains(id);
       }
    }
 }

@@ -43,7 +43,7 @@ namespace PokeStar.ConnectionInterface
 
       public List<string> GetBossList(short tier)
       {
-         return dbConnector.GetBossList(tier);
+         return SilphData.GetRaidBossesTier(tier);
       }
 
       public RaidBoss GetRaidBoss(string raidBossName)

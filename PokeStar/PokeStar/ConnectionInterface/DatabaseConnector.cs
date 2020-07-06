@@ -90,25 +90,6 @@ namespace PokeStar.ConnectionInterface
          return pokemon;
       }
 
-      public List<string> GetBossList(short tier)
-      {
-         List<string> bosses = new List<string>();
-         using (var conn = GetConnection())
-         {
-            conn.Open();
-            string queryString = $"SELECT pokemon FROM raid_boss WHERE tier = {tier} AND active = 1";
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
-            {
-               while (reader.Read())
-               {
-                  bosses.Add(Convert.ToString(reader["pokemon"]));
-               }
-            }
-            conn.Close();
-         }
-         return bosses;
-      }
-
       public List<string> GetWeather(List<string> types)
       {
          List<string> weather = new List<string>();

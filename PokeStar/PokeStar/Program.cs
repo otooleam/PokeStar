@@ -7,6 +7,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using Newtonsoft.Json.Linq;
+using PokeStar.ConnectionInterface;
 using PokeStar.ImageProcessors;
 using PokeStar.Modules;
 
@@ -58,6 +59,8 @@ namespace PokeStar
          Environment.SetEnvironmentVariable("SETUP_TRADE", "FALSE");
          Environment.SetEnvironmentVariable("SETUP_DEX", "FALSE");
 
+         var connectors = Connections.Instance();
+
          // Block this task until the program is closed.
          await Task.Delay(-1).ConfigureAwait(false);
       }
@@ -106,9 +109,7 @@ namespace PokeStar
          var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
          var user = reaction.User.Value;
          if (message != null && reaction.User.IsSpecified && !user.IsBot && RaidCommand.IsCurrentRaid(message.Id))
-         {
-            //Console.WriteLine($"{reaction.User.Value} just added a reaction '{reaction.Emote}' to {message.Author}'s message ({message.Id}).");
-            
+         {         
             await RaidCommand.RaidReaction(message, reaction);
          }
       }
