@@ -25,8 +25,18 @@ namespace PokeStar.Modules
                 new Emoji("🚫"),
                 new Emoji("❓")
             };
-
-      private const string selectPic = "Pikachu.png";
+      static Emoji[] selectionEmojis = {
+                new Emoji("1️⃣"),
+                new Emoji("2️⃣"),
+                new Emoji("3️⃣"),
+                new Emoji("4️⃣"),
+                new Emoji("5️⃣"),
+                new Emoji("6️⃣"),
+                new Emoji("7️⃣"),
+                new Emoji("8️⃣"),
+                new Emoji("9️⃣"),
+                new Emoji("🔟")
+            };
 
       [Command("raid")]
       public async Task Raid(short tier, string time, [Remainder]string location)
@@ -35,14 +45,16 @@ namespace PokeStar.Modules
          string boss = null;
          if (potentials.Count != 1)
          {
-            Connections.CopyFile(selectPic);
-            var selectMsg = await Context.Channel.SendFileAsync(selectPic, embed: BuildBossSelectEmbed(potentials));
-            await selectMsg.AddReactionsAsync(emojis); //TODO limit emojis (would then need to add full set on update)
+            string fileName = "Egg" + tier + ".png";
+            Connections.CopyFile(fileName);
+            var selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+            for (int i = 0; i < potentials.Count; i++)
+               await selectMsg.AddReactionAsync(selectionEmojis[i]);
 
             currentRaids.Add(selectMsg.Id, new Raid(tier, time, location));
             selections.Add(selectMsg.Id, potentials);
 
-            Connections.DeleteFile(selectPic);
+            Connections.DeleteFile(fileName);
          }
          else
          {
@@ -67,44 +79,25 @@ namespace PokeStar.Modules
 
          if (raid.Boss == null)
          {
-            if (reaction.Emote.Equals(emojis[0]))
+            bool validReactionAdded = false;
+            for (int i = 0; i < selections[message.Id].Count; i++)
             {
-               raid.SetBoss(selections[message.Id][0]);
+               if (reaction.Emote.Equals(selectionEmojis[i]))
+               {
+                  raid.SetBoss(selections[message.Id][i]);
+                  validReactionAdded = true;
+               }
             }
-            else if (reaction.Emote.Equals(emojis[1]))
-            {
-               raid.SetBoss(selections[message.Id][1]);
-            }
-            else if (reaction.Emote.Equals(emojis[2]))
-            {
-               raid.SetBoss(selections[message.Id][2]);
-            }
-            else if (reaction.Emote.Equals(emojis[3]))
-            {
-               raid.SetBoss(selections[message.Id][3]);
-            }
-            else if (reaction.Emote.Equals(emojis[4]))
-            {
-               raid.SetBoss(selections[message.Id][4]);
-            }
-            else if (reaction.Emote.Equals(emojis[5]))
-            {
-               raid.SetBoss(selections[message.Id][5]);
-            }
-            else if (reaction.Emote.Equals(emojis[6])) //assumes no more than 7 bosses in a tier at a time
-            {
-               raid.SetBoss(selections[message.Id][6]);
-            }
-            else
-            {
-               return;
-            }
-            await reaction.Channel.DeleteMessageAsync(message);
 
-            var raidMsg = await reaction.Channel.SendFileAsync(GetPokemonPicture(raid.Boss.Name), embed: BuildEmbed(raid));
-            await raidMsg.AddReactionsAsync(emojis);
-            currentRaids.Add(raidMsg.Id, raid);
-            needsUpdate = false;
+            if (validReactionAdded)
+            {
+               await reaction.Channel.DeleteMessageAsync(message);
+
+               var raidMsg = await reaction.Channel.SendFileAsync(GetPokemonPicture(raid.Boss.Name), embed: BuildEmbed(raid));
+               await raidMsg.AddReactionsAsync(emojis);
+               currentRaids.Add(raidMsg.Id, raid);
+               needsUpdate = false;
+            }
          }
          else
          {
@@ -177,7 +170,7 @@ namespace PokeStar.Modules
          return embed.Build();
       }
 
-      private static Embed BuildBossSelectEmbed(List<string> potentials)
+      private static Embed BuildBossSelectEmbed(List<string> potentials, string selectPic)
       {
          StringBuilder sb = new StringBuilder();
          for (int i = 0; i < potentials.Count; i++)
