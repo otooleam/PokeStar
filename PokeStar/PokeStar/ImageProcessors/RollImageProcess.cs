@@ -4,7 +4,6 @@ using System.Linq;
 using System.Net;
 using System.Drawing;
 using System.Reflection;
-using Discord;
 using Discord.Commands;
 using Patagames.Ocr;
 using Patagames.Ocr.Enums;
@@ -24,14 +23,14 @@ namespace PokeStar.ImageProcessors
          string url = attachments.ElementAt(0).Url;
          string imagePath = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\Images\profile\{user.Username}.png";
          string plainText = null;
-         System.Drawing.Color teamColor = System.Drawing.Color.White;
+         Color teamColor = Color.White;
 
          using (WebClient client = new WebClient())
          {
             client.DownloadFile(new Uri(url), imagePath);
          }
 
-         using (System.Drawing.Image image = System.Drawing.Image.FromFile(imagePath))
+         using (Image image = Image.FromFile(imagePath))
          {
             using (Bitmap bitmap = ImageProcess.ScaleImage(image, 495, 880))
             {
@@ -40,9 +39,9 @@ namespace PokeStar.ImageProcessors
                   api.Init(Languages.English);
                   plainText = api.GetTextFromImage(bitmap, new Rectangle(10, 120, 480, 100));
                }
-               System.Drawing.Color[] teamColors = { System.Drawing.Color.Red, System.Drawing.Color.Blue, System.Drawing.Color.Yellow };
-               System.Drawing.Color avgColor = GetAvgColor(bitmap, new Rectangle(410, 60, 10, 10));
-               teamColor = teamColors.ElementAt(ClosestColor(new List<System.Drawing.Color>(teamColors), avgColor));
+               Color[] teamColors = { Color.Red, Color.Blue, Color.Yellow };
+               Color avgColor = GetAvgColor(bitmap, new Rectangle(410, 60, 10, 10));
+               teamColor = teamColors.ElementAt(ClosestColor(new List<Color>(teamColors), avgColor));
             }
          }
 
@@ -63,7 +62,7 @@ namespace PokeStar.ImageProcessors
             }
          }
 
-         if (!teamColor.Equals(System.Drawing.Color.White))
+         if (!teamColor.Equals(Color.White))
          {
             var valor = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase));
             var mystic = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase));
@@ -76,11 +75,11 @@ namespace PokeStar.ImageProcessors
                await user.RemoveRoleAsync(instinct).ConfigureAwait(false);
 
             string teamName = "";
-            if (teamColor.Equals(System.Drawing.Color.Red))
+            if (teamColor.Equals(Color.Red))
                teamName = "Valor";
-            if (teamColor.Equals(System.Drawing.Color.Blue))
+            if (teamColor.Equals(Color.Blue))
                teamName = "Mystic";
-            if (teamColor.Equals(System.Drawing.Color.Yellow))
+            if (teamColor.Equals(Color.Yellow))
                teamName = "Instinct";
 
             var team = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(teamName, StringComparison.OrdinalIgnoreCase));
@@ -93,13 +92,13 @@ namespace PokeStar.ImageProcessors
          }
       }
 
-      private static System.Drawing.Color GetAvgColor(Bitmap bitmap, Rectangle rect)
+      private static Color GetAvgColor(Bitmap bitmap, Rectangle rect)
       {
          int[] avgRGB = { 0, 0, 0 };
          for (int x = rect.X; x < (rect.X + rect.Width); x++)
             for (int y = rect.Y; y < (rect.Y + rect.Height); y++)
             {
-               System.Drawing.Color c = bitmap.GetPixel(x, y);
+               Color c = bitmap.GetPixel(x, y);
                avgRGB[0] += c.R;
                avgRGB[1] += c.G;
                avgRGB[2] += c.B;
@@ -107,10 +106,10 @@ namespace PokeStar.ImageProcessors
          int pixelCount = rect.Width * rect.Height;
          for (int i = 0; i < avgRGB.Length; i++)
             avgRGB[i] /= pixelCount;
-         return System.Drawing.Color.FromArgb(avgRGB[0], avgRGB[1], avgRGB[2]);
+         return Color.FromArgb(avgRGB[0], avgRGB[1], avgRGB[2]);
       }
 
-      private static int ClosestColor(List<System.Drawing.Color> colors, System.Drawing.Color target)
+      private static int ClosestColor(List<Color> colors, Color target)
       {
          var hue1 = target.GetHue();
          var diffs = colors.Select(n => GetHueDistance(n.GetHue(), hue1));

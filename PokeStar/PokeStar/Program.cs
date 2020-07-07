@@ -27,12 +27,10 @@ namespace PokeStar
 
       public async Task MainAsync()
       {
-         _client = new DiscordSocketClient();
-         _commands = new CommandService();
-
          //sets cache for reaction events
          var _config = new DiscordSocketConfig { MessageCacheSize = 100 };
          _client = new DiscordSocketClient(_config);
+         _commands = new CommandService();
 
          _services = new ServiceCollection()
              .AddSingleton(_client)
@@ -58,6 +56,7 @@ namespace PokeStar
          Environment.SetEnvironmentVariable("SETUP_RAIDS", "FALSE");
          Environment.SetEnvironmentVariable("SETUP_TRADE", "FALSE");
          Environment.SetEnvironmentVariable("SETUP_DEX", "FALSE");
+         Environment.SetEnvironmentVariable("SETUP_EMOJI", "FALSE");
 
          var connectors = Connections.Instance();
 
