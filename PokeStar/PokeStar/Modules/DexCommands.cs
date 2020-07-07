@@ -25,7 +25,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            var fileName = GetPokemonPicture(pokemon.Name);
+            var fileName = Connections.GetPokemonPicture(pokemon.Name);
             Connections.CopyFile(fileName);
 
             EmbedBuilder embed = new EmbedBuilder();
@@ -66,7 +66,7 @@ namespace PokeStar.Modules
          else
          {
             Connections.CalcAllCP(ref pokemon);
-            var fileName = GetPokemonPicture(pokemon.Name);
+            var fileName = Connections.GetPokemonPicture(pokemon.Name);
             Connections.CopyFile(fileName);
 
             EmbedBuilder embed = new EmbedBuilder();
@@ -89,12 +89,7 @@ namespace PokeStar.Modules
          }
       }
 
-      private static string GetPokemonPicture(string pokemonName)
-      {
-         pokemonName = pokemonName.Replace(" ", "_");
-         pokemonName = pokemonName.Replace(".", "");
-         return pokemonName + ".png";
-      }
+
 
       private static string GetPokemon(string text)
       {

@@ -1,16 +1,21 @@
-﻿using Discord.WebSocket;
+﻿using System.Collections.Generic;
+using Discord.WebSocket;
 using PokeStar.ConnectionInterface;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace PokeStar.DataModels
 {
    class Raid
    {
       private const int playerLimit = 20;
+      public string Location { get; set; }
+      public string Time { get; set; }
+      public short Tier { get; set; }
+      public RaidBoss Boss { get; private set; }
+      public int PlayerCount { get; private set; }
+      public int HereCount { get; private set; }
+
+      public Dictionary<SocketGuildUser, int> Attending;
+      public Dictionary<SocketGuildUser, int> Here;
 
       public Raid(short tier, string time, string location, string boss = null)
       {
@@ -23,16 +28,6 @@ namespace PokeStar.DataModels
          Attending = new Dictionary<SocketGuildUser, int>();
          Here = new Dictionary<SocketGuildUser, int>();
       }
-
-      public string Location { get; set; }
-      public string Time { get; set; }
-      public short Tier { get; set; }
-      public RaidBoss Boss { get; private set; }
-      public int PlayerCount { get; private set; }
-      public int HereCount { get; private set; }
-
-      public Dictionary<SocketGuildUser, int> Attending;
-      public Dictionary<SocketGuildUser, int> Here;
 
       public void PlayerAdd(SocketGuildUser player, int partySize)
       {
@@ -94,11 +89,6 @@ namespace PokeStar.DataModels
             HereCount -= Here[player];
             Here.Remove(player);
          }
-      }
-
-      private List<string> GetBossData(short tier)
-      {
-         return Connections.GetBossList(tier);
       }
 
       public void SetBoss(string bossName)

@@ -41,6 +41,13 @@ namespace PokeStar.ConnectionInterface
          System.IO.File.Delete($"{location}\\{fileName}");
       }
 
+      public static string GetPokemonPicture(string pokemonName)
+      {
+         pokemonName = pokemonName.Replace(" ", "_");
+         pokemonName = pokemonName.Replace(".", "");
+         return pokemonName + ".png";
+      }
+
       public static List<string> GetBossList(short tier)
       {
          return SilphData.GetRaidBossesTier(tier);
