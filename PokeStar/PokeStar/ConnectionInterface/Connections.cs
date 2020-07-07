@@ -11,13 +11,13 @@ namespace PokeStar.ConnectionInterface
       private const string raidBossHTML = "//*[@class = 'col-md-4']";
 
       public Uri RAID_BOSS_URL { get; } = new Uri("https://thesilphroad.com/raid-bosses");
-      public string RAID_BOSS_HTML => raidBossHTML;
+      public static string RAID_BOSS_HTML => raidBossHTML;
 
       private static Connections connections;
 
       private DatabaseConnector dbConnector;
 
-      private Connections() 
+      private Connections()
       {
          dbConnector = new DatabaseConnector(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
       }
@@ -41,13 +41,16 @@ namespace PokeStar.ConnectionInterface
          System.IO.File.Delete($"{location}\\{fileName}");
       }
 
-      public List<string> GetBossList(short tier)
+      public static List<string> GetBossList(short tier)
       {
          return SilphData.GetRaidBossesTier(tier);
       }
 
       public RaidBoss GetRaidBoss(string raidBossName)
       {
+         if (raidBossName == null)
+            return null;
+
          string name = ReformatName(raidBossName);
          RaidBoss raidBoss = dbConnector.GetRaidBoss(name);
          if (raidBoss == null) return null;
@@ -81,9 +84,11 @@ namespace PokeStar.ConnectionInterface
          return raidBoss;
       }
 
-
       public Pokemon GetPokemon(string pokemonName)
       {
+         if (pokemonName == null)
+            return null;
+
          string name = ReformatName(pokemonName);
          Pokemon pokemon = dbConnector.GetPokemon(name);
          if (pokemon == null) return null;
@@ -102,61 +107,64 @@ namespace PokeStar.ConnectionInterface
          return pokemon;
       }
 
-      public void CalcAllCP(ref Pokemon pokemon)
+      public static void CalcAllCP(ref Pokemon pokemon)
       {
-         pokemon.CPBestBuddy = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-            CPCalculator.MAX_IV, 
-            CPCalculator.MAX_LEVEL + CPCalculator.BUDDY_BOOST);
-
-         pokemon.CPRaidMin = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
-            CPCalculator.MIN_SPECIAL_IV, CPCalculator.RAID_LEVEL);
-
-         pokemon.CPRaidMax = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-            CPCalculator.MAX_IV, CPCalculator.RAID_LEVEL);
-
-         pokemon.CPRaidBoostedMin = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
-            CPCalculator.MIN_SPECIAL_IV,
-            CPCalculator.RAID_LEVEL + CPCalculator.WEATHER_BOOST);
-
-         pokemon.CPRaidBoostedMax = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-            CPCalculator.MAX_IV,
-            CPCalculator.RAID_LEVEL + CPCalculator.WEATHER_BOOST);
-
-         pokemon.CPQuestMin = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
-            CPCalculator.MIN_SPECIAL_IV, CPCalculator.QUEST_LEVEL);
-
-         pokemon.CPQuestMax = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-            CPCalculator.MAX_IV, CPCalculator.QUEST_LEVEL);
-
-         pokemon.CPHatchMin = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
-            CPCalculator.MIN_SPECIAL_IV, CPCalculator.HATCH_LEVEL);
-
-         pokemon.CPHatchMax = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-            CPCalculator.MAX_IV, CPCalculator.HATCH_LEVEL);
-
-         for (int level = CPCalculator.MIN_WILD_LEVEL; level <= CPCalculator.MAX_WILD_LEVEL; level++)
-            pokemon.CPWild.Add(CPCalculator.CalcCPPerLevel(
+         if (pokemon != null)
+         {
+            pokemon.CPBestBuddy = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-               CPCalculator.MAX_IV, level));
+               CPCalculator.MAX_IV,
+               CPCalculator.MAX_LEVEL + CPCalculator.BUDDY_BOOST);
+
+            pokemon.CPRaidMin = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
+               CPCalculator.MIN_SPECIAL_IV, CPCalculator.RAID_LEVEL);
+
+            pokemon.CPRaidMax = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               CPCalculator.MAX_IV, CPCalculator.MAX_IV,
+               CPCalculator.MAX_IV, CPCalculator.RAID_LEVEL);
+
+            pokemon.CPRaidBoostedMin = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
+               CPCalculator.MIN_SPECIAL_IV,
+               CPCalculator.RAID_LEVEL + CPCalculator.WEATHER_BOOST);
+
+            pokemon.CPRaidBoostedMax = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               CPCalculator.MAX_IV, CPCalculator.MAX_IV,
+               CPCalculator.MAX_IV,
+               CPCalculator.RAID_LEVEL + CPCalculator.WEATHER_BOOST);
+
+            pokemon.CPQuestMin = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
+               CPCalculator.MIN_SPECIAL_IV, CPCalculator.QUEST_LEVEL);
+
+            pokemon.CPQuestMax = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               CPCalculator.MAX_IV, CPCalculator.MAX_IV,
+               CPCalculator.MAX_IV, CPCalculator.QUEST_LEVEL);
+
+            pokemon.CPHatchMin = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
+               CPCalculator.MIN_SPECIAL_IV, CPCalculator.HATCH_LEVEL);
+
+            pokemon.CPHatchMax = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               CPCalculator.MAX_IV, CPCalculator.MAX_IV,
+               CPCalculator.MAX_IV, CPCalculator.HATCH_LEVEL);
+
+            for (int level = CPCalculator.MIN_WILD_LEVEL; level <= CPCalculator.MAX_WILD_LEVEL; level++)
+               pokemon.CPWild.Add(CPCalculator.CalcCPPerLevel(
+                  pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+                  CPCalculator.MAX_IV, CPCalculator.MAX_IV,
+                  CPCalculator.MAX_IV, level));
+         }
       }
 
       private static string ReformatName(string originalName)

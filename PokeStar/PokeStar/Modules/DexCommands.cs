@@ -65,7 +65,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            Connections.Instance().CalcAllCP(ref pokemon);
+            Connections.CalcAllCP(ref pokemon);
             var fileName = GetPokemonPicture(pokemon.Name);
             Connections.CopyFile(fileName);
 

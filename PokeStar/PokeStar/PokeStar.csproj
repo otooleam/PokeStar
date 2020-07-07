@@ -165,7 +165,6 @@
     <Compile Include="Modules\RaidCommand.cs" />
     <Compile Include="Modules\RoleCommand.cs" />
     <Compile Include="Modules\SetupCommand.cs" />
-    <Compile Include="DataModels\Player.cs" />
     <Compile Include="DataModels\RaidBoss.cs" />
     <Compile Include="DataModels\RaidCounter.cs" />
     <Compile Include="Program.cs" />

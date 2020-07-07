@@ -16,6 +16,9 @@ namespace PokeStar.ImageProcessors
    {
       public static async void RoleImageProcess(SocketCommandContext context)
       {
+         if (context == null)
+            return;
+
          var attachments = context.Message.Attachments;
          var user = context.Guild.Users.FirstOrDefault(x => x.Username.ToString().Equals(context.Message.Author.Username, StringComparison.OrdinalIgnoreCase));
          string url = attachments.ElementAt(0).Url;

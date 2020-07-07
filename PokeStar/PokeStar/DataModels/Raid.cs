@@ -98,7 +98,7 @@ namespace PokeStar.DataModels
 
       private List<string> GetBossData(short tier)
       {
-         return Connections.Instance().GetBossList(tier);
+         return Connections.GetBossList(tier);
       }
 
       public void SetBoss(string bossName)

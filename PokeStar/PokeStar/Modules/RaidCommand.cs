@@ -41,7 +41,7 @@ namespace PokeStar.Modules
       [Command("raid")]
       public async Task Raid(short tier, string time, [Remainder]string location)
       {
-         List<string> potentials = Connections.Instance().GetBossList(tier);
+         List<string> potentials = Connections.GetBossList(tier);
          string boss = null;
          if (potentials.Count != 1)
          {
