@@ -7,6 +7,7 @@ using Discord.Commands;
 using PokeStar.DataModels;
 using PokeStar.ConnectionInterface;
 using Discord.WebSocket;
+using System;
 
 namespace PokeStar.Modules
 {
@@ -47,7 +48,6 @@ namespace PokeStar.Modules
          REMOVE_PLAYER,
          HELP
       }
-
 
       [Command("raid")]
       public async Task Raid(short tier, string time, [Remainder]string location)
@@ -200,8 +200,12 @@ namespace PokeStar.Modules
          StringBuilder sb = new StringBuilder();
          sb.Append("Raid ");
 
+         string raidSymbol = "⭐";
+         if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
+            raidSymbol = Emote.Parse(Environment.GetEnvironmentVariable("RAID_EMOTE")).ToString();
+
          for (int i = 0; i < tier; i++)
-            sb.Append("⭐"); 
+            sb.Append(raidSymbol);
 
          return sb.ToString();
       }
@@ -224,7 +228,10 @@ namespace PokeStar.Modules
          StringBuilder sb = new StringBuilder();
 
          foreach (KeyValuePair<SocketGuildUser, int> player in list)
-            sb.AppendLine($"{raidEmojis[player.Value - 1]} {(player.Key.Nickname ?? player.Key.Username)}");
+         {
+            string teamString = GetPlayerTeam(player.Key);
+            sb.AppendLine($"{raidEmojis[player.Value - 1]} {player.Key.Nickname ?? player.Key.Username} {teamString}");
+         }
 
          return sb.ToString();
       }
@@ -241,6 +248,20 @@ namespace PokeStar.Modules
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}");
 
          return sb.ToString();
+      }
+
+      private static string GetPlayerTeam(SocketGuildUser user)
+      {
+         if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
+         {
+            if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) != null)
+               return Emote.Parse(Environment.GetEnvironmentVariable("VALOR_EMOTE")).ToString();
+            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) != null)
+               return Emote.Parse(Environment.GetEnvironmentVariable("MYSTIC_EMOTE")).ToString();
+            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) != null)
+               return Emote.Parse(Environment.GetEnvironmentVariable("INSTINCT_EMOTE")).ToString();
+         }
+         return "";
       }
 
       public static bool IsCurrentRaid(ulong id)

@@ -70,7 +70,12 @@ namespace PokeStar.DataModels
       {
          string str = "";
          foreach (string type in Type)
-            str += Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")) + " ";
+         {
+            string typeString = type;
+            if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
+               typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
+            str += typeString + " ";
+         }
          return str.Trim();
       }
 
@@ -85,16 +90,26 @@ namespace PokeStar.DataModels
       public string WeaknessToString()
       {
          string str = "";
-         foreach (string weakness in Weakness)
-            str += Emote.Parse(Environment.GetEnvironmentVariable($"{weakness.ToUpper()}_EMOTE")) + " ";
+         foreach (string type in Weakness)
+         {
+            string typeString = type;
+            if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
+               typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
+            str += typeString + " ";
+         }
          return str.Trim();
       }
 
       public string ResistanceToString()
       {
          string str = "";
-         foreach (string resistance in Resistance)
-            str += Emote.Parse(Environment.GetEnvironmentVariable($"{resistance.ToUpper()}_EMOTE")) + " ";
+         foreach (string type in Resistance)
+         {
+            string typeString = type;
+            if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
+               typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
+            str += typeString + " ";
+         }
          return str.Trim();
       }
 
@@ -173,7 +188,5 @@ namespace PokeStar.DataModels
          }
          return str;
       }
-
-
    }
 }
