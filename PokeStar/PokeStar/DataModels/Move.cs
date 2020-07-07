@@ -1,5 +1,4 @@
-﻿
-using System;
+﻿using System;
 using Discord;
 
 namespace PokeStar.DataModels

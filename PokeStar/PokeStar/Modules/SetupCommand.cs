@@ -87,7 +87,5 @@ namespace PokeStar.Modules
             Environment.SetEnvironmentVariable(emote.ToUpper(), 
                server.Emotes.FirstOrDefault(x => x.Name.ToString().Equals(json.GetValue(emote.ToLower()).ToString(), StringComparison.OrdinalIgnoreCase)).ToString());
       }
-
-
    }
 }

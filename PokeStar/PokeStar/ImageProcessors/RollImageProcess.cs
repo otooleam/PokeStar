@@ -4,10 +4,10 @@ using System.Linq;
 using System.Net;
 using System.Drawing;
 using System.Reflection;
+using System.Collections.Generic;
 using Discord.Commands;
 using Patagames.Ocr;
 using Patagames.Ocr.Enums;
-using System.Collections.Generic;
 
 namespace PokeStar.ImageProcessors
 {

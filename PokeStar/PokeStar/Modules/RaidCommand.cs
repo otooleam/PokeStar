@@ -1,13 +1,13 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using PokeStar.DataModels;
 using PokeStar.ConnectionInterface;
-using Discord.WebSocket;
-using System;
 
 namespace PokeStar.Modules
 {

@@ -88,9 +88,6 @@ namespace PokeStar.Modules
             Connections.DeleteFile(fileName);
          }
       }
-
-
-
       private static string GetPokemon(string text)
       {
          List<string> words = new List<string>(text.Split(' '));
