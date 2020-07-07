@@ -77,7 +77,7 @@ namespace PokeStar.ConnectionInterface
                      Shadow = Convert.ToInt32(reader["shadow"]) == TRUE,
                      Shiny = Convert.ToInt32(reader["shiny"]) == TRUE,
                      Obtainable = Convert.ToInt32(reader["obtainable"]) == TRUE,
-                     Regional = Convert.ToInt32(reader["obtainable"]) == TRUE
+                     Regional = Convert.ToInt32(reader["regional"]) == TRUE
                   };
 
                   pokemon.Type.Add(Convert.ToString(reader["type_1"]));
