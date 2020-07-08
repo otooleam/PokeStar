@@ -160,6 +160,7 @@ namespace PokeStar.Modules
             {
                x.Embed = BuildEmbed(raid);
             });
+            await msg.RemoveReactionAsync(reaction.Emote, player);
          }
       }
 
@@ -223,7 +224,7 @@ namespace PokeStar.Modules
       private static string BuildPlayerList(Dictionary<SocketGuildUser, int> list)
       {
          if (list.Count == 0)
-            return "\0";
+            return "-----";
 
          StringBuilder sb = new StringBuilder();
 
