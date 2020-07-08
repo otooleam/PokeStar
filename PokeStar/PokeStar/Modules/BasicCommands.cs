@@ -8,7 +8,7 @@ namespace PokeStar.Modules
       [Command("ping")]
       public async Task Ping()
       {
-         await ReplyAsync("Pong");
+         await ReplyAsync("Pong").ConfigureAwait(false);
       }
    }
 }

@@ -25,7 +25,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            var fileName = GetPokemonPicture(pokemon.Name);
+            var fileName = Connections.GetPokemonPicture(pokemon.Name);
             Connections.CopyFile(fileName);
 
             EmbedBuilder embed = new EmbedBuilder();
@@ -41,7 +41,6 @@ namespace PokeStar.Modules
             embed.AddField("Fast Moves", pokemon.FastMoveToString(), true);
             embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
             embed.AddField("Counters", pokemon.CounterToString(), false);
-
             embed.WithColor(Color.Red);
             embed.WithFooter("* denotes STAB move ! denotes Legacy move");
 
@@ -66,8 +65,8 @@ namespace PokeStar.Modules
          }
          else
          {
-            Connections.Instance().CalcAllCP(ref pokemon);
-            var fileName = GetPokemonPicture(pokemon.Name);
+            Connections.CalcAllCP(ref pokemon);
+            var fileName = Connections.GetPokemonPicture(pokemon.Name);
             Connections.CopyFile(fileName);
 
             EmbedBuilder embed = new EmbedBuilder();
@@ -89,14 +88,6 @@ namespace PokeStar.Modules
             Connections.DeleteFile(fileName);
          }
       }
-
-      private static string GetPokemonPicture(string pokemonName)
-      {
-         pokemonName = pokemonName.Replace(" ", "_");
-         pokemonName = pokemonName.Replace(".", "");
-         return pokemonName + ".png";
-      }
-
       private static string GetPokemon(string text)
       {
          List<string> words = new List<string>(text.Split(' '));

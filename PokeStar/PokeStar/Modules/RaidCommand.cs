@@ -1,56 +1,66 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
 using PokeStar.DataModels;
 using PokeStar.ConnectionInterface;
-using Discord.WebSocket;
 
 namespace PokeStar.Modules
 {
    public class RaidCommand : ModuleBase<SocketCommandContext>
    {
-      static Dictionary<ulong, Raid> currentRaids = new Dictionary<ulong, Raid>();
-      static Dictionary<ulong, List<string>> selections = new Dictionary<ulong, List<string>>();
-      static Emoji[] emojis = {
-                new Emoji("1️⃣"),
-                new Emoji("2️⃣"),
-                new Emoji("3️⃣"),
-                new Emoji("4️⃣"),
-                new Emoji("5️⃣"),
-                new Emoji("✅"),
-                new Emoji("🚫"),
-                new Emoji("❓")
-            };
-      static Emoji[] selectionEmojis = {
-                new Emoji("1️⃣"),
-                new Emoji("2️⃣"),
-                new Emoji("3️⃣"),
-                new Emoji("4️⃣"),
-                new Emoji("5️⃣"),
-                new Emoji("6️⃣"),
-                new Emoji("7️⃣"),
-                new Emoji("8️⃣"),
-                new Emoji("9️⃣"),
-                new Emoji("🔟")
-            };
+      private static readonly Dictionary<ulong, Raid> currentRaids = new Dictionary<ulong, Raid>();
+      private static readonly Dictionary<ulong, List<string>> selections = new Dictionary<ulong, List<string>>();
+      private static readonly Emoji[] raidEmojis = {
+         new Emoji("1️⃣"),
+         new Emoji("2️⃣"),
+         new Emoji("3️⃣"),
+         new Emoji("4️⃣"),
+         new Emoji("5️⃣"),
+         new Emoji("✅"),
+         new Emoji("🚫"),
+         new Emoji("❓")
+      };
+      private static readonly Emoji[] selectionEmojis = {
+         new Emoji("1️⃣"),
+         new Emoji("2️⃣"),
+         new Emoji("3️⃣"),
+         new Emoji("4️⃣"),
+         new Emoji("5️⃣"),
+         new Emoji("6️⃣"),
+         new Emoji("7️⃣"),
+         new Emoji("8️⃣"),
+         new Emoji("9️⃣"),
+         new Emoji("🔟")
+      };
+
+      private enum RAID_EMOJI_INDEX {
+         ADD_PLAYER_1,
+         ADD_PLAYER_2,
+         ADD_PLAYER_3,
+         ADD_PLAYER_4,
+         ADD_PLAYER_5,
+         PLAYER_HERE,
+         REMOVE_PLAYER,
+         HELP
+      }
 
       [Command("raid")]
       public async Task Raid(short tier, string time, [Remainder]string location)
       {
-         List<string> potentials = Connections.Instance().GetBossList(tier);
-         string boss = null;
+         List<string> potentials = Connections.GetBossList(tier);
          if (potentials.Count != 1)
          {
-            string fileName = "Egg" + tier + ".png";
+            string fileName = $"Egg{tier}.png";
             Connections.CopyFile(fileName);
+
             var selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
             for (int i = 0; i < potentials.Count; i++)
                await selectMsg.AddReactionAsync(selectionEmojis[i]);
-
             currentRaids.Add(selectMsg.Id, new Raid(tier, time, location));
             selections.Add(selectMsg.Id, potentials);
 
@@ -58,13 +68,13 @@ namespace PokeStar.Modules
          }
          else
          {
-            boss = potentials.First<string>();
+            string boss = potentials.First();
             Raid raid = new Raid(tier, time, location, boss);
-            var fileName = GetPokemonPicture(raid.Boss.Name);
+            var fileName = Connections.GetPokemonPicture(raid.Boss.Name);
             Connections.CopyFile(fileName);
 
             var raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildEmbed(raid));
-            await raidMsg.AddReactionsAsync(emojis);
+            await raidMsg.AddReactionsAsync(raidEmojis);
             currentRaids.Add(raidMsg.Id, raid);
 
             Connections.DeleteFile(fileName);
@@ -93,46 +103,47 @@ namespace PokeStar.Modules
             {
                await reaction.Channel.DeleteMessageAsync(message);
 
-               var raidMsg = await reaction.Channel.SendFileAsync(GetPokemonPicture(raid.Boss.Name), embed: BuildEmbed(raid));
-               await raidMsg.AddReactionsAsync(emojis);
+               string filename = Connections.GetPokemonPicture(raid.Boss.Name);
+               var raidMsg = await reaction.Channel.SendFileAsync(filename, embed: BuildEmbed(raid));
+               await raidMsg.AddReactionsAsync(raidEmojis);
                currentRaids.Add(raidMsg.Id, raid);
                needsUpdate = false;
             }
          }
          else
          {
-            if (reaction.Emote.Equals(emojis[0]))
+            if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_1]))
             {
                raid.PlayerAdd(player, 1);
             }
-            else if (reaction.Emote.Equals(emojis[1]))
+            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_2]))
             {
                raid.PlayerAdd(player, 2);
             }
-            else if (reaction.Emote.Equals(emojis[2]))
+            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_3]))
             {
                raid.PlayerAdd(player, 3);
             }
-            else if (reaction.Emote.Equals(emojis[3]))
+            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_4]))
             {
                raid.PlayerAdd(player, 4);
             }
-            else if (reaction.Emote.Equals(emojis[4]))
+            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_5]))
             {
                raid.PlayerAdd(player, 5);
             }
-            else if (reaction.Emote.Equals(emojis[5]))
+            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_HERE]))
             {
                if (raid.PlayerHere(player)) //true if all players are marked here
                {
-                  await reaction.Channel.SendMessageAsync(BuildPingList(raid.Here.Keys.ToList<SocketGuildUser>()));
+                  await reaction.Channel.SendMessageAsync(BuildPingList(raid.Here.Keys.ToList()));
                }
             }
-            else if (reaction.Emote.Equals(emojis[6]))
+            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]))
             {
                raid.RemovePlayer(player);
             }
-            else if (reaction.Emote.Equals(emojis[7]))
+            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
             {
                //help message - needs no update
                await player.SendMessageAsync(BuildRaidHelpMessage());
@@ -154,18 +165,17 @@ namespace PokeStar.Modules
 
       private static Embed BuildEmbed(Raid raid)
       {
-         var fileName = GetPokemonPicture(raid.Boss.Name);
+         var fileName = Connections.GetPokemonPicture(raid.Boss.Name);
          Connections.CopyFile(fileName);
-         EmbedBuilder embed = new EmbedBuilder();
-         embed.Color = Color.DarkBlue;
 
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithColor(Color.DarkBlue);
          embed.WithTitle($"{raid.Boss.Name} {BuildRaidTitle(raid.Tier)}");
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Time", raid.Time, true);
          embed.AddField("Location", raid.Location, true);
          embed.AddField($"Here ({raid.HereCount}/{raid.PlayerCount})", $"{BuildPlayerList(raid.Here)}");
          embed.AddField("Attending", $"{BuildPlayerList(raid.Attending)}");
-         //embed.WithDescription($"Press {emojis[7]} for help");
 
          return embed.Build();
       }
@@ -174,12 +184,10 @@ namespace PokeStar.Modules
       {
          StringBuilder sb = new StringBuilder();
          for (int i = 0; i < potentials.Count; i++)
-         {
-            sb.AppendLine($"{emojis[i]} {potentials[i]}");
-         }
+            sb.AppendLine($"{raidEmojis[i]} {potentials[i]}");
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.Color = Color.DarkBlue;
+         embed.WithColor(Color.DarkBlue);
          embed.WithTitle("Raid");
          embed.WithThumbnailUrl($"attachment://{selectPic}");
          embed.AddField("Please Select Boss", sb.ToString());
@@ -187,20 +195,17 @@ namespace PokeStar.Modules
          return embed.Build();
       }
 
-      private static string GetPokemonPicture(string pokemonName)
-      {
-         pokemonName = pokemonName.Replace(" ", "_");
-         pokemonName = pokemonName.Replace(".", "");
-         return pokemonName + ".png";
-      }
-
       private static string BuildRaidTitle(int tier)
       {
          StringBuilder sb = new StringBuilder();
          sb.Append("Raid ");
 
+         string raidSymbol = "⭐";
+         if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
+            raidSymbol = Emote.Parse(Environment.GetEnvironmentVariable("RAID_EMOTE")).ToString();
+
          for (int i = 0; i < tier; i++)
-            sb.Append("⭐"); 
+            sb.Append(raidSymbol);
 
          return sb.ToString();
       }
@@ -210,10 +215,7 @@ namespace PokeStar.Modules
          StringBuilder sb = new StringBuilder();
 
          foreach (SocketGuildUser player in players)
-         {
-            sb.Append(player.Mention);
-            sb.Append(" ");
-         }
+            sb.Append($"{player.Mention} ");
          sb.Append("Everyone is here");
          return sb.ToString();
       }
@@ -226,7 +228,10 @@ namespace PokeStar.Modules
          StringBuilder sb = new StringBuilder();
 
          foreach (KeyValuePair<SocketGuildUser, int> player in list)
-            sb.AppendLine($"{emojis[player.Value - 1]} {(player.Key.Nickname != null ? player.Key.Nickname : player.Key.Username)}");
+         {
+            string teamString = GetPlayerTeam(player.Key);
+            sb.AppendLine($"{raidEmojis[player.Value - 1]} {player.Key.Nickname ?? player.Key.Username} {teamString}");
+         }
 
          return sb.ToString();
       }
@@ -238,16 +243,30 @@ namespace PokeStar.Modules
          sb.AppendLine("Raid Help:");
          sb.AppendLine("The numbers represent the number of accounts that you have with you." +
             " React with one of the numbers to show that you intend to participate in the raid");
-         sb.AppendLine($"Once you arrive at the raid, react with {emojis[5]} to show others that you have arrived." +
+         sb.AppendLine($"Once you arrive at the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_HERE]} to show others that you have arrived." +
             $" When all players have marked that they have arrived, Nona will send a message to the group");
-         sb.AppendLine($"If you wish to remove yourself from the raid, react with {emojis[6]}");
+         sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}");
 
          return sb.ToString();
       }
 
+      private static string GetPlayerTeam(SocketGuildUser user)
+      {
+         if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
+         {
+            if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) != null)
+               return Emote.Parse(Environment.GetEnvironmentVariable("VALOR_EMOTE")).ToString();
+            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) != null)
+               return Emote.Parse(Environment.GetEnvironmentVariable("MYSTIC_EMOTE")).ToString();
+            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) != null)
+               return Emote.Parse(Environment.GetEnvironmentVariable("INSTINCT_EMOTE")).ToString();
+         }
+         return "";
+      }
+
       public static bool IsCurrentRaid(ulong id)
       {
-         return currentRaids.Keys.ToList<ulong>().Contains(id);
+         return currentRaids.Keys.ToList().Contains(id);
       }
    }
 }

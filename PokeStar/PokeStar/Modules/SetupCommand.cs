@@ -1,8 +1,12 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using Discord.WebSocket;
+using Newtonsoft.Json.Linq;
 
 namespace PokeStar.Modules
 {
@@ -46,19 +50,42 @@ namespace PokeStar.Modules
                Environment.SetEnvironmentVariable("SETUP_RAIDS", "TRUE");
             }
 
-            if (Environment.GetEnvironmentVariable("SETUP_TRADE").Equals("FALSE", StringComparison.OrdinalIgnoreCase) &&
-               (subsystem.Equals("ALL", StringComparison.OrdinalIgnoreCase) || subsystem.Equals("TRADE", StringComparison.OrdinalIgnoreCase)))
-            {
-               Environment.SetEnvironmentVariable("SETUP_TRADE", "TRUE");
-            }
-
             if (Environment.GetEnvironmentVariable("SETUP_DEX").Equals("FALSE", StringComparison.OrdinalIgnoreCase) &&
                (subsystem.Equals("ALL", StringComparison.OrdinalIgnoreCase) || subsystem.Equals("DEX", StringComparison.OrdinalIgnoreCase)))
             {
                Environment.SetEnvironmentVariable("SETUP_DEX", "TRUE");
             }
 
+            if (Environment.GetEnvironmentVariable("SETUP_TRADE").Equals("FALSE", StringComparison.OrdinalIgnoreCase) &&
+                (subsystem.Equals("ALL", StringComparison.OrdinalIgnoreCase) || subsystem.Equals("TRADE", StringComparison.OrdinalIgnoreCase)))
+            {
+               Environment.SetEnvironmentVariable("SETUP_TRADE", "TRUE");
+            }
+
+            if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("FALSE", StringComparison.OrdinalIgnoreCase) &&
+                (subsystem.Equals("ALL", StringComparison.OrdinalIgnoreCase) || subsystem.Equals("EMOJI", StringComparison.OrdinalIgnoreCase)))
+            {
+               Environment.SetEnvironmentVariable("SETUP_EMOJI", "TRUE");
+               SetEmotes(Context.Guild);
+            }
          }
+      }
+
+      private static void SetEmotes(SocketGuild server)
+      {
+         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+         var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
+
+         string[] emoteNames = {
+            "bug_emote", "dark_emote", "dragon_emote", "electric_emote", "fairy_emote", "fighting_emote",
+            "fire_emote", "flying_emote", "ghost_emote", "grass_emote", "ground_emote", "ice_emote",
+            "normal_emote", "poison_emote", "psychic_emote", "rock_emote", "steel_emote", "water_emote",
+            "raid_emote", "valor_emote", "mystic_emote", "instinct_emote"
+         };
+
+         foreach (string emote in emoteNames)
+            Environment.SetEnvironmentVariable(emote.ToUpper(), 
+               server.Emotes.FirstOrDefault(x => x.Name.ToString().Equals(json.GetValue(emote.ToLower()).ToString(), StringComparison.OrdinalIgnoreCase)).ToString());
       }
    }
 }
