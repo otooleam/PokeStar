@@ -94,6 +94,8 @@ namespace PokeStar.DataModels
       {
          if (bossName != null)
             Boss = Connections.Instance().GetRaidBoss(bossName);
+         if (bossName.Equals("noboss"))
+            Boss = new RaidBoss();
       }
    }
 }

@@ -53,7 +53,7 @@ namespace PokeStar.Modules
       public async Task Raid(short tier, string time, [Remainder]string location)
       {
          List<string> potentials = Connections.GetBossList(tier);
-         if (potentials.Count != 1)
+         if (potentials.Count > 1)
          {
             string fileName = $"Egg{tier}.png";
             Connections.CopyFile(fileName);
@@ -68,12 +68,22 @@ namespace PokeStar.Modules
          }
          else
          {
-            string boss = potentials.First();
-            Raid raid = new Raid(tier, time, location, boss);
-            var fileName = Connections.GetPokemonPicture(raid.Boss.Name);
-            Connections.CopyFile(fileName);
+            string fileName;
+            Raid raid;
+            if (potentials.Count == 1)
+            {
+               string boss = potentials.First();
+               raid = new Raid(tier, time, location, boss);
+               fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+            }
+            else //silph is mid-update or something else went wrong
+            {
+               raid = new Raid(tier, time, location, "noboss");
+               fileName = $"Egg{tier}.png";
+            }
 
-            var raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildEmbed(raid));
+            Connections.CopyFile(fileName);
+            var raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildEmbed(raid, fileName));
             await raidMsg.AddReactionsAsync(raidEmojis);
             currentRaids.Add(raidMsg.Id, raid);
 
@@ -163,19 +173,21 @@ namespace PokeStar.Modules
          }
       }
 
-      private static Embed BuildEmbed(Raid raid)
+      private static Embed BuildEmbed(Raid raid, string fileName = null)
       {
-         var fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+         if (fileName != null)
+            fileName = Connections.GetPokemonPicture(raid.Boss.Name);
          Connections.CopyFile(fileName);
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.DarkBlue);
-         embed.WithTitle($"{raid.Boss.Name} {BuildRaidTitle(raid.Tier)}");
+         embed.WithTitle($"{(raid.Boss.Name.Equals("Bossless") ? "" : raid.Boss.Name)} {BuildRaidTitle(raid.Tier)}");
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Time", raid.Time, true);
          embed.AddField("Location", raid.Location, true);
          embed.AddField($"Here ({raid.HereCount}/{raid.PlayerCount})", $"{BuildPlayerList(raid.Here)}");
          embed.AddField("Attending", $"{BuildPlayerList(raid.Attending)}");
+         embed.WithDescription("Press ? for help");
 
          return embed.Build();
       }
