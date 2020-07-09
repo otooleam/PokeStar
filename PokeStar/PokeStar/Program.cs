@@ -80,6 +80,8 @@ namespace PokeStar
       private async Task HandleCommandAsync(SocketMessage arg)
       {
          var message = arg as SocketUserMessage;
+         if (message == null)
+            return;
          var context = new SocketCommandContext(_client, message);
          if (message.Author.IsBot) return;
 
