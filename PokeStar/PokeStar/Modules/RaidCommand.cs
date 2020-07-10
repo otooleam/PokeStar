@@ -279,7 +279,7 @@ namespace PokeStar.Modules
 
       public static bool IsCurrentRaid(ulong id)
       {
-         return currentRaids.Keys.ToList().Contains(id);
+         return currentRaids.ContainsKey(id);
       }
    }
 }
