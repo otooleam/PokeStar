@@ -93,9 +93,14 @@ namespace PokeStar.DataModels
       public void SetBoss(string bossName)
       {
          if (bossName != null)
+         {
+            if (bossName.Equals("noboss"))
+            {
+               Boss = new RaidBoss();
+               return;
+            }
             Boss = Connections.Instance().GetRaidBoss(bossName);
-         if (bossName.Equals("noboss"))
-            Boss = new RaidBoss();
+         }
       }
    }
 }

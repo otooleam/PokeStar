@@ -61,6 +61,7 @@ namespace PokeStar.Modules
             var selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
             for (int i = 0; i < potentials.Count; i++)
                await selectMsg.AddReactionAsync(selectionEmojis[i]);
+
             currentRaids.Add(selectMsg.Id, new Raid(tier, time, location));
             selections.Add(selectMsg.Id, potentials);
 
@@ -114,7 +115,7 @@ namespace PokeStar.Modules
                await reaction.Channel.DeleteMessageAsync(message);
 
                string filename = Connections.GetPokemonPicture(raid.Boss.Name);
-               var raidMsg = await reaction.Channel.SendFileAsync(filename, embed: BuildEmbed(raid));
+               var raidMsg = await reaction.Channel.SendFileAsync(filename, embed: BuildEmbed(raid, filename));
                await raidMsg.AddReactionsAsync(raidEmojis);
                currentRaids.Add(raidMsg.Id, raid);
                needsUpdate = false;
@@ -168,7 +169,7 @@ namespace PokeStar.Modules
             var msg = (SocketUserMessage)message;
             await msg.ModifyAsync(x =>
             {
-               x.Embed = BuildEmbed(raid);
+               x.Embed = BuildEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
             });
             await msg.RemoveReactionAsync(reaction.Emote, player);
          }
