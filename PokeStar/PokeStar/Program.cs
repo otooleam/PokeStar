@@ -30,7 +30,9 @@ namespace PokeStar
          //sets cache for reaction events
          var _config = new DiscordSocketConfig { MessageCacheSize = 100 };
          _client = new DiscordSocketClient(_config);
-         _commands = new CommandService();
+         CommandServiceConfig config = new CommandServiceConfig();
+         config.DefaultRunMode = RunMode.Async;
+         _commands = new CommandService(config);
 
          _services = new ServiceCollection()
              .AddSingleton(_client)
@@ -46,6 +48,7 @@ namespace PokeStar
          var token = json.GetValue("token").ToString();
          Environment.SetEnvironmentVariable("DB_CONNECTION_STRING", json.GetValue("sql").ToString());
          prefix = json.GetValue("prefix").ToString();
+         Environment.SetEnvironmentVariable("PREFIX_STRING", prefix);
 
          await RegisterCommandsAsync().ConfigureAwait(false);
          HookReactionAdded();
@@ -77,13 +80,12 @@ namespace PokeStar
          await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services).ConfigureAwait(false);
       }
 
-      private async Task HandleCommandAsync(SocketMessage arg)
+      private async Task<Task> HandleCommandAsync(SocketMessage arg)
       {
-         var message = arg as SocketUserMessage;
-         if (message == null)
-            return;
+         SocketUserMessage message = arg as SocketUserMessage;
+         if (message == null || message.Author.IsBot)
+            return Task.CompletedTask;
          var context = new SocketCommandContext(_client, message);
-         if (message.Author.IsBot) return;
 
          int argPos = 0;
 
@@ -99,12 +101,14 @@ namespace PokeStar
             var result = await _commands.ExecuteAsync(context, argPos, _services).ConfigureAwait(false);
             if (!result.IsSuccess) Console.WriteLine(result.ErrorReason);
          }
+
+         return Task.CompletedTask;
       }
 
       private void HookReactionAdded()
          => _client.ReactionAdded += HandleReactionAddedAsync;
 
-      private static async Task HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
+      private static async Task<Task> HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
           ISocketMessageChannel originChannel, SocketReaction reaction)
       {
          var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
@@ -113,6 +117,7 @@ namespace PokeStar
          {         
             await RaidCommand.RaidReaction(message, reaction);
          }
+         return Task.CompletedTask;
       }
    }
 }
