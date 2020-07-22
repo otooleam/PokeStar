@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Discord.WebSocket;
 using PokeStar.ConnectionInterface;
 
@@ -15,6 +16,8 @@ namespace PokeStar.DataModels
       public int HereCount { get; private set; }
       public Dictionary<SocketGuildUser, int> Attending { get; private set; }
       public Dictionary<SocketGuildUser, int> Here { get; private set; }
+      public Dictionary<SocketGuildUser, int> Invite { get; private set; }
+      public DateTime CreatedAt { get; private set; }
 
       public Raid(short tier, string time, string location, string boss = null)
       {
@@ -26,6 +29,8 @@ namespace PokeStar.DataModels
          SetBoss(boss);
          Attending = new Dictionary<SocketGuildUser, int>();
          Here = new Dictionary<SocketGuildUser, int>();
+         Invite = new Dictionary<SocketGuildUser, int>();
+         CreatedAt = DateTime.Now;
       }
 
       public void PlayerAdd(SocketGuildUser player, int partySize)
@@ -74,6 +79,13 @@ namespace PokeStar.DataModels
          }
          return false;
       }
+      public void PlayerRequestInvite(SocketGuildUser player)
+      {
+         if (!Attending.ContainsKey(player) && !Here.ContainsKey(player) && !Invite.ContainsKey(player))
+         {
+            Invite.Add(player, 1);
+         }
+      }
 
       public void RemovePlayer(SocketGuildUser player)
       {
@@ -87,6 +99,10 @@ namespace PokeStar.DataModels
             PlayerCount -= Here[player];
             HereCount -= Here[player];
             Here.Remove(player);
+         }
+         else if (Invite.ContainsKey(player))
+         {
+            Invite.Remove(player);
          }
       }
 

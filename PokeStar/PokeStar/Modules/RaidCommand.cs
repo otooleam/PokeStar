@@ -22,7 +22,9 @@ namespace PokeStar.Modules
          new Emoji("4️⃣"),
          new Emoji("5️⃣"),
          new Emoji("✅"),
+         new Emoji("✈️"),
          new Emoji("🚫"),
+         new Emoji("📝"),
          new Emoji("❓")
       };
       private static readonly Emoji[] selectionEmojis = {
@@ -45,7 +47,9 @@ namespace PokeStar.Modules
          ADD_PLAYER_4,
          ADD_PLAYER_5,
          PLAYER_HERE,
+         REQUEST_INVITE,
          REMOVE_PLAYER,
+         EDIT_RAID,
          HELP
       }
 
@@ -90,6 +94,7 @@ namespace PokeStar.Modules
 
             Connections.DeleteFile(fileName);
          }
+         RemoveOldRaids();
       }
 
       public static async Task RaidReaction(IMessage message, SocketReaction reaction)
@@ -150,14 +155,25 @@ namespace PokeStar.Modules
                   await reaction.Channel.SendMessageAsync(BuildPingList(raid.Here.Keys.ToList()));
                }
             }
+            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]))
+            {
+               raid.PlayerRequestInvite(player);
+            }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]))
             {
                raid.RemovePlayer(player);
+            }
+            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.EDIT_RAID]))
+            {
+               await player.SendMessageAsync(BuildRaidCodeMessage("Edit", message.Id.ToString()));
+               await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, player);
+               needsUpdate = false;
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
             {
                //help message - needs no update
                await player.SendMessageAsync(BuildRaidHelpMessage());
+               await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, player);
                needsUpdate = false;
             }
             else
@@ -189,6 +205,7 @@ namespace PokeStar.Modules
          embed.AddField("Location", raid.Location, true);
          embed.AddField($"Here ({raid.HereCount}/{raid.PlayerCount})", $"{BuildPlayerList(raid.Here)}");
          embed.AddField("Attending", $"{BuildPlayerList(raid.Attending)}");
+         embed.AddField("Need Invite", $"{BuildPlayerList(raid.Invite)}");
          embed.WithDescription("Press ? for help");
 
          return embed.Build();
@@ -250,16 +267,39 @@ namespace PokeStar.Modules
          return sb.ToString();
       }
 
+      private static string BuildRaidCodeMessage(string message, string code)
+      {
+         StringBuilder sb = new StringBuilder();
+         if (message.Equals("Edit"))
+         {
+            sb.AppendLine("Raid Edit:");
+            sb.AppendLine("To edit the desired raid send the following command in raid channel:");
+            sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}edit {code} time location");
+            sb.AppendLine("\nNote: Change time and location to desired time and location. Editing Location is optional.");
+         }
+         else if (message.Equals("Invite"))
+         {
+            sb.AppendLine("Raid Invite:");
+            sb.AppendLine("To invite someone to a raid through remote send the following command in raid channel:");
+            sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}invite {code} player");
+            sb.AppendLine("\nNote: Change player to desired name. May be benefitial to @ player.");
+         }
+
+         return sb.ToString();
+      }
+
       private static string BuildRaidHelpMessage()
       {
          StringBuilder sb = new StringBuilder();
 
          sb.AppendLine("Raid Help:");
          sb.AppendLine("The numbers represent the number of accounts that you have with you." +
-            " React with one of the numbers to show that you intend to participate in the raid");
+            " React with one of the numbers to show that you intend to participate in the raid.");
          sb.AppendLine($"Once you arrive at the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_HERE]} to show others that you have arrived." +
-            $" When all players have marked that they have arrived, Nona will send a message to the group");
-         sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}");
+            $" When all players have marked that they have arrived, Nona will send a message to the group.");
+         sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]}." +
+            $"NEED TO FIGURE OUT HOW TO RESPOND TO REQUESTED INVITE.");
+         sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
 
          return sb.ToString();
       }
@@ -276,6 +316,16 @@ namespace PokeStar.Modules
                return Emote.Parse(Environment.GetEnvironmentVariable("INSTINCT_EMOTE")).ToString();
          }
          return "";
+      }
+
+      private static void RemoveOldRaids()
+      {
+         List<ulong> ids = new List<ulong>();
+         foreach (var temp in currentRaids)
+            if ((temp.Value.CreatedAt - DateTime.Now).TotalDays >= 1)
+               ids.Add(temp.Key);
+         foreach (var id in ids)
+            currentRaids.Remove(id);
       }
 
       public static bool IsCurrentRaid(ulong id)
