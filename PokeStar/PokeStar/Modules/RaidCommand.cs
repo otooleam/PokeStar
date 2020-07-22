@@ -183,6 +183,17 @@ namespace PokeStar.Modules
          }
       }
 
+      [Command("invite")]
+      public async Task Invite(ulong id, IGuildUser user)
+      {
+         Raid raid = currentRaids[id];
+
+         if (raid.InvitePlayer((SocketGuildUser)user))
+         {
+            await user.SendMessageAsync($"You have been invited to a raid by {Context.User.Username}. Please mark yourself as \"HERE\" when ready.");
+         }
+      }
+
       private static Embed BuildEmbed(Raid raid, string fileName = null)
       {
          if (fileName != null)
