@@ -33,7 +33,7 @@ namespace PokeStar.DataModels
          CreatedAt = DateTime.Now;
       }
 
-      public void PlayerAdd(SocketGuildUser player, int partySize)
+      public void PlayerAdd(SocketGuildUser player, int partySize, bool isInvite=false)
       {
          if (Attending.ContainsKey(player))
          {
@@ -54,6 +54,18 @@ namespace PokeStar.DataModels
                Here[player] = partySize;
             }
          }
+         else if (Invite.ContainsKey(player))
+         {
+            if (isInvite)
+            {
+               int newPlayerCount = PlayerCount + partySize;
+               if (newPlayerCount <= 20)
+               {
+                  Attending.Add(player, partySize);
+                  PlayerCount = newPlayerCount;
+               }
+            }
+         }
          else
          {
             int newPlayerCount = PlayerCount + partySize;
@@ -64,7 +76,6 @@ namespace PokeStar.DataModels
             }
          }
       }
-
       public bool PlayerHere(SocketGuildUser player)
       {
          if (Attending.ContainsKey(player))
@@ -86,7 +97,16 @@ namespace PokeStar.DataModels
             Invite.Add(player, 1);
          }
       }
-
+      public bool InvitePlayer(SocketGuildUser player, SocketGuildUser user)
+      {
+         if (Invite.ContainsKey(player) && (Attending.ContainsKey(user) || Here.ContainsKey(user)))
+         {
+            PlayerAdd(player, 1, true);
+            Invite.Remove(player);
+            return true;
+         }
+         return false;
+      }
       public void RemovePlayer(SocketGuildUser player)
       {
          if (Attending.ContainsKey(player))
@@ -105,7 +125,6 @@ namespace PokeStar.DataModels
             Invite.Remove(player);
          }
       }
-
       public void SetBoss(string bossName)
       {
          if (bossName != null)

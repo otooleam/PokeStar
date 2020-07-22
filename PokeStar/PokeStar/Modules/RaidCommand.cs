@@ -164,7 +164,7 @@ namespace PokeStar.Modules
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
             {
                //help message - needs no update
-               await player.SendMessageAsync(BuildRaidHelpMessage());
+               await player.SendMessageAsync(BuildRaidHelpMessage(message.Id));
                await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, player);
                needsUpdate = false;
             }
@@ -184,13 +184,20 @@ namespace PokeStar.Modules
       }
 
       [Command("invite")]
-      public async Task Invite(ulong id, IGuildUser user)
+      public async Task Invite(ulong id, IGuildUser player)
       {
          Raid raid = currentRaids[id];
 
-         if (raid.InvitePlayer((SocketGuildUser)user))
+         if (raid.InvitePlayer((SocketGuildUser)player, (SocketGuildUser)Context.User))
          {
-            await user.SendMessageAsync($"You have been invited to a raid by {Context.User.Username}. Please mark yourself as \"HERE\" when ready.");
+
+            var message = (SocketUserMessage)Context.Channel.CachedMessages.FirstOrDefault(x => x.Id == id);
+            await message.ModifyAsync(x =>
+            {
+               x.Embed = BuildEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
+            });
+
+            await player.SendMessageAsync($"You have been invited to a raid by {Context.User.Username}. Please mark yourself as \"HERE\" when ready.");
          }
       }
 
@@ -270,7 +277,7 @@ namespace PokeStar.Modules
          return sb.ToString();
       }
 
-      private static string BuildRaidHelpMessage()
+      private static string BuildRaidHelpMessage(ulong code)
       {
          StringBuilder sb = new StringBuilder();
 
@@ -283,15 +290,15 @@ namespace PokeStar.Modules
             $"NEED TO FIGURE OUT HOW TO RESPOND TO REQUESTED INVITE.");
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
 
-         sb.AppendLine("\n\nRaid Edit:");
+         sb.AppendLine("\nRaid Edit:");
          sb.AppendLine("To edit the desired raid send the following command in raid channel:");
          sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}edit {code} time location");
-         sb.AppendLine("\nNote: Change time and location to desired time and location. Editing Location is optional.");
+         sb.AppendLine("Note: Change time and location to desired time and location. Editing Location is optional.");
 
-         sb.AppendLine("\n\nRaid Invite:");
+         sb.AppendLine("\nRaid Invite:");
          sb.AppendLine("To invite someone to a raid through remote send the following command in raid channel:");
          sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}invite {code} player");
-         sb.AppendLine("\nNote: Change player to desired name. May be benefitial to @ player.");
+         sb.AppendLine("Note: Change player to desired name. May be benefitial to @ player.");
 
          return sb.ToString();
       }
