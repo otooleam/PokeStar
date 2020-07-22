@@ -241,9 +241,7 @@ namespace PokeStar.Modules
          StringBuilder sb = new StringBuilder();
          sb.Append("Raid ");
 
-         string raidSymbol = "⭐";
-         if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
-            raidSymbol = Emote.Parse(Environment.GetEnvironmentVariable("RAID_EMOTE")).ToString();
+         string raidSymbol = Emote.Parse(Environment.GetEnvironmentVariable("RAID_EMOTE")).ToString();
 
          for (int i = 0; i < tier; i++)
             sb.Append(raidSymbol);
@@ -304,15 +302,12 @@ namespace PokeStar.Modules
 
       private static string GetPlayerTeam(SocketGuildUser user)
       {
-         if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
-         {
-            if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) != null)
-               return Emote.Parse(Environment.GetEnvironmentVariable("VALOR_EMOTE")).ToString();
-            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) != null)
-               return Emote.Parse(Environment.GetEnvironmentVariable("MYSTIC_EMOTE")).ToString();
-            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) != null)
-               return Emote.Parse(Environment.GetEnvironmentVariable("INSTINCT_EMOTE")).ToString();
-         }
+         if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) != null)
+            return Emote.Parse(Environment.GetEnvironmentVariable("VALOR_EMOTE")).ToString();
+         else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) != null)
+            return Emote.Parse(Environment.GetEnvironmentVariable("MYSTIC_EMOTE")).ToString();
+         else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) != null)
+            return Emote.Parse(Environment.GetEnvironmentVariable("INSTINCT_EMOTE")).ToString();
          return "";
       }
 

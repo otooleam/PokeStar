@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 using Discord;
@@ -55,13 +56,12 @@ namespace PokeStar
          await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
          await _client.StartAsync().ConfigureAwait(false);
 
-         Environment.SetEnvironmentVariable("SETUP_ROLES", "FALSE");
-         Environment.SetEnvironmentVariable("SETUP_RAIDS", "FALSE");
-         Environment.SetEnvironmentVariable("SETUP_TRADE", "FALSE");
-         Environment.SetEnvironmentVariable("SETUP_DEX", "FALSE");
-         Environment.SetEnvironmentVariable("SETUP_EMOJI", "FALSE");
+         Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
 
          var connectors = Connections.Instance();
+
+         var homeGuildName = prefix = json.GetValue("home_server").ToString();
+         SetEmotes(_client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(homeGuildName, StringComparison.OrdinalIgnoreCase)), json);
 
          // Block this task until the program is closed.
          await Task.Delay(-1).ConfigureAwait(false);
@@ -118,6 +118,20 @@ namespace PokeStar
             await RaidCommand.RaidReaction(message, reaction);
          }
          return Task.CompletedTask;
+      }
+
+      private static void SetEmotes(SocketGuild server, JObject json)
+      {
+         string[] emoteNames = {
+            "bug_emote", "dark_emote", "dragon_emote", "electric_emote", "fairy_emote", "fighting_emote",
+            "fire_emote", "flying_emote", "ghost_emote", "grass_emote", "ground_emote", "ice_emote",
+            "normal_emote", "poison_emote", "psychic_emote", "rock_emote", "steel_emote", "water_emote",
+            "raid_emote", "valor_emote", "mystic_emote", "instinct_emote"
+         };
+
+         foreach (string emote in emoteNames)
+            Environment.SetEnvironmentVariable(emote.ToUpper(),
+               server.Emotes.FirstOrDefault(x => x.Name.ToString().Equals(json.GetValue(emote.ToLower()).ToString(), StringComparison.OrdinalIgnoreCase)).ToString());
       }
    }
 }

@@ -11,7 +11,7 @@ namespace PokeStar.Modules
       [Command("role")]
       public async Task Role(IGuildUser user, string nickname, string roleName)
       {
-         if (Environment.GetEnvironmentVariable("SETUP_ROLES").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
+         if (Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
          {
             await ReplyAsync($"Error: Roles not setup. Please run setup command");
             return;
