@@ -125,7 +125,7 @@ namespace PokeStar
       {
          string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
          var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
-         var homeGuildName = prefix = json.GetValue("home_server").ToString();
+         var homeGuildName = json.GetValue("home_server").ToString();
          var server = _client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(homeGuildName, StringComparison.OrdinalIgnoreCase));
 
          SetEmotes(server, json);
