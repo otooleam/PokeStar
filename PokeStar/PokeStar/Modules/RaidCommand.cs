@@ -24,7 +24,6 @@ namespace PokeStar.Modules
          new Emoji("✅"),
          new Emoji("✈️"),
          new Emoji("🚫"),
-         new Emoji("📝"),
          new Emoji("❓")
       };
       private static readonly Emoji[] selectionEmojis = {
@@ -49,7 +48,6 @@ namespace PokeStar.Modules
          PLAYER_HERE,
          REQUEST_INVITE,
          REMOVE_PLAYER,
-         EDIT_RAID,
          HELP
       }
 
@@ -163,12 +161,6 @@ namespace PokeStar.Modules
             {
                raid.RemovePlayer(player);
             }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.EDIT_RAID]))
-            {
-               await player.SendMessageAsync(BuildRaidCodeMessage("Edit", message.Id.ToString()));
-               await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, player);
-               needsUpdate = false;
-            }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
             {
                //help message - needs no update
@@ -267,27 +259,6 @@ namespace PokeStar.Modules
          return sb.ToString();
       }
 
-      private static string BuildRaidCodeMessage(string message, string code)
-      {
-         StringBuilder sb = new StringBuilder();
-         if (message.Equals("Edit"))
-         {
-            sb.AppendLine("Raid Edit:");
-            sb.AppendLine("To edit the desired raid send the following command in raid channel:");
-            sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}edit {code} time location");
-            sb.AppendLine("\nNote: Change time and location to desired time and location. Editing Location is optional.");
-         }
-         else if (message.Equals("Invite"))
-         {
-            sb.AppendLine("Raid Invite:");
-            sb.AppendLine("To invite someone to a raid through remote send the following command in raid channel:");
-            sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}invite {code} player");
-            sb.AppendLine("\nNote: Change player to desired name. May be benefitial to @ player.");
-         }
-
-         return sb.ToString();
-      }
-
       private static string BuildRaidHelpMessage()
       {
          StringBuilder sb = new StringBuilder();
@@ -300,6 +271,16 @@ namespace PokeStar.Modules
          sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]}." +
             $"NEED TO FIGURE OUT HOW TO RESPOND TO REQUESTED INVITE.");
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
+
+         sb.AppendLine("\n\nRaid Edit:");
+         sb.AppendLine("To edit the desired raid send the following command in raid channel:");
+         sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}edit {code} time location");
+         sb.AppendLine("\nNote: Change time and location to desired time and location. Editing Location is optional.");
+
+         sb.AppendLine("\n\nRaid Invite:");
+         sb.AppendLine("To invite someone to a raid through remote send the following command in raid channel:");
+         sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}invite {code} player");
+         sb.AppendLine("\nNote: Change player to desired name. May be benefitial to @ player.");
 
          return sb.ToString();
       }
