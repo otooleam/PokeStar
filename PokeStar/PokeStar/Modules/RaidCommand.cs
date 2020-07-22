@@ -286,19 +286,18 @@ namespace PokeStar.Modules
             " React with one of the numbers to show that you intend to participate in the raid.");
          sb.AppendLine($"Once you arrive at the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_HERE]} to show others that you have arrived." +
             $" When all players have marked that they have arrived, Nona will send a message to the group.");
-         sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]}." +
-            $"NEED TO FIGURE OUT HOW TO RESPOND TO REQUESTED INVITE.");
+         sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]}.");
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
-
-         sb.AppendLine("\nRaid Edit:");
-         sb.AppendLine("To edit the desired raid send the following command in raid channel:");
-         sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}edit {code} time location");
-         sb.AppendLine("Note: Change time and location to desired time and location. Editing Location is optional.");
 
          sb.AppendLine("\nRaid Invite:");
          sb.AppendLine("To invite someone to a raid through remote send the following command in raid channel:");
          sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}invite {code} player");
          sb.AppendLine("Note: Change player to desired name. May be benefitial to @ player.");
+
+         sb.AppendLine("\nRaid Edit:");
+         sb.AppendLine("To edit the desired raid send the following command in raid channel:");
+         sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}edit {code} time location");
+         sb.AppendLine("Note: Change time and location to desired time and location. Editing Location is optional.");
 
          return sb.ToString();
       }
