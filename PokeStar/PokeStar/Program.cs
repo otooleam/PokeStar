@@ -53,15 +53,13 @@ namespace PokeStar
 
          await RegisterCommandsAsync().ConfigureAwait(false);
          HookReactionAdded();
+         HookSetup();
          await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
          await _client.StartAsync().ConfigureAwait(false);
 
          Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
 
          var connectors = Connections.Instance();
-
-         var homeGuildName = prefix = json.GetValue("home_server").ToString();
-         SetEmotes(_client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(homeGuildName, StringComparison.OrdinalIgnoreCase)), json);
 
          // Block this task until the program is closed.
          await Task.Delay(-1).ConfigureAwait(false);
@@ -119,6 +117,22 @@ namespace PokeStar
          }
          return Task.CompletedTask;
       }
+
+      private void HookSetup()
+         => _client.Ready += HandleReady;
+
+      private Task HandleReady()
+      {
+         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+         var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
+         var homeGuildName = prefix = json.GetValue("home_server").ToString();
+         var server = _client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(homeGuildName, StringComparison.OrdinalIgnoreCase));
+
+         SetEmotes(server, json);
+
+         return Task.CompletedTask;
+      }
+
 
       private static void SetEmotes(SocketGuild server, JObject json)
       {
