@@ -5,7 +5,7 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.DataModels
 {
-   class Raid
+   public class Raid
    {
       private const int playerLimit = 20;
       public string Location { get; set; }

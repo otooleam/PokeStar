@@ -91,7 +91,8 @@ namespace PokeStar
          {
             if (message.Attachments.Count != 0)
             {
-               RollImageProcess.RoleImageProcess(context);
+               //RollImageProcess.ProcessImage(context);
+               RaidImageProcess.ProcessImage(context);
             }
          }
          else if (message.HasStringPrefix(prefix, ref argPos))

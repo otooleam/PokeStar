@@ -13,7 +13,7 @@ namespace PokeStar.ImageProcessors
 {
    public static class RollImageProcess
    {
-      public static async void RoleImageProcess(SocketCommandContext context)
+      public static async void ProcessImage(SocketCommandContext context)
       {
          if (context == null)
             return;

@@ -85,12 +85,7 @@ namespace PokeStar.Modules
                fileName = $"Egg{tier}.png";
             }
 
-            Connections.CopyFile(fileName);
-            var raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildEmbed(raid, fileName));
-            await raidMsg.AddReactionsAsync(raidEmojis);
-            currentRaids.Add(raidMsg.Id, raid);
-
-            Connections.DeleteFile(fileName);
+            await CreateRaidMessage(raid, fileName, Context);
          }
          RemoveOldRaids();
       }
@@ -203,10 +198,6 @@ namespace PokeStar.Modules
 
       private static Embed BuildEmbed(Raid raid, string fileName = null)
       {
-         if (fileName != null)
-            fileName = Connections.GetPokemonPicture(raid.Boss.Name);
-         Connections.CopyFile(fileName);
-
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.DarkBlue);
          embed.WithTitle($"{(raid.Boss.Name.Equals("Bossless") ? "" : raid.Boss.Name)} {BuildRaidTitle(raid.Tier)}");
@@ -324,6 +315,15 @@ namespace PokeStar.Modules
       public static bool IsCurrentRaid(ulong id)
       {
          return currentRaids.ContainsKey(id);
+      }
+
+      public static async Task CreateRaidMessage(Raid raid, string fileName, SocketCommandContext context)
+      {
+         Connections.CopyFile(fileName);
+         var raidMsg = await context.Channel.SendFileAsync(fileName, embed: BuildEmbed(raid, fileName));
+         await raidMsg.AddReactionsAsync(raidEmojis);
+         currentRaids.Add(raidMsg.Id, raid);
+         Connections.DeleteFile(fileName);
       }
    }
 }
