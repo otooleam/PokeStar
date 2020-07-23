@@ -96,6 +96,11 @@ namespace PokeStar
          }
          else if (message.HasStringPrefix(prefix, ref argPos))
          {
+            if (!message.Content.Contains("setup") && !ChannelRegisterCommand.registeredChannels.ContainsKey(context.Guild.Id)) //bad. this doesnt let .setup run
+            {
+               await context.Channel.SendMessageAsync("Please run .setup to register this server");
+               return;
+            }
             var result = await _commands.ExecuteAsync(context, argPos, _services).ConfigureAwait(false);
             if (!result.IsSuccess) Console.WriteLine(result.ErrorReason);
          }

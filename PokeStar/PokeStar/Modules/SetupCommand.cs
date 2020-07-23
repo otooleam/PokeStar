@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -15,6 +16,7 @@ namespace PokeStar.Modules
       [Command("setup")]
       public async Task Setup(string subsystem = "ALL")
       {
+         ChannelRegisterCommand.registeredChannels.Add(Context.Guild.Id, new List<ulong>());
          if (Environment.GetEnvironmentVariable("SETUP_ROLES").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
          {
             Environment.SetEnvironmentVariable("SETUP_ROLES", "TRUE");
@@ -68,6 +70,7 @@ namespace PokeStar.Modules
                Environment.SetEnvironmentVariable("SETUP_EMOJI", "TRUE");
                SetEmotes(Context.Guild);
             }
+            await Context.Channel.SendMessageAsync("Server setup complete");
          }
       }
 
