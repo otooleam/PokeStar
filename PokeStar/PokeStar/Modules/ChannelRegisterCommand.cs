@@ -34,5 +34,13 @@ namespace PokeStar.Modules
          else
             await Context.Channel.SendMessageAsync("Please run .setup for this server before registering command channels").ConfigureAwait(false);
       }
+
+      /* for the command that needs to be channel verified
+         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id))
+         {
+         }
+         else
+            await Context.Channel.SendMessageAsync("This channel is not registered for commands.");
+      */
    }
 }
