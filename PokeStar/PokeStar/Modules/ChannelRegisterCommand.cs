@@ -11,17 +11,11 @@ namespace PokeStar.Modules
 {
    public class ChannelRegisterCommand : ModuleBase<SocketCommandContext>
    {
-      private string master = "DEPRT";
-      // Players, Raids, EX, TRAIN, DEX
+      // KEY: Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D)
 
-      public static Dictionary<ulong, Dictionary<ulong, string>> registeredChannels = new Dictionary<ulong, Dictionary<ulong, string>>();
+      private static Dictionary<ulong, Dictionary<ulong, string>> registeredChannels = new Dictionary<ulong, Dictionary<ulong, string>>();
 
-      public static bool IsRegisteredChannel(ulong guild, ulong channel, string type)
-      {
-         string temp =  registeredChannels[guild][channel];
-         return type.Length == 1 && temp.Contains(type.ToUpper());
 
-      }
 
       // Registers the channel this command is run in as a command channel
       // Requires .setup to have been run
@@ -64,20 +58,6 @@ namespace PokeStar.Modules
             await Context.Channel.SendMessageAsync("This channel is not registered for commands.");
       */
 
-      private static void SaveChannels()
-      {
-         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-         string json = JsonConvert.SerializeObject(registeredChannels, Formatting.Indented);
-         File.WriteAllText($"{path}\\chan_reg.json", json);
-      }
-
-      private static void LoadChannels()
-      {
-         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-         string json = File.ReadAllText($"{path}\\chan_reg.json");
-         registeredChannels = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<ulong, string>>>(json);
-      }
-
       private static string GenerateString(string purpose, string existing = "")
       {
          string add = "";
@@ -109,5 +89,42 @@ namespace PokeStar.Modules
          return new string(a);
       }
 
+      private static void SaveChannels()
+      {
+         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+         string json = JsonConvert.SerializeObject(registeredChannels, Formatting.Indented);
+         File.WriteAllText($"{path}\\chan_reg.json", json);
+      }
+
+      public static bool LoadChannels()
+      {
+         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+         string json = File.ReadAllText($"{path}\\chan_reg.json");
+         registeredChannels = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<ulong, string>>>(json);
+         if (registeredChannels == null)
+         {
+            registeredChannels = new Dictionary<ulong, Dictionary<ulong, string>>();
+            return false;
+         }
+         return true;
+      }
+
+      public static void AddGuild(ulong guild)
+      {
+         registeredChannels.Add(guild, new Dictionary<ulong, string>());
+      }
+
+      public static bool IsRegisteredChannel(ulong guild, ulong channel, string type)
+      {
+         if (registeredChannels.Keys.Contains(guild))
+         {
+            if (registeredChannels[guild].ContainsKey(channel))
+            {
+               string temp = registeredChannels[guild][channel];
+               return type.Length == 1 && temp.Contains(type.ToUpper());
+            }
+         }
+         return false;
+      }
    }
 }
