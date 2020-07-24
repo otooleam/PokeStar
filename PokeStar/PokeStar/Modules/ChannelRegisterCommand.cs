@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using Discord.Commands;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
-using Microsoft.SqlServer.Server;
 
 namespace PokeStar.Modules
 {

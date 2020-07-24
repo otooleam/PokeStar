@@ -13,7 +13,7 @@ namespace PokeStar.Modules
       [Command("dex")]
       public async Task Dex([Remainder] string text)
       {
-         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id))
+         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
             var name = GetPokemon(text);
             Pokemon pokemon = Connections.Instance().GetPokemon(name);
