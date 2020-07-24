@@ -16,7 +16,6 @@ namespace PokeStar.Modules
       [Command("setup")]
       public async Task Setup(string subsystem = "ALL")
       {
-         ChannelRegisterCommand.registeredChannels.Add(Context.Guild.Id, new List<ulong>());
          if (Environment.GetEnvironmentVariable("SETUP_ROLES").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
          {
             Environment.SetEnvironmentVariable("SETUP_ROLES", "TRUE");

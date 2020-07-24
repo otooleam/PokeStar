@@ -52,7 +52,7 @@ namespace PokeStar.Modules
       [Command("raid")]
       public async Task Raid(short tier, string time, [Remainder]string location)
       {
-         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id))
+         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
          {
             List<string> potentials = Connections.GetBossList(tier);
             if (potentials.Count > 1)
