@@ -96,7 +96,7 @@ namespace PokeStar.Modules
             }
          }
          else
-            await Context.Channel.SendMessageAsync("This channel is not registered for commands.");
+            await Context.Channel.SendMessageAsync("This channel is not registered to process Raid commands.");
          RemoveOldRaids();
       }
 
@@ -191,19 +191,24 @@ namespace PokeStar.Modules
       [Command("invite")]
       public async Task Invite(ulong id, IGuildUser player)
       {
-         Raid raid = currentRaids[id];
-
-         if (raid.InvitePlayer((SocketGuildUser)player, (SocketGuildUser)Context.User))
+         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
          {
+            Raid raid = currentRaids[id];
 
-            var message = (SocketUserMessage)Context.Channel.CachedMessages.FirstOrDefault(x => x.Id == id);
-            await message.ModifyAsync(x =>
+            if (raid.InvitePlayer((SocketGuildUser)player, (SocketGuildUser)Context.User))
             {
-               x.Embed = BuildEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
-            });
 
-            await player.SendMessageAsync($"You have been invited to a raid by {Context.User.Username}. Please mark yourself as \"HERE\" when ready.");
+               var message = (SocketUserMessage)Context.Channel.CachedMessages.FirstOrDefault(x => x.Id == id);
+               await message.ModifyAsync(x =>
+               {
+                  x.Embed = BuildEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
+               });
+
+               await player.SendMessageAsync($"You have been invited to a raid by {Context.User.Username}. Please mark yourself as \"HERE\" when ready.");
+            }
          }
+         else
+            await Context.Channel.SendMessageAsync("This channel is not registered to process Raid commands.");
       }
 
       private static Embed BuildEmbed(Raid raid, string fileName = null)

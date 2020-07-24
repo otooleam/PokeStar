@@ -52,45 +52,50 @@ namespace PokeStar.Modules
             }
          }
          else
-            await Context.Channel.SendMessageAsync("This channel is not registered for commands.");
+            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
       }
       [Command("cp")]
       public async Task CP([Remainder] string text)
       {
-         var name = GetPokemon(text);
-         Pokemon pokemon = Connections.Instance().GetPokemon(name);
-         if (pokemon == null)
+         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
-            EmbedBuilder embed = new EmbedBuilder();
-            embed.WithTitle("CP Command Error");
-            embed.WithDescription($"Pokemon {name} cannot be found.");
-            embed.WithColor(Color.DarkRed);
-            await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+            var name = GetPokemon(text);
+            Pokemon pokemon = Connections.Instance().GetPokemon(name);
+            if (pokemon == null)
+            {
+               EmbedBuilder embed = new EmbedBuilder();
+               embed.WithTitle("CP Command Error");
+               embed.WithDescription($"Pokemon {name} cannot be found.");
+               embed.WithColor(Color.DarkRed);
+               await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+            }
+            else
+            {
+               Connections.CalcAllCP(ref pokemon);
+               var fileName = Connections.GetPokemonPicture(pokemon.Name);
+               Connections.CopyFile(fileName);
+
+               EmbedBuilder embed = new EmbedBuilder();
+               embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
+               embed.WithDescription($"Max CP values for {pokemon.Name}");
+               embed.WithThumbnailUrl($"attachment://{fileName}");
+               embed.AddField($"Max CP (Level 40)", pokemon.CPMax, true);
+               embed.AddField($"Max Buddy CP (Level 41)", pokemon.CPBestBuddy, true);
+               embed.AddField($"Raid CP (Level 20)", pokemon.RaidCPToString(), false);
+               embed.AddField($"Quest CP (Level 20)", pokemon.QuestCPToString(), false);
+               embed.AddField($"Hatch CP (Level 15)", pokemon.HatchCPToString(), false);
+               embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
+               embed.WithColor(Color.Blue);
+               embed.WithFooter("* denotes Weather Boosted CP");
+
+
+               await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
+
+               Connections.DeleteFile(fileName);
+            }
          }
          else
-         {
-            Connections.CalcAllCP(ref pokemon);
-            var fileName = Connections.GetPokemonPicture(pokemon.Name);
-            Connections.CopyFile(fileName);
-
-            EmbedBuilder embed = new EmbedBuilder();
-            embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
-            embed.WithDescription($"Max CP values for {pokemon.Name}");
-            embed.WithThumbnailUrl($"attachment://{fileName}");
-            embed.AddField($"Max CP (Level 40)", pokemon.CPMax, true);
-            embed.AddField($"Max Buddy CP (Level 41)", pokemon.CPBestBuddy, true);
-            embed.AddField($"Raid CP (Level 20)", pokemon.RaidCPToString(), false);
-            embed.AddField($"Quest CP (Level 20)", pokemon.QuestCPToString(), false);
-            embed.AddField($"Hatch CP (Level 15)", pokemon.HatchCPToString(), false);
-            embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
-            embed.WithColor(Color.Blue);
-            embed.WithFooter("* denotes Weather Boosted CP");
-
-
-            await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
-
-            Connections.DeleteFile(fileName);
-         }
+            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
       }
       private static string GetPokemon(string text)
       {
