@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using Discord.Commands;
 using Newtonsoft.Json;
 using System.Threading.Tasks;
+using Discord.WebSocket;
 
 namespace PokeStar.Modules
 {
@@ -13,9 +14,18 @@ namespace PokeStar.Modules
    {
       // KEY: Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D)
 
+      /* 
+       for the command that needs to be channel verified
+       if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, 'type'))
+       {
+       }
+       else
+          await ReplyAsync("This channel is not registered to process "type" commands.");
+      */
+
       private static Dictionary<ulong, Dictionary<ulong, string>> registeredChannels = new Dictionary<ulong, Dictionary<ulong, string>>();
 
-
+      private static bool CheckSetupComplete = false;
 
       // Registers the channel this command is run in as a command channel
       // Requires .setup to have been run
@@ -24,48 +34,60 @@ namespace PokeStar.Modules
       {
          ulong guild = Context.Guild.Id;
          ulong channel = Context.Channel.Id;
+         string reg;
 
-         if (registeredChannels.Keys.Contains(guild))
+         if (registeredChannels[guild].ContainsKey(channel))
          {
-            if (registeredChannels[guild].ContainsKey(channel))
-            {
-               string reg = GenerateString(purpose, registeredChannels[guild][channel]);
-               if (reg != null)
-                  registeredChannels[guild][channel] = reg;
-               else
-                  await Context.Channel.SendMessageAsync("Please enter a valid registration for one of the following Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D) or give no value for all");
-            }
+            reg = GenerateRegistrationString(purpose, registeredChannels[guild][channel]);
+            if (reg != null)
+               registeredChannels[guild][channel] = reg;
             else
             {
-               string reg = GenerateString(purpose);
-               if (reg != null)
-                  registeredChannels[guild].Add(channel, reg);
-               else
-                  await Context.Channel.SendMessageAsync("Please enter a valid registration for one of the following Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D) or give no value for all");
+               await Context.Channel.SendMessageAsync("Please enter a valid registration for one of the following Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D) or give no value for all");
+               return;
             }
-            SaveChannels();
-            await Context.Channel.SendMessageAsync("Channel registeration complete");
          }
          else
-            await Context.Channel.SendMessageAsync("Please run .setup for this server before registering command channels").ConfigureAwait(false);
+         {
+            reg = GenerateRegistrationString(purpose);
+            if (reg != null)
+               registeredChannels[guild].Add(channel, reg);
+            else
+            {
+               await Context.Channel.SendMessageAsync("Please enter a valid registration for one of the following Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D) or give no value for all");
+               return;
+            }
+         }
+         SaveChannels();
+         await Context.Channel.SendMessageAsync($"Channel successfully registered for the following command types {GenerateSummaryString(reg)}");
+
+         if (CheckSetupComplete && Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
+         {
+            await Context.Channel.SendMessageAsync($"Please run the .setup command to ensure required roles have been setup.");
+            CheckSetupComplete = false;
+         }
       }
 
-      /* for the command that needs to be channel verified
-         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, 'type'))
-         {
-         }
-         else
-            await Context.Channel.SendMessageAsync("This channel is not registered for commands.");
-      */
 
-      private static string GenerateString(string purpose, string existing = "")
+
+
+
+
+
+
+      private static string GenerateRegistrationString(string purpose, string existing = "")
       {
-         string add = "";
-
+         string add;
          if (purpose.ToUpper().Equals("ALL"))
+         {
             add = "DEPRT";
+            CheckSetupComplete = true;
+         }
          else if (purpose.ToUpper().Equals("PLAYER") || purpose.ToUpper().Equals("P"))
+         {
             add = "P";
+            CheckSetupComplete = true;
+         }
          else if (purpose.ToUpper().Equals("RAID") || purpose.ToUpper().Equals("R"))
             add = "R";
          else if (purpose.ToUpper().Equals("EX") || purpose.ToUpper().Equals("E"))
@@ -86,7 +108,24 @@ namespace PokeStar.Modules
          string s = existing + add;
          char[] a = s.ToCharArray();
          Array.Sort(a);
-         return new string(a);
+         return new string(a).ToUpper();
+      }
+
+      private static string GenerateSummaryString(string reg)
+      {
+         string summary = "";
+         if (reg.ToUpper().Equals("P"))
+            summary += "Player Roles, ";
+         if (reg.ToUpper().Equals("R"))
+            summary += "Raids, ";
+         if (reg.ToUpper().Equals("E"))
+            summary += "EX-Raids, ";
+         if (reg.ToUpper().Equals("T"))
+            summary += "Raid Trains, ";
+         if (reg.ToUpper().Equals("D"))
+            summary += "PokeDex, ";
+         summary = summary.Trim();
+         return summary.TrimEnd(',');
       }
 
       private static void SaveChannels()
@@ -96,22 +135,30 @@ namespace PokeStar.Modules
          File.WriteAllText($"{path}\\chan_reg.json", json);
       }
 
-      public static bool LoadChannels()
+      public static void LoadChannels(IReadOnlyCollection<SocketGuild> guilds)
       {
          string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
          string json = File.ReadAllText($"{path}\\chan_reg.json");
          registeredChannels = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<ulong, string>>>(json);
          if (registeredChannels == null)
-         {
             registeredChannels = new Dictionary<ulong, Dictionary<ulong, string>>();
-            return false;
-         }
-         return true;
+
+         foreach (var guild in guilds)
+            if (!registeredChannels.ContainsKey(guild.Id))
+               AddGuild(guild.Id);
       }
 
-      public static void AddGuild(ulong guild)
+      public static void AddGuild(ulong guild, bool save = false)
       {
          registeredChannels.Add(guild, new Dictionary<ulong, string>());
+         if (save)
+            SaveChannels();
+      }
+
+      public static void RemoveGuild(ulong guild)
+      {
+         registeredChannels.Remove(guild);
+         SaveChannels();
       }
 
       public static bool IsRegisteredChannel(ulong guild, ulong channel, string type)
