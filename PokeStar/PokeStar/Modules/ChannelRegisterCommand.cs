@@ -29,7 +29,7 @@ namespace PokeStar.Modules
 
       // Registers the channel this command is run in as a command channel
       // Requires .setup to have been run
-      [Command("register channel")]
+      [Command("register")]
       public async Task Register(string purpose = "ALL")
       {
          ulong guild = Context.Guild.Id;
@@ -37,29 +37,20 @@ namespace PokeStar.Modules
          string reg;
 
          if (registeredChannels[guild].ContainsKey(channel))
-         {
             reg = GenerateRegistrationString(purpose, registeredChannels[guild][channel]);
-            if (reg != null)
-               registeredChannels[guild][channel] = reg;
-            else
-            {
-               await Context.Channel.SendMessageAsync("Please enter a valid registration for one of the following Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D) or give no value for all");
-               return;
-            }
-         }
+         else
+            reg = GenerateRegistrationString(purpose);
+
+         if (reg != null)
+            registeredChannels[guild].Add(channel, reg);
          else
          {
-            reg = GenerateRegistrationString(purpose);
-            if (reg != null)
-               registeredChannels[guild].Add(channel, reg);
-            else
-            {
-               await Context.Channel.SendMessageAsync("Please enter a valid registration for one of the following Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D) or give no value for all");
-               return;
-            }
+            await Context.Channel.SendMessageAsync("Please enter a valid registration for one of the following Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D) or give no value for all");
+            return;
          }
+
          SaveChannels();
-         await Context.Channel.SendMessageAsync($"Channel successfully registered for the following command types {GenerateSummaryString(reg)}");
+         await Context.Channel.SendMessageAsync($"Channel is now registered for the following command types {GenerateSummaryString(reg)}");
 
          if (CheckSetupComplete && Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
          {
@@ -68,7 +59,37 @@ namespace PokeStar.Modules
          }
       }
 
+      [Command("unregister")]
+      public async Task Unregister(string purpose = "ALL")
+      {
+         ulong guild = Context.Guild.Id;
+         ulong channel = Context.Channel.Id;
+         string reg;
 
+         if (registeredChannels[guild].ContainsKey(channel))
+         {
+            reg = GenerateUnregistrationString(purpose, registeredChannels[guild][channel]);
+            if (reg == null)
+            {
+               await Context.Channel.SendMessageAsync("Please enter a valid registration for one of the following Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D) or give no value for all");
+               return;
+            }
+            else if (reg.Equals(string.Empty))
+               registeredChannels.Remove(guild);
+            else
+               registeredChannels[guild][channel] = reg;
+         }
+         else
+         {
+               await Context.Channel.SendMessageAsync("This channel does not have any commands registered to it");
+               return;
+         }
+         SaveChannels();
+         if (reg.Equals(string.Empty))
+            await Context.Channel.SendMessageAsync($"Removed all registrations from this channel.");
+         else
+            await Context.Channel.SendMessageAsync($"Channel is now registered for the following command types {GenerateSummaryString(reg)}");
+      }
 
 
 
@@ -109,6 +130,29 @@ namespace PokeStar.Modules
          char[] a = s.ToCharArray();
          Array.Sort(a);
          return new string(a).ToUpper();
+      }
+
+      private static string GenerateUnregistrationString(string purpose, string existing = "")
+      {
+         string remove;
+         if (purpose.ToUpper().Equals("ALL"))
+            return "";
+         else if (purpose.ToUpper().Equals("PLAYER") || purpose.ToUpper().Equals("P"))
+            remove = "P";
+         else if (purpose.ToUpper().Equals("RAID") || purpose.ToUpper().Equals("R"))
+            remove = "R";
+         else if (purpose.ToUpper().Equals("EX") || purpose.ToUpper().Equals("E"))
+            remove = "E";
+         else if (purpose.ToUpper().Equals("TRAIN") || purpose.ToUpper().Equals("T"))
+            remove = "T";
+         else if (purpose.ToUpper().Equals("DEX") || purpose.ToUpper().Equals("D"))
+            remove = "D";
+         else
+            return null;
+
+         int index = existing.IndexOf(remove);
+         return (index < 0) ? null : existing.Remove(index, remove.Length);
+
       }
 
       private static string GenerateSummaryString(string reg)
