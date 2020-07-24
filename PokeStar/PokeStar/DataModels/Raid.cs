@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using Discord.WebSocket;
 using PokeStar.ConnectionInterface;
 
@@ -15,6 +16,8 @@ namespace PokeStar.DataModels
       public int HereCount { get; private set; }
       public Dictionary<SocketGuildUser, int> Attending { get; private set; }
       public Dictionary<SocketGuildUser, int> Here { get; private set; }
+      public Dictionary<SocketGuildUser, int> Invite { get; private set; }
+      public DateTime CreatedAt { get; private set; }
 
       public Raid(short tier, string time, string location, string boss = null)
       {
@@ -26,9 +29,11 @@ namespace PokeStar.DataModels
          SetBoss(boss);
          Attending = new Dictionary<SocketGuildUser, int>();
          Here = new Dictionary<SocketGuildUser, int>();
+         Invite = new Dictionary<SocketGuildUser, int>();
+         CreatedAt = DateTime.Now;
       }
 
-      public void PlayerAdd(SocketGuildUser player, int partySize)
+      public void PlayerAdd(SocketGuildUser player, int partySize, bool isInvite=false)
       {
          if (Attending.ContainsKey(player))
          {
@@ -49,6 +54,18 @@ namespace PokeStar.DataModels
                Here[player] = partySize;
             }
          }
+         else if (Invite.ContainsKey(player))
+         {
+            if (isInvite)
+            {
+               int newPlayerCount = PlayerCount + partySize;
+               if (newPlayerCount <= 20)
+               {
+                  Attending.Add(player, partySize);
+                  PlayerCount = newPlayerCount;
+               }
+            }
+         }
          else
          {
             int newPlayerCount = PlayerCount + partySize;
@@ -59,7 +76,6 @@ namespace PokeStar.DataModels
             }
          }
       }
-
       public bool PlayerHere(SocketGuildUser player)
       {
          if (Attending.ContainsKey(player))
@@ -74,7 +90,23 @@ namespace PokeStar.DataModels
          }
          return false;
       }
-
+      public void PlayerRequestInvite(SocketGuildUser player)
+      {
+         if (!Attending.ContainsKey(player) && !Here.ContainsKey(player) && !Invite.ContainsKey(player))
+         {
+            Invite.Add(player, 1);
+         }
+      }
+      public bool InvitePlayer(SocketGuildUser player, SocketGuildUser user)
+      {
+         if (Invite.ContainsKey(player) && (Attending.ContainsKey(user) || Here.ContainsKey(user)))
+         {
+            PlayerAdd(player, 1, true);
+            Invite.Remove(player);
+            return true;
+         }
+         return false;
+      }
       public void RemovePlayer(SocketGuildUser player)
       {
          if (Attending.ContainsKey(player))
@@ -88,8 +120,11 @@ namespace PokeStar.DataModels
             HereCount -= Here[player];
             Here.Remove(player);
          }
+         else if (Invite.ContainsKey(player))
+         {
+            Invite.Remove(player);
+         }
       }
-
       public void SetBoss(string bossName)
       {
          if (bossName != null)

@@ -71,9 +71,7 @@ namespace PokeStar.DataModels
          string str = "";
          foreach (string type in Type)
          {
-            string typeString = type;
-            if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
-               typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
+            string typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
             str += typeString + " ";
          }
          return str.Trim();
@@ -92,9 +90,7 @@ namespace PokeStar.DataModels
          string str = "";
          foreach (string type in Weakness)
          {
-            string typeString = type;
-            if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
-               typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
+            string typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
             str += typeString + " ";
          }
          return str.Trim();
@@ -105,9 +101,7 @@ namespace PokeStar.DataModels
          string str = "";
          foreach (string type in Resistance)
          {
-            string typeString = type;
-            if (Environment.GetEnvironmentVariable("SETUP_EMOJI").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
-               typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
+            string typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
             str += typeString + " ";
          }
          return str.Trim();
