@@ -54,44 +54,49 @@ namespace PokeStar.Modules
       [Command("raid")]
       public async Task Raid(short tier, string time, [Remainder]string location)
       {
-         List<string> potentials = Connections.GetBossList(tier);
-         if (potentials.Count > 1)
+         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
          {
-            string fileName = $"Egg{tier}.png";
-            Connections.CopyFile(fileName);
+            List<string> potentials = Connections.GetBossList(tier);
+            if (potentials.Count > 1)
+            {
+               string fileName = $"Egg{tier}.png";
+               Connections.CopyFile(fileName);
 
-            var selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
-            for (int i = 0; i < potentials.Count; i++)
-               await selectMsg.AddReactionAsync(selectionEmojis[i]);
+               var selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+               for (int i = 0; i < potentials.Count; i++)
+                  await selectMsg.AddReactionAsync(selectionEmojis[i]);
 
-            currentRaids.Add(selectMsg.Id, new Raid(tier, time, location));
-            selections.Add(selectMsg.Id, potentials);
+               currentRaids.Add(selectMsg.Id, new Raid(tier, time, location));
+               selections.Add(selectMsg.Id, potentials);
 
-            Connections.DeleteFile(fileName);
+               Connections.DeleteFile(fileName);
+            }
+            else
+            {
+               string fileName;
+               Raid raid;
+               if (potentials.Count == 1)
+               {
+                  string boss = potentials.First();
+                  raid = new Raid(tier, time, location, boss);
+                  fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+               }
+               else //silph is mid-update or something else went wrong
+               {
+                  raid = new Raid(tier, time, location, "noboss");
+                  fileName = $"Egg{tier}.png";
+               }
+
+               Connections.CopyFile(fileName);
+               var raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildEmbed(raid, fileName));
+               await raidMsg.AddReactionsAsync(raidEmojis);
+               currentRaids.Add(raidMsg.Id, raid);
+
+               Connections.DeleteFile(fileName);
+            }
          }
          else
-         {
-            string fileName;
-            Raid raid;
-            if (potentials.Count == 1)
-            {
-               string boss = potentials.First();
-               raid = new Raid(tier, time, location, boss);
-               fileName = Connections.GetPokemonPicture(raid.Boss.Name);
-            }
-            else //silph is mid-update or something else went wrong
-            {
-               raid = new Raid(tier, time, location, "noboss");
-               fileName = $"Egg{tier}.png";
-            }
-
-            Connections.CopyFile(fileName);
-            var raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildEmbed(raid, fileName));
-            await raidMsg.AddReactionsAsync(raidEmojis);
-            currentRaids.Add(raidMsg.Id, raid);
-
-            Connections.DeleteFile(fileName);
-         }
+            await Context.Channel.SendMessageAsync("This channel is not registered to process Raid commands.");
          RemoveOldRaids();
       }
 
@@ -186,19 +191,24 @@ namespace PokeStar.Modules
       [Command("invite")]
       public async Task Invite(ulong id, IGuildUser player)
       {
-         Raid raid = currentRaids[id];
-
-         if (raid.InvitePlayer((SocketGuildUser)player, (SocketGuildUser)Context.User))
+         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
          {
+            Raid raid = currentRaids[id];
 
-            var message = (SocketUserMessage)Context.Channel.CachedMessages.FirstOrDefault(x => x.Id == id);
-            await message.ModifyAsync(x =>
+            if (raid.InvitePlayer((SocketGuildUser)player, (SocketGuildUser)Context.User))
             {
-               x.Embed = BuildEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
-            });
 
-            await player.SendMessageAsync($"You have been invited to a raid by {Context.User.Username}. Please mark yourself as \"HERE\" when ready.");
+               var message = (SocketUserMessage)Context.Channel.CachedMessages.FirstOrDefault(x => x.Id == id);
+               await message.ModifyAsync(x =>
+               {
+                  x.Embed = BuildEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
+               });
+
+               await player.SendMessageAsync($"You have been invited to a raid by {Context.User.Username}. Please mark yourself as \"HERE\" when ready.");
+            }
          }
+         else
+            await Context.Channel.SendMessageAsync("This channel is not registered to process Raid commands.");
       }
 
       private static Embed BuildEmbed(Raid raid, string fileName = null)

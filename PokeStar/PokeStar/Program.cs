@@ -54,7 +54,9 @@ namespace PokeStar
          await RegisterCommandsAsync().ConfigureAwait(false);
          HookReactionAdded();
          HookSetup();
-         await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
+         HookJoinedGuild();
+         HookLeftGuild()
+;         await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
          await _client.StartAsync().ConfigureAwait(false);
 
          Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
@@ -87,11 +89,17 @@ namespace PokeStar
 
          int argPos = 0;
 
-         if (context.Channel.Name.Equals("Verification", StringComparison.OrdinalIgnoreCase))
+         if (message.Attachments.Count != 0)
          {
-            if (message.Attachments.Count != 0)
-            {
+            if (ChannelRegisterCommand.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "P"))
                RollImageProcess.RoleImageProcess(context);
+            if (ChannelRegisterCommand.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "R"))
+            {
+               //TODO: Add call for raid image processing
+            }
+            if (ChannelRegisterCommand.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "E"))
+            {
+               //TODO: Add call for ex raid image processing
             }
          }
          else if (message.HasStringPrefix(prefix, ref argPos))
@@ -130,9 +138,28 @@ namespace PokeStar
 
          SetEmotes(server, json);
 
+         ChannelRegisterCommand.LoadChannels(_client.Guilds);
+
          return Task.CompletedTask;
       }
 
+      private void HookJoinedGuild()
+         => _client.JoinedGuild += HandleJoinedGuild;
+
+      private Task HandleJoinedGuild(SocketGuild guild)
+      {
+         ChannelRegisterCommand.AddGuild(guild.Id, true);
+         return Task.CompletedTask;
+      }
+
+      private void HookLeftGuild()
+         => _client.LeftGuild += HandleLeftGuild;
+
+      private Task HandleLeftGuild(SocketGuild guild)
+      {
+         ChannelRegisterCommand.RemoveGuild(guild.Id);
+         return Task.CompletedTask;
+      }
 
       private static void SetEmotes(SocketGuild server, JObject json)
       {
