@@ -158,15 +158,15 @@ namespace PokeStar.Modules
       private static string GenerateSummaryString(string reg)
       {
          string summary = "";
-         if (reg.ToUpper().Equals("P"))
+         if (reg.ToUpper().Contains("P"))
             summary += "Player Roles, ";
-         if (reg.ToUpper().Equals("R"))
+         if (reg.ToUpper().Contains("R"))
             summary += "Raids, ";
-         if (reg.ToUpper().Equals("E"))
+         if (reg.ToUpper().Contains("E"))
             summary += "EX-Raids, ";
-         if (reg.ToUpper().Equals("T"))
+         if (reg.ToUpper().Contains("T"))
             summary += "Raid Trains, ";
-         if (reg.ToUpper().Equals("D"))
+         if (reg.ToUpper().Contains("D"))
             summary += "PokeDex, ";
          summary = summary.Trim();
          return summary.TrimEnd(',');
