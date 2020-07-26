@@ -49,7 +49,7 @@ namespace PokeStar.ConnectionInterface
                      raidBossList.Add(new RaidBossListElement
                      {
                         Tier = tier,
-                        Name = word.Trim()
+                        Name = ReformatName(word.Trim())
                      });
                      tierStart = false;
                   }
@@ -59,7 +59,7 @@ namespace PokeStar.ConnectionInterface
                      raidBossList.Add(new RaidBossListElement
                      {
                         Tier = tier,
-                        Name = word.Trim()
+                        Name = ReformatName(word.Trim())
                      });
                      nextInTier = false;
                   }
@@ -67,6 +67,14 @@ namespace PokeStar.ConnectionInterface
             }
          }
          return raidBossList;
+      }
+      private static string ReformatName(string name)
+      {
+         if (name.Equals("GIRATINA (ORIGIN FORME)", StringComparison.OrdinalIgnoreCase))
+            return "Origin Form Giratina";
+         if (name.Equals("GIRATINA (ALTERED FORME)", StringComparison.OrdinalIgnoreCase))
+            return "Altered Form Giratina";
+         return name;
       }
    }
    public struct RaidBossListElement
