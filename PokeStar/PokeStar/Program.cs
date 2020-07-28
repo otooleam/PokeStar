@@ -26,21 +26,23 @@ namespace PokeStar
 
       private string prefix;
 
+      private DateTime CurrentTime = DateTime.MinValue;
+
       public async Task MainAsync()
       {
          //sets cache for reaction events
          var _config = new DiscordSocketConfig { MessageCacheSize = 100 };
          _client = new DiscordSocketClient(_config);
-         CommandServiceConfig config = new CommandServiceConfig();
-         config.DefaultRunMode = RunMode.Async;
-         _commands = new CommandService(config);
+         CommandServiceConfig config = new CommandServiceConfig
+         {
+            DefaultRunMode = RunMode.Default
+         };
+         _commands = new CommandService();
 
          _services = new ServiceCollection()
              .AddSingleton(_client)
              .AddSingleton(_commands)
              .BuildServiceProvider();
-
-         _client.Log += Log;
 
          string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
@@ -51,12 +53,13 @@ namespace PokeStar
          prefix = json.GetValue("prefix").ToString();
          Environment.SetEnvironmentVariable("PREFIX_STRING", prefix);
 
+         HookLog();
          await RegisterCommandsAsync().ConfigureAwait(false);
          HookReactionAdded();
          HookSetup();
          HookJoinedGuild();
-         HookLeftGuild()
-;         await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
+         HookLeftGuild();
+         await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
          await _client.StartAsync().ConfigureAwait(false);
 
          Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
@@ -67,10 +70,25 @@ namespace PokeStar
          await Task.Delay(-1).ConfigureAwait(false);
       }
 
-      //TODO set up proper logging framework
+      private void HookLog()
+         => _client.Log += Log;
+
       private Task Log(LogMessage msg)
       {
-         Console.WriteLine(msg.ToString());
+         if (CurrentTime.Equals(DateTime.MinValue))
+            CurrentTime = DateTime.Now;
+         else if ((CurrentTime - DateTime.Now).TotalDays >= 1)
+            CurrentTime = DateTime.Now;
+
+         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+         string fileName = CurrentTime.ToString("MM-dd-yyyy");
+         string file = $"{path}\\Logs\\{fileName}.txt";
+
+         using (StreamWriter sw = File.AppendText(file))
+         {
+            sw.WriteLine(msg.ToString());
+         }
+
          return Task.CompletedTask;
       }
 
@@ -160,6 +178,9 @@ namespace PokeStar
          ChannelRegisterCommand.RemoveGuild(guild.Id);
          return Task.CompletedTask;
       }
+
+      private void HookError()
+         => _client.LeftGuild += HandleLeftGuild;
 
       private static void SetEmotes(SocketGuild server, JObject json)
       {
