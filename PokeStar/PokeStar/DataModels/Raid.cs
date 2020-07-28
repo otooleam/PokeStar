@@ -13,11 +13,9 @@ namespace PokeStar.DataModels
       public string Time { get; set; }
       public short Tier { get; set; }
       public RaidBoss Boss { get; private set; }
-      public PlayerGroup[] RaidPartyList { get; private set; }
-      public List<SocketGuildUser> InviteReqs { get; private set; }
+      public List<PlayerGroup> PlayerGroups { get; private set; } //TODO change array based code
+      public List<SocketGuildUser> InviteReqs { get; private set; } 
       public DateTime CreatedAt { get; private set; }
-
-      public PlayerGroup groupTEST { get; private set; }
 
       public Raid(short tier, string time, string location, string boss = null)
       {
@@ -27,17 +25,14 @@ namespace PokeStar.DataModels
          SetBoss(boss);
          CreatedAt = DateTime.Now;
          InviteReqs = new List<SocketGuildUser>();
-         RaidPartyList = new PlayerGroup[GROUP_LIMIT];
-         RaidPartyList[0] = new PlayerGroup();
-         
-         groupTEST = new PlayerGroup();
+         PlayerGroups = new List<PlayerGroup>() { new PlayerGroup() };
       }
 
       public void PlayerAdd(SocketGuildUser player, int partySize)
       {
-         if (RaidPartyList.Length == 1)
+         if (PlayerGroups.Count == 1)
          {
-            if (!RaidPartyList[0].PlayerAdd(player, partySize))
+            if (!PlayerGroups[0].PlayerAdd(player, partySize))
             {
                //split the party
 
@@ -45,56 +40,84 @@ namespace PokeStar.DataModels
          }
          else
          {
-            int[] playerCount = new int[GROUP_LIMIT];
-            for (int i = 0; i < GROUP_LIMIT; i++)
+            List<int> playerCount = new List<int>();
+            foreach (PlayerGroup group in PlayerGroups)
             {
-               if (RaidPartyList[i].Players.Contains(player))
-                  RaidPartyList[i].PlayerAdd(player, partySize); //update player
+               if (group.Players.Contains(player))
+                  group.PlayerAdd(player, partySize); //update player
                else
-                  playerCount[i] = RaidPartyList[i].Players.Count;
+                  playerCount.Add(group.Players.Count);
             }
-
          }
       }
 
-      private int FindMinIndex(int[] array)
+      private int FindMinIndex(List<int> list)
       {
          int min = 100;
          int mindex = -1;
-         for (int i = 0; i < array.Length; i++)
+         for (int i = 0; i < list.Count; i++)
          {
-            if (array[i] < min)
+            if (list[i] < min)
             {
-               min = array[i];
+               min = list[i];
                mindex = i;
             }
          }
          return mindex;
       }
 
-      public bool PlayerReady(SocketGuildUser player) //returns if party all here
+      public bool PlayerReady(SocketGuildUser player) //returns true if party all here
       {
-         return groupTEST.PlayerReady(player);
+         for (int i = 0; i < GROUP_LIMIT; i++)
+            if (PlayerGroups[i].Attending.ContainsKey(player))
+               return PlayerGroups[i].PlayerReady(player);
+         return false;
       }
 
       public void PlayerRequestInvite(SocketGuildUser player)
       {
-         InviteReqs.Add(player); //TODO check if they already exist
+         if (!InviteReqs.Contains(player))
+         {
+            foreach (PlayerGroup group in PlayerGroups)
+               if (group.Players.Contains(player))
+                  return;
+            InviteReqs.Add(player);
+         }
       }
 
       public bool InvitePlayer(SocketGuildUser invitee, SocketGuildUser invitingPlayer)
       {
          if (InviteReqs.Contains(invitee))
          {
-            groupTEST.PlayerAdd(invitingPlayer, -1);
-            return true;
+            foreach (PlayerGroup group in PlayerGroups)
+               if (group.Players.Contains(invitingPlayer))
+                  return group.PlayerAdd(invitingPlayer, -1);
          }
          return false;
       }
 
       public void RemovePlayer(SocketGuildUser player)
       {
-         groupTEST.RemovePlayer(player);
+         if (InviteReqs.Contains(player))
+         {
+            InviteReqs.Remove(player);
+         }
+         else
+         {
+            foreach (PlayerGroup group in PlayerGroups)
+               if (group.Players.Contains(player))
+                  group.RemovePlayer(player);
+         }
+      }
+
+      public string BuildPingList(SocketGuildUser player)
+      {
+         foreach (PlayerGroup group in PlayerGroups)
+         {
+            if (group.Players.Contains(player))
+               return group.BuildPingList();
+         }
+         return "Everyone is Here.";
       }
 
       public void SetBoss(string bossName)

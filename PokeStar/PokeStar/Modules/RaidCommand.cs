@@ -60,7 +60,7 @@ namespace PokeStar.Modules
             string fileName = $"Egg{tier}.png";
             Connections.CopyFile(fileName);
 
-            var selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+            var selectMsg = await Context.Channel.SendFileAsync(fileName, text: "test", embed: BuildBossSelectEmbed(potentials, fileName));
             for (int i = 0; i < potentials.Count; i++)
                await selectMsg.AddReactionAsync(selectionEmojis[i]);
 
@@ -150,7 +150,7 @@ namespace PokeStar.Modules
             {
                if (raid.PlayerReady(player)) //true if all players are marked here
                {
-                  await reaction.Channel.SendMessageAsync(raid.groupTEST.BuildPingList());
+                  await reaction.Channel.SendMessageAsync(raid.BuildPingList(player));
                }
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]))
@@ -213,8 +213,12 @@ namespace PokeStar.Modules
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Time", raid.Time, true);
          embed.AddField("Location", raid.Location, true);
-         embed.AddField($"Here ({raid.groupTEST.ReadyCount}/{raid.groupTEST.AttendingCount})", $"{BuildPlayerList(raid.groupTEST.Ready)}");
-         embed.AddField("Attending", $"{BuildPlayerList(raid.groupTEST.Attending)}");
+
+         if (raid.PlayerGroups.Count == 1)
+         {
+            embed.AddField($"Here ({raid.PlayerGroups[0].ReadyCount}/{raid.PlayerGroups[0].AttendingCount})", $"{BuildPlayerList(raid.PlayerGroups[0].Ready)}");
+            embed.AddField("Attending", $"{BuildPlayerList(raid.PlayerGroups[0].Attending)}");
+         }
          embed.AddField("Need Invite", $"{BuildPlayerList(raid.InviteReqs)}");
          embed.WithDescription("Press ? for help");
 

@@ -104,7 +104,7 @@ namespace PokeStar.DataModels
       }
       
       //true if all players in group are ready
-      public bool PlayerReady(SocketGuildUser player)
+      public bool PlayerReady(SocketGuildUser player) //this is more robust than it needs to be
       {
          if (Attending.ContainsKey(player))
          {
