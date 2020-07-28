@@ -11,9 +11,10 @@ copy .\chan_reg.json .\PokeStar\bin\Debug\chan_reg.json
 echo "Copy Pokemon Images..."
 xcopy .\Images\PokemonImages .\PokeStar\bin\Debug\PokemonImages
 
-echo "Createing image directories..."
+echo "Createing required directories..."
 cd .\PokeStar\bin\Debug
 mkdir Images
+mkdir Logs
 cd .\Images
 mkdir profile
 mkdir ex_raid
