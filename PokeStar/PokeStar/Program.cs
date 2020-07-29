@@ -8,7 +8,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using PokeStar.ConnectionInterface;
 using PokeStar.ImageProcessors;
 using PokeStar.Modules;
 
@@ -26,18 +25,23 @@ namespace PokeStar
 
       private string prefix;
 
-      private DateTime CurrentTime = DateTime.MinValue;
+      private bool logging = false;
 
       public async Task MainAsync()
       {
          //sets cache for reaction events
-         var _config = new DiscordSocketConfig { MessageCacheSize = 100 };
-         _client = new DiscordSocketClient(_config);
-         CommandServiceConfig config = new CommandServiceConfig
-         {
-            DefaultRunMode = RunMode.Default
+         var _config = new DiscordSocketConfig 
+         { 
+            MessageCacheSize = 100,
+            LogLevel = LogSeverity.Verbose
          };
-         _commands = new CommandService();
+         _client = new DiscordSocketClient(_config);
+         CommandServiceConfig config = new CommandServiceConfig 
+         {
+            DefaultRunMode = RunMode.Async,
+            LogLevel = LogSeverity.Verbose
+         };
+         _commands = new CommandService(config);
 
          _services = new ServiceCollection()
              .AddSingleton(_client)
@@ -64,30 +68,31 @@ namespace PokeStar
 
          Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
 
-         var connectors = Connections.Instance();
-
          // Block this task until the program is closed.
          await Task.Delay(-1).ConfigureAwait(false);
       }
 
       private void HookLog()
-         => _client.Log += Log;
+      {
+         _client.Log += Log;
+         _commands.Log += Log;
+      }
 
       private Task Log(LogMessage msg)
       {
-         if (CurrentTime.Equals(DateTime.MinValue))
-            CurrentTime = DateTime.Now;
-         else if ((CurrentTime - DateTime.Now).TotalDays >= 1)
-            CurrentTime = DateTime.Now;
-
          string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-         string fileName = CurrentTime.ToString("MM-dd-yyyy");
-         string file = $"{path}\\Logs\\{fileName}.txt";
+         string fileName = DateTime.Now.ToString("MM-dd-yyyy");
+         string logFile = $"{path}\\Logs\\{fileName}.txt";
 
-         using (StreamWriter sw = File.AppendText(file))
-         {
-            sw.WriteLine(msg.ToString());
-         }
+         string logText = $"{DateTime.Now:hh:mm:ss} [{msg.Severity}] {msg.Source}: {msg.Exception?.ToString() ?? msg.Message}";
+
+         while (logging) { }
+
+         logging = true;
+         File.AppendAllText(logFile, logText + "\n");
+         logging = false;
+
+         Console.WriteLine(msg.ToString());
 
          return Task.CompletedTask;
       }
