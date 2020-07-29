@@ -8,7 +8,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using PokeStar.ConnectionInterface;
 using PokeStar.ImageProcessors;
 using PokeStar.Modules;
 
@@ -26,21 +25,28 @@ namespace PokeStar
 
       private string prefix;
 
+      private bool logging = false;
+
       public async Task MainAsync()
       {
          //sets cache for reaction events
-         var _config = new DiscordSocketConfig { MessageCacheSize = 100 };
+         var _config = new DiscordSocketConfig 
+         { 
+            MessageCacheSize = 100,
+            LogLevel = LogSeverity.Verbose
+         };
          _client = new DiscordSocketClient(_config);
-         CommandServiceConfig config = new CommandServiceConfig();
-         config.DefaultRunMode = RunMode.Async;
+         CommandServiceConfig config = new CommandServiceConfig 
+         {
+            DefaultRunMode = RunMode.Async,
+            LogLevel = LogSeverity.Verbose
+         };
          _commands = new CommandService(config);
 
          _services = new ServiceCollection()
              .AddSingleton(_client)
              .AddSingleton(_commands)
              .BuildServiceProvider();
-
-         _client.Log += Log;
 
          string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
@@ -51,26 +57,43 @@ namespace PokeStar
          prefix = json.GetValue("prefix").ToString();
          Environment.SetEnvironmentVariable("PREFIX_STRING", prefix);
 
+         HookLog();
          await RegisterCommandsAsync().ConfigureAwait(false);
          HookReactionAdded();
          HookSetup();
          HookJoinedGuild();
-         HookLeftGuild()
-;         await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
+         HookLeftGuild();
+         await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
          await _client.StartAsync().ConfigureAwait(false);
 
          Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
-
-         var connectors = Connections.Instance();
 
          // Block this task until the program is closed.
          await Task.Delay(-1).ConfigureAwait(false);
       }
 
-      //TODO set up proper logging framework
+      private void HookLog()
+      {
+         _client.Log += Log;
+         _commands.Log += Log;
+      }
+
       private Task Log(LogMessage msg)
       {
+         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+         string fileName = DateTime.Now.ToString("MM-dd-yyyy");
+         string logFile = $"{path}\\Logs\\{fileName}.txt";
+
+         string logText = $"{DateTime.Now:hh:mm:ss} [{msg.Severity}] {msg.Source}: {msg.Exception?.ToString() ?? msg.Message}";
+
+         while (logging) { }
+
+         logging = true;
+         File.AppendAllText(logFile, logText + "\n");
+         logging = false;
+
          Console.WriteLine(msg.ToString());
+
          return Task.CompletedTask;
       }
 
@@ -160,6 +183,9 @@ namespace PokeStar
          ChannelRegisterCommand.RemoveGuild(guild.Id);
          return Task.CompletedTask;
       }
+
+      private void HookError()
+         => _client.LeftGuild += HandleLeftGuild;
 
       private static void SetEmotes(SocketGuild server, JObject json)
       {
