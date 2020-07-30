@@ -1,6 +1,4 @@
-﻿using System;
-using System.IO;
-using System.Linq;
+﻿using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -23,7 +21,7 @@ namespace PokeStar.Modules
          else
             commandPrefix.Add(guild, prefix);
          SavePrefix();
-         await ReplyAsync($"Command prefix has been set to \'{prefix}\'").ConfigureAwait(false);
+         await ReplyAsync($"Command prefix has been set to \'{prefix}\' for this server.").ConfigureAwait(false);
       }
 
       private static void SavePrefix()

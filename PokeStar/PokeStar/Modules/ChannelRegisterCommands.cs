@@ -2,15 +2,15 @@
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Threading.Tasks;
 using System.Collections.Generic;
 using Discord.Commands;
-using Newtonsoft.Json;
-using System.Threading.Tasks;
 using Discord.WebSocket;
+using Newtonsoft.Json;
 
 namespace PokeStar.Modules
 {
-   public class ChannelRegisterCommand : ModuleBase<SocketCommandContext>
+   public class ChannelRegisterCommands : ModuleBase<SocketCommandContext>
    {
       // KEY: Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D)
 
@@ -90,11 +90,6 @@ namespace PokeStar.Modules
          else
             await Context.Channel.SendMessageAsync($"Channel is now registered for the following command types {GenerateSummaryString(reg)}");
       }
-
-
-
-
-
 
       private static string GenerateRegistrationString(string purpose, string existing = "")
       {
