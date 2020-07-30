@@ -65,7 +65,6 @@ namespace PokeStar
          await Task.Delay(-1).ConfigureAwait(false);
       }
 
-      //TODO set up proper logging framework
       private Task Log(LogMessage msg)
       {
          Console.WriteLine(msg.ToString());

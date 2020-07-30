@@ -214,10 +214,20 @@ namespace PokeStar.Modules
          embed.AddField("Time", raid.Time, true);
          embed.AddField("Location", raid.Location, true);
 
-         if (raid.PlayerGroups.Count == 1)
+         if (raid.PlayerGroups.Count == 1) //single group
          {
             embed.AddField($"Here ({raid.PlayerGroups[0].ReadyCount}/{raid.PlayerGroups[0].AttendingCount})", $"{BuildPlayerList(raid.PlayerGroups[0].Ready)}");
             embed.AddField("Attending", $"{BuildPlayerList(raid.PlayerGroups[0].Attending)}");
+         }
+         else //multiple groups
+         {
+            int groupNum = 0;
+            foreach (PlayerGroup group in raid.PlayerGroups) //TODO group header - add limit
+            {
+               embed.AddField($"Group {groupNum + 1} Here ({raid.PlayerGroups[groupNum].ReadyCount}/{raid.PlayerGroups[groupNum].AttendingCount})", $"{BuildPlayerList(raid.PlayerGroups[groupNum].Ready)}");
+               embed.AddField($"Group {groupNum + 1} Attending", $"{BuildPlayerList(raid.PlayerGroups[groupNum].Attending)}");
+               groupNum++;
+            }
          }
          embed.AddField("Need Invite", $"{BuildPlayerList(raid.InviteReqs)}");
          embed.WithDescription("Press ? for help");

@@ -7,14 +7,12 @@ namespace PokeStar.DataModels
 {
    class Raid
    {
-      private const int GROUP_LIMIT = 5;
-
       public string Location { get; set; }
       public string Time { get; set; }
       public short Tier { get; set; }
       public RaidBoss Boss { get; private set; }
-      public List<PlayerGroup> PlayerGroups { get; private set; } //TODO change array based code
-      public List<SocketGuildUser> InviteReqs { get; private set; } 
+      public List<PlayerGroup> PlayerGroups { get; private set; }
+      public List<SocketGuildUser> InviteReqs { get; private set; }
       public DateTime CreatedAt { get; private set; }
 
       public Raid(short tier, string time, string location, string boss = null)
@@ -30,36 +28,62 @@ namespace PokeStar.DataModels
 
       public void PlayerAdd(SocketGuildUser player, int partySize)
       {
-         if (PlayerGroups.Count == 1)
+         foreach (PlayerGroup group in PlayerGroups)
          {
-            if (!PlayerGroups[0].PlayerAdd(player, partySize))
+            if (group.Players.Contains(player))
             {
-               //split the party
-
+               if (!group.PlayerAdd(player, partySize)) //updates player party size
+               {
+                  SplitPlayerGroup(group, player, partySize);
+               }
+               return;
             }
          }
-         else
+         int smallestGroupIndex = FindMinIndex(PlayerGroups);
+         if (!PlayerGroups[smallestGroupIndex].PlayerAdd(player, partySize))
          {
-            List<int> playerCount = new List<int>();
-            foreach (PlayerGroup group in PlayerGroups)
-            {
-               if (group.Players.Contains(player))
-                  group.PlayerAdd(player, partySize); //update player
-               else
-                  playerCount.Add(group.Players.Count);
-            }
+            SplitPlayerGroup(PlayerGroups[smallestGroupIndex], player, partySize);
          }
       }
 
-      private int FindMinIndex(List<int> list)
+      private void SplitPlayerGroup(PlayerGroup originalGroup, SocketGuildUser player, int partySize)
+      {
+         PlayerGroup newGroup = new PlayerGroup();
+         Dictionary<SocketGuildUser, int> nonReadyPlayers = new Dictionary<SocketGuildUser, int>();
+         foreach (KeyValuePair<SocketGuildUser, int> attendingPlayer in originalGroup.Attending)
+            nonReadyPlayers.Add(attendingPlayer.Key, attendingPlayer.Value);
+         foreach (SocketGuildUser attendingPlayer in nonReadyPlayers.Keys)
+         {
+            originalGroup.RemovePlayer(attendingPlayer);
+         }
+         if (!nonReadyPlayers.ContainsKey(player))
+            nonReadyPlayers.Add(player, partySize);
+         else
+            nonReadyPlayers[player] = partySize;
+
+         foreach (KeyValuePair<SocketGuildUser, int> attendingPlayer in nonReadyPlayers)
+         {
+            if (originalGroup.Players.Count < newGroup.Players.Count)
+            {
+               originalGroup.PlayerAdd(attendingPlayer.Key, attendingPlayer.Value);
+            }
+            else
+            {
+               newGroup.PlayerAdd(attendingPlayer.Key, attendingPlayer.Value);
+            }
+         }
+         PlayerGroups.Add(newGroup);
+      }
+
+      private int FindMinIndex(List<PlayerGroup> list)
       {
          int min = 100;
          int mindex = -1;
          for (int i = 0; i < list.Count; i++)
          {
-            if (list[i] < min)
+            if (list[i].Players.Count < min)
             {
-               min = list[i];
+               min = list[i].Players.Count;
                mindex = i;
             }
          }
@@ -68,9 +92,9 @@ namespace PokeStar.DataModels
 
       public bool PlayerReady(SocketGuildUser player) //returns true if party all here
       {
-         for (int i = 0; i < GROUP_LIMIT; i++)
-            if (PlayerGroups[i].Attending.ContainsKey(player))
-               return PlayerGroups[i].PlayerReady(player);
+         foreach (PlayerGroup group in PlayerGroups)
+            if (group.Attending.ContainsKey(player))
+               return group.PlayerReady(player);
          return false;
       }
 
