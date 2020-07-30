@@ -29,17 +29,27 @@ namespace PokeStar
 
       public async Task MainAsync()
       {
-         //sets cache for reaction events
+         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+         var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
+
+         var token = json.GetValue("token").ToString();
+         Environment.SetEnvironmentVariable("POGO_DB_CONNECTION_STRING", json.GetValue("sql").ToString());
+         defaultPrefix = json.GetValue("prefix").ToString()[0];
+         var logLevel = Convert.ToInt32(json.GetValue("log_level").ToString());
+
+         var logSeverity = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? LogSeverity.Info : (LogSeverity)logLevel;
+
+            //sets cache for reaction events
          var _config = new DiscordSocketConfig 
          { 
             MessageCacheSize = 100,
-            LogLevel = LogSeverity.Verbose
+            LogLevel = logSeverity
          };
          _client = new DiscordSocketClient(_config);
          CommandServiceConfig config = new CommandServiceConfig 
          {
             DefaultRunMode = RunMode.Async,
-            LogLevel = LogSeverity.Verbose
+            LogLevel = logSeverity
          };
          _commands = new CommandService(config);
 
@@ -48,13 +58,7 @@ namespace PokeStar
              .AddSingleton(_commands)
              .BuildServiceProvider();
 
-         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
 
-         var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
-
-         var token = json.GetValue("token").ToString();
-         Environment.SetEnvironmentVariable("DB_CONNECTION_STRING", json.GetValue("sql").ToString());
-         defaultPrefix = json.GetValue("prefix").ToString()[0];
 
          HookLog();
          await RegisterCommandsAsync().ConfigureAwait(false);
