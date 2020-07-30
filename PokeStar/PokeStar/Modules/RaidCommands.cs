@@ -11,7 +11,7 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
-   public class RaidCommand : ModuleBase<SocketCommandContext>
+   public class RaidCommands : ModuleBase<SocketCommandContext>
    {
       private static readonly Dictionary<ulong, Raid> currentRaids = new Dictionary<ulong, Raid>();
       private static readonly Dictionary<ulong, List<string>> selections = new Dictionary<ulong, List<string>>();
@@ -54,7 +54,7 @@ namespace PokeStar.Modules
       [Command("raid")]
       public async Task Raid(short tier, string time, [Remainder]string location)
       {
-         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
+         if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
          {
             List<string> potentials = Connections.GetBossList(tier);
             if (potentials.Count > 1)
@@ -191,7 +191,7 @@ namespace PokeStar.Modules
       [Command("invite")]
       public async Task Invite(ulong id, IGuildUser player)
       {
-         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
+         if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
          {
             Raid raid = currentRaids[id];
 

@@ -23,23 +23,33 @@ namespace PokeStar
       private CommandService _commands;
       private IServiceProvider _services;
 
-      private string prefix;
+      private char defaultPrefix;
 
       private bool logging = false;
 
       public async Task MainAsync()
       {
-         //sets cache for reaction events
+         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+         var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
+
+         var token = json.GetValue("token").ToString();
+         Environment.SetEnvironmentVariable("POGO_DB_CONNECTION_STRING", json.GetValue("sql").ToString());
+         defaultPrefix = json.GetValue("prefix").ToString()[0];
+         var logLevel = Convert.ToInt32(json.GetValue("log_level").ToString());
+
+         var logSeverity = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? LogSeverity.Info : (LogSeverity)logLevel;
+
+            //sets cache for reaction events
          var _config = new DiscordSocketConfig 
          { 
             MessageCacheSize = 100,
-            LogLevel = LogSeverity.Verbose
+            LogLevel = logSeverity
          };
          _client = new DiscordSocketClient(_config);
          CommandServiceConfig config = new CommandServiceConfig 
          {
             DefaultRunMode = RunMode.Async,
-            LogLevel = LogSeverity.Verbose
+            LogLevel = logSeverity
          };
          _commands = new CommandService(config);
 
@@ -47,15 +57,6 @@ namespace PokeStar
              .AddSingleton(_client)
              .AddSingleton(_commands)
              .BuildServiceProvider();
-
-         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-         var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
-
-         var token = json.GetValue("token").ToString();
-         Environment.SetEnvironmentVariable("DB_CONNECTION_STRING", json.GetValue("sql").ToString());
-         prefix = json.GetValue("prefix").ToString();
-         Environment.SetEnvironmentVariable("PREFIX_STRING", prefix);
 
          HookLog();
          await RegisterCommandsAsync().ConfigureAwait(false);
@@ -111,16 +112,17 @@ namespace PokeStar
          var context = new SocketCommandContext(_client, message);
 
          int argPos = 0;
+         string prefix = SystemEditCommands.GetPrefix(context.Guild.Id).ToString();
 
          if (message.Attachments.Count != 0)
          {
-            if (ChannelRegisterCommand.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "P"))
+            if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "P"))
                RollImageProcess.RoleImageProcess(context);
-            if (ChannelRegisterCommand.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "R"))
+            if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "R"))
             {
                //TODO: Add call for raid image processing
             }
-            if (ChannelRegisterCommand.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "E"))
+            if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "E"))
             {
                //TODO: Add call for ex raid image processing
             }
@@ -142,9 +144,9 @@ namespace PokeStar
       {
          var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
          var user = reaction.User.Value;
-         if (message != null && reaction.User.IsSpecified && !user.IsBot && RaidCommand.IsCurrentRaid(message.Id))
+         if (message != null && reaction.User.IsSpecified && !user.IsBot && RaidCommands.IsCurrentRaid(message.Id))
          {         
-            await RaidCommand.RaidReaction(message, reaction);
+            await RaidCommands.RaidReaction(message, reaction);
          }
          return Task.CompletedTask;
       }
@@ -161,7 +163,8 @@ namespace PokeStar
 
          SetEmotes(server, json);
 
-         ChannelRegisterCommand.LoadChannels(_client.Guilds);
+         ChannelRegisterCommands.LoadChannels(_client.Guilds);
+         SystemEditCommands.LoadPrefix(_client.Guilds, defaultPrefix);
 
          return Task.CompletedTask;
       }
@@ -171,7 +174,8 @@ namespace PokeStar
 
       private Task HandleJoinedGuild(SocketGuild guild)
       {
-         ChannelRegisterCommand.AddGuild(guild.Id, true);
+         ChannelRegisterCommands.AddGuild(guild.Id, true);
+         SystemEditCommands.AddGuild(guild.Id, defaultPrefix, true);
          return Task.CompletedTask;
       }
 
@@ -180,12 +184,10 @@ namespace PokeStar
 
       private Task HandleLeftGuild(SocketGuild guild)
       {
-         ChannelRegisterCommand.RemoveGuild(guild.Id);
+         ChannelRegisterCommands.RemoveGuild(guild.Id);
+         SystemEditCommands.RemoveGuild(guild.Id);
          return Task.CompletedTask;
       }
-
-      private void HookError()
-         => _client.LeftGuild += HandleLeftGuild;
 
       private static void SetEmotes(SocketGuild server, JObject json)
       {
