@@ -58,8 +58,6 @@ namespace PokeStar
              .AddSingleton(_commands)
              .BuildServiceProvider();
 
-
-
          HookLog();
          await RegisterCommandsAsync().ConfigureAwait(false);
          HookReactionAdded();
@@ -190,9 +188,6 @@ namespace PokeStar
          SystemEditCommands.RemoveGuild(guild.Id);
          return Task.CompletedTask;
       }
-
-      private void HookError()
-         => _client.LeftGuild += HandleLeftGuild;
 
       private static void SetEmotes(SocketGuild server, JObject json)
       {
