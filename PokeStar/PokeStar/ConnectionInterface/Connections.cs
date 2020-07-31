@@ -15,11 +15,12 @@ namespace PokeStar.ConnectionInterface
 
       private static Connections connections;
 
-      private DatabaseConnector dbConnector;
+      private POGODatabaseConnector POGODBConnector;
+      private NONADatabaseConnector NONADBConnector;
 
       private Connections()
       {
-         dbConnector = new DatabaseConnector(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
+         dbConnector = new POGODatabaseConnector(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
       }
 
       public static Connections Instance()
