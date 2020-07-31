@@ -137,15 +137,6 @@ namespace PokeStar.DataModels
          }
       }
 
-      public string BuildPingList()
-      {
-         StringBuilder sb = new StringBuilder();
-
-         foreach (SocketGuildUser player in Players)
-            sb.Append(player.Mention);
-         sb.AppendLine(" Everyone is ready, time to jump!");
-
-         return sb.ToString();
-      }
+      
    }
 }

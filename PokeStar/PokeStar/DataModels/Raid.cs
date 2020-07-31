@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Discord.WebSocket;
 using PokeStar.ConnectionInterface;
 
@@ -30,17 +31,17 @@ namespace PokeStar.DataModels
       {
          foreach (PlayerGroup group in PlayerGroups)
          {
-            if (group.Players.Contains(player))
+            if (group.Players.Contains(player)) //updates player party size 
             {
-               if (!group.PlayerAdd(player, partySize)) //updates player party size
+               if (!group.PlayerAdd(player, partySize))
                {
                   SplitPlayerGroup(group, player, partySize);
                }
                return;
             }
          }
-         int smallestGroupIndex = FindMinIndex(PlayerGroups);
-         if (!PlayerGroups[smallestGroupIndex].PlayerAdd(player, partySize))
+         int smallestGroupIndex = FindMinIndex(PlayerGroups); 
+         if (!PlayerGroups[smallestGroupIndex].PlayerAdd(player, partySize)) //adds new player to smallest group
          {
             SplitPlayerGroup(PlayerGroups[smallestGroupIndex], player, partySize);
          }
@@ -73,6 +74,11 @@ namespace PokeStar.DataModels
             }
          }
          PlayerGroups.Add(newGroup);
+      }
+
+      private void CombinePlayerGroups(PlayerGroup group1, PlayerGroup group2)
+      {
+         
       }
 
       private int FindMinIndex(List<PlayerGroup> list)
@@ -154,6 +160,30 @@ namespace PokeStar.DataModels
                return;
             }
             Boss = Connections.Instance().GetRaidBoss(bossName);
+         }
+      }
+
+      public string BuildPingList(int groupNum)
+      {
+         if (PlayerGroups.Count == 1)
+         {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (SocketGuildUser player in PlayerGroups[0].Players)
+               sb.Append(player.Mention);
+            sb.AppendLine($" Everyone is ready at {Location}, time to jump!");
+
+            return sb.ToString();
+         }
+         else
+         {
+            StringBuilder sb = new StringBuilder();
+
+            foreach (SocketGuildUser player in PlayerGroups[groupNum].Players)
+               sb.Append(player.Mention);
+            sb.AppendLine($" Group{groupNum} is ready at {Location}, time to jump!");
+
+            return sb.ToString();
          }
       }
    }
