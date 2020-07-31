@@ -21,6 +21,7 @@ namespace PokeStar.ConnectionInterface
       private Connections()
       {
          dbConnector = new POGODatabaseConnector(Environment.GetEnvironmentVariable("DB_CONNECTION_STRING"));
+         dbConnector = new DatabaseConnector(Environment.GetEnvironmentVariable("POGO_DB_CONNECTION_STRING"));
       }
 
       public static Connections Instance()

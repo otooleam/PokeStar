@@ -6,7 +6,7 @@ using Discord.Commands;
 
 namespace PokeStar.Modules
 {
-   public class SetupCommand : ModuleBase<SocketCommandContext>
+   public class SetupCommands : ModuleBase<SocketCommandContext>
    {
       [Command("setup")]
       public async Task Setup()

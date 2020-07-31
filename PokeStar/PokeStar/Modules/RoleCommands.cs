@@ -6,12 +6,12 @@ using Discord.Commands;
 
 namespace PokeStar.Modules
 {
-   public class RoleCommand : ModuleBase<SocketCommandContext>
+   public class RoleCommands : ModuleBase<SocketCommandContext>
    {
       [Command("role")]
       public async Task Role(IGuildUser user, string nickname, string roleName)
       {
-         if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "P"))
+         if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "P"))
          {
             if (Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
             {
