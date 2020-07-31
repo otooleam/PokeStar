@@ -9,27 +9,28 @@ namespace PokeStar.ConnectionInterface
 
       public string GetRegistration(ulong guild, ulong channel)
       {
-         string registration = "";
+         string registration = null;
          using (var conn = GetConnection())
          {
             conn.Open();
 
-            string queryString = $@"SELECT relation 
+            string queryString = $@"SELECT register 
                                  FROM channel_registration 
                                  WHERE guild={guild}
                                  AND channel={channel};";
             using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
-                  registration = Convert.ToString(reader["relation"]);
+                  if(reader["register"].GetType() != typeof(DBNull))
+                     registration = Convert.ToString(reader["register"]);
             }
             conn.Close();
          }
          return registration;
       }
-      public char GetPrefix(ulong guild)
+      public string GetPrefix(ulong guild)
       {
-         char prefix = Environment.GetEnvironmentVariable("PREFIX_STRING")[0];
+         string prefix = null;
          using (var conn = GetConnection())
          {
             conn.Open();
@@ -40,7 +41,8 @@ namespace PokeStar.ConnectionInterface
             using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
-                  prefix = Convert.ToChar(reader["prefix"]);
+                  if (reader["prefix"].GetType() != typeof(DBNull))
+                     prefix = Convert.ToString(reader["prefix"]);
             }
             conn.Close();
          }
@@ -54,7 +56,8 @@ namespace PokeStar.ConnectionInterface
             conn.Open();
 
             string queryString = $@"INSERT INTO channel_registration (guild, channel, register)
-                                 VALUES ({guild}, {channel}, {registration})";
+                                 VALUES ({guild}, {channel}, '{registration}')";
+            Console.WriteLine(queryString);
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
             conn.Close();
          }
@@ -67,7 +70,7 @@ namespace PokeStar.ConnectionInterface
             conn.Open();
 
             string queryString = $@"INSERT INTO command_prefix (guild, prefix)
-                                 VALUES ({guild}, {prefix})";
+                                 VALUES ({guild}, '{prefix[0]}')";
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
             conn.Close();
          }
@@ -80,7 +83,7 @@ namespace PokeStar.ConnectionInterface
             conn.Open();
 
             string queryString = $@"UPDATE channel_registration 
-                                 SET register = {registration} 
+                                 SET register = '{registration}'
                                  WHERE guild={guild}
                                  AND channel={channel};";
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -95,7 +98,20 @@ namespace PokeStar.ConnectionInterface
             conn.Open();
 
             string queryString = $@"UPDATE command_prefix 
-                                 SET prefix = {prefix} 
+                                 SET prefix = '{prefix}'
+                                 WHERE guild={guild};";
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+      public void DeleteAllRegistration(ulong guild)
+      {
+         using (var conn = GetConnection())
+         {
+            conn.Open();
+
+            string queryString = $@"DELETE FROM channel_registration
                                  WHERE guild={guild};";
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
             conn.Close();

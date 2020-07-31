@@ -2,10 +2,8 @@ echo off
 
 cd ..\PokeStar
 
-echo "Copying required data files..."
+echo "Copying env file..."
 copy .\env.json .\PokeStar\bin\Debug\env.json
-copy .\chan_reg.json .\PokeStar\bin\Debug\chan_reg.json
-copy .\prefix.json .\PokeStar\bin\Debug\prefix.json
 
 echo "Copy Pokemon Images..."
 xcopy .\Images\PokemonImages .\PokeStar\bin\Debug\PokemonImages

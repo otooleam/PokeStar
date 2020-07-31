@@ -8,8 +8,9 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.DependencyInjection;
-using PokeStar.ImageProcessors;
 using PokeStar.Modules;
+using PokeStar.ImageProcessors;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar
 {
@@ -23,8 +24,6 @@ namespace PokeStar
       private CommandService _commands;
       private IServiceProvider _services;
 
-      private char defaultPrefix;
-
       private bool logging = false;
 
       public async Task MainAsync()
@@ -33,13 +32,14 @@ namespace PokeStar
          var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
 
          var token = json.GetValue("token").ToString();
-         Environment.SetEnvironmentVariable("POGO_DB_CONNECTION_STRING", json.GetValue("sql").ToString());
-         defaultPrefix = json.GetValue("prefix").ToString()[0];
-         var logLevel = Convert.ToInt32(json.GetValue("log_level").ToString());
+         Environment.SetEnvironmentVariable("POGO_DB_CONNECTION_STRING", json.GetValue("pogo_db_sql").ToString());
+         Environment.SetEnvironmentVariable("NONA_DB_CONNECTION_STRING", json.GetValue("nona_db_sql").ToString());
+         Environment.SetEnvironmentVariable("DEFAULT_PREFIX", json.GetValue("prefix").ToString());
 
+         var logLevel = Convert.ToInt32(json.GetValue("log_level").ToString());
          var logSeverity = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? LogSeverity.Info : (LogSeverity)logLevel;
 
-            //sets cache for reaction events
+         //sets cache for reaction events
          var _config = new DiscordSocketConfig 
          { 
             MessageCacheSize = 100,
@@ -62,7 +62,6 @@ namespace PokeStar
          await RegisterCommandsAsync().ConfigureAwait(false);
          HookReactionAdded();
          HookSetup();
-         HookJoinedGuild();
          HookLeftGuild();
          await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
          await _client.StartAsync().ConfigureAwait(false);
@@ -112,7 +111,10 @@ namespace PokeStar
          var context = new SocketCommandContext(_client, message);
 
          int argPos = 0;
-         string prefix = SystemEditCommands.GetPrefix(context.Guild.Id).ToString();
+
+         string prefix = Connections.Instance().GetPrefix(context.Guild.Id);
+         if (prefix == null)
+            prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
 
          if (message.Attachments.Count != 0)
          {
@@ -163,19 +165,6 @@ namespace PokeStar
 
          SetEmotes(server, json);
 
-         ChannelRegisterCommands.LoadChannels(_client.Guilds);
-         SystemEditCommands.LoadPrefix(_client.Guilds, defaultPrefix);
-
-         return Task.CompletedTask;
-      }
-
-      private void HookJoinedGuild()
-         => _client.JoinedGuild += HandleJoinedGuild;
-
-      private Task HandleJoinedGuild(SocketGuild guild)
-      {
-         ChannelRegisterCommands.AddGuild(guild.Id, true);
-         SystemEditCommands.AddGuild(guild.Id, defaultPrefix, true);
          return Task.CompletedTask;
       }
 
@@ -184,8 +173,8 @@ namespace PokeStar
 
       private Task HandleLeftGuild(SocketGuild guild)
       {
-         ChannelRegisterCommands.RemoveGuild(guild.Id);
-         SystemEditCommands.RemoveGuild(guild.Id);
+         Connections.Instance().DeleteRegistration(guild.Id);
+         Connections.Instance().DeletePrefix(guild.Id);
          return Task.CompletedTask;
       }
 

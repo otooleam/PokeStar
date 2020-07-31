@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
@@ -23,8 +24,6 @@ namespace PokeStar.Modules
           await ReplyAsync("This channel is not registered to process "type" commands.");
       */
 
-      private static Dictionary<ulong, Dictionary<ulong, string>> registeredChannels = new Dictionary<ulong, Dictionary<ulong, string>>();
-
       private static bool CheckSetupComplete = false;
 
       // Registers the channel this command is run in as a command channel
@@ -34,23 +33,18 @@ namespace PokeStar.Modules
       {
          ulong guild = Context.Guild.Id;
          ulong channel = Context.Channel.Id;
-         string reg;
+         string registration = Connections.Instance().GetRegistration(guild, channel);
+         registration = GenerateRegistrationString(purpose, registration ?? "");
 
-         if (registeredChannels[guild].ContainsKey(channel))
-            reg = GenerateRegistrationString(purpose, registeredChannels[guild][channel]);
-         else
-            reg = GenerateRegistrationString(purpose);
-
-         if (reg != null)
-            registeredChannels[guild].Add(channel, reg);
-         else
+         if (registration == null)
          {
             await Context.Channel.SendMessageAsync("Please enter a valid registration for one of the following Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D) or give no value for all");
             return;
          }
 
-         SaveChannels();
-         await Context.Channel.SendMessageAsync($"Channel is now registered for the following command types {GenerateSummaryString(reg)}");
+         Connections.Instance().UpdateRegistration(guild, channel, registration);
+
+         await Context.Channel.SendMessageAsync($"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
 
          if (CheckSetupComplete && Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
          {
@@ -66,25 +60,26 @@ namespace PokeStar.Modules
          ulong channel = Context.Channel.Id;
          string reg;
 
-         if (registeredChannels[guild].ContainsKey(channel))
+         string registration = Connections.Instance().GetRegistration(guild, channel);
+
+         if (registration != null)
          {
-            reg = GenerateUnregistrationString(purpose, registeredChannels[guild][channel]);
+            reg = GenerateUnregistrationString(purpose, registration);
             if (reg == null)
             {
                await Context.Channel.SendMessageAsync("Please enter a valid registration for one of the following Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D) or give no value for all");
                return;
             }
             else if (reg.Equals(string.Empty))
-               registeredChannels.Remove(guild);
+               Connections.Instance().DeleteRegistration(guild, channel);
             else
-               registeredChannels[guild][channel] = reg;
+               Connections.Instance().UpdateRegistration(guild, channel, reg);
          }
          else
          {
                await Context.Channel.SendMessageAsync("This channel does not have any commands registered to it");
                return;
          }
-         SaveChannels();
          if (reg.Equals(string.Empty))
             await Context.Channel.SendMessageAsync($"Removed all registrations from this channel.");
          else
@@ -116,7 +111,7 @@ namespace PokeStar.Modules
             return null;
 
          if (existing.Equals(string.Empty))
-            return add.ToString();
+            return add;
 
          if (existing.Contains(add))
             return existing;
@@ -127,7 +122,7 @@ namespace PokeStar.Modules
          return new string(a).ToUpper();
       }
 
-      private static string GenerateUnregistrationString(string purpose, string existing = "")
+      private static string GenerateUnregistrationString(string purpose, string existing)
       {
          string remove;
          if (purpose.ToUpper().Equals("ALL"))
@@ -147,7 +142,6 @@ namespace PokeStar.Modules
 
          int index = existing.IndexOf(remove);
          return (index < 0) ? null : existing.Remove(index, remove.Length);
-
       }
 
       private static string GenerateSummaryString(string reg)
@@ -167,50 +161,12 @@ namespace PokeStar.Modules
          return summary.TrimEnd(',');
       }
 
-      private static void SaveChannels()
-      {
-         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-         string json = JsonConvert.SerializeObject(registeredChannels, Formatting.Indented);
-         File.WriteAllText($"{path}\\chan_reg.json", json);
-      }
-
-      public static void LoadChannels(IReadOnlyCollection<SocketGuild> guilds)
-      {
-         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-         string json = File.ReadAllText($"{path}\\chan_reg.json");
-         registeredChannels = JsonConvert.DeserializeObject<Dictionary<ulong, Dictionary<ulong, string>>>(json);
-         if (registeredChannels == null)
-            registeredChannels = new Dictionary<ulong, Dictionary<ulong, string>>();
-
-         foreach (var guild in guilds)
-            if (!registeredChannels.ContainsKey(guild.Id))
-               AddGuild(guild.Id);
-      }
-
-      public static void AddGuild(ulong guild, bool save = false)
-      {
-         registeredChannels.Add(guild, new Dictionary<ulong, string>());
-         if (save)
-            SaveChannels();
-      }
-
-      public static void RemoveGuild(ulong guild)
-      {
-         registeredChannels.Remove(guild);
-         SaveChannels();
-      }
-
       public static bool IsRegisteredChannel(ulong guild, ulong channel, string type)
       {
-         if (registeredChannels.Keys.Contains(guild))
-         {
-            if (registeredChannels[guild].ContainsKey(channel))
-            {
-               string temp = registeredChannels[guild][channel];
-               return type.Length == 1 && temp.Contains(type.ToUpper());
-            }
-         }
-         return false;
+         string registration = Connections.Instance().GetRegistration(guild, channel);
+         if (registration == null)
+            return false;
+         return registration.Contains(type.ToUpper());
       }
    }
 }

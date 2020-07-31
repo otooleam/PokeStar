@@ -2,7 +2,7 @@
 
 namespace PokeStar.ConnectionInterface
 {
-   public class DatabaseConnector
+   public abstract class DatabaseConnector
    {
       private string ConnectionString { get; set; }
       protected readonly int TRUE = 1;
