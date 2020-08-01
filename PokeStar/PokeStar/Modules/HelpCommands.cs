@@ -1,65 +1,43 @@
 ﻿using System.Threading.Tasks;
+using System;
+using System.Linq;
+using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
-using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
    public class HelpCommands : ModuleBase<SocketCommandContext>
    {
-      [Command("help")]
-      public async Task Prefix(string type = null)
+      [Command("Help")]
+      [Summary("Displays info about commands")]
+      public async Task Help([Summary("(Optional) Get help for given command.")] string type = null)
       {
-         await ReplyAsync(embed: SelectEmbed(type).Build()).ConfigureAwait(false);
-      }
+         List<CommandInfo> commands = Program.GetCommands();
+         EmbedBuilder embedBuilder = new EmbedBuilder();
+         embedBuilder.WithColor(Color.Green);
 
-      private EmbedBuilder SelectEmbed(string type)
-      {
-         return HelpRegister();
-      }
-
-      private EmbedBuilder HelpGeneral()
-      {
-         EmbedBuilder embed = new EmbedBuilder();
-         embed.WithTitle("General Help");
-         embed.WithDescription("Details general command details");
-         embed.AddField(".ping", "General testing command", false);
-         embed.WithColor(Color.Green);
-         return embed;
-      }
-      private EmbedBuilder HelpRegister()
-      {
-         EmbedBuilder embed = new EmbedBuilder();
-         embed.WithTitle("Register Command Help");
-         embed.WithDescription("Registers channels to allow for use of different functions");
-         embed.AddField("Command:", ".register", false);
-         embed.AddField("Param: purpose", "What to Register", false);
-         embed.WithColor(Color.Green);
-         return embed;
-      }
-      private EmbedBuilder HelpDex()
-      {
-         return null;
-      }
-      private EmbedBuilder HelpHelp()
-      {
-         return null;
-      }
-      private EmbedBuilder HelpRaid()
-      {
-         return null;
-      }
-      private EmbedBuilder HelpRole()
-      {
-         return null;
-      }
-      private EmbedBuilder HelpSetup()
-      {
-         return null;
-      }
-      private EmbedBuilder HelpSystemEdit()
-      {
-         return null;
+         if (type == null)
+         {
+            embedBuilder.WithTitle("Command List");
+            embedBuilder.WithDescription("List of commands supported by this bot.");
+            foreach (CommandInfo command in commands)
+               embedBuilder.AddField(command.Name, command.Summary ?? "No description available\n");
+            await ReplyAsync(embed: embedBuilder.Build());
+         }
+         else if (commands.FirstOrDefault(x => x.Name.Equals(type, StringComparison.OrdinalIgnoreCase)) != null)
+         {
+            embedBuilder.WithTitle($"{type.ToLower()} Command Parameter List");
+            embedBuilder.WithDescription("List of parameters for the command.");
+            CommandInfo command = commands.FirstOrDefault(x => x.Name.Equals(type, StringComparison.OrdinalIgnoreCase));
+            foreach (var param in command.Parameters)
+               embedBuilder.AddField(param.Name, param.Summary ?? "No description available\n");
+            if (command.Parameters.Count == 0)
+               embedBuilder.WithFooter("This command does not take any parameters.");
+            await ReplyAsync(embed: embedBuilder.Build());
+         }
+         else
+            await ReplyAsync($"Command \'{type}\' does not exist.");
       }
    }
 }
