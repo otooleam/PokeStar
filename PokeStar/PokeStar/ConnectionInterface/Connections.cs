@@ -15,11 +15,13 @@ namespace PokeStar.ConnectionInterface
 
       private static Connections connections;
 
-      private DatabaseConnector dbConnector;
+      private readonly POGODatabaseConnector POGODBConnector;
+      private readonly NONADatabaseConnector NONADBConnector;
 
       private Connections()
       {
-         dbConnector = new DatabaseConnector(Environment.GetEnvironmentVariable("POGO_DB_CONNECTION_STRING"));
+         POGODBConnector = new POGODatabaseConnector(Environment.GetEnvironmentVariable("POGO_DB_CONNECTION_STRING"));
+         NONADBConnector = new NONADatabaseConnector(Environment.GetEnvironmentVariable("NONA_DB_CONNECTION_STRING"));
       }
 
       public static Connections Instance()
@@ -59,12 +61,12 @@ namespace PokeStar.ConnectionInterface
             return null;
 
          string name = ReformatName(raidBossName);
-         RaidBoss raidBoss = dbConnector.GetRaidBoss(name);
+         RaidBoss raidBoss = POGODBConnector.GetRaidBoss(name);
          if (raidBoss == null) return null;
 
-         raidBoss.Weather = dbConnector.GetWeather(raidBoss.Type);
-         raidBoss.Weakness = dbConnector.GetTypeRelations(raidBoss.Type, true);
-         raidBoss.Resistance = dbConnector.GetTypeRelations(raidBoss.Type, false);
+         raidBoss.Weather = POGODBConnector.GetWeather(raidBoss.Type);
+         raidBoss.Weakness = POGODBConnector.GetTypeRelations(raidBoss.Type, true);
+         raidBoss.Resistance = POGODBConnector.GetTypeRelations(raidBoss.Type, false);
 
          raidBoss.CPLow = CPCalculator.CalcCPPerLevel(
             raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina, 
@@ -97,14 +99,14 @@ namespace PokeStar.ConnectionInterface
             return null;
 
          string name = ReformatName(pokemonName);
-         Pokemon pokemon = dbConnector.GetPokemon(name);
+         Pokemon pokemon = POGODBConnector.GetPokemon(name);
          if (pokemon == null) return null;
 
-         pokemon.Weather = dbConnector.GetWeather(pokemon.Type);
-         pokemon.Weakness = dbConnector.GetTypeRelations(pokemon.Type, true);
-         pokemon.Resistance = dbConnector.GetTypeRelations(pokemon.Type, false);
-         pokemon.FastMove = dbConnector.GetMoves(name, true);
-         pokemon.ChargeMove = dbConnector.GetMoves(name, false);
+         pokemon.Weather = POGODBConnector.GetWeather(pokemon.Type);
+         pokemon.Weakness = POGODBConnector.GetTypeRelations(pokemon.Type, true);
+         pokemon.Resistance = POGODBConnector.GetTypeRelations(pokemon.Type, false);
+         pokemon.FastMove = POGODBConnector.GetMoves(name, true);
+         pokemon.ChargeMove = POGODBConnector.GetMoves(name, false);
 
          pokemon.CPMax = CPCalculator.CalcCPPerLevel(
             pokemon.Attack, pokemon.Defense, pokemon.Stamina,
@@ -178,6 +180,47 @@ namespace PokeStar.ConnectionInterface
       {
          int index = originalName.IndexOf('\'');
          return index == -1 ? originalName : originalName.Insert(index, "\'");
+      }
+
+      public string GetPrefix(ulong guild)
+      {
+         string prefix = NONADBConnector.GetPrefix(guild);
+         return (prefix == null) ? null : prefix[0].ToString();
+      }
+      public void UpdatePrefix(ulong guild, string prefix)
+      {
+         if (GetPrefix(guild) == null)
+            NONADBConnector.AddPrefix(guild, prefix);
+         else
+            NONADBConnector.UpdatePrefix(guild, prefix);
+      }
+      public void DeletePrefix(ulong guild)
+      {
+         if (GetPrefix(guild) != null)
+            NONADBConnector.DeletePrefix(guild);
+      }
+
+      public string GetRegistration(ulong guild, ulong channel)
+      {
+         string registration = NONADBConnector.GetRegistration(guild, channel);
+         return (registration == null) ? null : registration;
+      }
+      public void UpdateRegistration(ulong guild, ulong channel, string prefix)
+      {
+         if (GetRegistration(guild, channel) == null)
+            NONADBConnector.AddRegistration(guild, channel, prefix);
+         else
+            NONADBConnector.UpdateRegistration(guild, channel, prefix);
+      }
+      public void DeleteRegistration(ulong guild, ulong? channel = null)
+      {
+         if (GetPrefix(guild) != null)
+         {
+            if (channel == null)
+               NONADBConnector.DeleteAllRegistration(guild);
+            else
+               NONADBConnector.DeleteRegistration(guild, (ulong)channel);
+         }
       }
    }
 }

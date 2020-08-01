@@ -8,8 +8,8 @@ namespace PokeStar.Calculators
       public static readonly int MIN_WILD_LEVEL = 1;
       public static readonly int MAX_WILD_LEVEL = 35;
       public static readonly int RAID_LEVEL = 20;
-      public static readonly int QUEST_LEVEL = 15;
       public static readonly int HATCH_LEVEL = 20;
+      public static readonly int QUEST_LEVEL = 15;
       public static readonly int WEATHER_BOOST = 5;
       public static readonly int BUDDY_BOOST = 1;
 
@@ -48,7 +48,7 @@ namespace PokeStar.Calculators
 
       private static double CalcCPM(double level)
       {
-         if (level % 1.0 == 0)
+         if (level % 1.0 != 0)
             return CalcHalfLevelCPM(level);
          else
             return discrete_cp_multiplier[(int)(level - 1)];
