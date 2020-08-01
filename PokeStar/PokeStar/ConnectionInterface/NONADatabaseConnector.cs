@@ -57,7 +57,6 @@ namespace PokeStar.ConnectionInterface
 
             string queryString = $@"INSERT INTO channel_registration (guild, channel, register)
                                  VALUES ({guild}, {channel}, '{registration}')";
-            Console.WriteLine(queryString);
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
             conn.Close();
          }
