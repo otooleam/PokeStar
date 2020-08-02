@@ -67,6 +67,8 @@ namespace PokeStar
          await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
          await _client.StartAsync().ConfigureAwait(false);
 
+         await _client.SetGameAsync(".help | v0");
+
          Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
 
          // Block this task until the program is closed.
@@ -121,11 +123,11 @@ namespace PokeStar
          {
             if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "P"))
                RollImageProcess.RoleImageProcess(context);
-            if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "R"))
+            else if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "R"))
             {
                //TODO: Add call for raid image processing
             }
-            if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "E"))
+            else if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "E"))
             {
                //TODO: Add call for ex raid image processing
             }
