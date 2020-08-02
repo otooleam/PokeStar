@@ -1,12 +1,6 @@
 ﻿using System;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Discord.Commands;
-using Discord.WebSocket;
-using Newtonsoft.Json;
 using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
@@ -29,16 +23,25 @@ namespace PokeStar.Modules
       // Registers the channel this command is run in as a command channel
       // Requires .setup to have been run
       [Command("register")]
-      public async Task Register(string purpose = "ALL")
+      [Summary("Registers a channel for a type of command.")]
+      [Remarks("Valid registration values are:\n" +
+               "Command Type.....Registration Value\n" +
+               "Players/Roles.........player / role / p\n" +
+               "Raids.........................raid / r\n" +
+               "EX Raids...................ex / e\n" +
+               "Raid Trains..............train / t\n" +
+               "Pokedex...................pokedex / dex / d\n" +
+               "Leave blank to register for all.")]
+      public async Task Register([Summary("(Optional) Register the channel for these commands.")] string register = "ALL")
       {
          ulong guild = Context.Guild.Id;
          ulong channel = Context.Channel.Id;
          string registration = Connections.Instance().GetRegistration(guild, channel);
-         registration = GenerateRegistrationString(purpose, registration ?? "");
+         registration = GenerateRegistrationString(register, registration ?? "");
 
          if (registration == null)
          {
-            await Context.Channel.SendMessageAsync("Please enter a valid registration for one of the following Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D) or give no value for all");
+            await Context.Channel.SendMessageAsync("Please enter a valid registration value.");
             return;
          }
 
@@ -54,7 +57,16 @@ namespace PokeStar.Modules
       }
 
       [Command("unregister")]
-      public async Task Unregister(string purpose = "ALL")
+      [Summary("Unregisters a channel from a type of command.")]
+      [Remarks("Valid unregistration values are:\n" +
+               "Command Type.....Unregistration Value\n" +
+               "Players/Roles.........player / role / p\n" +
+               "Raids.........................raid / r\n" +
+               "EX Raids...................ex / e\n" +
+               "Raid Trains..............train / t\n" +
+               "Pokedex...................pokedex / dex / d\n" +
+               "Leave blank to unregister for all.")]
+      public async Task Unregister([Summary("(Optional) Unregister the channel from these commands.")] string unregister = "ALL")
       {
          ulong guild = Context.Guild.Id;
          ulong channel = Context.Channel.Id;
@@ -64,10 +76,10 @@ namespace PokeStar.Modules
 
          if (registration != null)
          {
-            reg = GenerateUnregistrationString(purpose, registration);
+            reg = GenerateUnregistrationString(unregister, registration);
             if (reg == null)
             {
-               await Context.Channel.SendMessageAsync("Please enter a valid registration for one of the following Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D) or give no value for all");
+               await Context.Channel.SendMessageAsync("Please enter a valid registration value.");
                return;
             }
             else if (reg.Equals(string.Empty))
@@ -94,7 +106,7 @@ namespace PokeStar.Modules
             add = "DEPRT";
             CheckSetupComplete = true;
          }
-         else if (purpose.ToUpper().Equals("PLAYER") || purpose.ToUpper().Equals("P"))
+         else if (purpose.ToUpper().Equals("PLAYER") || purpose.ToUpper().Equals("ROLE") || purpose.ToUpper().Equals("P"))
          {
             add = "P";
             CheckSetupComplete = true;
@@ -105,7 +117,7 @@ namespace PokeStar.Modules
             add = "E";
          else if (purpose.ToUpper().Equals("TRAIN") || purpose.ToUpper().Equals("T"))
             add = "T";
-         else if (purpose.ToUpper().Equals("DEX") || purpose.ToUpper().Equals("D"))
+         else if (purpose.ToUpper().Equals("POKEDEX") || purpose.ToUpper().Equals("DEX") || purpose.ToUpper().Equals("D"))
             add = "D";
          else
             return null;
@@ -127,7 +139,7 @@ namespace PokeStar.Modules
          string remove;
          if (purpose.ToUpper().Equals("ALL"))
             return "";
-         else if (purpose.ToUpper().Equals("PLAYER") || purpose.ToUpper().Equals("P"))
+         else if (purpose.ToUpper().Equals("PLAYER") || purpose.ToUpper().Equals("ROLE") || purpose.ToUpper().Equals("P"))
             remove = "P";
          else if (purpose.ToUpper().Equals("RAID") || purpose.ToUpper().Equals("R"))
             remove = "R";
@@ -135,7 +147,7 @@ namespace PokeStar.Modules
             remove = "E";
          else if (purpose.ToUpper().Equals("TRAIN") || purpose.ToUpper().Equals("T"))
             remove = "T";
-         else if (purpose.ToUpper().Equals("DEX") || purpose.ToUpper().Equals("D"))
+         else if (purpose.ToUpper().Equals("POKEDEX") || purpose.ToUpper().Equals("DEX") || purpose.ToUpper().Equals("D"))
             remove = "D";
          else
             return null;
@@ -157,8 +169,7 @@ namespace PokeStar.Modules
             summary += "Raid Trains, ";
          if (reg.ToUpper().Contains("D"))
             summary += "PokeDex, ";
-         summary = summary.Trim();
-         return summary.TrimEnd(',');
+         return summary.TrimEnd().TrimEnd(',');
       }
 
       public static bool IsRegisteredChannel(ulong guild, ulong channel, string type)

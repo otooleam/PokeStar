@@ -6,6 +6,7 @@ namespace PokeStar.Modules
    public class BasicCommands : ModuleBase<SocketCommandContext>
    {
       [Command("ping")]
+      [Summary("Pong Pong Pong")]
       public async Task Ping()
       {
          await ReplyAsync("Pong").ConfigureAwait(false);

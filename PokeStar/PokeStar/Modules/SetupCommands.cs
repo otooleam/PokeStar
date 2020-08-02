@@ -9,6 +9,7 @@ namespace PokeStar.Modules
    public class SetupCommands : ModuleBase<SocketCommandContext>
    {
       [Command("setup")]
+      [Summary("summary")]
       public async Task Setup()
       {
          if (Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
