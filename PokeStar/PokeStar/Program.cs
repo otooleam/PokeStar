@@ -11,6 +11,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PokeStar.Modules;
 using PokeStar.ImageProcessors;
 using PokeStar.ConnectionInterface;
+using System.Collections.Generic;
 
 namespace PokeStar
 {
@@ -21,7 +22,7 @@ namespace PokeStar
          => new Program().MainAsync().GetAwaiter().GetResult(); //Any Exceptions get thrown here
 
       private DiscordSocketClient _client;
-      private CommandService _commands;
+      private static CommandService _commands;
       private IServiceProvider _services;
 
       private bool logging = false;
@@ -66,6 +67,8 @@ namespace PokeStar
          await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
          await _client.StartAsync().ConfigureAwait(false);
 
+         await _client.SetGameAsync(".help | v0");
+
          Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
 
          // Block this task until the program is closed.
@@ -97,7 +100,7 @@ namespace PokeStar
          return Task.CompletedTask;
       }
 
-      public async Task RegisterCommandsAsync()
+      private async Task RegisterCommandsAsync()
       {
          _client.MessageReceived += HandleCommandAsync;
          await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services).ConfigureAwait(false);
@@ -120,11 +123,11 @@ namespace PokeStar
          {
             if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "P"))
                RollImageProcess.RoleImageProcess(context);
-            if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "R"))
+            else if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "R"))
             {
                //TODO: Add call for raid image processing
             }
-            if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "E"))
+            else if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "E"))
             {
                //TODO: Add call for ex raid image processing
             }
@@ -178,7 +181,7 @@ namespace PokeStar
          return Task.CompletedTask;
       }
 
-      private static void SetEmotes(SocketGuild server, JObject json)
+      private void SetEmotes(SocketGuild server, JObject json)
       {
          string[] emoteNames = {
             "bug_emote", "dark_emote", "dragon_emote", "electric_emote", "fairy_emote", "fighting_emote",
@@ -190,6 +193,11 @@ namespace PokeStar
          foreach (string emote in emoteNames)
             Environment.SetEnvironmentVariable(emote.ToUpper(),
                server.Emotes.FirstOrDefault(x => x.Name.ToString().Equals(json.GetValue(emote.ToLower()).ToString(), StringComparison.OrdinalIgnoreCase)).ToString());
+      }
+
+      public static List<CommandInfo> GetCommands()
+      {
+         return _commands.Commands.ToList();
       }
    }
 }

@@ -18,6 +18,9 @@ namespace PokeStar.ImageProcessors
          if (context == null)
             return;
 
+         if (Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
+            return;
+
          var attachments = context.Message.Attachments;
          var user = context.Guild.Users.FirstOrDefault(x => x.Username.ToString().Equals(context.Message.Author.Username, StringComparison.OrdinalIgnoreCase));
          string url = attachments.ElementAt(0).Url;

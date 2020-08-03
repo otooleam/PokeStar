@@ -11,11 +11,13 @@ namespace PokeStar.Modules
    public class DexCommands : ModuleBase<SocketCommandContext>
    {
       [Command("dex")]
-      public async Task Dex([Remainder] string text)
+      [Alias("pokedex")]
+      [Summary("Gets information for a pokemon.")]
+      public async Task Dex([Summary("Get information for this pokemon.")] [Remainder] string pokemonName)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
-            var name = GetPokemon(text);
+            var name = GetPokemon(pokemonName);
             Pokemon pokemon = Connections.Instance().GetPokemon(name);
             if (pokemon == null)
             {
@@ -55,11 +57,12 @@ namespace PokeStar.Modules
             await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
       }
       [Command("cp")]
-      public async Task CP([Remainder] string text)
+      [Summary("Gets common max CP values for a pokemon")]
+      public async Task CP([Summary("Get CPs for this pokemon.")] [Remainder] string pokemonName)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
-            var name = GetPokemon(text);
+            var name = GetPokemon(pokemonName);
             Pokemon pokemon = Connections.Instance().GetPokemon(name);
             if (pokemon == null)
             {
@@ -286,7 +289,5 @@ namespace PokeStar.Modules
             return $"Pirouette {pokemonName}";
          return pokemonName;
       }
-
-
    }
 }

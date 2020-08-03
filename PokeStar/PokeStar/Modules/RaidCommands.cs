@@ -52,7 +52,10 @@ namespace PokeStar.Modules
       }
 
       [Command("raid")]
-      public async Task Raid(short tier, string time, [Remainder]string location)
+      [Summary("Creates a new Raid message.")]
+      public async Task Raid([Summary("Tier of the raid.")] short tier,
+                             [Summary("Time the raid will start.")] string time,
+                             [Summary("Where the raid will be.")] [Remainder]string location)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
          {
@@ -189,16 +192,18 @@ namespace PokeStar.Modules
       }
 
       [Command("invite")]
-      public async Task Invite(ulong id, IGuildUser player)
+      [Summary("Invites a user to a raid.")]
+      public async Task Invite([Summary("Raid to invite user to.")] ulong raidId,
+                               [Summary("Invite this user to raid.")] IGuildUser player)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
          {
-            Raid raid = currentRaids[id];
+            Raid raid = currentRaids[raidId];
 
             if (raid.InvitePlayer((SocketGuildUser)player, (SocketGuildUser)Context.User))
             {
 
-               var message = (SocketUserMessage)Context.Channel.CachedMessages.FirstOrDefault(x => x.Id == id);
+               var message = (SocketUserMessage)Context.Channel.CachedMessages.FirstOrDefault(x => x.Id == raidId);
                await message.ModifyAsync(x =>
                {
                   x.Embed = BuildEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
