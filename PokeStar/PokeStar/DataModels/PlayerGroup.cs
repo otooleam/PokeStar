@@ -9,7 +9,7 @@ namespace PokeStar.DataModels
 {
    class PlayerGroup
    {
-      private const int PARTY_SIZE_LIMIT = 7;
+      private const int PARTY_SIZE_LIMIT = 7; //TODO set this back to 20
 
       public int AttendingCount { get; private set; }
       public int ReadyCount { get; private set; }
@@ -136,7 +136,5 @@ namespace PokeStar.DataModels
             }
          }
       }
-
-      
    }
 }

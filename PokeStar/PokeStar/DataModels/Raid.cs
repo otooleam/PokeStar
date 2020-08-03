@@ -78,7 +78,24 @@ namespace PokeStar.DataModels
 
       private void CombinePlayerGroups(PlayerGroup group1, PlayerGroup group2)
       {
-         
+         PlayerGroup newGroup = new PlayerGroup();
+
+         newGroup.Players.AddRange(group1.Players);
+         newGroup.Players.AddRange(group2.Players);
+
+         foreach (KeyValuePair<SocketGuildUser, int> player in group1.Ready)
+            newGroup.Ready.Add(player.Key, player.Value);
+         foreach (KeyValuePair<SocketGuildUser, int> player in group2.Ready)
+            newGroup.Ready.Add(player.Key, player.Value);
+
+         foreach (KeyValuePair<SocketGuildUser, int> player in group1.Attending)
+            newGroup.Attending.Add(player.Key, player.Value);
+         foreach (KeyValuePair<SocketGuildUser, int> player in group1.Attending)
+            newGroup.Attending.Add(player.Key, player.Value);
+
+         PlayerGroups.Remove(group1);
+         PlayerGroups.Remove(group2);
+         PlayerGroups.Add(newGroup);
       }
 
       private int FindMinIndex(List<PlayerGroup> list)
@@ -136,7 +153,18 @@ namespace PokeStar.DataModels
          {
             foreach (PlayerGroup group in PlayerGroups)
                if (group.Players.Contains(player))
+               {
                   group.RemovePlayer(player);
+                  
+                  foreach (PlayerGroup group2 in PlayerGroups)
+                  {
+                     if (group.Players.Count + group2.Players.Count <= 20)
+                     {
+                        CombinePlayerGroups(group, group2);
+                        return;
+                     }
+                  }
+               }
          }
       }
 
@@ -145,7 +173,7 @@ namespace PokeStar.DataModels
          foreach (PlayerGroup group in PlayerGroups)
          {
             if (group.Players.Contains(player))
-               return group.BuildPingList();
+               return BuildPingList(PlayerGroups.IndexOf(group));
          }
          return "Everyone is Here.";
       }
@@ -171,7 +199,7 @@ namespace PokeStar.DataModels
 
             foreach (SocketGuildUser player in PlayerGroups[0].Players)
                sb.Append(player.Mention);
-            sb.AppendLine($" Everyone is ready at {Location}, time to jump!");
+            sb.AppendLine($" Everyone is ready at {Location}.");
 
             return sb.ToString();
          }
@@ -181,7 +209,7 @@ namespace PokeStar.DataModels
 
             foreach (SocketGuildUser player in PlayerGroups[groupNum].Players)
                sb.Append(player.Mention);
-            sb.AppendLine($" Group{groupNum} is ready at {Location}, time to jump!");
+            sb.AppendLine($" Group {groupNum + 1} is ready at {Location}.");
 
             return sb.ToString();
          }
