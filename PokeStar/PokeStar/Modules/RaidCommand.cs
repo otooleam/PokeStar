@@ -225,7 +225,7 @@ namespace PokeStar.Modules
             foreach (PlayerGroup group in raid.PlayerGroups) //TODO group header - add limit
             {
                embed.AddField($"Group {groupNum + 1} Here ({raid.PlayerGroups[groupNum].ReadyCount}/{raid.PlayerGroups[groupNum].AttendingCount})", $"{BuildPlayerList(raid.PlayerGroups[groupNum].Ready)}");
-               embed.AddField($"Group {groupNum + 1} Attending", $"{BuildPlayerList(raid.PlayerGroups[groupNum].Attending)}");
+               embed.AddField($"Group {groupNum + 1} Attending", $"{BuildPlayerList(raid.PlayerGroups[groupNum].Attending)}"); //TODO embed must have less than 25 fields
                groupNum++;
             }
          }

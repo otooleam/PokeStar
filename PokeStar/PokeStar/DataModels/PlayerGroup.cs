@@ -9,7 +9,7 @@ namespace PokeStar.DataModels
 {
    class PlayerGroup
    {
-      private const int PARTY_SIZE_LIMIT = 7; //TODO set this back to 20
+      public const int PARTY_SIZE_LIMIT = 7; //TODO set this back to 20
 
       public int AttendingCount { get; private set; }
       public int ReadyCount { get; private set; }
@@ -79,7 +79,7 @@ namespace PokeStar.DataModels
                   }
                   else
                   {
-                     AttendingCount += partySize - Ready[player];
+                     AttendingCount += partySize - Ready[player]; //key non exist error
                      ReadyCount += partySize - Ready[player];
                      Ready[player] = partySize;
                   }

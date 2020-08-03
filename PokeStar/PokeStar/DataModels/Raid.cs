@@ -64,7 +64,7 @@ namespace PokeStar.DataModels
 
          foreach (KeyValuePair<SocketGuildUser, int> attendingPlayer in nonReadyPlayers)
          {
-            if (originalGroup.Players.Count < newGroup.Players.Count)
+            if (originalGroup.Players.Count <= newGroup.Players.Count)
             {
                originalGroup.PlayerAdd(attendingPlayer.Key, attendingPlayer.Value);
             }
@@ -138,7 +138,7 @@ namespace PokeStar.DataModels
          {
             foreach (PlayerGroup group in PlayerGroups)
                if (group.Players.Contains(invitingPlayer))
-                  return group.PlayerAdd(invitingPlayer, -1);
+                  return group.PlayerAdd(invitingPlayer, -1); //-1 denotes an invite
          }
          return false;
       }
@@ -158,9 +158,9 @@ namespace PokeStar.DataModels
                   
                   foreach (PlayerGroup group2 in PlayerGroups)
                   {
-                     if (group.Players.Count + group2.Players.Count <= 20)
+                     if (group.Players.Count + group2.Players.Count <= PlayerGroup.PARTY_SIZE_LIMIT)
                      {
-                        CombinePlayerGroups(group, group2);
+                        CombinePlayerGroups(group, group2); 
                         return;
                      }
                   }
