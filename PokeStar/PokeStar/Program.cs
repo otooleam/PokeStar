@@ -41,13 +41,13 @@ namespace PokeStar
          var logSeverity = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? LogSeverity.Info : (LogSeverity)logLevel;
 
          //sets cache for reaction events
-         var _config = new DiscordSocketConfig 
-         { 
+         var _config = new DiscordSocketConfig
+         {
             MessageCacheSize = 100,
             LogLevel = logSeverity
          };
          _client = new DiscordSocketClient(_config);
-         CommandServiceConfig config = new CommandServiceConfig 
+         CommandServiceConfig config = new CommandServiceConfig
          {
             DefaultRunMode = RunMode.Async,
             LogLevel = logSeverity
@@ -150,7 +150,7 @@ namespace PokeStar
          var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
          var user = reaction.User.Value;
          if (message != null && reaction.User.IsSpecified && !user.IsBot && RaidCommands.IsCurrentRaid(message.Id))
-         {         
+         {
             await RaidCommands.RaidReaction(message, reaction);
          }
          return Task.CompletedTask;

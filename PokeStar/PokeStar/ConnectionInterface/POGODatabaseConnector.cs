@@ -15,6 +15,7 @@ namespace PokeStar.ConnectionInterface
          using (var conn = GetConnection())
          {
             conn.Open();
+
             string queryString = $@"SELECT name, attack, defense, stamina, type_1, type_2
                                     FROM pokemon 
                                     WHERE name='{raidBossName}';";
@@ -46,6 +47,7 @@ namespace PokeStar.ConnectionInterface
          using (var conn = GetConnection())
          {
             conn.Open();
+
             string queryString = $@"SELECT *
                                     FROM pokemon 
                                     WHERE name='{pokemonName}';";
@@ -86,7 +88,7 @@ namespace PokeStar.ConnectionInterface
          using (var conn = GetConnection())
          {
             conn.Open();
-            
+
             string queryString = $@"SELECT weather 
                                  FROM weather 
                                  WHERE {GetTypeWhere(types, "type")};";
@@ -106,6 +108,7 @@ namespace PokeStar.ConnectionInterface
          using (var conn = GetConnection())
          {
             conn.Open();
+
             string queryString = $@"SELECT attacker, SUM(modifier) AS total_relation 
                                     FROM (
                                     SELECT attacker, modifier
@@ -135,6 +138,7 @@ namespace PokeStar.ConnectionInterface
          using (var conn = GetConnection())
          {
             conn.Open();
+
             string moveType = fast ? "Fast" : "Charge";
             string queryString = $@"SELECT name, type, is_legacy
                                     FROM pokemon_move

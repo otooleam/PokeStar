@@ -39,7 +39,8 @@ namespace PokeStar.Modules
          new Emoji("🔟")
       };
 
-      private enum RAID_EMOJI_INDEX {
+      private enum RAID_EMOJI_INDEX
+      {
          ADD_PLAYER_1,
          ADD_PLAYER_2,
          ADD_PLAYER_3,
@@ -55,7 +56,7 @@ namespace PokeStar.Modules
       [Summary("Creates a new Raid message.")]
       public async Task Raid([Summary("Tier of the raid.")] short tier,
                              [Summary("Time the raid will start.")] string time,
-                             [Summary("Where the raid will be.")] [Remainder]string location)
+                             [Summary("Where the raid will be.")][Remainder] string location)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
          {

@@ -33,7 +33,7 @@ namespace PokeStar.DataModels
          CreatedAt = DateTime.Now;
       }
 
-      public void PlayerAdd(SocketGuildUser player, int partySize, bool isInvite=false)
+      public void PlayerAdd(SocketGuildUser player, int partySize, bool isInvite = false)
       {
          if (Attending.ContainsKey(player))
          {

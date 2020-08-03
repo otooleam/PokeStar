@@ -17,6 +17,5 @@ namespace PokeStar.DataModels
             str += " !";
          return str;
       }
-
    }
 }
