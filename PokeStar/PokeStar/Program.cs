@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -11,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using PokeStar.Modules;
 using PokeStar.ImageProcessors;
 using PokeStar.ConnectionInterface;
-using System.Collections.Generic;
 
 namespace PokeStar
 {
@@ -67,7 +67,7 @@ namespace PokeStar
          await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
          await _client.StartAsync().ConfigureAwait(false);
 
-         await _client.SetGameAsync(".help | v0");
+         await _client.SetGameAsync(".help | v0.1.dev");
 
          Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
 
