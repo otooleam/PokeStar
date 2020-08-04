@@ -12,8 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using PokeStar.Modules;
 using PokeStar.ImageProcessors;
 using PokeStar.ConnectionInterface;
-using System.Collections.Generic;
-using PokeStar.DataModels;
 
 namespace PokeStar
 {
@@ -37,7 +35,7 @@ namespace PokeStar
          var token = json.GetValue("token").ToString();
          Environment.SetEnvironmentVariable("POGO_DB_CONNECTION_STRING", json.GetValue("pogo_db_sql").ToString());
          Environment.SetEnvironmentVariable("NONA_DB_CONNECTION_STRING", json.GetValue("nona_db_sql").ToString());
-         Environment.SetEnvironmentVariable("DEFAULT_PREFIX", json.GetValue("prefix").ToString());
+         Environment.SetEnvironmentVariable("DEFAULT_PREFIX", json.GetValue("default_prefix").ToString());
 
          var logLevel = Convert.ToInt32(json.GetValue("log_level").ToString());
          var logSeverity = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? LogSeverity.Info : (LogSeverity)logLevel;
@@ -69,7 +67,8 @@ namespace PokeStar
          await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
          await _client.StartAsync().ConfigureAwait(false);
 
-         await _client.SetGameAsync(".help | v0.1.dev");
+         string version = json.GetValue("version").ToString();
+         await _client.SetGameAsync($".help | v{version}");
 
          Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
 
