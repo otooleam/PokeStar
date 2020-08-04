@@ -138,5 +138,10 @@ namespace PokeStar.DataModels
             Boss = Connections.Instance().GetRaidBoss(bossName);
          }
       }
+
+      public bool HasPlayer(SocketGuildUser user)
+      {
+         return Attending.ContainsKey(user) || Here.ContainsKey(user);
+      }
    }
 }
