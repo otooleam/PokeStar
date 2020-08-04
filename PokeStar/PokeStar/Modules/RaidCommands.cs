@@ -207,31 +207,6 @@ namespace PokeStar.Modules
          }
       }
 
-      [Command("invite")]
-      [Summary("Invites a user to a raid.")]
-      public async Task Invite([Summary("Raid to invite user to.")] ulong raidId,
-                               [Summary("Invite this user to raid.")] IGuildUser player)
-      {
-         if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
-         {
-            Raid raid = currentRaids[raidId];
-
-            if (raid.InvitePlayer((SocketGuildUser)player, (SocketGuildUser)Context.User))
-            {
-
-               var message = (SocketUserMessage)Context.Channel.CachedMessages.FirstOrDefault(x => x.Id == raidId);
-               await message.ModifyAsync(x =>
-               {
-                  x.Embed = BuildEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
-               });
-
-               await player.SendMessageAsync($"You have been invited to a raid by {Context.User.Username}. Please mark yourself as \"HERE\" when ready.");
-            }
-         }
-         else
-            await Context.Channel.SendMessageAsync("This channel is not registered to process Raid commands.");
-      }
-
       public static async Task RaidInviteReaction(IMessage message, SocketReaction reaction, ISocketMessageChannel channel)
       {
          var raidMessageId = raidMessages[message.Id];
@@ -356,14 +331,10 @@ namespace PokeStar.Modules
          sb.AppendLine($"Once you arrive at the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_HERE]} to show others that you have arrived." +
             $" When all players have marked that they have arrived, Nona will send a message to the group.");
          sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]}.");
+         sb.AppendLine($"To invite someone to a raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]} and react with the coresponding emote for the person.");
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
 
-         sb.AppendLine("\nRaid Invite:");
-         sb.AppendLine("To invite someone to a raid through remote send the following command in raid channel:");
-         sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}invite {code} player");
-         sb.AppendLine("Note: Change player to desired name. May be benefitial to @ player.");
-
-         sb.AppendLine("\nRaid Edit:");
+         sb.AppendLine("\nRaid Edit (Note this is not implemented yet):");
          sb.AppendLine("To edit the desired raid send the following command in raid channel:");
          sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}edit {code} time location");
          sb.AppendLine("Note: Change time and location to desired time and location. Editing Location is optional.");
