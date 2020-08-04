@@ -242,13 +242,13 @@ namespace PokeStar.Modules
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.DarkBlue);
          embed.WithTitle($"{(raid.Boss.Name.Equals("Bossless") ? "" : raid.Boss.Name)} {BuildRaidTitle(raid.Tier)}");
+         embed.WithDescription("Press ? for help.\nNote: the max number of members in a raid is 20, and the max number of invites is 10.");
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Time", raid.Time, true);
          embed.AddField("Location", raid.Location, true);
          embed.AddField($"Here ({raid.HereCount}/{raid.PlayerCount})", $"{BuildPlayerList(raid.Here)}");
          embed.AddField("Attending", $"{BuildPlayerList(raid.Attending)}");
          embed.AddField("Need Invite", $"{BuildPlayerList(raid.Invite)}");
-         embed.WithDescription("Press ? for help");
 
          return embed.Build();
       }
@@ -331,7 +331,7 @@ namespace PokeStar.Modules
          sb.AppendLine($"Once you arrive at the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_HERE]} to show others that you have arrived." +
             $" When all players have marked that they have arrived, Nona will send a message to the group.");
          sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]}.");
-         sb.AppendLine($"To invite someone to a raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]} and react with the coresponding emote for the person.");
+         sb.AppendLine($"To invite someone to a raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]} and react with the coresponding emote for the player.");
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
 
          sb.AppendLine("\nRaid Edit (Note this is not implemented yet):");
