@@ -69,8 +69,8 @@ namespace PokeStar.ConnectionInterface
          raidBoss.Resistance = POGODBConnector.GetTypeRelations(raidBoss.Type, false);
 
          raidBoss.CPLow = CPCalculator.CalcCPPerLevel(
-            raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina, 
-            CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV, 
+            raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
+            CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
             CPCalculator.MIN_SPECIAL_IV, CPCalculator.RAID_LEVEL);
 
          raidBoss.CPHigh = CPCalculator.CalcCPPerLevel(
@@ -81,13 +81,13 @@ namespace PokeStar.ConnectionInterface
          raidBoss.CPLowBoosted = CPCalculator.CalcCPPerLevel(
             raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
             CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
-            CPCalculator.MIN_SPECIAL_IV, 
+            CPCalculator.MIN_SPECIAL_IV,
             CPCalculator.RAID_LEVEL + CPCalculator.WEATHER_BOOST);
 
          raidBoss.CPHighBoosted = CPCalculator.CalcCPPerLevel(
             raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
             CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-            CPCalculator.MAX_IV, 
+            CPCalculator.MAX_IV,
             CPCalculator.RAID_LEVEL + CPCalculator.WEATHER_BOOST);
 
          return raidBoss;

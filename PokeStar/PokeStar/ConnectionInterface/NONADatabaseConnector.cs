@@ -21,7 +21,7 @@ namespace PokeStar.ConnectionInterface
             using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
-                  if(reader["register"].GetType() != typeof(DBNull))
+                  if (reader["register"].GetType() != typeof(DBNull))
                      registration = Convert.ToString(reader["register"]);
             }
             conn.Close();

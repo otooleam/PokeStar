@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -11,7 +12,6 @@ using Microsoft.Extensions.DependencyInjection;
 using PokeStar.Modules;
 using PokeStar.ImageProcessors;
 using PokeStar.ConnectionInterface;
-using System.Collections.Generic;
 
 namespace PokeStar
 {
@@ -35,19 +35,19 @@ namespace PokeStar
          var token = json.GetValue("token").ToString();
          Environment.SetEnvironmentVariable("POGO_DB_CONNECTION_STRING", json.GetValue("pogo_db_sql").ToString());
          Environment.SetEnvironmentVariable("NONA_DB_CONNECTION_STRING", json.GetValue("nona_db_sql").ToString());
-         Environment.SetEnvironmentVariable("DEFAULT_PREFIX", json.GetValue("prefix").ToString());
+         Environment.SetEnvironmentVariable("DEFAULT_PREFIX", json.GetValue("default_prefix").ToString());
 
          var logLevel = Convert.ToInt32(json.GetValue("log_level").ToString());
          var logSeverity = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? LogSeverity.Info : (LogSeverity)logLevel;
 
          //sets cache for reaction events
-         var _config = new DiscordSocketConfig 
-         { 
+         var _config = new DiscordSocketConfig
+         {
             MessageCacheSize = 100,
             LogLevel = logSeverity
          };
          _client = new DiscordSocketClient(_config);
-         CommandServiceConfig config = new CommandServiceConfig 
+         CommandServiceConfig config = new CommandServiceConfig
          {
             DefaultRunMode = RunMode.Async,
             LogLevel = logSeverity
@@ -67,7 +67,8 @@ namespace PokeStar
          await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
          await _client.StartAsync().ConfigureAwait(false);
 
-         await _client.SetGameAsync(".help | v0");
+         string version = json.GetValue("version").ToString();
+         await _client.SetGameAsync($".help | v{version}");
 
          Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
 
@@ -149,9 +150,12 @@ namespace PokeStar
       {
          var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
          var user = reaction.User.Value;
-         if (message != null && reaction.User.IsSpecified && !user.IsBot && RaidCommands.IsCurrentRaid(message.Id))
-         {         
-            await RaidCommands.RaidReaction(message, reaction);
+         if (message != null && reaction.User.IsSpecified && !user.IsBot)
+         {
+            if (RaidCommands.IsCurrentRaid(message.Id))
+               await RaidCommands.RaidReaction(message, reaction);
+            else if (RaidCommands.isRaidInvite(message.Id))
+               await RaidCommands.RaidInviteReaction(message, reaction, originChannel);
          }
          return Task.CompletedTask;
       }

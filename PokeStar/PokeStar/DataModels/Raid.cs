@@ -8,6 +8,7 @@ namespace PokeStar.DataModels
    class Raid
    {
       private const int playerLimit = 20;
+      private const int maxInvites = 10;
       public string Location { get; set; }
       public string Time { get; set; }
       public short Tier { get; set; }
@@ -33,7 +34,7 @@ namespace PokeStar.DataModels
          CreatedAt = DateTime.Now;
       }
 
-      public void PlayerAdd(SocketGuildUser player, int partySize, bool isInvite=false)
+      public void PlayerAdd(SocketGuildUser player, int partySize, bool isInvite = false)
       {
          if (Attending.ContainsKey(player))
          {
@@ -99,7 +100,7 @@ namespace PokeStar.DataModels
       }
       public bool InvitePlayer(SocketGuildUser player, SocketGuildUser user)
       {
-         if (Invite.ContainsKey(player) && (Attending.ContainsKey(user) || Here.ContainsKey(user)))
+         if ((Invite.Count + 1) < maxInvites && Invite.ContainsKey(player) && (Attending.ContainsKey(user) || Here.ContainsKey(user)))
          {
             PlayerAdd(player, 1, true);
             Invite.Remove(player);
@@ -136,6 +137,11 @@ namespace PokeStar.DataModels
             }
             Boss = Connections.Instance().GetRaidBoss(bossName);
          }
+      }
+
+      public bool HasPlayer(SocketGuildUser user)
+      {
+         return Attending.ContainsKey(user) || Here.ContainsKey(user);
       }
    }
 }

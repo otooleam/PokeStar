@@ -89,8 +89,8 @@ namespace PokeStar.Modules
          }
          else
          {
-               await Context.Channel.SendMessageAsync("This channel does not have any commands registered to it");
-               return;
+            await Context.Channel.SendMessageAsync("This channel does not have any commands registered to it");
+            return;
          }
          if (reg.Equals(string.Empty))
             await Context.Channel.SendMessageAsync($"Removed all registrations from this channel.");
