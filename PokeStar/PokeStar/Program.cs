@@ -12,6 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using PokeStar.Modules;
 using PokeStar.ImageProcessors;
 using PokeStar.ConnectionInterface;
+using System.Collections.Generic;
+using PokeStar.DataModels;
 
 namespace PokeStar
 {
@@ -149,9 +151,12 @@ namespace PokeStar
       {
          var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
          var user = reaction.User.Value;
-         if (message != null && reaction.User.IsSpecified && !user.IsBot && RaidCommands.IsCurrentRaid(message.Id))
+         if (message != null && reaction.User.IsSpecified && !user.IsBot)
          {
-            await RaidCommands.RaidReaction(message, reaction);
+            if (RaidCommands.IsCurrentRaid(message.Id))
+               await RaidCommands.RaidReaction(message, reaction);
+            else if (RaidCommands.isRaidInvite(message.Id))
+               await RaidCommands.RaidInviteReaction(message, reaction, originChannel);
          }
          return Task.CompletedTask;
       }
