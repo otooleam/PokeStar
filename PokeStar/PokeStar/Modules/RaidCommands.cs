@@ -57,7 +57,7 @@ namespace PokeStar.Modules
 
       [Command("raid")]
       [Summary("Creates a new Raid message.")]
-      public async Task Raid([Summary("Tier of the raid.")] short tier,
+      public async Task Raid([Summary("Tier of the raid.")] short tier, //TODO feedback if you enter tier ! 1-5
                              [Summary("Time the raid will start.")] string time,
                              [Summary("Where the raid will be.")][Remainder] string location)
       {
@@ -171,12 +171,12 @@ namespace PokeStar.Modules
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]))
             {
-               if (raid.Invite.Count == 0)
+               if (raid.InviteReqs.Count == 0)
                   await reaction.Channel.SendMessageAsync($"{player.Mention}, There are no players to invite.");
-               else if (raid.HasPlayer(player))
+               else if (raid.PlayerIsAttending(player))
                {
                   var inviteMsg = await reaction.Channel.SendMessageAsync(text: $"{player.Mention}", embed: BuildPlayerInviteEmbed(raid, player.Nickname));
-                  for (int i = 0; i < raid.Invite.Count; i++)
+                  for (int i = 0; i < raid.InviteReqs.Count; i++)
                      await inviteMsg.AddReactionAsync(selectionEmojis[i]);
                   raidMessages.Add(inviteMsg.Id, message.Id);
                }
@@ -212,11 +212,11 @@ namespace PokeStar.Modules
          await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value);
          var raidMessageId = raidMessages[message.Id];
          Raid raid = currentRaids[raidMessageId];
-         for (int i = 0; i < raid.Invite.Count; i++)
+         for (int i = 0; i < raid.InviteReqs.Count; i++)
          {
             if (reaction.Emote.Equals(selectionEmojis.ElementAt(i)))
             {
-               var player = raid.Invite.Keys.ElementAt(i);
+               var player = raid.InviteReqs.ElementAt(i);
                if (raid.InvitePlayer(player, (SocketGuildUser)reaction.User))
                {
                   var raidMessage = (SocketUserMessage)channel.CachedMessages.FirstOrDefault(x => x.Id == raidMessageId);
@@ -288,8 +288,8 @@ namespace PokeStar.Modules
       private static Embed BuildPlayerInviteEmbed(Raid raid, string user)
       {
          StringBuilder sb = new StringBuilder();
-         for (int i = 0; i < raid.Invite.Count; i++)
-            sb.AppendLine($"{raidEmojis[i]} {raid.Invite.Keys.ElementAt(i).Nickname}");
+         for (int i = 0; i < raid.InviteReqs.Count; i++)
+            sb.AppendLine($"{raidEmojis[i]} {raid.InviteReqs.ElementAt(i).Nickname}");
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.DarkBlue);

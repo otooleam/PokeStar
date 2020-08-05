@@ -8,7 +8,6 @@ namespace PokeStar.DataModels
 {
    class Raid
    {
-      private const int playerLimit = 20;
       private const int maxInvites = 10;
       public string Location { get; set; }
       public string Time { get; set; }
@@ -38,11 +37,26 @@ namespace PokeStar.DataModels
                if (!group.PlayerAdd(player, partySize))
                {
                   SplitPlayerGroup(group, player, partySize);
+                  return;
                }
-               return;
+               else
+               {
+                  //it didnt need to split so check for combinability
+                  if (PlayerGroups.Count > 1)
+                  {
+                     foreach (PlayerGroup group2 in PlayerGroups) //TODO function?
+                     {
+                        if (group.AttendingCount + group2.AttendingCount <= PlayerGroup.PARTY_SIZE_LIMIT)
+                        {
+                           CombinePlayerGroups(group, group2); 
+                           return;
+                        }
+                     }
+                  }
+               }
             }
          }
-         int smallestGroupIndex = FindMinIndex(PlayerGroups); 
+         int smallestGroupIndex = FindMinIndex(PlayerGroups);
          if (!PlayerGroups[smallestGroupIndex].PlayerAdd(player, partySize)) //adds new player to smallest group
          {
             SplitPlayerGroup(PlayerGroups[smallestGroupIndex], player, partySize);
@@ -89,11 +103,13 @@ namespace PokeStar.DataModels
             newGroup.Ready.Add(player.Key, player.Value);
          foreach (KeyValuePair<SocketGuildUser, int> player in group2.Ready)
             newGroup.Ready.Add(player.Key, player.Value);
+         newGroup.ReadyCount = group1.ReadyCount + group2.ReadyCount;
 
          foreach (KeyValuePair<SocketGuildUser, int> player in group1.Attending)
             newGroup.Attending.Add(player.Key, player.Value);
-         foreach (KeyValuePair<SocketGuildUser, int> player in group1.Attending)
+         foreach (KeyValuePair<SocketGuildUser, int> player in group2.Attending)
             newGroup.Attending.Add(player.Key, player.Value);
+         newGroup.AttendingCount = group1.AttendingCount + group2.AttendingCount;
 
          PlayerGroups.Remove(group1);
          PlayerGroups.Remove(group2);
@@ -136,12 +152,9 @@ namespace PokeStar.DataModels
 
       public bool InvitePlayer(SocketGuildUser invitee, SocketGuildUser invitingPlayer)
       {
-         if ((Invite.Count + 1) < maxInvites && Invite.ContainsKey(player) && (Attending.ContainsKey(user) || Here.ContainsKey(user)))
-         {
-            foreach (PlayerGroup group in PlayerGroups)
-               if (group.Players.Contains(invitingPlayer))
-                  return group.PlayerAdd(invitingPlayer, -1); //-1 denotes an invite
-         }
+         foreach (PlayerGroup group in PlayerGroups)
+            if ((InviteReqs.Count + 1) < maxInvites && group.Players.Contains(invitingPlayer))
+               return group.PlayerAdd(invitingPlayer, -1); //-1 denotes an invite
          return false;
       }
 
@@ -154,19 +167,24 @@ namespace PokeStar.DataModels
          else
          {
             foreach (PlayerGroup group in PlayerGroups)
+            {
                if (group.Players.Contains(player))
                {
                   group.RemovePlayer(player);
-                  
-                  foreach (PlayerGroup group2 in PlayerGroups)
+
+                  if (PlayerGroups.Count > 1)
                   {
-                     if (group.Players.Count + group2.Players.Count <= PlayerGroup.PARTY_SIZE_LIMIT)
+                     foreach (PlayerGroup group2 in PlayerGroups)
                      {
-                        CombinePlayerGroups(group, group2); 
-                        return;
+                        if (group.Players.Count + group2.Players.Count <= PlayerGroup.PARTY_SIZE_LIMIT)
+                        {
+                           CombinePlayerGroups(group, group2);
+                           return;
+                        }
                      }
                   }
                }
+            }
          }
       }
 
@@ -193,11 +211,14 @@ namespace PokeStar.DataModels
          }
       }
 
-      public bool HasPlayer(SocketGuildUser user)
+      public bool PlayerIsAttending(SocketGuildUser user)
       {
-         return Attending.ContainsKey(user) || Here.ContainsKey(user);
+         foreach (PlayerGroup group in PlayerGroups)
+            if (group.Attending.ContainsKey(user) || group.Ready.ContainsKey(user))
+               return true;
+         return false;
       }
-      
+
       public string BuildPingList(int groupNum)
       {
          if (PlayerGroups.Count == 1)

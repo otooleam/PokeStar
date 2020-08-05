@@ -11,8 +11,8 @@ namespace PokeStar.DataModels
    {
       public const int PARTY_SIZE_LIMIT = 7; //TODO set this back to 20
 
-      public int AttendingCount { get; private set; }
-      public int ReadyCount { get; private set; }
+      public int AttendingCount { get; set; }
+      public int ReadyCount { get; set; }
       public List<SocketGuildUser> Players { get; private set; }
       public Dictionary<SocketGuildUser, int> Attending { get; private set; }
       public Dictionary<SocketGuildUser, int> Ready { get; private set; }
@@ -26,83 +26,52 @@ namespace PokeStar.DataModels
          Ready = new Dictionary<SocketGuildUser, int>();
       }
 
-      //false if party needs to be split
+      //returns false if party needs to be split
       public bool PlayerAdd(SocketGuildUser player, int partySize)
       {
-         if (partySize == -1) //true if invite
+         if (Players.Contains(player)) //update existing player
          {
-            if (Players.Contains(player))
+            if (Attending.ContainsKey(player))
             {
-               int newPlayerCount = AttendingCount + 1;
+               int newPlayerCount = AttendingCount + partySize - Attending[player];
 
                if (newPlayerCount <= PARTY_SIZE_LIMIT)
                {
-                  if (Attending.ContainsKey(player))
-                  {
-                     Attending[player]++;
-                  }
-                  else
-                  {
-                     Ready[player]++;
-                  }
-                  AttendingCount = newPlayerCount;
+                  AttendingCount += partySize - Attending[player];
+                  Attending[player] = partySize;
                   return true;
                }
                return false;
             }
-            else
+            else //player is ready
             {
-               int newPlayerCount = AttendingCount + 2;
+               int newPlayerCount = AttendingCount + partySize - Ready[player];
 
                if (newPlayerCount <= PARTY_SIZE_LIMIT)
                {
-                  Attending.Add(player, 2); //add the player and the person they invited
-                  Players.Add(player);
-                  AttendingCount = newPlayerCount;
+                  AttendingCount += partySize - Ready[player];
+                  ReadyCount += partySize - Ready[player];
+                  Ready[player] = partySize;
                   return true;
                }
                return false;
             }
          }
-         else
+         else //new player
          {
-            if (Players.Contains(player))
-            {
-               int newPlayerCount = AttendingCount + partySize;
+            int newPlayerCount = AttendingCount + partySize;
 
-               if (newPlayerCount <= PARTY_SIZE_LIMIT)
-               {
-                  if (Attending.ContainsKey(player))
-                  {
-                     AttendingCount += partySize - Attending[player];
-                     Attending[player] = partySize;
-                  }
-                  else
-                  {
-                     AttendingCount += partySize - Ready[player]; //key non exist error
-                     ReadyCount += partySize - Ready[player];
-                     Ready[player] = partySize;
-                  }
-                  return true;
-               }
-               return false;
-            }
-            else
+            if (newPlayerCount <= PARTY_SIZE_LIMIT)
             {
-               int newPlayerCount = AttendingCount + partySize;
-
-               if (newPlayerCount <= PARTY_SIZE_LIMIT)
-               {
-                  Players.Add(player);
-                  Attending.Add(player, partySize);
-                  AttendingCount = newPlayerCount;
-                  return true;
-               }
-               return false;
+               Players.Add(player);
+               Attending.Add(player, partySize);
+               AttendingCount = newPlayerCount;
+               return true;
             }
+            return false;
          }
       }
-      
+
       //true if all players in group are ready
       public bool PlayerReady(SocketGuildUser player) //this is more robust than it needs to be
       {
