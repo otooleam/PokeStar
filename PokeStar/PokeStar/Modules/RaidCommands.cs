@@ -14,7 +14,6 @@ namespace PokeStar.Modules
    public class RaidCommands : ModuleBase<SocketCommandContext>
    {
       private static readonly Dictionary<ulong, Raid> currentRaids = new Dictionary<ulong, Raid>();
-      private static readonly Dictionary<ulong, List<string>> selections = new Dictionary<ulong, List<string>>();
       private static readonly Dictionary<ulong, ulong> raidMessages = new Dictionary<ulong, ulong>();
       private static readonly Emoji[] raidEmojis = {
          new Emoji("1️⃣"),
@@ -73,8 +72,9 @@ namespace PokeStar.Modules
                for (int i = 0; i < potentials.Count; i++)
                   await selectMsg.AddReactionAsync(selectionEmojis[i]);
 
-               currentRaids.Add(selectMsg.Id, new Raid(tier, time, location));
-               selections.Add(selectMsg.Id, potentials);
+               Raid raid = new Raid(tier, time, location);
+               raid.RaidBossSelections = potentials;
+               currentRaids.Add(selectMsg.Id, raid);
 
                Connections.DeleteFile(fileName);
             }
@@ -116,11 +116,11 @@ namespace PokeStar.Modules
          if (raid.Boss == null)
          {
             bool validReactionAdded = false;
-            for (int i = 0; i < selections[message.Id].Count; i++)
+            for (int i = 0; i < raid.RaidBossSelections.Count; i++)
             {
                if (reaction.Emote.Equals(selectionEmojis[i]))
                {
-                  raid.SetBoss(selections[message.Id][i]);
+                  raid.SetBoss(raid.RaidBossSelections[i]);
                   validReactionAdded = true;
                }
             }
