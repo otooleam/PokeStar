@@ -14,7 +14,6 @@ namespace PokeStar.Modules
    public class RaidCommands : ModuleBase<SocketCommandContext>
    {
       private static readonly Dictionary<ulong, Raid> currentRaids = new Dictionary<ulong, Raid>();
-      private static readonly Dictionary<ulong, List<string>> selections = new Dictionary<ulong, List<string>>();
       private static readonly Dictionary<ulong, ulong> raidMessages = new Dictionary<ulong, ulong>();
       private static readonly Emoji[] raidEmojis = {
          new Emoji("1️⃣"),
@@ -73,8 +72,11 @@ namespace PokeStar.Modules
                for (int i = 0; i < potentials.Count; i++)
                   await selectMsg.AddReactionAsync(selectionEmojis[i]);
 
-               currentRaids.Add(selectMsg.Id, new Raid(tier, time, location));
-               selections.Add(selectMsg.Id, potentials);
+               Raid raid = new Raid(tier, time, location)
+               {
+                  RaidBossSelections = potentials
+               };
+               currentRaids.Add(selectMsg.Id, raid);
 
                Connections.DeleteFile(fileName);
             }
@@ -107,6 +109,48 @@ namespace PokeStar.Modules
          RemoveOldRaids();
       }
 
+      [Command("edit")]
+      [Summary("Edit the tier, time, or location of a Raid message.")]
+      public async Task Edit([Summary("Raid code given by the help message.")] ulong code,
+                             [Summary("Raid attribute to change.")] string attribute,
+                             [Summary("New value of the raid attribute.")][Remainder] string edit)
+      {
+
+         if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
+         {
+            if (currentRaids.ContainsKey(code))
+            {
+               Raid raid = currentRaids[code];
+               if (attribute.Equals("time", StringComparison.OrdinalIgnoreCase))
+               {
+                  raid.Time = edit;
+                  var msg = (SocketUserMessage)Context.Channel.GetCachedMessage(code);
+                  await msg.ModifyAsync(x =>
+                  {
+                     x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
+                  });
+               }
+               else if (attribute.Equals("location", StringComparison.OrdinalIgnoreCase) ||
+                        attribute.Equals("loc", StringComparison.OrdinalIgnoreCase))
+               {
+                  raid.Location = edit;
+                  var msg = (SocketUserMessage)Context.Channel.GetCachedMessage(code);
+                  await msg.ModifyAsync(x =>
+                  {
+                     x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
+                  });
+               }
+               else if (attribute.Equals("tier", StringComparison.OrdinalIgnoreCase) ||
+                        attribute.Equals("boss", StringComparison.OrdinalIgnoreCase))
+               {
+                  // TODO: Add editing of raid tier/boss
+               }
+            }
+         }
+         else
+            await Context.Channel.SendMessageAsync("This channel is not registered to process Raid commands.");
+      }
+
       public static async Task RaidReaction(IMessage message, SocketReaction reaction)
       {
          Raid raid = currentRaids[message.Id];
@@ -116,11 +160,11 @@ namespace PokeStar.Modules
          if (raid.Boss == null)
          {
             bool validReactionAdded = false;
-            for (int i = 0; i < selections[message.Id].Count; i++)
+            for (int i = 0; i < raid.RaidBossSelections.Count; i++)
             {
                if (reaction.Emote.Equals(selectionEmojis[i]))
                {
-                  raid.SetBoss(selections[message.Id][i]);
+                  raid.SetBoss(raid.RaidBossSelections[i]);
                   validReactionAdded = true;
                }
             }
@@ -189,7 +233,8 @@ namespace PokeStar.Modules
             {
                //help message - needs no update
                await player.SendMessageAsync(BuildRaidHelpMessage(message.Id));
-               await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, player);
+               await player.SendMessageAsync($"{message.Id}");
+
                needsUpdate = false;
             }
             else
@@ -203,8 +248,8 @@ namespace PokeStar.Modules
             {
                x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
             });
-            await msg.RemoveReactionAsync(reaction.Emote, player);
          }
+         await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, player);
       }
 
       public static async Task RaidInviteReaction(IMessage message, SocketReaction reaction, ISocketMessageChannel channel)
@@ -336,11 +381,8 @@ namespace PokeStar.Modules
          sb.AppendLine($"To invite someone to a raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]} and react with the coresponding emote for the player.");
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
 
-         sb.AppendLine("\nRaid Edit (Note this is not implemented yet):");
-         sb.AppendLine("To edit the desired raid send the following command in raid channel:");
-         sb.AppendLine($"{Environment.GetEnvironmentVariable("PREFIX_STRING")}edit {code} time location");
-         sb.AppendLine("Note: Change time and location to desired time and location. Editing Location is optional.");
-
+         sb.AppendLine("\nRaid Edit:");
+         sb.AppendLine("To edit the desired raid send the edit command with the following code: ");
          return sb.ToString();
       }
 
@@ -370,7 +412,7 @@ namespace PokeStar.Modules
          return currentRaids.ContainsKey(id);
       }
 
-      public static bool isRaidInvite(ulong id)
+      public static bool IsRaidInvite(ulong id)
       {
          return raidMessages.ContainsKey(id);
       }

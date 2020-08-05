@@ -18,6 +18,7 @@ namespace PokeStar.DataModels
       public Dictionary<SocketGuildUser, int> Attending { get; private set; }
       public Dictionary<SocketGuildUser, int> Here { get; private set; }
       public Dictionary<SocketGuildUser, int> Invite { get; private set; }
+      public List<string> RaidBossSelections { get; set; }
       public DateTime CreatedAt { get; private set; }
 
       public Raid(short tier, string time, string location, string boss = null)
