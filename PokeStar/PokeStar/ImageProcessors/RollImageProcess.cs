@@ -18,6 +18,9 @@ namespace PokeStar.ImageProcessors
          if (context == null)
             return;
 
+         if (Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
+            return;
+
          var attachments = context.Message.Attachments;
          var user = context.Guild.Users.FirstOrDefault(x => x.Username.ToString().Equals(context.Message.Author.Username, StringComparison.OrdinalIgnoreCase));
          string url = attachments.ElementAt(0).Url;
@@ -55,7 +58,7 @@ namespace PokeStar.ImageProcessors
 
                await context.Channel.SendMessageAsync($"{user.Username} now has the nickname {nickname}").ConfigureAwait(false);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                Console.WriteLine(e.Message);
                await context.Channel.SendMessageAsync($"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{context.Guild.Name}\"").ConfigureAwait(false);
@@ -68,7 +71,7 @@ namespace PokeStar.ImageProcessors
             var mystic = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase));
             var instinct = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase));
             if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) == null)
-             await user.RemoveRoleAsync(valor).ConfigureAwait(false);
+               await user.RemoveRoleAsync(valor).ConfigureAwait(false);
             else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) == null)
                await user.RemoveRoleAsync(mystic).ConfigureAwait(false);
             else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) == null)
