@@ -159,6 +159,7 @@
     <Compile Include="ConnectionInterface\NONADatabaseConnector.cs" />
     <Compile Include="ConnectionInterface\POGODatabaseConnector.cs" />
     <Compile Include="DataModels\Move.cs" />
+    <Compile Include="DataModels\PlayerGroup.cs" />
     <Compile Include="DataModels\Pokemon.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ImageProcessors\ImageProcess.cs" />

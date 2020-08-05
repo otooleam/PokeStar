@@ -160,9 +160,9 @@ namespace PokeStar.Modules
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_HERE]))
             {
-               if (raid.PlayerHere(player)) //true if all players are marked here
+               if (raid.PlayerReady(player)) //true if all players are marked here
                {
-                  await reaction.Channel.SendMessageAsync(BuildPingList(raid.Here.Keys.ToList(), raid.Location));
+                  await reaction.Channel.SendMessageAsync(raid.BuildPingList(player));
                }
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]))
@@ -247,9 +247,24 @@ namespace PokeStar.Modules
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Time", raid.Time, true);
          embed.AddField("Location", raid.Location, true);
-         embed.AddField($"Here ({raid.HereCount}/{raid.PlayerCount})", $"{BuildPlayerList(raid.Here)}");
-         embed.AddField("Attending", $"{BuildPlayerList(raid.Attending)}");
-         embed.AddField("Need Invite", $"{BuildPlayerList(raid.Invite)}");
+
+         if (raid.PlayerGroups.Count == 1) //single group
+         {
+            embed.AddField($"Here ({raid.PlayerGroups[0].ReadyCount}/{raid.PlayerGroups[0].AttendingCount})", $"{BuildPlayerList(raid.PlayerGroups[0].Ready)}");
+            embed.AddField("Attending", $"{BuildPlayerList(raid.PlayerGroups[0].Attending)}");
+         }
+         else //multiple groups
+         {
+            int groupNum = 0;
+            foreach (PlayerGroup group in raid.PlayerGroups) //TODO group header - add limit
+            {
+               embed.AddField($"Group {groupNum + 1} Here ({raid.PlayerGroups[groupNum].ReadyCount}/{raid.PlayerGroups[groupNum].AttendingCount})", $"{BuildPlayerList(raid.PlayerGroups[groupNum].Ready)}");
+               embed.AddField($"Group {groupNum + 1} Attending", $"{BuildPlayerList(raid.PlayerGroups[groupNum].Attending)}"); //TODO embed must have less than 25 fields
+               groupNum++;
+            }
+         }
+         embed.AddField("Need Invite", $"{BuildPlayerList(raid.InviteReqs)}");
+         embed.WithDescription("Press ? for help");
          embed.WithFooter("Note: the max number of members in a raid is 20, and the max number of invites is 10.");
 
          return embed.Build();
@@ -323,6 +338,22 @@ namespace PokeStar.Modules
          return sb.ToString();
       }
 
+      private static string BuildPlayerList(List<SocketGuildUser> list)
+      {
+         if (list.Count == 0)
+            return "-----";
+
+         StringBuilder sb = new StringBuilder();
+
+         foreach (SocketGuildUser player in list)
+         {
+            string teamString = GetPlayerTeam(player);
+            sb.AppendLine($"{player.Nickname ?? player.Username} {teamString}");
+         }
+
+         return sb.ToString();
+      }
+
       private static string BuildRaidHelpMessage(ulong code)
       {
          StringBuilder sb = new StringBuilder();
@@ -330,8 +361,8 @@ namespace PokeStar.Modules
          sb.AppendLine("Raid Help:");
          sb.AppendLine("The numbers represent the number of accounts that you have with you." +
             " React with one of the numbers to show that you intend to participate in the raid.");
-         sb.AppendLine($"Once you arrive at the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_HERE]} to show others that you have arrived." +
-            $" When all players have marked that they have arrived, Nona will send a message to the group.");
+         sb.AppendLine($"Once you are ready for the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_HERE]} to show others that you are ready." +
+            $" When all players have marked that they are ready, Nona will send a message telling the group to jump.");
          sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]}.");
          sb.AppendLine($"To invite someone to a raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]} and react with the coresponding emote for the player.");
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
