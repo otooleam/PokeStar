@@ -7,7 +7,6 @@ namespace PokeStar.ConnectionInterface
 {
    public class Connections
    {
-
       private const string raidBossHTML = "//*[@class = 'col-md-4']";
 
       public Uri RAID_BOSS_URL { get; } = new Uri("https://thesilphroad.com/raid-bosses");
@@ -18,12 +17,20 @@ namespace PokeStar.ConnectionInterface
       private readonly POGODatabaseConnector POGODBConnector;
       private readonly NONADatabaseConnector NONADBConnector;
 
+      /// <summary>
+      /// Creates a new Connections object.
+      /// Private to implement the singleton design patturn.
+      /// </summary>
       private Connections()
       {
          POGODBConnector = new POGODatabaseConnector(Environment.GetEnvironmentVariable("POGO_DB_CONNECTION_STRING"));
          NONADBConnector = new NONADatabaseConnector(Environment.GetEnvironmentVariable("NONA_DB_CONNECTION_STRING"));
       }
 
+      /// <summary>
+      /// Gets the current Connections instance.
+      /// </summary>
+      /// <returns>The Connections instance.</returns>
       public static Connections Instance()
       {
          if (connections == null)
@@ -31,18 +38,31 @@ namespace PokeStar.ConnectionInterface
          return connections;
       }
 
+      /// <summary>
+      /// Copy a file from PokemonImages to the location of the application.
+      /// </summary>
+      /// <param name="fileName">Name of file to copy.</param>
       public static void CopyFile(string fileName)
       {
          var location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
          System.IO.File.Copy($"{location}\\PokemonImages\\{fileName}", $"{location}\\{fileName}", true);
       }
 
+      /// <summary>
+      /// Delete a file from the location of the application.
+      /// </summary>
+      /// <param name="fileName">Name of file to delete.</param>
       public static void DeleteFile(string fileName)
       {
          var location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
          System.IO.File.Delete($"{location}\\{fileName}");
       }
 
+      /// <summary>
+      /// Converts a pokemon's name to its file name.
+      /// </summary>
+      /// <param name="pokemonName">Name of pokemon.</param>
+      /// <returns>Pokemon picture file name.</returns>
       public static string GetPokemonPicture(string pokemonName)
       {
          pokemonName = pokemonName.Replace(" ", "_");
@@ -50,11 +70,23 @@ namespace PokeStar.ConnectionInterface
          return pokemonName + ".png";
       }
 
+      /// <summary>
+      /// Gets a list of current raid bosses from The Silph Road.
+      /// </summary>
+      /// <param name="tier">Tier of bosses to get.</param>
+      /// <returns>List of current raid bosses in the given tier.</returns>
       public static List<string> GetBossList(short tier)
       {
          return SilphData.GetRaidBossesTier(tier);
       }
 
+      /// <summary>
+      /// Gets a given raid boss.
+      /// Calculates CP values relevant to a raid boss. This includes
+      /// min and max cps and weather boosted min and max cps.
+      /// </summary>
+      /// <param name="raidBossName">Name of the raid boss.</param>
+      /// <returns>The raid boss coresponding to the name, otherwise null.</returns>
       public RaidBoss GetRaidBoss(string raidBossName)
       {
          if (raidBossName == null)
@@ -93,6 +125,12 @@ namespace PokeStar.ConnectionInterface
          return raidBoss;
       }
 
+      /// <summary>
+      /// Gets a given pokemon.
+      /// Calculates max CP value of the pokemon.
+      /// </summary>
+      /// <param name="pokemonName">Name of the pokemon.</param>
+      /// <returns>The pokemon coresponding to the name, otherwise null.</returns>
       public Pokemon GetPokemon(string pokemonName)
       {
          if (pokemonName == null)
@@ -116,6 +154,11 @@ namespace PokeStar.ConnectionInterface
          return pokemon;
       }
 
+      /// <summary>
+      /// Calculates all of the relevant CP valus of a pokemon. This
+      /// includes the raid, quest, hatch, and wild perfect IV values.
+      /// </summary>
+      /// <param name="pokemon"></param>
       public static void CalcAllCP(ref Pokemon pokemon)
       {
          if (pokemon != null)
@@ -176,17 +219,33 @@ namespace PokeStar.ConnectionInterface
          }
       }
 
+      /// <summary>
+      /// Reformats the name from user input to the POGO database format.
+      /// </summary>
+      /// <param name="originalName">User input name.</param>
+      /// <returns>Name formated for the POGO database</returns>
       private static string ReformatName(string originalName)
       {
          int index = originalName.IndexOf('\'');
          return index == -1 ? originalName : originalName.Insert(index, "\'");
       }
 
+      /// <summary>
+      /// Gets the prefix of a guild.
+      /// </summary>
+      /// <param name="guild">Id of guild to get prefix of.</param>
+      /// <returns>Prefix of the guild if it is not default, otherwise null.</returns>
       public string GetPrefix(ulong guild)
       {
          string prefix = NONADBConnector.GetPrefix(guild);
-         return (prefix == null) ? null : prefix[0].ToString();
+         return prefix?[0].ToString();
       }
+      
+      /// <summary>
+      /// Updates the prefix of the guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild to set the prefix for.</param>
+      /// <param name="prefix">New prefix value.</param>
       public void UpdatePrefix(ulong guild, string prefix)
       {
          if (GetPrefix(guild) == null)
@@ -194,24 +253,50 @@ namespace PokeStar.ConnectionInterface
          else
             NONADBConnector.UpdatePrefix(guild, prefix);
       }
+      
+      /// <summary>
+      /// Deletes the prefix of a guild.
+      /// </summary>
+      /// <param name="guild">Id of guild to delete prefix of.</param>
       public void DeletePrefix(ulong guild)
       {
          if (GetPrefix(guild) != null)
             NONADBConnector.DeletePrefix(guild);
       }
 
+      /// <summary>
+      /// Gets the registration of a channel.
+      /// </summary>
+      /// <param name="guild">Id of the guild that has the channel.</param>
+      /// <param name="channel">Id of the channel that the registration is for.</param>
+      /// <returns>Registration string for the channel, otherwise null.</returns>
       public string GetRegistration(ulong guild, ulong channel)
       {
          string registration = NONADBConnector.GetRegistration(guild, channel);
-         return (registration == null) ? null : registration;
+         return registration ?? null;
       }
-      public void UpdateRegistration(ulong guild, ulong channel, string prefix)
+      
+      /// <summary>
+      /// Updates the registration of a channel.
+      /// </summary>
+      /// <param name="guild">Id of the guild that has the channel.</param>
+      /// <param name="channel">Id of the channel to update the registration of.</param>
+      /// <param name="register">New registration value.</param>
+      public void UpdateRegistration(ulong guild, ulong channel, string register)
       {
          if (GetRegistration(guild, channel) == null)
-            NONADBConnector.AddRegistration(guild, channel, prefix);
+            NONADBConnector.AddRegistration(guild, channel, register);
          else
-            NONADBConnector.UpdateRegistration(guild, channel, prefix);
+            NONADBConnector.UpdateRegistration(guild, channel, register);
       }
+      
+      /// <summary>
+      /// Deletes the registration of a guild or channel.
+      /// If no channel is given then all registrations for the guild are
+      /// deleted.
+      /// </summary>
+      /// <param name="guild">Id of the guild that has the channel, or to remove registrations from.</param>
+      /// <param name="channel">Id of the channel to remove the registration from.</param>
       public void DeleteRegistration(ulong guild, ulong? channel = null)
       {
          if (GetPrefix(guild) != null)

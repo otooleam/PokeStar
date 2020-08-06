@@ -6,6 +6,9 @@ using Discord.Commands;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles bot setup commands.
+   /// </summary>
    public class SetupCommands : ModuleBase<SocketCommandContext>
    {
       [Command("setup")]

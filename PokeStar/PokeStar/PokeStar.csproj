@@ -171,7 +171,7 @@
     <Compile Include="Modules\RoleCommands.cs" />
     <Compile Include="Modules\SetupCommands.cs" />
     <Compile Include="DataModels\RaidBoss.cs" />
-    <Compile Include="DataModels\RaidCounter.cs" />
+    <Compile Include="DataModels\Counter.cs" />
     <Compile Include="Modules\SystemEditCommands.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="DataModels\Raid.cs" />

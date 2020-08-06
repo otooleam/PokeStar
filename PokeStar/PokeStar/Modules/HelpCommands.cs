@@ -8,6 +8,9 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles help commands.
+   /// </summary>
    public class HelpCommands : ModuleBase<SocketCommandContext>
    {
       [Command("Help")]

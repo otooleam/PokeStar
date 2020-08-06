@@ -7,6 +7,9 @@ using Discord.WebSocket;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles role assignment commands.
+   /// </summary>
    public class RoleCommands : ModuleBase<SocketCommandContext>
    {
       [Command("role")]

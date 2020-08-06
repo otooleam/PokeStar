@@ -4,8 +4,18 @@ using System.Drawing.Imaging;
 
 namespace PokeStar.ImageProcessors
 {
+   /// <summary>
+   /// Processes an image.
+   /// </summary>
    public static class ImageProcess
    {
+      /// <summary>
+      /// Scales an image to a desired size.
+      /// </summary>
+      /// <param name="image">Original image</param>
+      /// <param name="width">New width of the image.</param>
+      /// <param name="height">New height of the image.</param>
+      /// <returns>Copy of the original image scalled to the desired size.</returns>
       public static Bitmap ScaleImage(Image image, int width, int height)
       {
          var destRect = new Rectangle(0, 0, width, height);
