@@ -250,7 +250,7 @@ namespace PokeStar.Modules
 
          if (raid.PlayerGroups.Count == 1) //single group
          {
-            embed.AddField($"Here ({raid.PlayerGroups[0].ReadyCount}/{raid.PlayerGroups[0].AttendingCount})", $"{BuildPlayerList(raid.PlayerGroups[0].Ready)}");
+            embed.AddField($"Here ({raid.PlayerGroups[0].HereCount}/{raid.PlayerGroups[0].AttendingCount})", $"{BuildPlayerList(raid.PlayerGroups[0].Here)}");
             embed.AddField("Attending", $"{BuildPlayerList(raid.PlayerGroups[0].Attending)}");
          }
          else //multiple groups
@@ -258,7 +258,7 @@ namespace PokeStar.Modules
             int groupNum = 0;
             foreach (PlayerGroup group in raid.PlayerGroups) //TODO group header - add limit
             {
-               embed.AddField($"Group {groupNum + 1} Here ({raid.PlayerGroups[groupNum].ReadyCount}/{raid.PlayerGroups[groupNum].AttendingCount})", $"{BuildPlayerList(raid.PlayerGroups[groupNum].Ready)}");
+               embed.AddField($"Group {groupNum + 1} Here ({raid.PlayerGroups[groupNum].HereCount}/{raid.PlayerGroups[groupNum].AttendingCount})", $"{BuildPlayerList(raid.PlayerGroups[groupNum].Here)}");
                embed.AddField($"Group {groupNum + 1} Attending", $"{BuildPlayerList(raid.PlayerGroups[groupNum].Attending)}"); //TODO embed must have less than 25 fields
                groupNum++;
             }
