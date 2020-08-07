@@ -154,7 +154,7 @@ namespace PokeStar
          {
             if (RaidCommands.IsCurrentRaid(message.Id))
                await RaidCommands.RaidReaction(message, reaction);
-            else if (RaidCommands.isRaidInvite(message.Id))
+            else if (RaidCommands.IsRaidInvite(message.Id))
                await RaidCommands.RaidInviteReaction(message, reaction, originChannel);
          }
          return Task.CompletedTask;
