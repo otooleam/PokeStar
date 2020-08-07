@@ -16,7 +16,7 @@ namespace PokeStar.DataModels
       public List<RaidGroup> Groups { get; private set; }
       public List<string> RaidBossSelections { get; set; }
       public DateTime CreatedAt { get; private set; }
-      private Dictionary<SocketGuildUser, int> Invite { get; set; }
+      private List<SocketGuildUser> Invite { get; set; }
 
       public Raid(short tier, string time, string location, string boss = null)
       {
@@ -28,20 +28,20 @@ namespace PokeStar.DataModels
          {
             new RaidGroup()
          };
-         Invite = new Dictionary<SocketGuildUser, int>();
+         Invite = new List<SocketGuildUser>();
          RaidBossSelections = new List<string>();
          CreatedAt = DateTime.Now;
       }
 
       public ImmutableDictionary<SocketGuildUser, int> GetReadonlyInvite()
       {
-         return Invite.ToImmutableDictionary(k => k.Key, v => v.Value);
+         return Invite.ToImmutableDictionary(k => k, v => 1);
       }
 
-      public bool PlayerAdd(SocketGuildUser player, int partySize, SocketGuildUser user = null)
+      public bool PlayerAdd(SocketGuildUser player, int partySize, SocketGuildUser invitedBy = null)
       {
          int group;
-         if (user == null)
+         if (invitedBy == null)
          {
             group = IsInRaid(player);
             if (group == -1)
@@ -50,10 +50,10 @@ namespace PokeStar.DataModels
          }
          else // is invite
          {
-            group = IsInRaid(user);
+            group = IsInRaid(invitedBy);
             if (group != -1)
             {
-               Groups.ElementAt(group).Invite(player, user);
+               Groups.ElementAt(group).Invite(player, invitedBy);
                return false;
             }
          }
@@ -66,18 +66,18 @@ namespace PokeStar.DataModels
 
       public void RemovePlayer(SocketGuildUser player)
       {
-         if (Invite.ContainsKey(player))
-         {
+         if (Invite.Contains(player))
             Invite.Remove(player);
-            return;
-         }
-         foreach (var group in Groups)
+         else
          {
-            if (group.HasPlayer(player))
+            foreach (var group in Groups)
             {
-               group.Remove(player);
-               CheckMergeGroups();
-               return;
+               if (group.HasPlayer(player))
+               {
+                  group.Remove(player);
+                  CheckMergeGroups();
+                  return;
+               }
             }
          }
       }
@@ -100,15 +100,15 @@ namespace PokeStar.DataModels
 
       public void PlayerRequestInvite(SocketGuildUser player)
       {
-         if (!Invite.ContainsKey(player) && IsInRaid(player) == -1)
+         if (!Invite.Contains(player) && IsInRaid(player) == -1)
          {
-            Invite.Add(player, 1);
+            Invite.Add(player);
          }
       }
 
       public bool InvitePlayer(SocketGuildUser player, SocketGuildUser user)
       {
-         if (Invite.ContainsKey(player))
+         if (Invite.Contains(player))
          {
             return PlayerAdd(player, 1, user);
          }

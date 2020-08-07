@@ -233,9 +233,12 @@ namespace PokeStar.Modules
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
             {
-               //help message - needs no update
-               await player.SendMessageAsync(BuildRaidHelpMessage(message.Id));
-               await player.SendMessageAsync($"{message.Id}");
+               string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
+               if (prefix == null)
+                  prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
+
+               await player.SendMessageAsync(BuildRaidHelpMessage());
+               await player.SendMessageAsync($"{prefix}edit {message.Id}");
 
                needsUpdate = false;
             }
@@ -382,20 +385,20 @@ namespace PokeStar.Modules
          return sb.ToString();
       }
 
-      private static string BuildRaidHelpMessage(ulong code)
+      private static string BuildRaidHelpMessage()
       {
          StringBuilder sb = new StringBuilder();
          sb.AppendLine("Raid Help:");
          sb.AppendLine("The numbers represent the number of accounts that you have with you." +
             " React with one of the numbers to show that you intend to participate in the raid.");
          sb.AppendLine($"Once you are ready for the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]} to show others that you are ready." +
-            $" When all players have marked that they are ready, Nona will send a message to the group to jump.");
+            $" When all players have marked that they are ready, Nona will send a message to the group.");
          sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]}.");
          sb.AppendLine($"To invite someone to a raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]} and react with the coresponding emote for the player.");
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
 
          sb.AppendLine("\nRaid Edit:");
-         sb.AppendLine($"To edit the desired raid send the edit command with the following code: {code}");
+         sb.AppendLine($"To edit the desired raid send the edit command with the following code: ");
          return sb.ToString();
       }
 

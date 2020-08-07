@@ -7,7 +7,7 @@ namespace PokeStar.DataModels
 {
    public class RaidGroup
    {
-      public readonly int playerLimit = 12;
+      public readonly int playerLimit = 20;
       public readonly int inviteLimit = 10;
       private Dictionary<SocketGuildUser, int> Attending { get; set; }
       private Dictionary<SocketGuildUser, int> Ready { get; set; }
