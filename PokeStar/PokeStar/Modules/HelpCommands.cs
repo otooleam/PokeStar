@@ -28,7 +28,7 @@ namespace PokeStar.Modules
                prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
 
             embedBuilder.WithTitle("Command List");
-            embedBuilder.WithDescription($"List of commands supported by this bot.\nThe command prefix for this bot is \"{prefix}\".'");
+            embedBuilder.WithDescription($"List of commands supported by this bot.\nThe command prefix for this bot is \" {prefix} \"");
             foreach (var cmdInfo in commands)
                embedBuilder.AddField(cmdInfo.Name, cmdInfo.Summary ?? "No description available");
             embedBuilder.WithFooter("Run \"help command_name\" to get help for a specific command.");

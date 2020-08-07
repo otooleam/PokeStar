@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using Discord.WebSocket;
 using PokeStar.ConnectionInterface;
 
@@ -7,126 +9,112 @@ namespace PokeStar.DataModels
 {
    class Raid
    {
-      private const int playerLimit = 20;
-      private const int maxInvites = 10;
       public string Location { get; set; }
       public string Time { get; set; }
       public short Tier { get; set; }
       public RaidBoss Boss { get; private set; }
-      public int PlayerCount { get; private set; }
-      public int HereCount { get; private set; }
-      public Dictionary<SocketGuildUser, int> Attending { get; private set; }
-      public Dictionary<SocketGuildUser, int> Here { get; private set; }
-      public Dictionary<SocketGuildUser, int> Invite { get; private set; }
+      public List<RaidGroup> Groups { get; private set; }
       public List<string> RaidBossSelections { get; set; }
       public DateTime CreatedAt { get; private set; }
+      private List<SocketGuildUser> Invite { get; set; }
 
       public Raid(short tier, string time, string location, string boss = null)
       {
          Tier = tier;
          Time = time;
          Location = location;
-         PlayerCount = 0;
-         HereCount = 0;
          SetBoss(boss);
-         Attending = new Dictionary<SocketGuildUser, int>();
-         Here = new Dictionary<SocketGuildUser, int>();
-         Invite = new Dictionary<SocketGuildUser, int>();
+         Groups = new List<RaidGroup>
+         {
+            new RaidGroup()
+         };
+         Invite = new List<SocketGuildUser>();
+         RaidBossSelections = new List<string>();
          CreatedAt = DateTime.Now;
       }
 
-      public void PlayerAdd(SocketGuildUser player, int partySize, bool isInvite = false)
+      public ImmutableDictionary<SocketGuildUser, int> GetReadonlyInvite()
       {
-         if (Attending.ContainsKey(player))
+         return Invite.ToImmutableDictionary(k => k, v => 1);
+      }
+
+      public bool PlayerAdd(SocketGuildUser player, int partySize, SocketGuildUser invitedBy = null)
+      {
+         int group;
+         if (invitedBy == null)
          {
-            int newPlayerCount = PlayerCount + (partySize - Attending[player]);
-            if (newPlayerCount <= playerLimit)
+            group = IsInRaid(player);
+            if (group == -1)
+               group = FindSmallestGroup();
+            Groups.ElementAt(group).Add(player, partySize);
+         }
+         else // is invite
+         {
+            group = IsInRaid(invitedBy);
+            if (group != -1)
             {
-               Attending[player] = partySize;
-               PlayerCount = newPlayerCount;
+               Groups.ElementAt(group).Invite(player, invitedBy);
+               return false;
             }
          }
-         else if (Here.ContainsKey(player))
+         var newGroup = Groups.ElementAt(group).SplitGroup();
+         if (newGroup != null)
+            Groups.Add(newGroup);
+         CheckMergeGroups();
+         return true;
+      }
+
+      public void RemovePlayer(SocketGuildUser player)
+      {
+         if (Invite.Contains(player))
+            Invite.Remove(player);
+         else
          {
-            int newPlayerCount = PlayerCount + (partySize - Here[player]);
-            if (newPlayerCount <= playerLimit)
+            foreach (var group in Groups)
             {
-               HereCount += partySize - Here[player];
-               PlayerCount = newPlayerCount;
-               Here[player] = partySize;
-            }
-         }
-         else if (Invite.ContainsKey(player))
-         {
-            if (isInvite)
-            {
-               int newPlayerCount = PlayerCount + partySize;
-               if (newPlayerCount <= 20)
+               if (group.HasPlayer(player))
                {
-                  Attending.Add(player, partySize);
-                  PlayerCount = newPlayerCount;
+                  group.Remove(player);
+                  CheckMergeGroups();
+                  return;
                }
             }
          }
-         else
+      }
+
+      public int PlayerReady(SocketGuildUser player)
+      {
+         for (int i = 0; i < Groups.Count; i++)
          {
-            int newPlayerCount = PlayerCount + partySize;
-            if (newPlayerCount <= 20)
+            var group = Groups.ElementAt(i);
+            if (group.HasPlayer(player))
             {
-               Attending.Add(player, partySize);
-               PlayerCount = newPlayerCount;
+               group.PlayerReady(player);
+               if (group.AllPlayersReady())
+                  return i;
+               return -1;
             }
          }
+         return -1;
       }
-      public bool PlayerHere(SocketGuildUser player)
-      {
-         if (Attending.ContainsKey(player))
-         {
-            Here.Add(player, Attending[player]);
-            Attending.Remove(player);
-            HereCount += Here[player];
 
-            if (Attending.Count == 0)
-               return true;
-            return false;
-         }
-         return false;
-      }
       public void PlayerRequestInvite(SocketGuildUser player)
       {
-         if (!Attending.ContainsKey(player) && !Here.ContainsKey(player) && !Invite.ContainsKey(player))
+         if (!Invite.Contains(player) && IsInRaid(player) == -1)
          {
-            Invite.Add(player, 1);
+            Invite.Add(player);
          }
       }
+
       public bool InvitePlayer(SocketGuildUser player, SocketGuildUser user)
       {
-         if ((Invite.Count + 1) < maxInvites && Invite.ContainsKey(player) && (Attending.ContainsKey(user) || Here.ContainsKey(user)))
+         if (Invite.Contains(player))
          {
-            PlayerAdd(player, 1, true);
-            Invite.Remove(player);
-            return true;
+            return PlayerAdd(player, 1, user);
          }
          return false;
       }
-      public void RemovePlayer(SocketGuildUser player)
-      {
-         if (Attending.ContainsKey(player))
-         {
-            PlayerCount -= Attending[player];
-            Attending.Remove(player);
-         }
-         else if (Here.ContainsKey(player))
-         {
-            PlayerCount -= Here[player];
-            HereCount -= Here[player];
-            Here.Remove(player);
-         }
-         else if (Invite.ContainsKey(player))
-         {
-            Invite.Remove(player);
-         }
-      }
+
       public void SetBoss(string bossName)
       {
          if (bossName != null)
@@ -140,9 +128,38 @@ namespace PokeStar.DataModels
          }
       }
 
-      public bool HasPlayer(SocketGuildUser user)
+      public int IsInRaid(SocketGuildUser player, bool checkInvite = true)
       {
-         return Attending.ContainsKey(user) || Here.ContainsKey(user);
+         for (int i = 0; i < Groups.Count; i++)
+            if (Groups.ElementAt(i).HasPlayer(player, checkInvite))
+               return i;
+         return -1;
+      }
+
+      private int FindSmallestGroup()
+      {
+         int minSize = int.MaxValue;
+         int minGroup = 0;
+         for (int i = 0; i < Groups.Count; i++)
+         {
+            int groupSize = Groups.ElementAt(i).TotalPlayers();
+            if (groupSize < minSize)
+            {
+               minSize = groupSize;
+               minGroup = i;
+            }
+         }
+         return minGroup;
+      }
+
+      private void CheckMergeGroups()
+      {
+         foreach (var group in Groups)
+            foreach (var check in Groups)
+               group.MergeGroup(check);
+         Groups.RemoveAll(x => x.TotalPlayers() == 0);
+         if (Groups.Count == 0)
+            Groups.Add(new RaidGroup());
       }
    }
 }
