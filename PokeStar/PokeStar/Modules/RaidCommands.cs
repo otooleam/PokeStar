@@ -239,7 +239,6 @@ namespace PokeStar.Modules
 
                await player.SendMessageAsync(BuildRaidHelpMessage());
                await player.SendMessageAsync($"{prefix}edit {message.Id}");
-
                needsUpdate = false;
             }
             else
@@ -398,7 +397,7 @@ namespace PokeStar.Modules
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
 
          sb.AppendLine("\nRaid Edit:");
-         sb.AppendLine($"To edit the desired raid send the edit command with the following code: ");
+         sb.AppendLine("To edit the desired raid send the edit command with the following code: ");
          return sb.ToString();
       }
 
