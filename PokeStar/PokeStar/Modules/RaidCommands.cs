@@ -353,7 +353,7 @@ namespace PokeStar.Modules
          StringBuilder sb = new StringBuilder();
          foreach (SocketGuildUser player in players)
             sb.Append($"{player.Mention} ");
-         sb.Append($"Everyone in group {groupNumber + 1} is ready to jump at {location}");
+         sb.Append($"Everyone in group {groupNumber + 1} is ready at {location}");
          return sb.ToString();
       }
 
