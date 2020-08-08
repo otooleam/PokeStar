@@ -4,6 +4,9 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles system edit commands.
+   /// </summary>
    public class SystemEditCommands : ModuleBase<SocketCommandContext>
    {
       [Command("prefix")]

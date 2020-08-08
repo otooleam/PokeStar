@@ -7,17 +7,59 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.DataModels
 {
+   /// <summary>
+   /// Raid to fight against a raid boss.
+   /// </summary>
    class Raid
    {
-      public string Location { get; set; }
+      /// <summary>
+      /// When the raid starts.
+      /// </summary>
       public string Time { get; set; }
+
+      /// <summary>
+      /// Where the raid is.
+      /// </summary>
+      public string Location { get; set; }
+
+      /// <summary>
+      /// Tier of the raid (1-5).
+      /// </summary>
       public short Tier { get; set; }
+
+      /// <summary>
+      /// Raid boss that the raid is for.
+      /// </summary>
       public RaidBoss Boss { get; private set; }
+
+      /// <summary>
+      /// List of raid groups in the raid.
+      /// </summary>
       public List<RaidGroup> Groups { get; private set; }
+
+      /// <summary>
+      /// List of possible raid bosses.
+      /// Only used if no raid boss is selected.
+      /// </summary>
       public List<string> RaidBossSelections { get; set; }
+
+      /// <summary>
+      /// When the raid was created at.
+      /// </summary>
       public DateTime CreatedAt { get; private set; }
+
+      /// <summary>
+      /// List of players looking for an invite to the raid.
+      /// </summary>
       private List<SocketGuildUser> Invite { get; set; }
 
+      /// <summary>
+      /// Creates a new raid.
+      /// </summary>
+      /// <param name="tier">Tier of the raid.</param>
+      /// <param name="time">When the raid starts.</param>
+      /// <param name="location">Where the raid is.</param>
+      /// <param name="boss">Name of the raid boss.</param>
       public Raid(short tier, string time, string location, string boss = null)
       {
          Tier = tier;
@@ -33,11 +75,32 @@ namespace PokeStar.DataModels
          CreatedAt = DateTime.Now;
       }
 
+      /// <summary>
+      /// Gets all users that want an invite to the raid.
+      /// A user's party will always be 1.
+      /// </summary>
+      /// <returns>Dictionary of users with a party of 1.</returns>
       public ImmutableDictionary<SocketGuildUser, int> GetReadonlyInvite()
       {
          return Invite.ToImmutableDictionary(k => k, v => 1);
       }
 
+      /// <summary>
+      /// Gets all users that want an invite to the raid.
+      /// </summary>
+      /// <returns>List of users.</returns>
+      public ImmutableList<SocketGuildUser> GetReadonlyInviteList()
+      {
+         return Invite.ToImmutableList();
+      }
+
+      /// <summary>
+      /// Adds a player to a raid.
+      /// </summary>
+      /// <param name="player">Player to add.</param>
+      /// <param name="partySize">Number of accounts the user is bringing.</param>
+      /// <param name="invitedBy">Who invited the user.</param>
+      /// <returns>True if the user was added, otherwise false.</returns>
       public bool PlayerAdd(SocketGuildUser player, int partySize, SocketGuildUser invitedBy = null)
       {
          int group;
@@ -52,10 +115,9 @@ namespace PokeStar.DataModels
          {
             group = IsInRaid(invitedBy);
             if (group != -1)
-            {
                Groups.ElementAt(group).Invite(player, invitedBy);
+            else
                return false;
-            }
          }
          var newGroup = Groups.ElementAt(group).SplitGroup();
          if (newGroup != null)
@@ -64,6 +126,10 @@ namespace PokeStar.DataModels
          return true;
       }
 
+      /// <summary>
+      /// Removes a player from the raid.
+      /// </summary>
+      /// <param name="player">Player to remove.</param>
       public void RemovePlayer(SocketGuildUser player)
       {
          if (Invite.Contains(player))
@@ -82,6 +148,11 @@ namespace PokeStar.DataModels
          }
       }
 
+      /// <summary>
+      /// Marks the player as ready.
+      /// </summary>
+      /// <param name="player">Player to mark ready.</param>
+      /// <returns>Group number if all members of the group are ready, else -1.</returns>
       public int PlayerReady(SocketGuildUser player)
       {
          for (int i = 0; i < Groups.Count; i++)
@@ -98,6 +169,10 @@ namespace PokeStar.DataModels
          return -1;
       }
 
+      /// <summary>
+      /// Requests an invite to a raid for a player.
+      /// </summary>
+      /// <param name="player">Player that requested the invite.</param>
       public void PlayerRequestInvite(SocketGuildUser player)
       {
          if (!Invite.Contains(player) && IsInRaid(player) == -1)
@@ -106,15 +181,25 @@ namespace PokeStar.DataModels
          }
       }
 
-      public bool InvitePlayer(SocketGuildUser player, SocketGuildUser user)
+      /// <summary>
+      /// Accepts an invite of a player.
+      /// </summary>
+      /// <param name="requester">Player that requested the invite.</param>
+      /// <param name="accepter">Player that accepted the invite.</param>
+      /// <returns></returns>
+      public bool InvitePlayer(SocketGuildUser requester, SocketGuildUser accepter)
       {
-         if (Invite.Contains(player))
+         if (Invite.Contains(requester))
          {
-            return PlayerAdd(player, 1, user);
+            return PlayerAdd(requester, 1, accepter);
          }
          return false;
       }
 
+      /// <summary>
+      /// Sets the boss of the raid.
+      /// </summary>
+      /// <param name="bossName">Name of the raid boss.</param>
       public void SetBoss(string bossName)
       {
          if (bossName != null)
@@ -128,6 +213,13 @@ namespace PokeStar.DataModels
          }
       }
 
+      /// <summary>
+      /// Checks if a player is in the raid.
+      /// This does not check the raid request invite list.
+      /// </summary>
+      /// <param name="player">Player to check.</param>
+      /// <param name="checkInvite">If invited players should be checked.</param>
+      /// <returns>Group number the player is in, else -1.</returns>
       public int IsInRaid(SocketGuildUser player, bool checkInvite = true)
       {
          for (int i = 0; i < Groups.Count; i++)
@@ -136,6 +228,10 @@ namespace PokeStar.DataModels
          return -1;
       }
 
+      /// <summary>
+      /// Finds the smallest group.
+      /// </summary>
+      /// <returns>Group number of the smallest group.</returns>
       private int FindSmallestGroup()
       {
          int minSize = int.MaxValue;
@@ -152,6 +248,9 @@ namespace PokeStar.DataModels
          return minGroup;
       }
 
+      /// <summary>
+      /// Attempts to merge groups.
+      /// </summary>
       private void CheckMergeGroups()
       {
          foreach (var group in Groups)

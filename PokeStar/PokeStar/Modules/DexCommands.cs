@@ -8,6 +8,9 @@ using PokeStar.DataModels;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles pokedex commands.
+   /// </summary>
    public class DexCommands : ModuleBase<SocketCommandContext>
    {
       [Command("dex")]
@@ -56,6 +59,7 @@ namespace PokeStar.Modules
          else
             await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
       }
+
       [Command("cp")]
       [Summary("Gets common max CP values for a pokemon")]
       public async Task CP([Summary("Get CPs for this pokemon.")][Remainder] string pokemonName)
@@ -100,9 +104,15 @@ namespace PokeStar.Modules
          else
             await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
       }
-      private static string GetPokemon(string text)
+
+      /// <summary>
+      /// Processes the pokemon name given from a command.
+      /// </summary>
+      /// <param name="pokemonName">Name of the pokemon.</param>
+      /// <returns>Full name of the pokemon</returns>
+      private static string GetPokemon(string pokemonName)
       {
-         List<string> words = new List<string>(text.Split(' '));
+         List<string> words = new List<string>(pokemonName.Split(' '));
 
          string form = words[words.Count - 1];
          if (form.Substring(0, 1).Equals("-", StringComparison.OrdinalIgnoreCase))
@@ -118,24 +128,30 @@ namespace PokeStar.Modules
          return GetFullName(name, form);
       }
 
-      /*
-       Burmy      default plant
-       Wormadam   default plant
-       Cherrim    default sunshine
-       Shellos    default east
-       Gastrodon  default east
-       Giratina   default Altered
-       Shaymin    default land
-       Arceus     default Normal
-       Basculin   default Blue
-       Deerling   default summer
-       Sawsbuck   default summer
-       Tornadus   default Incarnate
-       Thundurus  default Incarnate
-       Landorus   default Incarnate
-       Meloetta   default Aria
-       */
-
+      /// <summary>
+      /// Gets the full name of a pokemon.
+      /// The following pokemon have multiple forms:
+      /// Name       Default Form
+      /// -----------------------
+      /// Burmy      Plant Cloak
+      /// Wormadam   Plant Cloak
+      /// Cherrim    Sunshine
+      /// Shellos    East Sea
+      /// Gastrodon  East Sea
+      /// Giratina   Altered Form
+      /// Shaymin    Land Form
+      /// Arceus     Normal
+      /// Basculin   Blue Striped
+      /// Deerling   Summer Form
+      /// Sawsbuck   Summer Form
+      /// Tornadus   Incarnate
+      /// Thundurus  Incarnate
+      /// Landorus   Incarnate
+      /// Meloetta   Aria
+      /// </summary>
+      /// <param name="pokemonName">Name of the pokemon</param>
+      /// <param name="form">Form of the pokemon.</param>
+      /// <returns>Full name of the pokemon.</returns>
       private static string GetFullName(string pokemonName, string form = "")
       {
          // Alolan

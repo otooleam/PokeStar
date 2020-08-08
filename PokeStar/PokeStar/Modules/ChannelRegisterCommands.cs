@@ -5,23 +5,13 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles channel registration commands.
+   /// </summary>
    public class ChannelRegisterCommands : ModuleBase<SocketCommandContext>
    {
-      // KEY: Players(P), Raids(R), EX-Raids(E), Raid Train(T), Pokedex(D)
-
-      /* 
-       for the command that needs to be channel verified
-       if (ChannelRegisterCommand.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, 'type'))
-       {
-       }
-       else
-          await ReplyAsync("This channel is not registered to process "type" commands.");
-      */
-
       private static bool CheckSetupComplete = false;
 
-      // Registers the channel this command is run in as a command channel
-      // Requires .setup to have been run
       [Command("register")]
       [Summary("Registers a channel for a type of command.")]
       [Remarks("Valid registration values are:\n" +
@@ -98,26 +88,34 @@ namespace PokeStar.Modules
             await Context.Channel.SendMessageAsync($"Channel is now registered for the following command types {GenerateSummaryString(reg)}");
       }
 
-      private static string GenerateRegistrationString(string purpose, string existing = "")
+      /// <summary>
+      /// Adds a registered command type from a channel register string.
+      /// If the channel is already registed for a command type
+      /// nothing will be changed.
+      /// </summary>
+      /// <param name="register">Command type to register for a channel.</param>
+      /// <param name="existing">Channel's existing register string.</param>
+      /// <returns>Updated register string.</returns>
+      private static string GenerateRegistrationString(string register, string existing = "")
       {
          string add;
-         if (purpose.ToUpper().Equals("ALL"))
+         if (register.ToUpper().Equals("ALL"))
          {
             add = "DEPRT";
             CheckSetupComplete = true;
          }
-         else if (purpose.ToUpper().Equals("PLAYER") || purpose.ToUpper().Equals("ROLE") || purpose.ToUpper().Equals("P"))
+         else if (register.ToUpper().Equals("PLAYER") || register.ToUpper().Equals("ROLE") || register.ToUpper().Equals("P"))
          {
             add = "P";
             CheckSetupComplete = true;
          }
-         else if (purpose.ToUpper().Equals("RAID") || purpose.ToUpper().Equals("R"))
+         else if (register.ToUpper().Equals("RAID") || register.ToUpper().Equals("R"))
             add = "R";
-         else if (purpose.ToUpper().Equals("EX") || purpose.ToUpper().Equals("E"))
+         else if (register.ToUpper().Equals("EX") || register.ToUpper().Equals("E"))
             add = "E";
-         else if (purpose.ToUpper().Equals("TRAIN") || purpose.ToUpper().Equals("T"))
+         else if (register.ToUpper().Equals("TRAIN") || register.ToUpper().Equals("T"))
             add = "T";
-         else if (purpose.ToUpper().Equals("POKEDEX") || purpose.ToUpper().Equals("DEX") || purpose.ToUpper().Equals("D"))
+         else if (register.ToUpper().Equals("POKEDEX") || register.ToUpper().Equals("DEX") || register.ToUpper().Equals("D"))
             add = "D";
          else
             return null;
@@ -134,20 +132,28 @@ namespace PokeStar.Modules
          return new string(a).ToUpper();
       }
 
-      private static string GenerateUnregistrationString(string purpose, string existing)
+      /// <summary>
+      /// Removes a registered command type from a channel register string.
+      /// If the channel is not registed for a command type
+      /// nothing will be changed.
+      /// </summary>
+      /// <param name="unregister">Command type to unregister from a channel.</param>
+      /// <param name="existing">Channel's existing register string.</param>
+      /// <returns>Updated register string.</returns>
+      private static string GenerateUnregistrationString(string unregister, string existing)
       {
          string remove;
-         if (purpose.ToUpper().Equals("ALL"))
+         if (unregister.ToUpper().Equals("ALL"))
             return "";
-         else if (purpose.ToUpper().Equals("PLAYER") || purpose.ToUpper().Equals("ROLE") || purpose.ToUpper().Equals("P"))
+         else if (unregister.ToUpper().Equals("PLAYER") || unregister.ToUpper().Equals("ROLE") || unregister.ToUpper().Equals("P"))
             remove = "P";
-         else if (purpose.ToUpper().Equals("RAID") || purpose.ToUpper().Equals("R"))
+         else if (unregister.ToUpper().Equals("RAID") || unregister.ToUpper().Equals("R"))
             remove = "R";
-         else if (purpose.ToUpper().Equals("EX") || purpose.ToUpper().Equals("E"))
+         else if (unregister.ToUpper().Equals("EX") || unregister.ToUpper().Equals("E"))
             remove = "E";
-         else if (purpose.ToUpper().Equals("TRAIN") || purpose.ToUpper().Equals("T"))
+         else if (unregister.ToUpper().Equals("TRAIN") || unregister.ToUpper().Equals("T"))
             remove = "T";
-         else if (purpose.ToUpper().Equals("POKEDEX") || purpose.ToUpper().Equals("DEX") || purpose.ToUpper().Equals("D"))
+         else if (unregister.ToUpper().Equals("POKEDEX") || unregister.ToUpper().Equals("DEX") || unregister.ToUpper().Equals("D"))
             remove = "D";
          else
             return null;
@@ -156,6 +162,11 @@ namespace PokeStar.Modules
          return (index < 0) ? null : existing.Remove(index, remove.Length);
       }
 
+      /// <summary>
+      /// Generates a list of command types registered as a string.
+      /// </summary>
+      /// <param name="reg">Channel register string.</param>
+      /// <returns>Channel register summary string.</returns>
       private static string GenerateSummaryString(string reg)
       {
          string summary = "";
@@ -172,6 +183,13 @@ namespace PokeStar.Modules
          return summary.TrimEnd().TrimEnd(',');
       }
 
+      /// <summary>
+      /// Checks if the channel is registered for a type of command.
+      /// </summary>
+      /// <param name="guild">Guild that has the channel.</param>
+      /// <param name="channel">Channel to check for registered command type.</param>
+      /// <param name="type">Type of command to check if the channel is registered for.</param>
+      /// <returns>True if the channel is registed for the command type, else false.</returns>
       public static bool IsRegisteredChannel(ulong guild, ulong channel, string type)
       {
          string registration = Connections.Instance().GetRegistration(guild, channel);

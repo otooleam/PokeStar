@@ -15,18 +15,29 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar
 {
+   /// <summary>
+   /// Runs the main thread of the system.
+   /// </summary>
    public class Program
    {
-      // Allows System to run Asynchronously
-      public static void Main()
-         => new Program().MainAsync().GetAwaiter().GetResult(); //Any Exceptions get thrown here
-
-      private DiscordSocketClient _client;
+      private static DiscordSocketClient _client;
       private static CommandService _commands;
-      private IServiceProvider _services;
+      private static IServiceProvider _services;
 
       private bool logging = false;
 
+      /// <summary>
+      /// Main function for the system.
+      /// Allows the system to run asyncronously.
+      /// </summary>
+      public static void Main()
+         => new Program().MainAsync().GetAwaiter().GetResult();
+
+      /// <summary>
+      /// Runs main thread for the function.
+      /// Task is blocked until the program is closed.
+      /// </summary>
+      /// <returns>No task is returned as function ends on system termination.</returns>
       public async Task MainAsync()
       {
          string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -37,10 +48,11 @@ namespace PokeStar
          Environment.SetEnvironmentVariable("NONA_DB_CONNECTION_STRING", json.GetValue("nona_db_sql").ToString());
          Environment.SetEnvironmentVariable("DEFAULT_PREFIX", json.GetValue("default_prefix").ToString());
 
+         Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
+
          var logLevel = Convert.ToInt32(json.GetValue("log_level").ToString());
          var logSeverity = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? LogSeverity.Info : (LogSeverity)logLevel;
 
-         //sets cache for reaction events
          var _config = new DiscordSocketConfig
          {
             MessageCacheSize = 100,
@@ -59,29 +71,39 @@ namespace PokeStar
              .AddSingleton(_commands)
              .BuildServiceProvider();
 
-         HookLog();
-         await RegisterCommandsAsync().ConfigureAwait(false);
-         HookReactionAdded();
-         HookSetup();
-         HookLeftGuild();
+         await HookEvents();
          await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
          await _client.StartAsync().ConfigureAwait(false);
 
          string version = json.GetValue("version").ToString();
          await _client.SetGameAsync($".help | v{version}");
 
-         Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
-
          // Block this task until the program is closed.
          await Task.Delay(-1).ConfigureAwait(false);
       }
 
-      private void HookLog()
+      /// <summary>
+      /// Hooks events to the Client and Command services.
+      /// Runs asyncronously.
+      /// </summary>
+      /// <returns>Task Complete.</returns>
+      private async Task<Task> HookEvents()
       {
          _client.Log += Log;
          _commands.Log += Log;
+         _client.MessageReceived += HandleCommandAsync;
+         await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services).ConfigureAwait(false);
+         _client.ReactionAdded += HandleReactionAddedAsync;
+         _client.Ready += HandleReady;
+         _client.LeftGuild += HandleLeftGuild;
+         return Task.CompletedTask;
       }
 
+      /// <summary>
+      /// Handles the Log event.
+      /// </summary>
+      /// <param name="msg">Message to log.</param>
+      /// <returns>Task Complete.</returns>
       private Task Log(LogMessage msg)
       {
          string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -101,15 +123,15 @@ namespace PokeStar
          return Task.CompletedTask;
       }
 
-      private async Task RegisterCommandsAsync()
+      /// <summary>
+      /// Handles the Command event.
+      /// Runs asyncronously.
+      /// </summary>
+      /// <param name="cmdMessage">Command message that was sent.</param>
+      /// <returns>Task Complete.</returns>
+      private async Task<Task> HandleCommandAsync(SocketMessage cmdMessage)
       {
-         _client.MessageReceived += HandleCommandAsync;
-         await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services).ConfigureAwait(false);
-      }
-
-      private async Task<Task> HandleCommandAsync(SocketMessage arg)
-      {
-         SocketUserMessage message = arg as SocketUserMessage;
+         SocketUserMessage message = cmdMessage as SocketUserMessage;
          if (message == null || message.Author.IsBot)
             return Task.CompletedTask;
          var context = new SocketCommandContext(_client, message);
@@ -142,10 +164,15 @@ namespace PokeStar
          return Task.CompletedTask;
       }
 
-      private void HookReactionAdded()
-         => _client.ReactionAdded += HandleReactionAddedAsync;
-
-      private static async Task<Task> HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
+      /// <summary>
+      /// Handles the Reaction Added event.
+      /// Runs asyncronously.
+      /// </summary>
+      /// <param name="cachedMessage">Message that was reaction is on.</param>
+      /// <param name="originChannel">Channel where the message is located.</param>
+      /// <param name="reaction">Reaction made on the message.</param>
+      /// <returns>Task Complete.</returns>
+      private async Task<Task> HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
           ISocketMessageChannel originChannel, SocketReaction reaction)
       {
          var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
@@ -160,9 +187,10 @@ namespace PokeStar
          return Task.CompletedTask;
       }
 
-      private void HookSetup()
-         => _client.Ready += HandleReady;
-
+      /// <summary>
+      /// Handles the Ready event.
+      /// </summary>
+      /// <returns>Task Complete.</returns>
       private Task HandleReady()
       {
          string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -175,9 +203,11 @@ namespace PokeStar
          return Task.CompletedTask;
       }
 
-      private void HookLeftGuild()
-         => _client.LeftGuild += HandleLeftGuild;
-
+      /// <summary>
+      /// Handles the Left Guild event.
+      /// </summary>
+      /// <param name="guild">Guild that the bot left.</param>
+      /// <returns>Task Complete.</returns>
       private Task HandleLeftGuild(SocketGuild guild)
       {
          Connections.Instance().DeleteRegistration(guild.Id);
@@ -185,6 +215,11 @@ namespace PokeStar
          return Task.CompletedTask;
       }
 
+      /// <summary>
+      /// Sets the emotes from a JSON file
+      /// </summary>
+      /// <param name="server">Server that the emotes are on.</param>
+      /// <param name="json">JSON file that has the emote names.</param>
       private void SetEmotes(SocketGuild server, JObject json)
       {
          string[] emoteNames = {
@@ -195,10 +230,17 @@ namespace PokeStar
          };
 
          foreach (string emote in emoteNames)
-            Environment.SetEnvironmentVariable(emote.ToUpper(),
-               server.Emotes.FirstOrDefault(x => x.Name.ToString().Equals(json.GetValue(emote.ToLower()).ToString(), StringComparison.OrdinalIgnoreCase)).ToString());
+            Environment.SetEnvironmentVariable(
+               emote.ToUpper(), server.Emotes.FirstOrDefault(
+                  x => x.Name.ToString().Equals(
+                     json.GetValue(emote.ToLower()).ToString(),
+                     StringComparison.OrdinalIgnoreCase)).ToString());
       }
 
+      /// <summary>
+      /// Gets the list of commands.
+      /// </summary>
+      /// <returns>List of command info objects for the commands.</returns>
       public static List<CommandInfo> GetCommands()
       {
          return _commands.Commands.ToList();

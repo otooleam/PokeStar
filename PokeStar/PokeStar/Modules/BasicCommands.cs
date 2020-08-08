@@ -3,6 +3,9 @@ using Discord.Commands;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles basic test commands.
+   /// </summary>
    public class BasicCommands : ModuleBase<SocketCommandContext>
    {
       [Command("ping")]
