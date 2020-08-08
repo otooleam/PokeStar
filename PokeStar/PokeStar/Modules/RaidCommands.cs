@@ -313,7 +313,7 @@ namespace PokeStar.Modules
       {
          StringBuilder sb = new StringBuilder();
          for (int i = 0; i < potentials.Count; i++)
-            sb.AppendLine($"{raidEmojis[i]} {potentials[i]}");
+            sb.AppendLine($"{selectionEmojis[i]} {potentials[i]}");
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.DarkBlue);
