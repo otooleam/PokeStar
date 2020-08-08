@@ -148,7 +148,7 @@ namespace PokeStar.ImageProcessors
       /// <returns>Distance from 0-360 between the given hues.</returns>
       private static float GetHueDistance(float hue1, float hue2)
       {
-         float d = Math.Abs(hue1 - hue2); 
+         float d = Math.Abs(hue1 - hue2);
          return d > 180 ? 360 - d : d;
       }
    }

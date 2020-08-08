@@ -12,10 +12,14 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles raid commands.
+   /// </summary>
    public class RaidCommands : ModuleBase<SocketCommandContext>
    {
       private static readonly Dictionary<ulong, Raid> currentRaids = new Dictionary<ulong, Raid>();
       private static readonly Dictionary<ulong, ulong> raidMessages = new Dictionary<ulong, ulong>();
+
       private static readonly Emoji[] raidEmojis = {
          new Emoji("1️⃣"),
          new Emoji("2️⃣"),
@@ -28,6 +32,7 @@ namespace PokeStar.Modules
          new Emoji("🚫"),
          new Emoji("❓")
       };
+
       private static readonly Emoji[] selectionEmojis = {
          new Emoji("1️⃣"),
          new Emoji("2️⃣"),
@@ -151,6 +156,12 @@ namespace PokeStar.Modules
             await Context.Channel.SendMessageAsync("This channel is not registered to process Raid commands.");
       }
 
+      /// <summary>
+      /// Handles a reaction on a raid message.
+      /// </summary>
+      /// <param name="message">Message that was reacted on.</param>
+      /// <param name="reaction">Reaction that was sent.</param>
+      /// <returns>Completed Task.</returns>
       public static async Task RaidReaction(IMessage message, SocketReaction reaction)
       {
          Raid raid = currentRaids[message.Id];
@@ -220,7 +231,7 @@ namespace PokeStar.Modules
                      await reaction.Channel.SendMessageAsync($"{player.Mention}, There are no players to invite.");
                   else
                   {
-                     var inviteMsg = await reaction.Channel.SendMessageAsync(text: $"{player.Mention}", embed: BuildPlayerInviteEmbed(raid, player.Nickname));
+                     var inviteMsg = await reaction.Channel.SendMessageAsync(text: $"{player.Mention}", embed: BuildPlayerInviteEmbed(raid.GetReadonlyInviteList(), player.Nickname));
                      for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
                         await inviteMsg.AddReactionAsync(selectionEmojis[i]);
                      raidMessages.Add(inviteMsg.Id, message.Id);
@@ -256,6 +267,13 @@ namespace PokeStar.Modules
          await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, player);
       }
 
+      /// <summary>
+      /// Handles a reaction on a raid invite message.
+      /// </summary>
+      /// <param name="message">Message that was reacted on.</param>
+      /// <param name="reaction">Reaction that was sent.</param>
+      /// <param name="channel">Channel the reaction happened in</param>
+      /// <returns>Completed Task.</returns>
       public static async Task RaidInviteReaction(IMessage message, SocketReaction reaction, ISocketMessageChannel channel)
       {
          await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value);
@@ -283,6 +301,12 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Builds the raid embed.
+      /// </summary>
+      /// <param name="raid">Raid to display in the embed.</param>
+      /// <param name="fileName">Name of picture to use for the raid.</param>
+      /// <returns>Embed for viewing a raid.</returns>
       private static Embed BuildRaidEmbed(Raid raid, string fileName = null)
       {
          if (fileName != null)
@@ -297,7 +321,7 @@ namespace PokeStar.Modules
          embed.AddField("Time", raid.Time, true);
          embed.AddField("Location", raid.Location, true);
 
-         for(int i = 0; i < raid.Groups.Count; i++)
+         for (int i = 0; i < raid.Groups.Count; i++)
          {
             embed.AddField($"Group {i + 1} Ready ({raid.Groups.ElementAt(i).GetHereCount()}/{raid.Groups.ElementAt(i).TotalPlayers()})", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyHere())}");
             embed.AddField($"Group {i + 1} Attending", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyAttending())}");
@@ -309,6 +333,12 @@ namespace PokeStar.Modules
          return embed.Build();
       }
 
+      /// <summary>
+      /// Builds the raid boss select embed.
+      /// </summary>
+      /// <param name="potentials">List of potential raid bosses.</param>
+      /// <param name="selectPic">Name of picture file to get.</param>
+      /// <returns>Embed for selecting raid boss.</returns>
       private static Embed BuildBossSelectEmbed(List<string> potentials, string selectPic)
       {
          StringBuilder sb = new StringBuilder();
@@ -323,11 +353,17 @@ namespace PokeStar.Modules
          return embed.Build();
       }
 
-      private static Embed BuildPlayerInviteEmbed(Raid raid, string user)
+      /// <summary>
+      /// Builds the raid invite embed.
+      /// </summary>
+      /// <param name="invite">List of users to invite.</param>
+      /// <param name="user">User that wants to invite someone.</param>
+      /// <returns>Embed for inviting a player to a raid.</returns>
+      private static Embed BuildPlayerInviteEmbed(ImmutableList<SocketGuildUser> invite, string user)
       {
          StringBuilder sb = new StringBuilder();
-         for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
-            sb.AppendLine($"{raidEmojis[i]} {raid.GetReadonlyInvite().Keys.ElementAt(i).Nickname}");
+         for (int i = 0; i < invite.Count; i++)
+            sb.AppendLine($"{raidEmojis[i]} {invite.ElementAt(i).Nickname}");
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.DarkBlue);
@@ -337,6 +373,11 @@ namespace PokeStar.Modules
          return embed.Build();
       }
 
+      /// <summary>
+      /// Builds the title of the raid.
+      /// </summary>
+      /// <param name="tier">Raid tier.</param>
+      /// <returns>Raid title as a string.</returns>
       private static string BuildRaidTitle(int tier)
       {
          StringBuilder sb = new StringBuilder();
@@ -347,6 +388,13 @@ namespace PokeStar.Modules
          return sb.ToString();
       }
 
+      /// <summary>
+      /// Builds a list of players to ping when a group is ready.
+      /// </summary>
+      /// <param name="players">List of players to ping.</param>
+      /// <param name="location">Location of the raid.</param>
+      /// <param name="groupNumber">Group number the players are part of.</param>
+      /// <returns>List of players to ping as a string.</returns>
       private static string BuildPingList(List<SocketGuildUser> players, string location, int groupNumber)
       {
          StringBuilder sb = new StringBuilder();
@@ -356,6 +404,11 @@ namespace PokeStar.Modules
          return sb.ToString();
       }
 
+      /// <summary>
+      /// Builds a list of players in a raid.
+      /// </summary>
+      /// <param name="players">Dictionary of players and the number of accounts they are bringing.</param>
+      /// <returns>List of players as a string.</returns>
       private static string BuildPlayerList(ImmutableDictionary<SocketGuildUser, int> players)
       {
          if (players.Count == 0)
@@ -370,6 +423,11 @@ namespace PokeStar.Modules
          return sb.ToString();
       }
 
+      /// <summary>
+      /// Builds the invite list for a raid group.
+      /// </summary>
+      /// <param name="players">Dictionary of invited players and who invited them.</param>
+      /// <returns>List of invited players as a string.</returns>
       private static string BuildInvitedList(ImmutableDictionary<SocketGuildUser, SocketGuildUser> players)
       {
          if (players.Count == 0)
@@ -384,6 +442,10 @@ namespace PokeStar.Modules
          return sb.ToString();
       }
 
+      /// <summary>
+      /// Builds the raid help message.
+      /// </summary>
+      /// <returns>Raid help messsage as a string.</returns>
       private static string BuildRaidHelpMessage()
       {
          StringBuilder sb = new StringBuilder();
@@ -401,6 +463,11 @@ namespace PokeStar.Modules
          return sb.ToString();
       }
 
+      /// <summary>
+      /// Getss the team role registered to a user.
+      /// </summary>
+      /// <param name="user">User to get team role of.</param>
+      /// <returns>Team role name of the user.</returns>
       private static string GetPlayerTeam(SocketGuildUser user)
       {
          if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) != null)
@@ -412,6 +479,10 @@ namespace PokeStar.Modules
          return "";
       }
 
+      /// <summary>
+      /// Removes old raid messages from the list of raid messages.
+      /// Old raid messages are messages older than one day.
+      /// </summary>
       private static void RemoveOldRaids()
       {
          List<ulong> ids = new List<ulong>();
@@ -422,11 +493,21 @@ namespace PokeStar.Modules
             currentRaids.Remove(id);
       }
 
+      /// <summary>
+      /// Checks if a message is a raid message.
+      /// </summary>
+      /// <param name="id">Id of the message to check.</param>
+      /// <returns>True if the message is a raid message, otherwise false.</returns>
       public static bool IsCurrentRaid(ulong id)
       {
          return currentRaids.ContainsKey(id);
       }
 
+      /// <summary>
+      /// Checks if a message is a raid invite message.
+      /// </summary>
+      /// <param name="id">Id of the message to check.</param>
+      /// <returns>True if the message is a raid invite message, otherwise false.</returns>
       public static bool IsRaidInvite(ulong id)
       {
          return raidMessages.ContainsKey(id);

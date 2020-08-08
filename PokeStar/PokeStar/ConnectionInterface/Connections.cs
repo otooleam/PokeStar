@@ -7,15 +7,14 @@ namespace PokeStar.ConnectionInterface
 {
    public class Connections
    {
-      private const string raidBossHTML = "//*[@class = 'col-md-4']";
-
-      public Uri RAID_BOSS_URL { get; } = new Uri("https://thesilphroad.com/raid-bosses");
-      public static string RAID_BOSS_HTML => raidBossHTML;
-
       private static Connections connections;
 
       private readonly POGODatabaseConnector POGODBConnector;
       private readonly NONADatabaseConnector NONADBConnector;
+
+      public Uri RAID_BOSS_URL { get; } = new Uri("https://thesilphroad.com/raid-bosses");
+      public static string RAID_BOSS_HTML => raidBossHTML;
+      private const string raidBossHTML = "//*[@class = 'col-md-4']";
 
       /// <summary>
       /// Creates a new Connections object.
@@ -240,7 +239,7 @@ namespace PokeStar.ConnectionInterface
          string prefix = NONADBConnector.GetPrefix(guild);
          return prefix?[0].ToString();
       }
-      
+
       /// <summary>
       /// Updates the prefix of the guild.
       /// </summary>
@@ -253,7 +252,7 @@ namespace PokeStar.ConnectionInterface
          else
             NONADBConnector.UpdatePrefix(guild, prefix);
       }
-      
+
       /// <summary>
       /// Deletes the prefix of a guild.
       /// </summary>
@@ -275,7 +274,7 @@ namespace PokeStar.ConnectionInterface
          string registration = NONADBConnector.GetRegistration(guild, channel);
          return registration ?? null;
       }
-      
+
       /// <summary>
       /// Updates the registration of a channel.
       /// </summary>
@@ -289,7 +288,7 @@ namespace PokeStar.ConnectionInterface
          else
             NONADBConnector.UpdateRegistration(guild, channel, register);
       }
-      
+
       /// <summary>
       /// Deletes the registration of a guild or channel.
       /// If no channel is given then all registrations for the guild are
