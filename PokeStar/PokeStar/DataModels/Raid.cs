@@ -115,7 +115,10 @@ namespace PokeStar.DataModels
          {
             group = IsInRaid(invitedBy);
             if (group != -1)
+            {
                Groups.ElementAt(group).Invite(player, invitedBy);
+               Invite.Remove(player);
+            }
             else
                return false;
          }
