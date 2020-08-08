@@ -238,7 +238,7 @@ namespace PokeStar.DataModels
          {
             string typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
             str += typeString + " ";
-            if (count == 4)
+            if (count == 3)
             {
                count = -1;
                str += "\n";
@@ -260,7 +260,7 @@ namespace PokeStar.DataModels
          {
             string typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
             str += typeString + " ";
-            if (count == 4)
+            if (count == 3)
             {
                count = -1;
                str += "\n";
