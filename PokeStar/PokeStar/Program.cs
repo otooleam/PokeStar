@@ -56,7 +56,8 @@ namespace PokeStar
          var _config = new DiscordSocketConfig
          {
             MessageCacheSize = 100,
-            LogLevel = logSeverity
+            LogLevel = logSeverity,
+            ExclusiveBulkDelete = true
          };
          _client = new DiscordSocketClient(_config);
          CommandServiceConfig config = new CommandServiceConfig
