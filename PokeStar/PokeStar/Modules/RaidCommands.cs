@@ -166,7 +166,6 @@ namespace PokeStar.Modules
       {
          Raid raid = currentRaids[message.Id];
          SocketGuildUser player = (SocketGuildUser)reaction.User;
-         bool needsUpdate = true;
 
          if (raid.Boss == null)
          {
@@ -188,11 +187,11 @@ namespace PokeStar.Modules
                var raidMsg = await reaction.Channel.SendFileAsync(filename, embed: BuildRaidEmbed(raid, filename));
                await raidMsg.AddReactionsAsync(raidEmojis);
                currentRaids.Add(raidMsg.Id, raid);
-               needsUpdate = false;
             }
          }
          else
          {
+            bool needsUpdate = true;
             if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_1]))
             {
                raid.PlayerAdd(player, 1);
@@ -254,17 +253,18 @@ namespace PokeStar.Modules
             }
             else
                needsUpdate = false;
-         }
 
-         if (needsUpdate)
-         {
-            var msg = (SocketUserMessage)message;
-            await msg.ModifyAsync(x =>
+            if (needsUpdate)
             {
-               x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
-            });
+               var msg = (SocketUserMessage)message;
+               await msg.ModifyAsync(x =>
+               {
+                  x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
+               });
+            }
+
+            await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, player);
          }
-         await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, player);
       }
 
       /// <summary>
