@@ -66,6 +66,7 @@ namespace PokeStar.ConnectionInterface
       {
          pokemonName = pokemonName.Replace(" ", "_");
          pokemonName = pokemonName.Replace(".", "");
+         pokemonName = pokemonName.Replace("?", "QU");
          return pokemonName + ".png";
       }
 
@@ -229,7 +230,7 @@ namespace PokeStar.ConnectionInterface
       private static string ReformatName(string originalName)
       {
          if (originalName.Contains("Unown"))
-            originalName = "Unown";
+            return "Unown";
          int index = originalName.IndexOf('\'');
          return index == -1 ? originalName : originalName.Insert(index, "\'");
       }
