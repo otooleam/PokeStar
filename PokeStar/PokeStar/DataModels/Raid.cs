@@ -133,22 +133,35 @@ namespace PokeStar.DataModels
       /// Removes a player from the raid.
       /// </summary>
       /// <param name="player">Player to remove.</param>
-      public void RemovePlayer(SocketGuildUser player)
+      public int RemovePlayer(SocketGuildUser player)
       {
          if (Invite.Contains(player))
+         {
             Invite.Remove(player);
+            return -1;
+         }
          else
          {
-            foreach (var group in Groups)
+            for (int i = 0; i < Groups.Count; i++)
             {
+               RaidGroup group = Groups.ElementAt(i);
                if (group.HasPlayer(player))
                {
+                  bool everyoneWasReady;
+                  if (group.HasPlayer(player))
+                     everyoneWasReady = true;
+                  else
+                     everyoneWasReady = false;
+
                   group.Remove(player);
-                  CheckMergeGroups();
-                  return;
+                  if (group.AllPlayersReady())
+                     if (!everyoneWasReady)
+                        return i;
+                  return -1;
                }
             }
          }
+         return -1;
       }
 
       /// <summary>

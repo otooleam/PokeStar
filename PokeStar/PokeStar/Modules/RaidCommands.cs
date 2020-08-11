@@ -240,7 +240,9 @@ namespace PokeStar.Modules
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]))
             {
-               raid.RemovePlayer(player);
+               int group = raid.RemovePlayer(player);
+               if (group != -1)
+                  await reaction.Channel.SendMessageAsync(BuildPingList(raid.Groups.ElementAt(group).GetPingList(), raid.Location, group));
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
             {
