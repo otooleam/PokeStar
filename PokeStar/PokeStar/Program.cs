@@ -227,7 +227,8 @@ namespace PokeStar
             "bug_emote", "dark_emote", "dragon_emote", "electric_emote", "fairy_emote", "fighting_emote",
             "fire_emote", "flying_emote", "ghost_emote", "grass_emote", "ground_emote", "ice_emote",
             "normal_emote", "poison_emote", "psychic_emote", "rock_emote", "steel_emote", "water_emote",
-            "raid_emote", "valor_emote", "mystic_emote", "instinct_emote"
+            "raid_emote", "valor_emote", "mystic_emote", "instinct_emote", "sunny_emote", "clear_emote",
+            "rain_emote", "partly_cloudy_emote", "cloudy_emote", "windy_emote", "snow_emote", "fog_emote"
          };
 
          foreach (string emote in emoteNames)
