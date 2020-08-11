@@ -165,8 +165,9 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       /// <param name="pokemonName">Name of the pokemon.</param>
       /// <param name="fast">Is the type of move a fast move, else charge move.</param>
+      /// <param name="shadowable">Is the pokemon shadowable.</param>
       /// <returns>List of moves of the pokemon.</returns>
-      public List<Move> GetMoves(string pokemonName, bool fast = true)
+      public List<Move> GetMoves(string pokemonName, bool fast = true, bool shadowable = false)
       {
          List<Move> moves = new List<Move>();
          string moveType = fast ? "Fast" : "Charge";
@@ -194,6 +195,21 @@ namespace PokeStar.ConnectionInterface
                }
             }
             conn.Close();
+         }
+         if (!fast && shadowable)
+         {
+            moves.Add(new Move
+            {
+               Name = "Frustration",
+               Type = "Normal",
+               IsLegacy = false
+            });
+            moves.Add(new Move
+            {
+               Name = "Return",
+               Type = "Normal",
+               IsLegacy = false
+            });
          }
          return moves;
       }

@@ -222,7 +222,10 @@ namespace PokeStar.DataModels
       {
          string str = "";
          foreach (string weather in Weather)
-            str += weather + "\n";
+         {
+            string typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{weather.Replace(' ', '_').ToUpper()}_EMOTE")).ToString();
+            str += typeString + " ";
+         }
          return str.Trim();
       }
 

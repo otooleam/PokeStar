@@ -144,7 +144,7 @@ namespace PokeStar.ConnectionInterface
          pokemon.Weakness = POGODBConnector.GetTypeRelations(pokemon.Type, true);
          pokemon.Resistance = POGODBConnector.GetTypeRelations(pokemon.Type, false);
          pokemon.FastMove = POGODBConnector.GetMoves(name, true);
-         pokemon.ChargeMove = POGODBConnector.GetMoves(name, false);
+         pokemon.ChargeMove = POGODBConnector.GetMoves(name, false, pokemon.Shadow);
 
          pokemon.CPMax = CPCalculator.CalcCPPerLevel(
             pokemon.Attack, pokemon.Defense, pokemon.Stamina,
