@@ -122,9 +122,6 @@ namespace PokeStar.ConnectionInterface
             CPCalculator.MAX_IV,
             CPCalculator.RAID_LEVEL + CPCalculator.WEATHER_BOOST);
 
-         if (raidBoss.Name.Equals("Unown"))
-            raidBoss.Name = raidBossName;
-
          return raidBoss;
       }
 
@@ -229,8 +226,6 @@ namespace PokeStar.ConnectionInterface
       /// <returns>Name formated for the POGO database</returns>
       private static string ReformatName(string originalName)
       {
-         if (originalName.Contains("Unown"))
-            return "Unown";
          int index = originalName.IndexOf('\'');
          return index == -1 ? originalName : originalName.Insert(index, "\'");
       }
