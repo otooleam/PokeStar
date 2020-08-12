@@ -12,6 +12,9 @@ namespace PokeStar.DataModels
    /// </summary>
    class Raid
    {
+      //if we have more groups, the embed breaks
+      private const int GROUP_LIMIT = 3;
+
       /// <summary>
       /// When the raid starts.
       /// </summary>
