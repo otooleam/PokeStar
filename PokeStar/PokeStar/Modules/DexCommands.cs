@@ -133,6 +133,7 @@ namespace PokeStar.Modules
       /// The following pokemon have multiple forms:
       /// Name       Default Form
       /// -----------------------
+      /// Unown      F
       /// Burmy      Plant Cloak
       /// Wormadam   Plant Cloak
       /// Cherrim    Sunshine
@@ -148,14 +149,17 @@ namespace PokeStar.Modules
       /// Thundurus  Incarnate
       /// Landorus   Incarnate
       /// Meloetta   Aria
+      /// Note: nidoran defaults to the female form.
       /// </summary>
       /// <param name="pokemonName">Name of the pokemon</param>
       /// <param name="form">Form of the pokemon.</param>
       /// <returns>Full name of the pokemon.</returns>
       private static string GetFullName(string pokemonName, string form = "")
       {
+         if (form.Length == 2)
+            return $"{pokemonName} {form.ToCharArray()[1]}";
          // Alolan
-         if (form.Equals("-alola", StringComparison.OrdinalIgnoreCase))
+         else if (form.Equals("-alola", StringComparison.OrdinalIgnoreCase))
             return $"Alolan {pokemonName}";
          // Galarian
          else if (form.Equals("-galar", StringComparison.OrdinalIgnoreCase))
@@ -168,13 +172,16 @@ namespace PokeStar.Modules
          else if (form.Equals("-megay", StringComparison.OrdinalIgnoreCase))
             return $"Mega {pokemonName} Y";
          // Nidoran
-         else if (form.Equals("-female", StringComparison.OrdinalIgnoreCase) || form.Equals("-F", StringComparison.OrdinalIgnoreCase))
+         else if (form.Equals("-female", StringComparison.OrdinalIgnoreCase))
             return $"{pokemonName} F";
-         else if (form.Equals("-male", StringComparison.OrdinalIgnoreCase) || form.Equals("-M", StringComparison.OrdinalIgnoreCase))
+         else if (form.Equals("-male", StringComparison.OrdinalIgnoreCase))
             return $"{pokemonName} M";
          // Mewtwo
          else if (form.Equals("-armor", StringComparison.OrdinalIgnoreCase))
             return $"Armored {pokemonName}";
+         /// Unown and Nidoran
+         else if (string.IsNullOrWhiteSpace(form) && (pokemonName.Equals("unown", StringComparison.OrdinalIgnoreCase) || pokemonName.Equals("nidoran", StringComparison.OrdinalIgnoreCase)))
+            return $"{pokemonName} F";
          // Castform
          else if (form.Equals("-rain", StringComparison.OrdinalIgnoreCase))
             return $"Rainy {pokemonName}";
