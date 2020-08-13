@@ -501,7 +501,7 @@ namespace PokeStar.Modules
       {
          List<ulong> ids = new List<ulong>();
          foreach (var temp in currentRaids)
-            if ((temp.Value.CreatedAt - DateTime.Now).TotalDays >= 1)
+            if (Math.Abs((temp.Value.CreatedAt - DateTime.Now).TotalDays) >= 1)
                ids.Add(temp.Key);
          foreach (var id in ids)
             currentRaids.Remove(id);

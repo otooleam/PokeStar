@@ -99,7 +99,7 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets all weather that boosts the given types
+      /// Gets all weather that boosts the given types.
       /// </summary>
       /// <param name="types">List of types to get weather for.</param>
       /// <returns>List of weather that boosts the givent types.</returns>
@@ -125,14 +125,13 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets type relations to a pokemon type.
+      /// Gets defensive type relations for a pokemon's type.
       /// </summary>
       /// <param name="types">List of pokemon types.</param>
-      /// <param name="weaknesses">Is the type relation weaknesses, else resistances.</param>
-      /// <returns>List of types with the desired relation.</returns>
-      public List<string> GetTypeRelations(List<string> types, bool weaknesses = true)
+      /// <returns>Dictionary of types and modifiers.</returns>
+      public Dictionary<string, int> GetTypeDefenseRelations(List<string> types)
       {
-         List<string> relations = new List<string>();
+         Dictionary<string, int> relations = new Dictionary<string, int>();
          string queryString = $@"SELECT attacker, SUM(modifier) AS total_relation 
                                  FROM (
                                  SELECT attacker, modifier
@@ -149,11 +148,33 @@ namespace PokeStar.ConnectionInterface
             using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
-               {
-                  int modifier = Convert.ToInt32(reader["total_relation"]);
-                  if ((weaknesses && modifier > 0) || !weaknesses && modifier < 0)
-                     relations.Add(Convert.ToString(reader["attacker"]));
-               }
+                  relations.Add(Convert.ToString(reader["attacker"]), Convert.ToInt32(reader["total_relation"]));
+            }
+            conn.Close();
+         }
+         return relations;
+      }
+
+      /// <summary>
+      /// Gets offensive type relations for a move's type.
+      /// </summary>
+      /// <param name="type">Move type.</param>
+      /// <returns>Dictionary of types and modifiers.</returns>
+      public Dictionary<string, int> GetTypeAttackRelations(string type)
+      {
+         Dictionary<string, int> relations = new Dictionary<string, int>();
+         string queryString = $@"SELECT defender, modifier
+                                 FROM type_match_up
+                                 WHERE attacker = '{type}'
+                                 ORDER BY modifier;";
+
+         using (var conn = GetConnection())
+         {
+            conn.Open();
+            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+                  relations.Add(Convert.ToString(reader["defender"]), Convert.ToInt32(reader["modifier"]));
             }
             conn.Close();
          }
