@@ -135,7 +135,11 @@ namespace PokeStar.DataModels
             CheckMergeGroups();
             return true;
          }
-         return false;
+         else
+         {
+            Groups.ElementAt(group).Remove(player);
+            return false;
+         }
       }
 
       /// <summary>
