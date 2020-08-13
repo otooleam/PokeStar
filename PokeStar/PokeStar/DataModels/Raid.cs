@@ -125,11 +125,17 @@ namespace PokeStar.DataModels
             else
                return false;
          }
-         var newGroup = Groups.ElementAt(group).SplitGroup();
-         if (newGroup != null)
-            Groups.Add(newGroup);
-         CheckMergeGroups();
-         return true;
+
+         RaidGroup newGroup;
+         if (Groups.Count < GROUP_LIMIT)
+         {
+            newGroup = Groups.ElementAt(group).SplitGroup();
+            if (newGroup != null)
+               Groups.Add(newGroup);
+            CheckMergeGroups();
+            return true;
+         }
+         return false;
       }
 
       /// <summary>
