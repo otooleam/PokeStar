@@ -232,11 +232,15 @@ namespace PokeStar.Modules
                      await reaction.Channel.SendMessageAsync($"{player.Mention}, There are no players to invite.");
                   else
                   {
-                     var inviteMsg = await reaction.Channel.SendMessageAsync(text: $"{player.Mention}", embed: BuildPlayerInviteEmbed(raid.GetReadonlyInviteList(), (player.Nickname == null ? player.Username : player.Nickname)));
-                     for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
-                        await inviteMsg.AddReactionAsync(selectionEmojis[i]);
-                     await inviteMsg.AddReactionAsync(cancelEmoji);
-                     raidMessages.Add(inviteMsg.Id, message.Id);
+                     if (!raid.HasActiveInvite())
+                     {
+                        raid.InvitingPlayer = player;
+                        var inviteMsg = await reaction.Channel.SendMessageAsync(text: $"{player.Mention}", embed: BuildPlayerInviteEmbed(raid.GetReadonlyInviteList(), (player.Nickname == null ? player.Username : player.Nickname)));
+                        for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
+                           await inviteMsg.AddReactionAsync(selectionEmojis[i]);
+                        await inviteMsg.AddReactionAsync(cancelEmoji);
+                        raidMessages.Add(inviteMsg.Id, message.Id);
+                     }
                   }
                }
             }
@@ -284,30 +288,37 @@ namespace PokeStar.Modules
          await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value);
          var raidMessageId = raidMessages[message.Id];
          Raid raid = currentRaids[raidMessageId];
-         if (reaction.Emote.Equals(cancelEmoji))
-         {
-            await message.DeleteAsync();
-            return;
-         }
-         for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
-         {
-            if (reaction.Emote.Equals(selectionEmojis.ElementAt(i)))
-            {
-               var player = raid.GetReadonlyInvite().Keys.ElementAt(i);
-               if (raid.InvitePlayer(player, (SocketGuildUser)reaction.User))
-               {
-                  var raidMessage = (SocketUserMessage)channel.CachedMessages.FirstOrDefault(x => x.Id == raidMessageId);
-                  await raidMessage.ModifyAsync(x =>
-                  {
-                     x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
-                  });
+         SocketGuildUser player = (SocketGuildUser)reaction.User;
 
-                  SocketGuildUser invitingPlayer = (SocketGuildUser)reaction.User.Value;
-                  await player.SendMessageAsync($"You have been invited to a raid by {(invitingPlayer.Nickname == null ? invitingPlayer.Username : invitingPlayer.Nickname)}.");
-                  raidMessages.Remove(message.Id);
-                  await message.DeleteAsync();
-               }
+         if (player.Equals(raid.InvitingPlayer))
+         {
+            if (reaction.Emote.Equals(cancelEmoji))
+            {
+               await message.DeleteAsync();
+               raid.InvitingPlayer = null;
                return;
+            }
+            for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
+            {
+               if (reaction.Emote.Equals(selectionEmojis.ElementAt(i)))
+               {
+                  var player = raid.GetReadonlyInvite().Keys.ElementAt(i);
+                  if (raid.InvitePlayer(player, (SocketGuildUser)reaction.User))
+                  {
+                     var raidMessage = (SocketUserMessage)channel.CachedMessages.FirstOrDefault(x => x.Id == raidMessageId);
+                     await raidMessage.ModifyAsync(x =>
+                     {
+                        x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
+                     });
+
+                     SocketGuildUser invitingPlayer = (SocketGuildUser)reaction.User.Value;
+                     await player.SendMessageAsync($"You have been invited to a raid by {(invitingPlayer.Nickname == null ? invitingPlayer.Username : invitingPlayer.Nickname)}.");
+                     raidMessages.Remove(message.Id);
+                     raid.InvitingPlayer = null;
+                     await message.DeleteAsync();
+                  }
+                  return;
+               }
             }
          }
       }

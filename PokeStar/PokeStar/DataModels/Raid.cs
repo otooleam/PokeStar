@@ -57,6 +57,11 @@ namespace PokeStar.DataModels
       private List<SocketGuildUser> Invite { get; set; }
 
       /// <summary>
+      /// Player who is in the process of inviting someone.
+      /// </summary>
+      public SocketGuildUser InvitingPlayer { get; set; }
+
+      /// <summary>
       /// Creates a new raid.
       /// </summary>
       /// <param name="tier">Tier of the raid.</param>
@@ -76,6 +81,7 @@ namespace PokeStar.DataModels
          Invite = new List<SocketGuildUser>();
          RaidBossSelections = new List<string>();
          CreatedAt = DateTime.Now;
+         InvitingPlayer = null;
       }
 
       /// <summary>
@@ -95,6 +101,11 @@ namespace PokeStar.DataModels
       public ImmutableList<SocketGuildUser> GetReadonlyInviteList()
       {
          return Invite.ToImmutableList();
+      }
+
+      public bool HasActiveInvite()
+      {
+         return InvitingPlayer != null;
       }
 
       /// <summary>
