@@ -156,11 +156,7 @@ namespace PokeStar.DataModels
                RaidGroup group = Groups.ElementAt(i);
                if (group.HasPlayer(player))
                {
-                  bool everyoneWasReady;
-                  if (group.HasPlayer(player))
-                     everyoneWasReady = true;
-                  else
-                     everyoneWasReady = false;
+                  bool everyoneWasReady = group.HasPlayer(player);
 
                   group.Remove(player);
                   if (group.AllPlayersReady())
