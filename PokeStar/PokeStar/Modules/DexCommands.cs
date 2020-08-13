@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
-using PokeStar.ConnectionInterface;
 using PokeStar.DataModels;
+using PokeStar.Calculators;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
@@ -104,6 +105,64 @@ namespace PokeStar.Modules
          else
             await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
       }
+
+      [Command("type")]
+      [Summary("Gets information for a pokemon type.")]
+      public async Task PokeType([Summary("Primary type.")] string type1,
+                                 [Summary("(Optional) Secondary type.")] string type2 = null)
+      {
+         if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
+         {
+            List<string> types = new List<string>
+            {
+               type1,
+            };
+            if (type2 != null && !type1.Equals(type2, StringComparison.OrdinalIgnoreCase))
+               types.Add(type2);
+
+            
+
+            if (!CheckValidType(type1) || (types.Count == 2 && !CheckValidType(type2)))
+            {
+               EmbedBuilder embed = new EmbedBuilder();
+               embed.WithTitle("CP Command Error");
+               embed.WithDescription($"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
+               embed.WithColor(Color.DarkRed);
+               await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+            }
+            else
+            {
+               string title = $"{type1}";
+               if (types.Count == 2)
+                  title += $", {type2}";
+
+               string description = Emote.Parse(Environment.GetEnvironmentVariable($"{type1.ToUpper()}_EMOTE")).ToString();
+               if (types.Count == 2)
+                  description += Emote.Parse(Environment.GetEnvironmentVariable($"{type2.ToUpper()}_EMOTE")).ToString();
+
+               var type1AttackRelations = (types.Count == 2) ? null : Connections.Instance().GetTypeAttackRelations(type1);
+               var defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
+               var weather = Connections.Instance().GetWeather(types);
+
+               EmbedBuilder embed = new EmbedBuilder();
+               embed.WithTitle($@"Type {title.ToUpper()}");
+               embed.WithDescription(description);
+               embed.AddField("Weather Boosts:", FormatWeatherList(weather), false);
+               if (type1AttackRelations.HasValue)
+               { 
+                  embed.AddField($"Super Effective against:", FormatTypeList(type1AttackRelations.Value.strong), false);
+                  embed.AddField($"Not Very Effective against:", FormatTypeList(type1AttackRelations.Value.weak), false);
+               }
+               embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.weak), false);
+               embed.AddField($"Resistances:", FormatTypeList(defenseRelations.strong), false);
+               embed.WithColor(Color.Blue);
+               await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+            }
+         }
+         else
+            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
+      }
+
 
       /// <summary>
       /// Processes the pokemon name given from a command.
@@ -304,6 +363,48 @@ namespace PokeStar.Modules
          else if (form.Equals("-pirouette", StringComparison.OrdinalIgnoreCase))
             return $"Pirouette {pokemonName}";
          return pokemonName;
+      }
+
+      /// <summary>
+      /// Formats weather boosts as a string.
+      /// </summary>
+      /// <param name="weatherList">List of weather that boosts the type(s).</param>
+      /// <returns>Weather for type(s) as a string.</returns>
+      private static string FormatWeatherList(List<string> weatherList)
+      {
+         string weatherString = "";
+         foreach (var weather in weatherList)
+            weatherString += $"{Emote.Parse(Environment.GetEnvironmentVariable($"{weather.Replace(' ', '_').ToUpper()}_EMOTE"))} ";
+         return weatherString;
+      }
+
+      /// <summary>
+      /// Formats type relations as a string.
+      /// </summary>
+      /// <param name="relations">Dictionary of type relations for the type(s).</param>
+      /// <returns>Type relations for type(s) as a string.</returns>
+      private static string FormatTypeList(Dictionary<string, int> relations)
+      {
+         if (relations.Count == 0)
+            return "-----";
+         string relationString = "";
+         foreach(var relation in relations)
+         {
+            double multiplier = TypeCalculator.CalcTypeEffectivness(relation.Value) * 100.0;
+            string typeEmote = Emote.Parse(Environment.GetEnvironmentVariable($"{relation.Key.ToUpper()}_EMOTE")).ToString();
+            relationString += $"{typeEmote} {relation.Key}: {multiplier}%\n";
+         }
+         return relationString;
+      }
+
+      /// <summary>
+      /// Checks if a type is vaid.
+      /// </summary>
+      /// <param name="type">The type to check.</param>
+      /// <returns>True if the type is valid, otherwise false.</returns>
+      private static bool CheckValidType(string type)
+      {
+         return Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE") != null;
       }
    }
 }

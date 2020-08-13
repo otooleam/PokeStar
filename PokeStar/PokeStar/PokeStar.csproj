@@ -155,6 +155,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Calculators\CPCalculator.cs" />
+    <Compile Include="Calculators\TypeCalculator.cs" />
     <Compile Include="ConnectionInterface\DatabaseConnector.cs" />
     <Compile Include="ConnectionInterface\NONADatabaseConnector.cs" />
     <Compile Include="ConnectionInterface\POGODatabaseConnector.cs" />

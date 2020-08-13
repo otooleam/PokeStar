@@ -1,7 +1,8 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
-using PokeStar.Calculators;
 using PokeStar.DataModels;
+using PokeStar.Calculators;
 
 namespace PokeStar.ConnectionInterface
 {
@@ -95,9 +96,10 @@ namespace PokeStar.ConnectionInterface
          RaidBoss raidBoss = POGODBConnector.GetRaidBoss(name);
          if (raidBoss == null) return null;
 
-         raidBoss.Weather = POGODBConnector.GetWeather(raidBoss.Type);
-         raidBoss.Weakness = POGODBConnector.GetTypeRelations(raidBoss.Type, true);
-         raidBoss.Resistance = POGODBConnector.GetTypeRelations(raidBoss.Type, false);
+         var typeRelations = GetTypeDefenseRelations(raidBoss.Type);
+         raidBoss.Weakness = typeRelations.weak.Keys.ToList();
+         raidBoss.Resistance = typeRelations.strong.Keys.ToList();
+         raidBoss.Weather = GetWeather(raidBoss.Type);
 
          raidBoss.CPLow = CPCalculator.CalcCPPerLevel(
             raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
@@ -142,9 +144,10 @@ namespace PokeStar.ConnectionInterface
          Pokemon pokemon = POGODBConnector.GetPokemon(name);
          if (pokemon == null) return null;
 
-         pokemon.Weather = POGODBConnector.GetWeather(pokemon.Type);
-         pokemon.Weakness = POGODBConnector.GetTypeRelations(pokemon.Type, true);
-         pokemon.Resistance = POGODBConnector.GetTypeRelations(pokemon.Type, false);
+         var typeRelations = GetTypeDefenseRelations(pokemon.Type);
+         pokemon.Weakness = typeRelations.weak.Keys.ToList();
+         pokemon.Resistance = typeRelations.strong.Keys.ToList();
+         pokemon.Weather = GetWeather(pokemon.Type);
          pokemon.FastMove = POGODBConnector.GetMoves(name, true);
          pokemon.ChargeMove = POGODBConnector.GetMoves(name, false, pokemon.Shadow);
 
@@ -235,6 +238,49 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Gets defensive type relations for a pokemon's type.
+      /// Separates weaknesses and resistances.
+      /// </summary>
+      /// <param name="types">List of pokemon types.</param>
+      /// <returns>Dictionaries of types and modifiers.</returns>
+      public TypeRelation GetTypeDefenseRelations(List<string> types)
+      {
+         var allRelations = POGODBConnector.GetTypeDefenseRelations(types);
+         return new TypeRelation
+         {
+            strong = allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value),
+            weak = allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value)
+         };
+      }
+
+      /// <summary>
+      /// Gets offensive type relations for a move's type.
+      /// Separates super and not very effective moves.
+      /// </summary>
+      /// <param name="type">Move type.</param>
+      /// <returns>Dictionaries of types and modifiers.</returns>
+      public Nullable<TypeRelation> GetTypeAttackRelations(string type)
+      {
+         var allRelations = POGODBConnector.GetTypeAttackRelations(type);
+         return new TypeRelation
+         {
+            strong = allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value),
+            weak = allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value)
+         };
+      }
+
+      /// <summary>
+      /// Gets all weather that boosts the given types.
+      /// </summary>
+      /// <param name="types">List of types to get weather for.</param>
+      /// <returns>List of weather that boosts the givent types.</returns>
+      public List<string> GetWeather(List<string> types)
+      {
+         return POGODBConnector.GetWeather(types);
+      }
+
+
+      /// <summary>
       /// Gets the prefix of a guild.
       /// </summary>
       /// <param name="guild">Id of guild to get prefix of.</param>
@@ -311,5 +357,14 @@ namespace PokeStar.ConnectionInterface
                NONADBConnector.DeleteRegistration(guild, (ulong)channel);
          }
       }
+   }
+
+   /// <summary>
+   /// Relations for pokemon type(s).
+   /// </summary>
+   public struct TypeRelation
+   {
+      public Dictionary<string, int> strong;
+      public Dictionary<string, int> weak;
    }
 }

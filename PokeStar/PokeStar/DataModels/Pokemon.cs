@@ -207,10 +207,7 @@ namespace PokeStar.DataModels
       {
          string str = "";
          foreach (string type in Type)
-         {
-            string typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
-            str += typeString + " ";
-         }
+            str += $"{Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE"))} ";
          return str.Trim();
       }
 
@@ -222,10 +219,7 @@ namespace PokeStar.DataModels
       {
          string str = "";
          foreach (string weather in Weather)
-         {
-            string typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{weather.Replace(' ', '_').ToUpper()}_EMOTE")).ToString();
-            str += typeString + " ";
-         }
+            str += $"{Emote.Parse(Environment.GetEnvironmentVariable($"{weather.Replace(' ', '_').ToUpper()}_EMOTE"))} ";
          return str.Trim();
       }
 
@@ -239,8 +233,7 @@ namespace PokeStar.DataModels
          int count = 0;
          foreach (string type in Weakness)
          {
-            string typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
-            str += typeString + " ";
+            str += $"{Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE"))} ";
             if (count == 3)
             {
                count = -1;
