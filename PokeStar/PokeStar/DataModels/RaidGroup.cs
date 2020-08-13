@@ -210,6 +210,7 @@ namespace PokeStar.DataModels
          if (TotalPlayers() <= playerLimit)
             return null;
 
+         
          var newGroup = new RaidGroup();
          foreach (var player in Attending)
          {

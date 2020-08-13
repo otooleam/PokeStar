@@ -46,6 +46,8 @@ namespace PokeStar.Modules
          new Emoji("🔟")
       };
 
+      private static readonly Emoji cancelEmoji = new Emoji("🚫");
+
       private enum RAID_EMOJI_INDEX
       {
          ADD_PLAYER_1,
@@ -233,13 +235,16 @@ namespace PokeStar.Modules
                      var inviteMsg = await reaction.Channel.SendMessageAsync(text: $"{player.Mention}", embed: BuildPlayerInviteEmbed(raid.GetReadonlyInviteList(), (player.Nickname == null ? player.Username : player.Nickname)));
                      for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
                         await inviteMsg.AddReactionAsync(selectionEmojis[i]);
+                     await inviteMsg.AddReactionAsync(cancelEmoji);
                      raidMessages.Add(inviteMsg.Id, message.Id);
                   }
                }
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]))
             {
-               raid.RemovePlayer(player);
+               int group = raid.RemovePlayer(player);
+               if (group != -1)
+                  await reaction.Channel.SendMessageAsync(BuildPingList(raid.Groups.ElementAt(group).GetPingList(), raid.Location, group));
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
             {
@@ -279,6 +284,11 @@ namespace PokeStar.Modules
          await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value);
          var raidMessageId = raidMessages[message.Id];
          Raid raid = currentRaids[raidMessageId];
+         if (reaction.Emote.Equals(cancelEmoji))
+         {
+            await message.DeleteAsync();
+            return;
+         }
          for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
          {
             if (reaction.Emote.Equals(selectionEmojis.ElementAt(i)))
@@ -364,7 +374,10 @@ namespace PokeStar.Modules
       {
          StringBuilder sb = new StringBuilder();
          for (int i = 0; i < invite.Count; i++)
+         {
             sb.AppendLine($"{raidEmojis[i]} {(invite.ElementAt(i).Nickname == null ? invite.ElementAt(i).Username : invite.ElementAt(i).Nickname)}");
+         }
+         sb.AppendLine($"{cancelEmoji} Cancel");
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.DarkBlue);
