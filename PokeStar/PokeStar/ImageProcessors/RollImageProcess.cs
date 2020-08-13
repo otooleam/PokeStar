@@ -11,11 +11,22 @@ using Patagames.Ocr.Enums;
 
 namespace PokeStar.ImageProcessors
 {
+   /// <summary>
+   /// Processes an image of a user's role.
+   /// </summary>
    public static class RollImageProcess
    {
-      public static async void ProcessImage(SocketCommandContext context)
+      /// <summary>
+      /// Processes an image of a user's profile page.
+      /// Assigns the user's nickname and team.
+      /// </summary>
+      /// <param name="context">Command context that has the image.</param>
+      public static async void RoleImageProcess(SocketCommandContext context)
       {
          if (context == null)
+            return;
+
+         if (Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
             return;
 
          var attachments = context.Message.Attachments;
@@ -55,7 +66,7 @@ namespace PokeStar.ImageProcessors
 
                await context.Channel.SendMessageAsync($"{user.Username} now has the nickname {nickname}").ConfigureAwait(false);
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                Console.WriteLine(e.Message);
                await context.Channel.SendMessageAsync($"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{context.Guild.Name}\"").ConfigureAwait(false);
@@ -68,7 +79,7 @@ namespace PokeStar.ImageProcessors
             var mystic = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase));
             var instinct = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase));
             if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) == null)
-             await user.RemoveRoleAsync(valor).ConfigureAwait(false);
+               await user.RemoveRoleAsync(valor).ConfigureAwait(false);
             else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) == null)
                await user.RemoveRoleAsync(mystic).ConfigureAwait(false);
             else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) == null)
@@ -92,6 +103,12 @@ namespace PokeStar.ImageProcessors
          }
       }
 
+      /// <summary>
+      /// Get the average color of a bitmap within a rectangle.
+      /// </summary>
+      /// <param name="bitmap">Bitmap to get the average color of.</param>
+      /// <param name="rect">Rectangle to get average color within.</param>
+      /// <returns>Average color of the bitmap within a rectangle.</returns>
       private static Color GetAvgColor(Bitmap bitmap, Rectangle rect)
       {
          int[] avgRGB = { 0, 0, 0 };
@@ -109,6 +126,12 @@ namespace PokeStar.ImageProcessors
          return Color.FromArgb(avgRGB[0], avgRGB[1], avgRGB[2]);
       }
 
+      /// <summary>
+      /// Gets the closest color from a list of colors to a given color.
+      /// </summary>
+      /// <param name="colors">List of colors to check against.</param>
+      /// <param name="target">Color to check against list.</param>
+      /// <returns>Closest color to the target color.</returns>
       private static int ClosestColor(List<Color> colors, Color target)
       {
          var hue1 = target.GetHue();
@@ -117,9 +140,16 @@ namespace PokeStar.ImageProcessors
          return diffs.ToList().FindIndex(n => n == diffMin);
       }
 
+      /// <summary>
+      /// Gets the distance between two hue values
+      /// </summary>
+      /// <param name="hue1">First hue to check</param>
+      /// <param name="hue2">Second hue to check.</param>
+      /// <returns>Distance from 0-360 between the given hues.</returns>
       private static float GetHueDistance(float hue1, float hue2)
       {
-         float d = Math.Abs(hue1 - hue2); return d > 180 ? 360 - d : d;
+         float d = Math.Abs(hue1 - hue2);
+         return d > 180 ? 360 - d : d;
       }
    }
 }
