@@ -376,8 +376,8 @@ namespace PokeStar.Modules
          for (int i = 0; i < invite.Count; i++)
          {
             sb.AppendLine($"{raidEmojis[i]} {(invite.ElementAt(i).Nickname == null ? invite.ElementAt(i).Username : invite.ElementAt(i).Nickname)}");
-            sb.AppendLine($"{cancelEmoji} Cancel");
          }
+         sb.AppendLine($"{cancelEmoji} Cancel");
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.DarkBlue);
