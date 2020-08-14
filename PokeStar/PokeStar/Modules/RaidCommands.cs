@@ -288,9 +288,9 @@ namespace PokeStar.Modules
          await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value);
          var raidMessageId = raidMessages[message.Id];
          Raid raid = currentRaids[raidMessageId];
-         SocketGuildUser player = (SocketGuildUser)reaction.User;
+         SocketGuildUser reactingPlayer = (SocketGuildUser)reaction.User;
 
-         if (player.Equals(raid.InvitingPlayer))
+         if (reactingPlayer.Equals(raid.InvitingPlayer))
          {
             if (reaction.Emote.Equals(cancelEmoji))
             {
