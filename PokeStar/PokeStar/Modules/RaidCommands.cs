@@ -558,7 +558,7 @@ namespace PokeStar.Modules
          StringBuilder sb = new StringBuilder();
          sb.AppendLine("Raid Help:");
          sb.AppendLine("The numbers represent the number of accounts that you have with you." +
-            " React with one of the numbers to show that you intend to participate in the raid.");
+            " React with one of the numbers to show that you intend to participate in the raid in person.");
          sb.AppendLine($"Once you are ready for the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]} to show others that you are ready." +
             $" When all players have marked that they are ready, Nona will send a message to the group.");
          sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]}.");
