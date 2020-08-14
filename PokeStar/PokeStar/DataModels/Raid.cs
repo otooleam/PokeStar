@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using Discord.WebSocket;
 using PokeStar.ConnectionInterface;
+using System.Runtime.CompilerServices;
 
 namespace PokeStar.DataModels
 {
@@ -103,6 +104,10 @@ namespace PokeStar.DataModels
          return Invite.ToImmutableList();
       }
 
+      /// <summary>
+      /// Checks if there is an active invite message.
+      /// </summary>
+      /// <returns>True if there is an active message, otherwise false.</returns>
       public bool HasActiveInvite()
       {
          return InvitingPlayer != null;
@@ -110,6 +115,8 @@ namespace PokeStar.DataModels
 
       /// <summary>
       /// Adds a player to a raid.
+      /// The player will not be added if splitting the group brings the number of
+      /// raid groups over the group limit.
       /// </summary>
       /// <param name="player">Player to add.</param>
       /// <param name="partySize">Number of accounts the user is bringing.</param>
@@ -146,23 +153,26 @@ namespace PokeStar.DataModels
             CheckMergeGroups();
             return true;
          }
-         else
-         {
-            Groups.ElementAt(group).Remove(player);
-            return false;
-         }
+         Groups.ElementAt(group).Remove(player);
+         return false;
       }
 
       /// <summary>
       /// Removes a player from the raid.
       /// </summary>
       /// <param name="player">Player to remove.</param>
-      public int RemovePlayer(SocketGuildUser player)
+      /// <returns>Struct with raid group and list of invited users.</returns>
+      public RemovePlayerReturn RemovePlayer(SocketGuildUser player)
       {
+         var returnValue = new RemovePlayerReturn
+         {
+            GroupNum = -1,
+            invited = new List<SocketGuildUser>()
+         };
          if (Invite.Contains(player))
          {
             Invite.Remove(player);
-            return -1;
+            return returnValue;
          }
          else
          {
@@ -171,24 +181,24 @@ namespace PokeStar.DataModels
                RaidGroup group = Groups.ElementAt(i);
                if (group.HasPlayer(player))
                {
-                  bool everyoneWasReady = group.HasPlayer(player);
+                  returnValue.invited = group.Remove(player);
+                  foreach (var invite in returnValue.invited)
+                     Invite.Add(invite);
 
-                  group.Remove(player);
                   if (group.AllPlayersReady())
-                     if (!everyoneWasReady)
-                        return i;
-                  return -1;
+                     returnValue.GroupNum =  i;
+                  return returnValue;
                }
             }
          }
-         return -1;
+         return returnValue;
       }
 
       /// <summary>
       /// Marks the player as ready.
       /// </summary>
       /// <param name="player">Player to mark ready.</param>
-      /// <returns>Group number if all members of the group are ready, else -1.</returns>
+      /// <returns>Group number if all members of the group are ready, otherwise -1.</returns>
       public int PlayerReady(SocketGuildUser player)
       {
          for (int i = 0; i < Groups.Count; i++)
@@ -212,9 +222,7 @@ namespace PokeStar.DataModels
       public void PlayerRequestInvite(SocketGuildUser player)
       {
          if (!Invite.Contains(player) && IsInRaid(player) == -1)
-         {
             Invite.Add(player);
-         }
       }
 
       /// <summary>
@@ -222,13 +230,11 @@ namespace PokeStar.DataModels
       /// </summary>
       /// <param name="requester">Player that requested the invite.</param>
       /// <param name="accepter">Player that accepted the invite.</param>
-      /// <returns></returns>
+      /// <returns>True if the requester was invited, otherwise false.</returns>
       public bool InvitePlayer(SocketGuildUser requester, SocketGuildUser accepter)
       {
          if (Invite.Contains(requester))
-         {
             return PlayerAdd(requester, 1, accepter);
-         }
          return false;
       }
 
@@ -296,5 +302,14 @@ namespace PokeStar.DataModels
          if (Groups.Count == 0)
             Groups.Add(new RaidGroup());
       }
+   }
+
+   /// <summary>
+   /// Return values for remove player method.
+   /// </summary>
+   public struct RemovePlayerReturn
+   {
+      public int GroupNum;
+      public List<SocketGuildUser> invited;
    }
 }

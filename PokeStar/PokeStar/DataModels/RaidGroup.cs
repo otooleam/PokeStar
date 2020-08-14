@@ -124,14 +124,27 @@ namespace PokeStar.DataModels
       /// Removes a player from the raid group.
       /// </summary>
       /// <param name="player">Player to remove.</param>
-      public void Remove(SocketGuildUser player)
+      /// <returns>List of players invited by the player.</returns>
+      public List<SocketGuildUser> Remove(SocketGuildUser player)
       {
          if (Attending.ContainsKey(player))
             Attending.Remove(player);
          else if (Ready.ContainsKey(player))
             Ready.Remove(player);
          else if (Invited.ContainsKey(player))
+         {
             Invited.Remove(player);
+            return new List<SocketGuildUser>();
+         }
+
+         List<SocketGuildUser> playerInvited = new List<SocketGuildUser>();
+         foreach (var invite in Invited.Where(x => x.Value.Equals(player)))
+            playerInvited.Add(invite.Key);
+
+         foreach (var invite in playerInvited)
+            Invited.Remove(invite);
+
+         return playerInvited;
       }
 
       /// <summary>

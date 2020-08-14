@@ -193,85 +193,92 @@ namespace PokeStar.Modules
          }
          else
          {
-            bool needsUpdate = true;
-            if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_1]))
+            if (raid.InvitingPlayer == null || !raid.InvitingPlayer.Equals(player))
             {
-               raid.PlayerAdd(player, 1);
-            }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_2]))
-            {
-               raid.PlayerAdd(player, 2);
-            }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_3]))
-            {
-               raid.PlayerAdd(player, 3);
-            }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_4]))
-            {
-               raid.PlayerAdd(player, 4);
-            }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_5]))
-            {
-               raid.PlayerAdd(player, 5);
-            }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]))
-            {
-               var group = raid.PlayerReady(player);
-               if (group != -1)
-                  await reaction.Channel.SendMessageAsync(BuildPingList(raid.Groups.ElementAt(group).GetPingList(), raid.Location, group));
-            }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]))
-            {
-               raid.PlayerRequestInvite(player);
-            }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]))
-            {
-               if (raid.IsInRaid(player, false) != -1)
+
+               bool needsUpdate = true;
+               if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_1]))
                {
-                  if (raid.GetReadonlyInvite().Count == 0)
-                     await reaction.Channel.SendMessageAsync($"{player.Mention}, There are no players to invite.");
-                  else
+                  raid.PlayerAdd(player, 1);
+               }
+               else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_2]))
+               {
+                  raid.PlayerAdd(player, 2);
+               }
+               else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_3]))
+               {
+                  raid.PlayerAdd(player, 3);
+               }
+               else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_4]))
+               {
+                  raid.PlayerAdd(player, 4);
+               }
+               else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_5]))
+               {
+                  raid.PlayerAdd(player, 5);
+               }
+               else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]))
+               {
+                  var group = raid.PlayerReady(player);
+                  if (group != -1)
+                     await reaction.Channel.SendMessageAsync(BuildPingList(raid.Groups.ElementAt(group).GetPingList(), raid.Location, group));
+               }
+               else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]))
+               {
+                  raid.PlayerRequestInvite(player);
+               }
+               else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]))
+               {
+                  if (raid.IsInRaid(player, false) != -1)
                   {
-                     if (!raid.HasActiveInvite())
+                     if (raid.GetReadonlyInvite().Count == 0)
+                        await reaction.Channel.SendMessageAsync($"{player.Mention}, There are no players to invite.");
+                     else
                      {
-                        raid.InvitingPlayer = player;
-                        var inviteMsg = await reaction.Channel.SendMessageAsync(text: $"{player.Mention}", embed: BuildPlayerInviteEmbed(raid.GetReadonlyInviteList(), (player.Nickname == null ? player.Username : player.Nickname)));
-                        for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
-                           await inviteMsg.AddReactionAsync(selectionEmojis[i]);
-                        await inviteMsg.AddReactionAsync(cancelEmoji);
-                        raidMessages.Add(inviteMsg.Id, message.Id);
+                        if (!raid.HasActiveInvite())
+                        {
+                           raid.InvitingPlayer = player;
+                           var inviteMsg = await reaction.Channel.SendMessageAsync(text: $"{player.Mention}", embed: BuildPlayerInviteEmbed(raid.GetReadonlyInviteList(), (player.Nickname == null ? player.Username : player.Nickname)));
+                           for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
+                              await inviteMsg.AddReactionAsync(selectionEmojis[i]);
+                           await inviteMsg.AddReactionAsync(cancelEmoji);
+                           raidMessages.Add(inviteMsg.Id, message.Id);
+                        }
                      }
                   }
                }
-            }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]))
-            {
-               int group = raid.RemovePlayer(player);
-               if (group != -1)
-                  await reaction.Channel.SendMessageAsync(BuildPingList(raid.Groups.ElementAt(group).GetPingList(), raid.Location, group));
-            }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
-            {
-               string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
-               if (prefix == null)
-                  prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
-
-               await player.SendMessageAsync(BuildRaidHelpMessage());
-               await player.SendMessageAsync($"{prefix}edit {message.Id}");
-               needsUpdate = false;
-            }
-            else
-               needsUpdate = false;
-
-            if (needsUpdate)
-            {
-               var msg = (SocketUserMessage)message;
-               await msg.ModifyAsync(x =>
+               else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]))
                {
-                  x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
-               });
-            }
+                  var returnValue = raid.RemovePlayer(player);
 
+                  foreach (var invite in returnValue.invited)
+                     await invite.SendMessageAsync($"{player.Nickname ?? player.Username} has left the raid. You have been moved back to \"Need Invite\".");
+
+                  if (returnValue.GroupNum != -1)
+                     await reaction.Channel.SendMessageAsync(BuildPingList(raid.Groups.ElementAt(returnValue.GroupNum).GetPingList(), raid.Location, returnValue.GroupNum));
+               }
+               else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
+               {
+                  string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
+                  if (prefix == null)
+                     prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
+
+                  await player.SendMessageAsync(BuildRaidHelpMessage());
+                  await player.SendMessageAsync($"{prefix}edit {message.Id}");
+                  needsUpdate = false;
+               }
+               else
+                  needsUpdate = false;
+
+               if (needsUpdate)
+               {
+                  var msg = (SocketUserMessage)message;
+                  await msg.ModifyAsync(x =>
+                  {
+                     x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
+                  });
+               }
+            }
             await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, player);
          }
       }
@@ -288,9 +295,9 @@ namespace PokeStar.Modules
          await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value);
          var raidMessageId = raidMessages[message.Id];
          Raid raid = currentRaids[raidMessageId];
-         SocketGuildUser player = (SocketGuildUser)reaction.User;
+         SocketGuildUser reactingPlayer = (SocketGuildUser)reaction.User;
 
-         if (player.Equals(raid.InvitingPlayer))
+         if (reactingPlayer.Equals(raid.InvitingPlayer))
          {
             if (reaction.Emote.Equals(cancelEmoji))
             {
@@ -303,7 +310,7 @@ namespace PokeStar.Modules
                if (reaction.Emote.Equals(selectionEmojis.ElementAt(i)))
                {
                   var player = raid.GetReadonlyInvite().Keys.ElementAt(i);
-                  if (raid.InvitePlayer(player, (SocketGuildUser)reaction.User))
+                  if (raid.InvitePlayer(player, reactor))
                   {
                      var raidMessage = (SocketUserMessage)channel.CachedMessages.FirstOrDefault(x => x.Id == raidMessageId);
                      await raidMessage.ModifyAsync(x =>
@@ -311,8 +318,7 @@ namespace PokeStar.Modules
                         x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
                      });
 
-                     SocketGuildUser invitingPlayer = (SocketGuildUser)reaction.User.Value;
-                     await player.SendMessageAsync($"You have been invited to a raid by {(invitingPlayer.Nickname == null ? invitingPlayer.Username : invitingPlayer.Nickname)}.");
+                     await player.SendMessageAsync($"You have been invited to a raid by {reactor.Nickname ?? reactor.Username}.");
                      raidMessages.Remove(message.Id);
                      raid.InvitingPlayer = null;
                      await message.DeleteAsync();
