@@ -132,13 +132,18 @@ namespace PokeStar.DataModels
                group = FindSmallestGroup();
             Groups.ElementAt(group).Add(player, partySize);
          }
-         else // is invite
+         else // is remote
          {
             group = IsInRaid(invitedBy);
             if (group != -1)
             {
                Groups.ElementAt(group).Invite(player, invitedBy);
                Invite.Remove(player);
+            }
+            else if (player.Equals(invitedBy))
+            {
+               group = FindSmallestGroup();
+               Groups.ElementAt(group).Invite(player, invitedBy);
             }
             else
                return false;
