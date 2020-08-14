@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Text;
 using Discord;
 
 namespace PokeStar.DataModels
@@ -173,15 +174,17 @@ namespace PokeStar.DataModels
       /// <returns>Pokemon detail string.</returns>
       public string DetailsToString()
       {
-         string str = "";
-         str += $"Region           : {Region}\n";
-         str += $"Category         : {Category}\n";
-         str += $"Buddy Distance   : {BuddyDistance} km\n";
-         str += $"Can be Obtained  : {Obtainable}\n";
-         str += $"Can be Shiny     : {Shiny}\n";
-         str += $"Can be Shadow    : {Shadow}\n";
-         str += $"Is a Regional    : {Regional}\n";
-         return str.Trim();
+         StringBuilder sb = new StringBuilder();
+
+         sb.AppendLine($"Region\t: {Region}");
+         sb.AppendLine($"Category\t: {Category}");
+         sb.AppendLine($"Buddy Distance\t: {BuddyDistance} km");
+         sb.AppendLine($"Can be Obtained\t: {(Obtainable ? "Yes" : "No")}");
+         sb.AppendLine($"Can be Shiny\t: {(Shiny ? "Yes" : "No")}");
+         sb.AppendLine($"Can be Shadow\t: {(Shadow ? "Yes" : "No")}");
+         sb.AppendLine($"Regional\t: {(Regional ? "Yes" : "No")}");
+
+         return sb.ToString();
       }
 
       /// <summary>
@@ -189,14 +192,16 @@ namespace PokeStar.DataModels
       /// Stats include Max CP, attack, defense, and stamina(hp).
       /// </summary>
       /// <returns>Pokemon stat string.</returns>
-      public string StatsToString()
+      public string StatsToString() //TODO add other cp values
       {
-         string str = "";
-         str += $"Max CP : {CPMax}\n";
-         str += $"Attack : {Attack}\n";
-         str += $"Defense: {Defense}\n";
-         str += $"Stamina: {Stamina}\n";
-         return str.Trim();
+         StringBuilder sb = new StringBuilder();
+
+         sb.AppendLine($"Max CP : {CPMax}");
+         sb.AppendLine($"Attack : {Attack}");
+         sb.AppendLine($"Defense: {Defense}");
+         sb.AppendLine($"Stamina: {Stamina}");
+
+         return sb.ToString();
       }
 
       /// <summary>
