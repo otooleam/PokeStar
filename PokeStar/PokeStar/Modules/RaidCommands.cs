@@ -288,9 +288,9 @@ namespace PokeStar.Modules
          await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value);
          var raidMessageId = raidMessages[message.Id];
          Raid raid = currentRaids[raidMessageId];
-         SocketGuildUser player = (SocketGuildUser)reaction.User;
+         SocketGuildUser reactingPlayer = (SocketGuildUser)reaction.User;
 
-         if (player.Equals(raid.InvitingPlayer))
+         if (reactingPlayer.Equals(raid.InvitingPlayer))
          {
             if (reaction.Emote.Equals(cancelEmoji))
             {
@@ -303,7 +303,7 @@ namespace PokeStar.Modules
                if (reaction.Emote.Equals(selectionEmojis.ElementAt(i)))
                {
                   var player = raid.GetReadonlyInvite().Keys.ElementAt(i);
-                  if (raid.InvitePlayer(player, (SocketGuildUser)reaction.User))
+                  if (raid.InvitePlayer(player, reactingPlayer))
                   {
                      var raidMessage = (SocketUserMessage)channel.CachedMessages.FirstOrDefault(x => x.Id == raidMessageId);
                      await raidMessage.ModifyAsync(x =>
@@ -311,8 +311,7 @@ namespace PokeStar.Modules
                         x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
                      });
 
-                     SocketGuildUser invitingPlayer = (SocketGuildUser)reaction.User.Value;
-                     await player.SendMessageAsync($"You have been invited to a raid by {(invitingPlayer.Nickname == null ? invitingPlayer.Username : invitingPlayer.Nickname)}.");
+                     await player.SendMessageAsync($"You have been invited to a raid by {reactingPlayer.Nickname ?? reactingPlayer.Username}.");
                      raidMessages.Remove(message.Id);
                      raid.InvitingPlayer = null;
                      await message.DeleteAsync();
