@@ -6,6 +6,9 @@ using PokeStar.Calculators;
 
 namespace PokeStar.ConnectionInterface
 {
+   /// <summary>
+   /// Manages backend connections
+   /// </summary>
    public class Connections
    {
       private static Connections connections;
@@ -255,7 +258,7 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       /// <param name="type">Move type.</param>
       /// <returns>Dictionaries of types and modifiers.</returns>
-      public Nullable<TypeRelation> GetTypeAttackRelations(string type)
+      public TypeRelation? GetTypeAttackRelations(string type)
       {
          var allRelations = POGODBConnector.GetTypeAttackRelations(type);
          return new TypeRelation
@@ -274,7 +277,6 @@ namespace PokeStar.ConnectionInterface
       {
          return POGODBConnector.GetWeather(types);
       }
-
 
       /// <summary>
       /// Gets the prefix of a guild.

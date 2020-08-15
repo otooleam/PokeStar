@@ -163,7 +163,7 @@ order by DIFFERENCE(name, 'pika') desc;
                embed.AddField($"Hatch CP (Level 20)", pokemon.HatchCPToString(), false);
                embed.AddField($"Quest CP (Level 15)", pokemon.QuestCPToString(), false);
                embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
-               embed.WithColor(Color.Blue);
+               embed.WithColor(Color.Red);
                embed.WithFooter("* denotes Weather Boosted CP");
 
 
@@ -244,8 +244,6 @@ order by DIFFERENCE(name, 'pika') desc;
             if (type2 != null && !type1.Equals(type2, StringComparison.OrdinalIgnoreCase))
                types.Add(type2);
 
-            
-
             if (!CheckValidType(type1) || (types.Count == 2 && !CheckValidType(type2)))
             {
                EmbedBuilder embed = new EmbedBuilder();
@@ -279,7 +277,7 @@ order by DIFFERENCE(name, 'pika') desc;
                }
                embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.weak), false);
                embed.AddField($"Resistances:", FormatTypeList(defenseRelations.strong), false);
-               embed.WithColor(Color.Blue);
+               embed.WithColor(Color.Red);
                await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
             }
          }
