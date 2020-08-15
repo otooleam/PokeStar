@@ -161,6 +161,16 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Gets pokemon with similar names to a string.
+      /// </summary>
+      /// <param name="str">String to compare to pokemon names.</param>
+      /// <returns>List of 10 closest pokemon names.</returns>
+      public List<string> GetSimilarPokemon(string str)
+      {
+         return POGODBConnector.GetSimilarPokemon(str);
+      }
+
+      /// <summary>
       /// Calculates all of the relevant CP valus of a pokemon. This
       /// includes the raid, quest, hatch, and wild perfect IV values.
       /// </summary>

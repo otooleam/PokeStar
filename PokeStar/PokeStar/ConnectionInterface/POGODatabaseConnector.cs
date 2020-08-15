@@ -99,6 +99,32 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Gets pokemon with similar names to a string.
+      /// </summary>
+      /// <param name="str">String to compare to pokemon names.</param>
+      /// <returns>List of 10 closest pokemon names.</returns>
+      public List<string> GetSimilarPokemon(string str)
+      {
+         List<string> pokemon = new List<string>();
+         string queryString = $@"SELECT TOP 10 name 
+                                 FROM pokemon 
+                                 WHERE name LIKE '%{str}%'
+                                 ORDER BY DIFFERENCE(name, '{str}') DESC;";
+
+         using (var conn = GetConnection())
+         {
+            conn.Open();
+            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+                  pokemon.Add(Convert.ToString(reader["name"]));
+            }
+            conn.Close();
+         }
+         return pokemon;
+      }
+
+      /// <summary>
       /// Gets all weather that boosts the given types.
       /// </summary>
       /// <param name="types">List of types to get weather for.</param>
@@ -108,7 +134,8 @@ namespace PokeStar.ConnectionInterface
          List<string> weather = new List<string>();
          string queryString = $@"SELECT weather 
                                  FROM weather 
-                                 WHERE {GetTypeWhere(types, "type")};";
+                                 WHERE {GetTypeWhere(types, "type")}
+                                 GROUP BY weather;";
 
          using (var conn = GetConnection())
          {
@@ -116,8 +143,7 @@ namespace PokeStar.ConnectionInterface
             using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
-                  if (!weather.Contains(Convert.ToString(reader["weather"])))
-                     weather.Add(Convert.ToString(reader["weather"]));
+                  weather.Add(Convert.ToString(reader["weather"]));
             }
             conn.Close();
          }

@@ -1,6 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using PokeStar.DataModels;
@@ -14,6 +16,23 @@ namespace PokeStar.Modules
    /// </summary>
    public class DexCommands : ModuleBase<SocketCommandContext>
    {
+      private static Dictionary<ulong, List<string>> pokemonSuggestions = new Dictionary<ulong, List<string>>();
+
+      private static readonly Emoji[] selectionEmojis = {
+         new Emoji("1️⃣"),
+         new Emoji("2️⃣"),
+         new Emoji("3️⃣"),
+         new Emoji("4️⃣"),
+         new Emoji("5️⃣"),
+         new Emoji("6️⃣"),
+         new Emoji("7️⃣"),
+         new Emoji("8️⃣"),
+         new Emoji("9️⃣"),
+         new Emoji("🔟")
+      };
+
+      private static readonly Emoji cancelEmoji = new Emoji("🚫");
+
       [Command("dex")]
       [Alias("pokedex")]
       [Summary("Gets information for a pokemon.")]
@@ -23,13 +42,38 @@ namespace PokeStar.Modules
          {
             var name = GetPokemon(pokemonName);
             Pokemon pokemon = Connections.Instance().GetPokemon(name);
+
+            List<string> pokemonList = new List<string>();
             if (pokemon == null)
             {
-               EmbedBuilder embed = new EmbedBuilder();
-               embed.WithTitle("PokeDex Command Error");
-               embed.WithDescription($"Pokemon {name} cannot be found.");
-               embed.WithColor(Color.DarkRed);
-               await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+               pokemonList = Connections.Instance().GetSimilarPokemon(pokemonName);
+               if (pokemonList.Count == 1)
+                  pokemon = Connections.Instance().GetPokemon(pokemonList.ElementAt(0));
+            }
+
+            if (pokemon == null)
+            {
+               if (pokemonList.Count == 0)
+               {
+                  EmbedBuilder embed = new EmbedBuilder();
+                  embed.WithTitle("PokeDex Command Error");
+                  embed.WithDescription($"Pokemon {name} cannot be found.");
+                  embed.WithColor(Color.DarkRed);
+                  await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+               }
+               else
+               {
+                  StringBuilder sb = new StringBuilder();
+                  for (int i = 0; i < pokemonList.Count; i++)
+                     sb.AppendLine($"{selectionEmojis[i]} {pokemonList.ElementAt(i)}");
+                  sb.AppendLine($"{cancelEmoji} Cancel");
+
+                  EmbedBuilder embed = new EmbedBuilder();
+                  embed.WithTitle("Similar pokemon");
+                  embed.AddField("Are you searching for one of these?", sb.ToString(), true);
+                  embed.WithColor(Color.Red);
+                  await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+               }
             }
             else
             {
