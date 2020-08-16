@@ -31,17 +31,17 @@ namespace PokeStar.Modules
 
          if (registration == null)
          {
-            await Context.Channel.SendMessageAsync("Please enter a valid registration value.");
+            await Context.Channel.SendMessageAsync("Please enter a valid registration value.").ConfigureAwait(false);
             return;
          }
 
          Connections.Instance().UpdateRegistration(guild, channel, registration);
 
-         await Context.Channel.SendMessageAsync($"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
+         await Context.Channel.SendMessageAsync($"Channel is now registered for the following command types {GenerateSummaryString(registration)}").ConfigureAwait(false);
 
          if (CheckSetupComplete && Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
          {
-            await Context.Channel.SendMessageAsync($"Please run the .setup command to ensure required roles have been setup.");
+            await Context.Channel.SendMessageAsync($"Please run the .setup command to ensure required roles have been setup.").ConfigureAwait(false);
             CheckSetupComplete = false;
          }
       }
@@ -69,10 +69,10 @@ namespace PokeStar.Modules
             reg = GenerateUnregistrationString(unregister, registration);
             if (reg == null)
             {
-               await Context.Channel.SendMessageAsync("Please enter a valid registration value.");
+               await Context.Channel.SendMessageAsync("Please enter a valid registration value.").ConfigureAwait(false);
                return;
             }
-            else if (reg.Equals(string.Empty))
+            else if (String.IsNullOrEmpty(reg))
             {
                Connections.Instance().DeleteRegistration(guild, channel);
             }
@@ -83,16 +83,16 @@ namespace PokeStar.Modules
          }
          else
          {
-            await Context.Channel.SendMessageAsync("This channel does not have any commands registered to it");
+            await Context.Channel.SendMessageAsync("This channel does not have any commands registered to it").ConfigureAwait(false);
             return;
          }
-         if (reg.Equals(string.Empty))
+         if (String.IsNullOrEmpty(reg))
          {
-            await Context.Channel.SendMessageAsync($"Removed all registrations from this channel.");
+            await Context.Channel.SendMessageAsync($"Removed all registrations from this channel.").ConfigureAwait(false);
          }
          else
          {
-            await Context.Channel.SendMessageAsync($"Channel is now registered for the following command types {GenerateSummaryString(reg)}");
+            await Context.Channel.SendMessageAsync($"Channel is now registered for the following command types {GenerateSummaryString(reg)}").ConfigureAwait(false);
          }
       }
 
