@@ -10,8 +10,8 @@ namespace PokeStar.DataModels
    /// </summary>
    public class RaidGroup
    {
-      public readonly int playerLimit = 20;
-      public readonly int inviteLimit = 10;
+      private readonly int playerLimit = 20;
+      private readonly int inviteLimit = 10;
 
       /// <summary>
       /// Dictionary of players attending the raid.
@@ -78,8 +78,10 @@ namespace PokeStar.DataModels
       public int GetAttendingCount()
       {
          int total = 0;
-         foreach (var player in Attending)
-            total += player.Value;
+         foreach (int player in Attending.Values)
+         {
+            total += player;
+         }
          return total;
       }
 
@@ -90,8 +92,10 @@ namespace PokeStar.DataModels
       public int GetHereCount()
       {
          int total = 0;
-         foreach (var player in Ready)
-            total += player.Value;
+         foreach (int player in Ready.Values)
+         {
+            total += player;
+         }
          return total;
       }
 
@@ -113,11 +117,17 @@ namespace PokeStar.DataModels
       public void Add(SocketGuildUser player, int partySize)
       {
          if (Attending.ContainsKey(player))
+         {
             Attending[player] = partySize;
+         }
          else if (Ready.ContainsKey(player))
+         {
             Ready[player] = partySize;
+         }
          else
+         {
             Attending.Add(player, partySize);
+         }
       }
 
       /// <summary>
@@ -127,11 +137,17 @@ namespace PokeStar.DataModels
       public void Remove(SocketGuildUser player)
       {
          if (Attending.ContainsKey(player))
+         {
             Attending.Remove(player);
+         }
          else if (Ready.ContainsKey(player))
+         {
             Ready.Remove(player);
+         }
          else if (Invited.ContainsKey(player))
+         {
             Invited.Remove(player);
+         }
       }
 
       /// <summary>
@@ -210,40 +226,53 @@ namespace PokeStar.DataModels
          if (TotalPlayers() <= playerLimit)
             return null;
 
-         
-         var newGroup = new RaidGroup();
-         foreach (var player in Attending)
+         RaidGroup newGroup = new RaidGroup();
+         foreach (KeyValuePair<SocketGuildUser, int> player in Attending)
          {
             if ((newGroup.TotalPlayers() + player.Value) <= playerLimit / 2)
             {
                newGroup.Attending.Add(player.Key, player.Value);
 
-               foreach (var invite in Invited)
+               foreach (KeyValuePair<SocketGuildUser, SocketGuildUser> invite in Invited)
+               {
                   if (invite.Value.Equals(player.Key))
+                  {
                      newGroup.Invite(invite.Key, invite.Value);
+                  }
+               }
             }
          }
 
          if (newGroup.TotalPlayers() < playerLimit / 2)
          {
-            foreach (var player in Ready)
+            foreach (KeyValuePair<SocketGuildUser, int> player in Ready)
             {
                if (newGroup.TotalPlayers() < playerLimit / 2)
                {
                   newGroup.Ready.Add(player.Key, player.Value);
-                  foreach (var invite in Invited)
+                  foreach (KeyValuePair<SocketGuildUser, SocketGuildUser> invite in Invited)
+                  {
                      if (invite.Value.Equals(player.Key))
+                     {
                         newGroup.Invite(invite.Key, invite.Value);
+                     }
+                  }
                }
             }
          }
 
-         foreach (var player in newGroup.Attending.Keys)
+         foreach (SocketGuildUser player in newGroup.Attending.Keys)
+         {
             Attending.Remove(player);
-         foreach (var player in newGroup.Ready.Keys)
+         }
+         foreach (SocketGuildUser player in newGroup.Ready.Keys)
+         {
             Ready.Remove(player);
-         foreach (var player in newGroup.Invited.Keys)
+         }
+         foreach (SocketGuildUser player in newGroup.Invited.Keys)
+         {
             Invited.Remove(player);
+         }
          return newGroup;
       }
 
