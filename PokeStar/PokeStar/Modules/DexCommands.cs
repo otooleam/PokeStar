@@ -21,7 +21,7 @@ namespace PokeStar.Modules
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
-            var name = GetPokemon(pokemonName);
+            string name = GetPokemon(pokemonName);
             Pokemon pokemon = Connections.Instance().GetPokemon(name);
             if (pokemon == null)
             {
@@ -29,11 +29,12 @@ namespace PokeStar.Modules
                embed.WithTitle("PokeDex Command Error");
                embed.WithDescription($"Pokemon {name} cannot be found.");
                embed.WithColor(Color.DarkRed);
+
                await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
             }
             else
             {
-               var fileName = Connections.GetPokemonPicture(pokemon.Name);
+               string fileName = Connections.GetPokemonPicture(pokemon.Name);
                Connections.CopyFile(fileName);
 
                EmbedBuilder embed = new EmbedBuilder();
@@ -50,7 +51,7 @@ namespace PokeStar.Modules
                embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
                embed.AddField("Counters", pokemon.CounterToString(), false);
                embed.WithColor(Color.Red);
-               embed.WithFooter("* denotes STAB move ! denotes Legacy move");
+               embed.WithFooter("**\\*** denotes STAB move **!** denotes Legacy move");
 
                await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
 
@@ -58,7 +59,9 @@ namespace PokeStar.Modules
             }
          }
          else
-            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
+         {
+            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.").ConfigureAwait(false);
+         }
       }
 
       [Command("cp")]
@@ -67,7 +70,7 @@ namespace PokeStar.Modules
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
-            var name = GetPokemon(pokemonName);
+            string name = GetPokemon(pokemonName);
             Pokemon pokemon = Connections.Instance().GetPokemon(name);
             if (pokemon == null)
             {
@@ -75,12 +78,13 @@ namespace PokeStar.Modules
                embed.WithTitle("CP Command Error");
                embed.WithDescription($"Pokemon {name} cannot be found.");
                embed.WithColor(Color.DarkRed);
+
                await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
             }
             else
             {
                Connections.CalcAllCP(ref pokemon);
-               var fileName = Connections.GetPokemonPicture(pokemon.Name);
+               string fileName = Connections.GetPokemonPicture(pokemon.Name);
                Connections.CopyFile(fileName);
 
                EmbedBuilder embed = new EmbedBuilder();
@@ -96,14 +100,15 @@ namespace PokeStar.Modules
                embed.WithColor(Color.Blue);
                embed.WithFooter("* denotes Weather Boosted CP");
 
-
                await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
 
                Connections.DeleteFile(fileName);
             }
          }
          else
-            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
+         {
+            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.").ConfigureAwait(false);
+         }
       }
 
       [Command("type")]
@@ -118,9 +123,9 @@ namespace PokeStar.Modules
                type1,
             };
             if (type2 != null && !type1.Equals(type2, StringComparison.OrdinalIgnoreCase))
+            {
                types.Add(type2);
-
-            
+            }
 
             if (!CheckValidType(type1) || (types.Count == 2 && !CheckValidType(type2)))
             {
@@ -128,41 +133,48 @@ namespace PokeStar.Modules
                embed.WithTitle("CP Command Error");
                embed.WithDescription($"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
                embed.WithColor(Color.DarkRed);
+
                await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
             }
             else
             {
                string title = $"{type1}";
                if (types.Count == 2)
+               {
                   title += $", {type2}";
+               }
 
                string description = Emote.Parse(Environment.GetEnvironmentVariable($"{type1.ToUpper()}_EMOTE")).ToString();
                if (types.Count == 2)
+               {
                   description += Emote.Parse(Environment.GetEnvironmentVariable($"{type2.ToUpper()}_EMOTE")).ToString();
+               }
 
-               var type1AttackRelations = (types.Count == 2) ? null : Connections.Instance().GetTypeAttackRelations(type1);
-               var defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
-               var weather = Connections.Instance().GetWeather(types);
+               TypeRelation? type1AttackRelations = (types.Count == 2) ? null : Connections.Instance().GetTypeAttackRelations(type1);
+               TypeRelation? defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
+               List<string> weather = Connections.Instance().GetWeather(types);
 
                EmbedBuilder embed = new EmbedBuilder();
                embed.WithTitle($@"Type {title.ToUpper()}");
                embed.WithDescription(description);
                embed.AddField("Weather Boosts:", FormatWeatherList(weather), false);
                if (type1AttackRelations.HasValue)
-               { 
+               {
                   embed.AddField($"Super Effective against:", FormatTypeList(type1AttackRelations.Value.strong), false);
                   embed.AddField($"Not Very Effective against:", FormatTypeList(type1AttackRelations.Value.weak), false);
                }
-               embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.weak), false);
-               embed.AddField($"Resistances:", FormatTypeList(defenseRelations.strong), false);
+               embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.Value.weak), false);
+               embed.AddField($"Resistances:", FormatTypeList(defenseRelations.Value.strong), false);
                embed.WithColor(Color.Blue);
+
                await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
             }
          }
          else
-            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
+         {
+            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.").ConfigureAwait(false);
+         }
       }
-
 
       /// <summary>
       /// Processes the pokemon name given from a command.
@@ -175,13 +187,19 @@ namespace PokeStar.Modules
 
          string form = words[words.Count - 1];
          if (form.Substring(0, 1).Equals("-", StringComparison.OrdinalIgnoreCase))
+         {
             words.RemoveAt(words.Count - 1);
+         }
          else
+         {
             form = "";
+         }
 
          string name = "";
          foreach (string str in words)
+         {
             name += str + " ";
+         }
          name = name.TrimEnd(' ');
 
          return GetFullName(name, form);
@@ -381,7 +399,9 @@ namespace PokeStar.Modules
       {
          string weatherString = "";
          foreach (var weather in weatherList)
+         {
             weatherString += $"{Emote.Parse(Environment.GetEnvironmentVariable($"{weather.Replace(' ', '_').ToUpper()}_EMOTE"))} ";
+         }
          return weatherString;
       }
 
@@ -394,6 +414,7 @@ namespace PokeStar.Modules
       {
          if (relations.Count == 0)
             return "-----";
+
          string relationString = "";
          foreach(var relation in relations)
          {
