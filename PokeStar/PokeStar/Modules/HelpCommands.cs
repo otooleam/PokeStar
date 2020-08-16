@@ -25,14 +25,19 @@ namespace PokeStar.Modules
          {
             string prefix = Connections.Instance().GetPrefix(Context.Guild.Id);
             if (prefix == null)
+            {
                prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
+            }
 
             embedBuilder.WithTitle("Command List");
             embedBuilder.WithDescription($"List of commands supported by this bot.\nThe command prefix for this bot is \" {prefix} \"");
-            foreach (var cmdInfo in commands)
+            foreach (CommandInfo cmdInfo in commands)
+            {
                embedBuilder.AddField(cmdInfo.Name, cmdInfo.Summary ?? "No description available");
-            embedBuilder.WithFooter("Run \"help command_name\" to get help for a specific command.");
-            await ReplyAsync(embed: embedBuilder.Build());
+            }
+            embedBuilder.WithFooter("Run \"help <command name>\" to get help for a specific command.");
+
+            await ReplyAsync(embed: embedBuilder.Build()).ConfigureAwait(false);
          }
          else if (commands.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase)) != null)
          {
@@ -42,22 +47,34 @@ namespace PokeStar.Modules
             if (cmdInfo.Aliases.Count > 1)
             {
                string aliases = "";
-               foreach (var alias in cmdInfo.Aliases)
+               foreach (string alias in cmdInfo.Aliases)
+               {
                   if (!alias.Equals(command, StringComparison.OrdinalIgnoreCase))
+                  {
                      aliases += $"{alias}, ";
+                  }
+               }
                aliases = aliases.TrimEnd().TrimEnd(',');
                embedBuilder.AddField("Aliases:", aliases);
             }
             if (cmdInfo.Remarks != null)
+            {
                embedBuilder.AddField("Additional Information:", cmdInfo.Remarks);
-            foreach (var param in cmdInfo.Parameters)
-               embedBuilder.AddField(param.Name, param.Summary ?? "No description available");
+            }
+            foreach (ParameterInfo param in cmdInfo.Parameters)
+            {
+               embedBuilder.AddField($"<{param.Name}>", param.Summary ?? "No description available");
+            }
             if (cmdInfo.Parameters.Count == 0)
+            {
                embedBuilder.WithFooter("*This command does not take any parameters.");
-            await ReplyAsync(embed: embedBuilder.Build());
+            }
+            await ReplyAsync(embed: embedBuilder.Build()).ConfigureAwait(false);
          }
          else
-            await ReplyAsync($"Command \'{command}\' does not exist. Run the help command to get a list of valid commands.");
+         {
+            await ReplyAsync($"Command \'{command}\' does not exist. Run the '.help' command to get a list of valid commands.").ConfigureAwait(false);
+         }
       }
    }
 }
