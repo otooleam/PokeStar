@@ -359,7 +359,8 @@ namespace PokeStar.Modules
             {
                for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
                {
-                  if (reaction.Emote.Equals(selectionEmojis.ElementAt(i)))
+                  var player = raid.GetReadonlyInvite().Keys.ElementAt(i);
+                  if (raid.InvitePlayer(player, reactingPlayer))
                   {
                      var player = raid.GetReadonlyInvite().Keys.ElementAt(i);
                      if (raid.InvitePlayer(player, reactingPlayer))
@@ -370,12 +371,10 @@ namespace PokeStar.Modules
                            x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
                         });
 
-                        await player.SendMessageAsync($"You have been invited to a raid by {reactingPlayer.Nickname ?? reactingPlayer.Username}.");
-                        inviteMessages.Remove(message.Id);
-                        raid.InvitingPlayer = null;
-                        await message.DeleteAsync();
-                     }
-                     return;
+                     await player.SendMessageAsync($"You have been invited to a raid by {reactingPlayer.Nickname ?? reactingPlayer.Username}.");
+                     raidMessages.Remove(message.Id);
+                     raid.InvitingPlayer = null;
+                     await message.DeleteAsync();
                   }
                }
                await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reactingPlayer);
