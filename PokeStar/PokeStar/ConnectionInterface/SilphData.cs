@@ -16,11 +16,15 @@ namespace PokeStar.ConnectionInterface
       /// <returns>List of current raid bosses for the tier.</returns>
       public static List<string> GetRaidBossesTier(int tier)
       {
-         var raidbossList = GetRaidBosses();
+         List<RaidBossListElement> raidbossList = GetRaidBosses();
          List<string> bossTier = new List<string>();
          foreach (RaidBossListElement boss in raidbossList)
+         {
             if (boss.Tier == tier)
+            {
                bossTier.Add(boss.Name);
+            }
+         }
          return bossTier;
       }
 
@@ -36,20 +40,20 @@ namespace PokeStar.ConnectionInterface
          int tier = -1;
          bool tierStart = false;
          bool nextInTier = false;
-         var web = new HtmlWeb();
-         var doc = web.Load(Connections.Instance().RAID_BOSS_URL);
-         var bosses = doc.DocumentNode.SelectNodes(Connections.RAID_BOSS_HTML);
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(Connections.Instance().RAID_BOSS_URL);
+         HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(Connections.RAID_BOSS_HTML);
 
          List<RaidBossListElement> raidBossList = new List<RaidBossListElement>();
 
-         foreach (var col in bosses)
+         foreach (HtmlNode col in bosses)
          {
             string[] words = col.InnerText.Split('\n');
             foreach (string word in words)
             {
                if (!string.IsNullOrEmpty(word.Replace(" ", string.Empty)))
                {
-                  var temp = word.Trim();
+                  string temp = word.Trim();
                   temp = temp.Substring(0, Math.Min(temp.Length, 4));
                   if (temp.Equals("Tier", StringComparison.OrdinalIgnoreCase))
                   {
@@ -58,7 +62,9 @@ namespace PokeStar.ConnectionInterface
                      nextInTier = false;
                   }
                   else if (temp.Equals("8+", StringComparison.OrdinalIgnoreCase))
+                  {
                      nextInTier = true;
+                  }
                   else if (tierStart)
                   {
                      raidBossList.Add(new RaidBossListElement
@@ -91,9 +97,13 @@ namespace PokeStar.ConnectionInterface
       private static string ReformatName(string name)
       {
          if (name.Equals("GIRATINA (ORIGIN FORME)", StringComparison.OrdinalIgnoreCase))
+         {
             return "Origin Form Giratina";
+         }
          if (name.Equals("GIRATINA (ALTERED FORME)", StringComparison.OrdinalIgnoreCase))
+         {
             return "Altered Form Giratina";
+         }
          return name;
       }
    }
