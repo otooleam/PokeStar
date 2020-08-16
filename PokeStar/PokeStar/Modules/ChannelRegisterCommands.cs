@@ -73,9 +73,13 @@ namespace PokeStar.Modules
                return;
             }
             else if (reg.Equals(string.Empty))
+            {
                Connections.Instance().DeleteRegistration(guild, channel);
+            }
             else
+            {
                Connections.Instance().UpdateRegistration(guild, channel, reg);
+            }
          }
          else
          {
@@ -83,9 +87,13 @@ namespace PokeStar.Modules
             return;
          }
          if (reg.Equals(string.Empty))
+         {
             await Context.Channel.SendMessageAsync($"Removed all registrations from this channel.");
+         }
          else
+         {
             await Context.Channel.SendMessageAsync($"Channel is now registered for the following command types {GenerateSummaryString(reg)}");
+         }
       }
 
       /// <summary>
@@ -110,21 +118,35 @@ namespace PokeStar.Modules
             CheckSetupComplete = true;
          }
          else if (register.ToUpper().Equals("RAID") || register.ToUpper().Equals("R"))
+         {
             add = "R";
+         }
          else if (register.ToUpper().Equals("EX") || register.ToUpper().Equals("E"))
+         {
             add = "E";
+         }
          else if (register.ToUpper().Equals("TRAIN") || register.ToUpper().Equals("T"))
+         {
             add = "T";
+         }
          else if (register.ToUpper().Equals("POKEDEX") || register.ToUpper().Equals("DEX") || register.ToUpper().Equals("D"))
+         {
             add = "D";
+         }
          else
+         {
             return null;
+         }
 
          if (existing.Equals(string.Empty))
+         {
             return add;
+         }
 
          if (existing.Contains(add))
+         {
             return existing;
+         }
 
          string s = existing + add;
          char[] a = s.ToCharArray();
@@ -144,19 +166,33 @@ namespace PokeStar.Modules
       {
          string remove;
          if (unregister.ToUpper().Equals("ALL"))
+         {
             return "";
+         }
          else if (unregister.ToUpper().Equals("PLAYER") || unregister.ToUpper().Equals("ROLE") || unregister.ToUpper().Equals("P"))
+         {
             remove = "P";
+         }
          else if (unregister.ToUpper().Equals("RAID") || unregister.ToUpper().Equals("R"))
+         {
             remove = "R";
+         }
          else if (unregister.ToUpper().Equals("EX") || unregister.ToUpper().Equals("E"))
+         {
             remove = "E";
+         }
          else if (unregister.ToUpper().Equals("TRAIN") || unregister.ToUpper().Equals("T"))
+         {
             remove = "T";
+         }
          else if (unregister.ToUpper().Equals("POKEDEX") || unregister.ToUpper().Equals("DEX") || unregister.ToUpper().Equals("D"))
+         {
             remove = "D";
+         }
          else
+         {
             return null;
+         }
 
          int index = existing.IndexOf(remove);
          return (index < 0) ? null : existing.Remove(index, remove.Length);
@@ -171,15 +207,25 @@ namespace PokeStar.Modules
       {
          string summary = "";
          if (reg.ToUpper().Contains("P"))
+         {
             summary += "Player Roles, ";
+         }
          if (reg.ToUpper().Contains("R"))
+         {
             summary += "Raids, ";
+         }
          if (reg.ToUpper().Contains("E"))
+         {
             summary += "EX-Raids, ";
+         }
          if (reg.ToUpper().Contains("T"))
+         {
             summary += "Raid Trains, ";
+         }
          if (reg.ToUpper().Contains("D"))
+         {
             summary += "PokeDex, ";
+         }
          return summary.TrimEnd().TrimEnd(',');
       }
 
@@ -194,7 +240,9 @@ namespace PokeStar.Modules
       {
          string registration = Connections.Instance().GetRegistration(guild, channel);
          if (registration == null)
+         {
             return false;
+         }
          return registration.Contains(type.ToUpper());
       }
    }
