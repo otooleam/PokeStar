@@ -168,7 +168,8 @@ namespace PokeStar.DataModels
       /// <returns>True if the requester is added to the raid, otherwise false.</returns>
       public bool Invite(SocketGuildUser requester, SocketGuildUser accepter)
       {
-         if (HasPlayer(accepter, false) && !HasPlayer(requester) && (TotalPlayers() + 1) <= playerLimit && (Invited.Count + 1) <= inviteLimit)
+         if ((TotalPlayers() + 1) <= playerLimit && (Invited.Count + 1) <= inviteLimit && 
+            ((HasPlayer(accepter, false) && !HasPlayer(requester)) || requester.Equals(accepter)))                             
          {
             Invited.Add(requester, accepter);
             return true;
