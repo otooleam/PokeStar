@@ -28,16 +28,21 @@ namespace PokeStar.ConnectionInterface
                                  WHERE guild={guild}
                                  AND channel={channel};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
+               {
                   if (reader["register"].GetType() != typeof(DBNull))
+                  {
                      registration = Convert.ToString(reader["register"]);
+                  }
+               }
             }
             conn.Close();
+
          }
          return registration;
       }
@@ -79,7 +84,7 @@ namespace PokeStar.ConnectionInterface
          string queryString = $@"INSERT INTO channel_registration (guild, channel, register)
                                  VALUES ({guild}, {channel}, '{registration}')";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -97,7 +102,7 @@ namespace PokeStar.ConnectionInterface
          string queryString = $@"INSERT INTO command_prefix (guild, prefix)
                                  VALUES ({guild}, '{prefix[0]}')";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -118,7 +123,7 @@ namespace PokeStar.ConnectionInterface
                                  WHERE guild={guild}
                                  AND channel={channel};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -137,7 +142,7 @@ namespace PokeStar.ConnectionInterface
                                  SET prefix = '{prefix}'
                                  WHERE guild={guild};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -154,7 +159,7 @@ namespace PokeStar.ConnectionInterface
          string queryString = $@"DELETE FROM channel_registration
                                  WHERE guild={guild};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -173,7 +178,7 @@ namespace PokeStar.ConnectionInterface
                                  WHERE guild={guild}
                                  AND channel={channel};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -190,7 +195,7 @@ namespace PokeStar.ConnectionInterface
          string queryString = $@"DELETE FROM command_prefix
                                  WHERE guild={guild};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
