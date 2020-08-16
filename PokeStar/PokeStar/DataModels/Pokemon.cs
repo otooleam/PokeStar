@@ -192,7 +192,7 @@ namespace PokeStar.DataModels
       /// Stats include Max CP, attack, defense, and stamina(hp).
       /// </summary>
       /// <returns>Pokemon stat string.</returns>
-      public string StatsToString() //TODO add other cp values
+      public string StatsToString() 
       {
          StringBuilder sb = new StringBuilder();
 
@@ -210,10 +210,14 @@ namespace PokeStar.DataModels
       /// <returns>Pokemon type string.</returns>
       public string TypeToString()
       {
-         string str = "";
+         StringBuilder sb = new StringBuilder();
+
          foreach (string type in Type)
-            str += $"{Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE"))} ";
-         return str.Trim();
+         {
+            sb.Append($"{Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE"))} ");
+         }
+
+         return sb.ToString();
       }
 
       /// <summary>
@@ -222,10 +226,14 @@ namespace PokeStar.DataModels
       /// <returns>Pokemon weather string.</returns>
       public string WeatherToString()
       {
-         string str = "";
+         StringBuilder sb = new StringBuilder();
+
          foreach (string weather in Weather)
-            str += $"{Emote.Parse(Environment.GetEnvironmentVariable($"{weather.Replace(' ', '_').ToUpper()}_EMOTE"))} ";
-         return str.Trim();
+         {
+            sb.Append($"{Emote.Parse(Environment.GetEnvironmentVariable($"{weather.Replace(' ', '_').ToUpper()}_EMOTE"))} ");
+         }
+
+         return sb.ToString();
       }
 
       /// <summary>
@@ -234,19 +242,19 @@ namespace PokeStar.DataModels
       /// <returns>Pokemon weakness string0</returns>
       public string WeaknessToString()
       {
-         string str = "";
+         StringBuilder sb = new StringBuilder();
          int count = 0;
          foreach (string type in Weakness)
          {
-            str += $"{Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE"))} ";
+            sb.Append($"{Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE"))} ");
             if (count == 3)
             {
                count = -1;
-               str += "\n";
+               sb.AppendLine();
             }
             count++;
          }
-         return str.Trim();
+         return sb.ToString();
       }
 
       /// <summary>
@@ -255,20 +263,19 @@ namespace PokeStar.DataModels
       /// <returns>Pokemon resistance string.</returns>
       public string ResistanceToString()
       {
-         string str = "";
+         StringBuilder sb = new StringBuilder();
          int count = 0;
          foreach (string type in Resistance)
          {
-            string typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE")).ToString();
-            str += typeString + " ";
+            sb.Append($"{Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE"))} ");
             if (count == 3)
             {
                count = -1;
-               str += "\n";
+               sb.AppendLine();
             }
             count++;
          }
-         return str.Trim();
+         return sb.ToString();
       }
 
       /// <summary>
@@ -280,15 +287,17 @@ namespace PokeStar.DataModels
          if (FastMove.Count == 0)
             return "No Fast Move Data";
 
-         string str = "";
+         StringBuilder sb = new StringBuilder();
          foreach (Move fastMove in FastMove)
          {
-            str += fastMove.ToString();
+            sb.Append(fastMove.ToString());
             if (Type.Contains(fastMove.Type))
-               str += " *";
-            str += "\n";
+            {
+               sb.Append(" *");
+            }
+            sb.AppendLine();
          }
-         return str.Trim();
+         return sb.ToString();
       }
 
       /// <summary>
@@ -300,15 +309,17 @@ namespace PokeStar.DataModels
          if (ChargeMove.Count == 0)
             return "No Charge Move Data";
 
-         string str = "";
+         StringBuilder sb = new StringBuilder();
          foreach (Move chargeMove in ChargeMove)
          {
-            str += chargeMove.ToString();
+            sb.Append(chargeMove.ToString());
             if (Type.Contains(chargeMove.Type))
-               str += " *";
-            str += "\n";
+            {
+               sb.Append(" *");
+            }
+            sb.AppendLine();
          }
-         return str.Trim();
+         return sb.ToString();
       }
 
       /// <summary>
@@ -363,21 +374,22 @@ namespace PokeStar.DataModels
       /// <returns>Pokemon max wild CP string.</returns>
       public string WildCPToString()
       {
-         string str = "";
-         for (int i = 0; i < CPWild.Count; i++)
+         StringBuilder sb = new StringBuilder();
+         string dash = "-";
+         int columnLength = 12;
+
+         for (int i = 0; i < columnLength; i++)
          {
-            str += $"{i + 1}";
-            var temp = $"{i + 1}";
+            int column1level = i + 1;
+            int column2level = i + 1 + columnLength;
+            int column3level = i + 1 + columnLength * 2;
 
-            for (int j = temp.Length; j < 20; j++)
-               str += "-";
-            str += $"{CPWild[i]}";
-
-            if (i >= 30)
-               str += "*";
-            str += "\n";
+            sb.Append($"**{column1level}** {(i >= 10 ? dash : dash)} {CPWild[column1level - 1]} . ");
+            sb.Append($"**{column2level}** {dash} {CPWild[column2level - 1]}");
+            sb.AppendLine($"{(column3level <= 35 ? $" . **{column3level}** {dash} {CPWild[column3level - 1]}{(column3level > 30 ? "\\*" : "")}" : "")}");
          }
-         return str;
+
+         return sb.ToString();
       }
    }
 }

@@ -302,12 +302,9 @@ namespace PokeStar.Modules
             {
                if (reaction.Emote.Equals(selectionEmojis.ElementAt(i)))
                {
-                  var player = raid.GetReadonlyInvite().Keys.ElementAt(i);
-<<<<<<< Updated upstream
-                  if (raid.InvitePlayer(player, (SocketGuildUser)reaction.User))
-=======
+                  var reactingPlayer = raid.GetReadonlyInvite().Keys.ElementAt(i);
+
                   if (raid.InvitePlayer(player, reactingPlayer))
->>>>>>> Stashed changes
                   {
                      var raidMessage = (SocketUserMessage)channel.CachedMessages.FirstOrDefault(x => x.Id == raidMessageId);
                      await raidMessage.ModifyAsync(x =>
@@ -315,12 +312,8 @@ namespace PokeStar.Modules
                         x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
                      });
 
-<<<<<<< Updated upstream
                      SocketGuildUser invitingPlayer = (SocketGuildUser)reaction.User.Value;
-                     await player.SendMessageAsync($"You have been invited to a raid by {(invitingPlayer.Nickname == null ? invitingPlayer.Username : invitingPlayer.Nickname)}.");
-=======
                      await player.SendMessageAsync($"You have been invited to a raid by {reactingPlayer.Nickname ?? reactingPlayer.Username}.");
->>>>>>> Stashed changes
                      raidMessages.Remove(message.Id);
                      raid.InvitingPlayer = null;
                      await message.DeleteAsync();
