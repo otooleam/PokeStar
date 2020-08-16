@@ -122,7 +122,9 @@ namespace PokeStar.DataModels
          {
             group = IsInRaid(player);
             if (group == -1)
+            {
                group = FindSmallestGroup();
+            }
             Groups.ElementAt(group).Add(player, partySize);
          }
          else // is invite
@@ -134,7 +136,9 @@ namespace PokeStar.DataModels
                Invite.Remove(player);
             }
             else
+            {
                return false;
+            }
          }
 
          RaidGroup newGroup;
@@ -142,7 +146,9 @@ namespace PokeStar.DataModels
          {
             newGroup = Groups.ElementAt(group).SplitGroup();
             if (newGroup != null)
+            {
                Groups.Add(newGroup);
+            }
             CheckMergeGroups();
             return true;
          }
@@ -162,7 +168,6 @@ namespace PokeStar.DataModels
          if (Invite.Contains(player))
          {
             Invite.Remove(player);
-            return -1;
          }
          else
          {
@@ -175,9 +180,12 @@ namespace PokeStar.DataModels
 
                   group.Remove(player);
                   if (group.AllPlayersReady())
+                  {
                      if (!everyoneWasReady)
+                     {
                         return i;
-                  return -1;
+                     }
+                  }
                }
             }
          }
@@ -193,13 +201,14 @@ namespace PokeStar.DataModels
       {
          for (int i = 0; i < Groups.Count; i++)
          {
-            var group = Groups.ElementAt(i);
+            RaidGroup group = Groups.ElementAt(i);
             if (group.HasPlayer(player))
             {
                group.PlayerReady(player);
                if (group.AllPlayersReady())
+               {
                   return i;
-               return -1;
+               }
             }
          }
          return -1;
@@ -259,8 +268,12 @@ namespace PokeStar.DataModels
       public int IsInRaid(SocketGuildUser player, bool checkInvite = true)
       {
          for (int i = 0; i < Groups.Count; i++)
+         {
             if (Groups.ElementAt(i).HasPlayer(player, checkInvite))
+            {
                return i;
+            }
+         }
          return -1;
       }
 
@@ -289,12 +302,18 @@ namespace PokeStar.DataModels
       /// </summary>
       private void CheckMergeGroups()
       {
-         foreach (var group in Groups)
-            foreach (var check in Groups)
+         foreach (RaidGroup group in Groups)
+         {
+            foreach (RaidGroup check in Groups)
+            {
                group.MergeGroup(check);
+            }
+         }
          Groups.RemoveAll(x => x.TotalPlayers() == 0);
          if (Groups.Count == 0)
+         {
             Groups.Add(new RaidGroup());
+         }
       }
    }
 }
