@@ -1,11 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
+using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using PokeStar.DataModels;
 using PokeStar.Calculators;
 using PokeStar.ConnectionInterface;
+using System.Linq;
 
 namespace PokeStar.Modules
 {
@@ -14,6 +16,74 @@ namespace PokeStar.Modules
    /// </summary>
    public class DexCommands : ModuleBase<SocketCommandContext>
    {
+      /*
+       * select * from pokemon
+inner join 
+(select number from pokemon group by number having count(number) > 1) as dup
+ON pokemon.number=dup.number
+order by pokemon.number;
+
+
+select TOP 10 * 
+from pokemon 
+where name like '%pika%'
+order by DIFFERENCE(name, 'pika') desc;
+       * 
+       */
+      private static Dictionary<string, PokemonForm> pokemonForms = new Dictionary<string, PokemonForm>(StringComparer.OrdinalIgnoreCase)
+      {
+         ["Rattata"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Raticate"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Raichu"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Sandshrew"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Sandslash"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Nidoran"] = new PokemonForm { formList = "-f,-m", defaultForm = "-f" },
+         ["Vulpix"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Ninetales"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Diglett"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Dugtrio"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Meowth"] = new PokemonForm { formList = "-alola,-galar", defaultForm = "" },
+         ["Persian"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Geodude"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Graveler"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Golem"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Farfetch'd"] = new PokemonForm { formList = "-galar", defaultForm = "" },
+         ["Grimer"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Muk"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Exeggutor"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Marowak"] = new PokemonForm { formList = "-alola", defaultForm = "" },
+         ["Weezing"] = new PokemonForm { formList = "-galar", defaultForm = "" },
+         ["Mewtwo"] = new PokemonForm { formList = "-armor", defaultForm = "" },
+         ["Unown"] = new PokemonForm { formList = "-a,-b,-c,-d,-e,-f,-g,-h,-i,-j,-k,-l,-m,-n,-o,-p,-q,-r,-s,-t,-u,-v,-w,-x,-y,-z,-!,-?,", defaultForm = "-f" },
+         ["Zigzagoon"] = new PokemonForm { formList = "-galar", defaultForm = "" },
+         ["Linoone"] = new PokemonForm { formList = "-galar", defaultForm = "" },
+         ["Castform"] = new PokemonForm { formList = "-rain,-snow,-sun", defaultForm = "" },
+         ["Deoxys"] = new PokemonForm { formList = "-attack,-defense,-speed", defaultForm = "" },
+         ["Burmy"] = new PokemonForm { formList = "-plant,-sand,-trash", defaultForm = "-plant" },
+         ["Wormadam"] = new PokemonForm { formList = "-plant,-sand,-trash", defaultForm = "-plant" },
+         ["Cherrim"] = new PokemonForm { formList = "-sunshine,-overcast", defaultForm = "-sunshine" },
+         ["Shellow"] = new PokemonForm { formList = "-east,-west", defaultForm = "-east" },
+         ["Gastrodon"] = new PokemonForm { formList = "-east,-west", defaultForm = "-east" },
+         ["Rotom"] = new PokemonForm { formList = "-fan,-frost,-heat,-mow,-wash", defaultForm = "" },
+         ["Giratina"] = new PokemonForm { formList = "-altered,-origin", defaultForm = "-altered" },
+         ["Shayman"] = new PokemonForm { formList = "-land,-sky", defaultForm = "-land" },
+         ["Arceus"] = new PokemonForm { formList = "-normal,-bug,-dark,-dragon,-electric,-fairy,-fighting,-fire,-flying,-ghost,-grass,-ground,-ice,-poison,-psychic,-rock,-steel,-water", defaultForm = "-normal" },
+         ["Basculin"] = new PokemonForm { formList = "-blue,-red", defaultForm = "-blue" },
+         ["Darumaka"] = new PokemonForm { formList = "-galar", defaultForm = "" },
+         ["Darmanitan"] = new PokemonForm { formList = "-galar,-zen,-galar-zen", defaultForm = "" },
+         ["Deerling"] = new PokemonForm { formList = "-summer,-spring,-winter,-autumn", defaultForm = "-summer" },
+         ["Sawsbuck"] = new PokemonForm { formList = "-summer,-spring,-winter,-autumn", defaultForm = "-summer" },
+         ["Stunfisk"] = new PokemonForm { formList = "-galar", defaultForm = "" },
+         ["Tornadus"] = new PokemonForm { formList = "-incarnate,-therian", defaultForm = "-incarnate" },
+         ["Thundurus"] = new PokemonForm { formList = "-incarnate,-therian", defaultForm = "-incarnate" },
+         ["Landorus"] = new PokemonForm { formList = "-incarnate,-therian", defaultForm = "-incarnate" },
+         ["Kyurem"] = new PokemonForm { formList = "-black,-white", defaultForm = "" },
+         ["Keldeo"] = new PokemonForm { formList = "-resolute", defaultForm = "" },
+         ["Meloetta"] = new PokemonForm { formList = "-aria,-pirouette", defaultForm = "-aria" },
+      };
+
+
+
       [Command("dex")]
       [Alias("pokedex")]
       [Summary("Gets information for a pokemon.")]
@@ -104,6 +174,60 @@ namespace PokeStar.Modules
          }
          else
             await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
+      }
+
+      [Command("form")]
+      [Summary("Gets all forms for a pokemon.")]
+      [Remarks("Leave blank to get all pokemon with forms.\n" +
+               "Send \"Alias\" to get variations for form names.")]
+      public async Task Form([Summary("(Optional) Pokemon with the form.")] string pokemonName = null)
+      {
+         EmbedBuilder embed = new EmbedBuilder();
+         if (pokemonName == null)
+         {
+            StringBuilder sb = new StringBuilder();
+            foreach (string key in pokemonForms.Keys)
+               sb.AppendLine(key);
+            embed.AddField($"Pokemon With Forms", sb.ToString(), true);
+            embed.WithColor(Color.Red);
+         }
+         else if (pokemonForms.ContainsKey(pokemonName))
+         {
+            StringBuilder sb = new StringBuilder();
+            PokemonForm forms = pokemonForms[pokemonName];
+            var formsList = forms.formList.Split(',');
+
+            foreach (string form in formsList)
+            {
+               sb.Append(form);
+               if (form.Equals(forms.defaultForm))
+                  sb.Append("*");
+               sb.Append('\n');
+            }
+            embed.AddField($"Forms for {pokemonName}", sb.ToString(), true);
+            embed.WithColor(Color.Red);
+            embed.WithFooter("* Form is default form");
+         }
+         else if (pokemonName.Equals("Alias", StringComparison.OrdinalIgnoreCase))
+         {
+            embed.WithTitle("Form tag variations");
+            embed.AddField($"-alola", "-alolan", true);
+            embed.AddField($"-galar", "-garlarian", true);
+            embed.AddField($"-armor", "-armored", true);
+            embed.AddField($"-fighting", "-fight", true);
+            embed.AddField($"-flying", "-fly", true);
+            embed.AddField($"-psychic", "-psy", true);
+            embed.AddField($"-galar-zen", "-garlarian-zen", true);
+            embed.AddField($"-autumn", "-fall", true);
+            embed.WithColor(Color.Red);
+         }
+         else
+         {
+            embed.WithTitle("PokeDex Command Error");
+            embed.WithDescription($"Pokemon {pokemonName} cannot be found or has no forms.");
+            embed.WithColor(Color.DarkRed);
+         }
+         await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
       }
 
       [Command("type")]
@@ -216,10 +340,10 @@ namespace PokeStar.Modules
          if (form.Length == 2)
             return $"{pokemonName} {form.ToCharArray()[1]}";
          // Alolan
-         else if (form.Equals("-alola", StringComparison.OrdinalIgnoreCase))
+         else if (form.Equals("-alola", StringComparison.OrdinalIgnoreCase) || form.Equals("-alolan", StringComparison.OrdinalIgnoreCase))
             return $"Alolan {pokemonName}";
          // Galarian
-         else if (form.Equals("-galar", StringComparison.OrdinalIgnoreCase))
+         else if (form.Equals("-galar", StringComparison.OrdinalIgnoreCase) || form.Equals("-galarian", StringComparison.OrdinalIgnoreCase))
             return $"Galarian {pokemonName}";
          // Mega
          else if (form.Equals("-mega", StringComparison.OrdinalIgnoreCase))
@@ -234,7 +358,7 @@ namespace PokeStar.Modules
          else if (form.Equals("-male", StringComparison.OrdinalIgnoreCase))
             return $"{pokemonName} M";
          // Mewtwo
-         else if (form.Equals("-armor", StringComparison.OrdinalIgnoreCase))
+         else if (form.Equals("-armor", StringComparison.OrdinalIgnoreCase) || form.Equals("-armored", StringComparison.OrdinalIgnoreCase))
             return $"Armored {pokemonName}";
          /// Unown and Nidoran
          else if (string.IsNullOrWhiteSpace(form) && (pokemonName.Equals("unown", StringComparison.OrdinalIgnoreCase) || pokemonName.Equals("nidoran", StringComparison.OrdinalIgnoreCase)))
@@ -298,8 +422,6 @@ namespace PokeStar.Modules
             return $"{pokemonName} Bug";
          else if (form.Equals("-dark", StringComparison.OrdinalIgnoreCase))
             return $"{pokemonName} Dark";
-         else if (form.Equals("-bug", StringComparison.OrdinalIgnoreCase))
-            return $"{pokemonName} Bug";
          else if (form.Equals("-dragon", StringComparison.OrdinalIgnoreCase))
             return $"{pokemonName} Dragon";
          else if (form.Equals("-electric", StringComparison.OrdinalIgnoreCase))
@@ -338,7 +460,7 @@ namespace PokeStar.Modules
          // Darmanitan
          else if (form.Equals("-zen", StringComparison.OrdinalIgnoreCase))
             return $"{pokemonName} Zen Mode";
-         else if (form.Equals("-galarzen", StringComparison.OrdinalIgnoreCase))
+         else if (form.Equals("-galar-zen", StringComparison.OrdinalIgnoreCase) || form.Equals("-galarian-zen", StringComparison.OrdinalIgnoreCase))
             return $"Galarian {pokemonName} Zen Mode";
          // Deerling and Sawsbuck
          else if (form.Equals("-summer", StringComparison.OrdinalIgnoreCase) || (string.IsNullOrWhiteSpace(form) && (pokemonName.Equals("deerling", StringComparison.OrdinalIgnoreCase) || pokemonName.Equals("sawsbuck", StringComparison.OrdinalIgnoreCase))))
@@ -411,5 +533,11 @@ namespace PokeStar.Modules
       {
          return Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE") != null;
       }
+   }
+
+   public struct PokemonForm
+   {
+      public string formList;
+      public string defaultForm;
    }
 }

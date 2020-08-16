@@ -361,6 +361,7 @@ namespace PokeStar.Modules
                {
                   var player = raid.GetReadonlyInvite().Keys.ElementAt(i);
                   if (raid.InvitePlayer(player, reactingPlayer))
+
                   {
                      var player = raid.GetReadonlyInvite().Keys.ElementAt(i);
                      if (raid.InvitePlayer(player, reactingPlayer))
