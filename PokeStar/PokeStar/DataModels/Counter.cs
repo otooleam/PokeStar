@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Text;
 
 namespace PokeStar.DataModels
 {
@@ -33,13 +34,19 @@ namespace PokeStar.DataModels
       /// <returns>Counter string.</returns>
       public string ToString()
       {
-         string str = $@"{Name}: {FastAttack}";
+         StringBuilder sb = new StringBuilder();
+
+         sb.Append($@"{Name}: {FastAttack}");
          if (Type.Contains(FastAttack.Type))
-            str += " * ";
-         str += $@"\{ChargedAttack}";
+         {
+            sb.Append(" * ");
+         }
+         sb.Append($@"\{ChargedAttack}");
          if (Type.Contains(FastAttack.Type))
-            str += " *";
-         return str;
+         {
+            sb.Append(" *");
+         }
+         return sb.ToString();
       }
    }
 }
