@@ -9,6 +9,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using PokeStar.DataModels;
 using PokeStar.ConnectionInterface;
+using Discord.Rest;
 
 namespace PokeStar.Modules
 {
@@ -56,7 +57,7 @@ namespace PokeStar.Modules
          ADD_PLAYER_4,
          ADD_PLAYER_5,
          PLAYER_READY,
-         REQUEST_INVITE,
+         REMOTE,
          INVITE_PLAYER,
          REMOVE_PLAYER,
          HELP
@@ -76,9 +77,11 @@ namespace PokeStar.Modules
                string fileName = $"Egg{tier}.png";
                Connections.CopyFile(fileName);
 
-               var selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+               RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName)).ConfigureAwait(false);
                for (int i = 0; i < potentials.Count; i++)
-                  await selectMsg.AddReactionAsync(selectionEmojis[i]);
+               {
+                  await selectMsg.AddReactionAsync(selectionEmojis[i]).ConfigureAwait(false);
+               }
 
                Raid raid = new Raid(tier, time, location)
                {
@@ -104,15 +107,17 @@ namespace PokeStar.Modules
                }
 
                Connections.CopyFile(fileName);
-               var raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
-               await raidMsg.AddReactionsAsync(raidEmojis);
+               RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName)).ConfigureAwait(false);
+               await raidMsg.AddReactionsAsync(raidEmojis).ConfigureAwait(false);
                currentRaids.Add(raidMsg.Id, raid);
 
                Connections.DeleteFile(fileName);
             }
          }
          else
-            await Context.Channel.SendMessageAsync("This channel is not registered to process Raid commands.");
+         {
+            await Context.Channel.SendMessageAsync("This channel is not registered to process Raid commands.").ConfigureAwait(false);
+         }
          RemoveOldRaids();
       }
 
@@ -131,31 +136,31 @@ namespace PokeStar.Modules
                if (attribute.Equals("time", StringComparison.OrdinalIgnoreCase))
                {
                   raid.Time = edit;
-                  var msg = (SocketUserMessage)Context.Channel.GetCachedMessage(code);
+                  SocketUserMessage msg = (SocketUserMessage)Context.Channel.GetCachedMessage(code);
                   await msg.ModifyAsync(x =>
                   {
                      x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
-                  });
+                  }).ConfigureAwait(false);
                }
-               else if (attribute.Equals("location", StringComparison.OrdinalIgnoreCase) ||
-                        attribute.Equals("loc", StringComparison.OrdinalIgnoreCase))
+               else if (attribute.Equals("location", StringComparison.OrdinalIgnoreCase) || attribute.Equals("loc", StringComparison.OrdinalIgnoreCase))
                {
                   raid.Location = edit;
-                  var msg = (SocketUserMessage)Context.Channel.GetCachedMessage(code);
+                  SocketUserMessage msg = (SocketUserMessage)Context.Channel.GetCachedMessage(code);
                   await msg.ModifyAsync(x =>
                   {
                      x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
-                  });
+                  }).ConfigureAwait(false);
                }
-               else if (attribute.Equals("tier", StringComparison.OrdinalIgnoreCase) ||
-                        attribute.Equals("boss", StringComparison.OrdinalIgnoreCase))
+               else if (attribute.Equals("tier", StringComparison.OrdinalIgnoreCase) || attribute.Equals("boss", StringComparison.OrdinalIgnoreCase))
                {
                   // TODO: Add editing of raid tier/boss
                }
             }
          }
          else
-            await Context.Channel.SendMessageAsync("This channel is not registered to process Raid commands.");
+         {
+            await Context.Channel.SendMessageAsync("This channel is not registered to process Raid commands.").ConfigureAwait(false);
+         }
       }
 
       /// <summary>
@@ -183,11 +188,11 @@ namespace PokeStar.Modules
 
             if (validReactionAdded)
             {
-               await reaction.Channel.DeleteMessageAsync(message);
+               await reaction.Channel.DeleteMessageAsync(message).ConfigureAwait(false);
 
                string filename = Connections.GetPokemonPicture(raid.Boss.Name);
-               var raidMsg = await reaction.Channel.SendFileAsync(filename, embed: BuildRaidEmbed(raid, filename));
-               await raidMsg.AddReactionsAsync(raidEmojis);
+               RestUserMessage raidMsg = await reaction.Channel.SendFileAsync(filename, embed: BuildRaidEmbed(raid, filename)).ConfigureAwait(false);
+               await raidMsg.AddReactionsAsync(raidEmojis).ConfigureAwait(false);
                currentRaids.Add(raidMsg.Id, raid);
             }
          }
@@ -216,11 +221,13 @@ namespace PokeStar.Modules
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]))
             {
-               var group = raid.PlayerReady(player);
+               int group = raid.PlayerReady(player);
                if (group != -1)
-                  await reaction.Channel.SendMessageAsync(BuildPingList(raid.Groups.ElementAt(group).GetPingList(), raid.Location, group));
+               {
+                  await reaction.Channel.SendMessageAsync(BuildPingList(raid.Groups.ElementAt(group).GetPingList(), raid.Location, group)).ConfigureAwait(false);
+               }
             }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]))
+            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE]))
             {
                raid.PlayerRequestInvite(player);
             }
@@ -228,17 +235,21 @@ namespace PokeStar.Modules
             {
                if (raid.IsInRaid(player, false) != -1)
                {
-                  if (raid.GetReadonlyInvite().Count == 0)
-                     await reaction.Channel.SendMessageAsync($"{player.Mention}, There are no players to invite.");
+                  if (raid.GetReadonlyInvite().IsEmpty)
+                  {
+                     await reaction.Channel.SendMessageAsync($"{player.Mention}, There are no players to invite.").ConfigureAwait(false);
+                  }
                   else
                   {
                      if (!raid.HasActiveInvite())
                      {
                         raid.InvitingPlayer = player;
-                        var inviteMsg = await reaction.Channel.SendMessageAsync(text: $"{player.Mention}", embed: BuildPlayerInviteEmbed(raid.GetReadonlyInviteList(), (player.Nickname == null ? player.Username : player.Nickname)));
+                        RestUserMessage inviteMsg = await reaction.Channel.SendMessageAsync(text: $"{player.Mention}", embed: BuildPlayerInviteEmbed(raid.GetReadonlyInviteList(), (player.Nickname == null ? player.Username : player.Nickname))).ConfigureAwait(false);
                         for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
-                           await inviteMsg.AddReactionAsync(selectionEmojis[i]);
-                        await inviteMsg.AddReactionAsync(cancelEmoji);
+                        {
+                           await inviteMsg.AddReactionAsync(selectionEmojis[i]).ConfigureAwait(false);
+                        }
+                        await inviteMsg.AddReactionAsync(cancelEmoji).ConfigureAwait(false);
                         raidMessages.Add(inviteMsg.Id, message.Id);
                      }
                   }
@@ -248,31 +259,37 @@ namespace PokeStar.Modules
             {
                int group = raid.RemovePlayer(player);
                if (group != -1)
-                  await reaction.Channel.SendMessageAsync(BuildPingList(raid.Groups.ElementAt(group).GetPingList(), raid.Location, group));
+               {
+                  await reaction.Channel.SendMessageAsync(BuildPingList(raid.Groups.ElementAt(group).GetPingList(), raid.Location, group)).ConfigureAwait(false);
+               }
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
             {
                string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
                if (prefix == null)
+               {
                   prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
+               }
 
-               await player.SendMessageAsync(BuildRaidHelpMessage());
-               await player.SendMessageAsync($"{prefix}edit {message.Id}");
+               await player.SendMessageAsync(BuildRaidHelpMessage()).ConfigureAwait(false);
+               await player.SendMessageAsync($"{prefix}edit {message.Id}").ConfigureAwait(false);
                needsUpdate = false;
             }
             else
+            {
                needsUpdate = false;
+            }
 
             if (needsUpdate)
             {
-               var msg = (SocketUserMessage)message;
+               SocketUserMessage msg = (SocketUserMessage)message;
                await msg.ModifyAsync(x =>
                {
                   x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
-               });
+               }).ConfigureAwait(false);
             }
 
-            await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, player);
+            await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, player).ConfigureAwait(false);
          }
       }
 
@@ -285,8 +302,8 @@ namespace PokeStar.Modules
       /// <returns>Completed Task.</returns>
       public static async Task RaidInviteReaction(IMessage message, SocketReaction reaction, ISocketMessageChannel channel)
       {
-         await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value);
-         var raidMessageId = raidMessages[message.Id];
+         await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value).ConfigureAwait(false);
+         ulong raidMessageId = raidMessages[message.Id];
          Raid raid = currentRaids[raidMessageId];
          SocketGuildUser player = (SocketGuildUser)reaction.User;
 
@@ -294,31 +311,33 @@ namespace PokeStar.Modules
          {
             if (reaction.Emote.Equals(cancelEmoji))
             {
-               await message.DeleteAsync();
+               await message.DeleteAsync().ConfigureAwait(false);
                raid.InvitingPlayer = null;
-               return;
             }
-            for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
+            else
             {
-               if (reaction.Emote.Equals(selectionEmojis.ElementAt(i)))
+               for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
                {
-                  var reactingPlayer = raid.GetReadonlyInvite().Keys.ElementAt(i);
-
-                  if (raid.InvitePlayer(player, reactingPlayer))
+                  if (reaction.Emote.Equals(selectionEmojis.ElementAt(i)))
                   {
-                     var raidMessage = (SocketUserMessage)channel.CachedMessages.FirstOrDefault(x => x.Id == raidMessageId);
-                     await raidMessage.ModifyAsync(x =>
-                     {
-                        x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
-                     });
+                     SocketGuildUser reactingPlayer = raid.GetReadonlyInvite().Keys.ElementAt(i);
 
-                     SocketGuildUser invitingPlayer = (SocketGuildUser)reaction.User.Value;
-                     await player.SendMessageAsync($"You have been invited to a raid by {reactingPlayer.Nickname ?? reactingPlayer.Username}.");
-                     raidMessages.Remove(message.Id);
-                     raid.InvitingPlayer = null;
-                     await message.DeleteAsync();
+                     if (raid.InvitePlayer(player, reactingPlayer))
+                     {
+                        SocketUserMessage raidMessage = (SocketUserMessage)channel.CachedMessages.FirstOrDefault(x => x.Id == raidMessageId);
+                        await raidMessage.ModifyAsync(x =>
+                        {
+                           x.Embed = BuildRaidEmbed(raid, Connections.GetPokemonPicture(raid.Boss.Name));
+                        }).ConfigureAwait(false);
+
+                        SocketGuildUser invitingPlayer = (SocketGuildUser)reaction.User.Value;
+                        await player.SendMessageAsync($"You have been invited to a raid by {reactingPlayer.Nickname ?? reactingPlayer.Username}.").ConfigureAwait(false);
+                        raidMessages.Remove(message.Id);
+                        raid.InvitingPlayer = null;
+                        await message.DeleteAsync().ConfigureAwait(false);
+                     }
+                     return;
                   }
-                  return;
                }
             }
          }
@@ -333,13 +352,14 @@ namespace PokeStar.Modules
       private static Embed BuildRaidEmbed(Raid raid, string fileName = null)
       {
          if (fileName != null)
+         {
             fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+         }
          Connections.CopyFile(fileName);
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.DarkBlue);
          embed.WithTitle($"{(raid.Boss.Name.Equals("Bossless") ? "" : raid.Boss.Name)} {BuildRaidTitle(raid.Tier)}");
-         embed.WithDescription("Press ? for help.");
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Time", raid.Time, true);
          embed.AddField("Location", raid.Location, true);
@@ -351,7 +371,7 @@ namespace PokeStar.Modules
             embed.AddField($"Group {i + 1} Invited", $"{BuildInvitedList(raid.Groups.ElementAt(i).GetReadonlyInvited())}");
          }
          embed.AddField($"Need Invite:", $"{BuildPlayerList(raid.GetReadonlyInvite())}");
-         embed.WithFooter("Note: the max number of members in a raid is 20, and the max number of invites is 10.");
+         embed.WithFooter("Note: the max number of members in a raid is 20, and the max number of invites is 10.\nPress ? for help.");
 
          return embed.Build();
       }
@@ -366,13 +386,16 @@ namespace PokeStar.Modules
       {
          StringBuilder sb = new StringBuilder();
          for (int i = 0; i < potentials.Count; i++)
+         {
             sb.AppendLine($"{selectionEmojis[i]} {potentials[i]}");
+         }
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.DarkBlue);
          embed.WithTitle("Raid");
          embed.WithThumbnailUrl($"attachment://{selectPic}");
          embed.AddField("Please Select Boss", sb.ToString());
+
          return embed.Build();
       }
 
@@ -407,10 +430,14 @@ namespace PokeStar.Modules
       private static string BuildRaidTitle(int tier)
       {
          StringBuilder sb = new StringBuilder();
+
          sb.Append("Raid ");
          string raidSymbol = Emote.Parse(Environment.GetEnvironmentVariable("RAID_EMOTE")).ToString();
          for (int i = 0; i < tier; i++)
+         {
             sb.Append(raidSymbol);
+         }
+
          return sb.ToString();
       }
 
@@ -424,9 +451,13 @@ namespace PokeStar.Modules
       private static string BuildPingList(List<SocketGuildUser> players, string location, int groupNumber)
       {
          StringBuilder sb = new StringBuilder();
+
          foreach (SocketGuildUser player in players)
+         {
             sb.Append($"{player.Mention} ");
+         }
          sb.Append($"Everyone in group {groupNumber + 1} is ready at {location}");
+
          return sb.ToString();
       }
 
@@ -437,15 +468,17 @@ namespace PokeStar.Modules
       /// <returns>List of players as a string.</returns>
       private static string BuildPlayerList(ImmutableDictionary<SocketGuildUser, int> players)
       {
-         if (players.Count == 0)
+         if (players.IsEmpty)
             return "-----";
 
          StringBuilder sb = new StringBuilder();
-         foreach (var player in players)
+
+         foreach (KeyValuePair<SocketGuildUser, int> player in players)
          {
             string teamString = GetPlayerTeam(player.Key);
             sb.AppendLine($"{raidEmojis[player.Value - 1]} {player.Key.Nickname ?? player.Key.Username} {teamString}");
          }
+
          return sb.ToString();
       }
 
@@ -456,15 +489,17 @@ namespace PokeStar.Modules
       /// <returns>List of invited players as a string.</returns>
       private static string BuildInvitedList(ImmutableDictionary<SocketGuildUser, SocketGuildUser> players)
       {
-         if (players.Count == 0)
+         if (players.IsEmpty)
             return "-----";
 
          StringBuilder sb = new StringBuilder();
-         foreach (var player in players)
+
+         foreach (KeyValuePair<SocketGuildUser, SocketGuildUser> player in players)
          {
             string teamString = GetPlayerTeam(player.Key);
             sb.AppendLine($"{player.Key.Nickname ?? player.Key.Username} {teamString} invited by {player.Value.Nickname ?? player.Value.Username}");
          }
+
          return sb.ToString();
       }
 
@@ -480,7 +515,7 @@ namespace PokeStar.Modules
             " React with one of the numbers to show that you intend to participate in the raid.");
          sb.AppendLine($"Once you are ready for the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]} to show others that you are ready." +
             $" When all players have marked that they are ready, Nona will send a message to the group.");
-         sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]}.");
+         sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE]}.");
          sb.AppendLine($"To invite someone to a raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]} and react with the coresponding emote for the player.");
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
 
@@ -497,11 +532,17 @@ namespace PokeStar.Modules
       private static string GetPlayerTeam(SocketGuildUser user)
       {
          if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) != null)
+         {
             return Emote.Parse(Environment.GetEnvironmentVariable("VALOR_EMOTE")).ToString();
+         }
          else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) != null)
+         {
             return Emote.Parse(Environment.GetEnvironmentVariable("MYSTIC_EMOTE")).ToString();
+         }
          else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) != null)
+         {
             return Emote.Parse(Environment.GetEnvironmentVariable("INSTINCT_EMOTE")).ToString();
+         }
          return "";
       }
 
@@ -512,11 +553,17 @@ namespace PokeStar.Modules
       private static void RemoveOldRaids()
       {
          List<ulong> ids = new List<ulong>();
-         foreach (var temp in currentRaids)
+         foreach (KeyValuePair<ulong, Raid> temp in currentRaids)
+         {
             if (Math.Abs((temp.Value.CreatedAt - DateTime.Now).TotalDays) >= 1)
+            {
                ids.Add(temp.Key);
-         foreach (var id in ids)
+            }
+         }
+         foreach (ulong id in ids)
+         {
             currentRaids.Remove(id);
+         }
       }
 
       /// <summary>
