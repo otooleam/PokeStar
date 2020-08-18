@@ -151,6 +151,13 @@ namespace PokeStar.ConnectionInterface
          pokemon.Weather = GetWeather(pokemon.Type);
          pokemon.FastMove = POGODBConnector.GetMoves(name, true);
          pokemon.ChargeMove = POGODBConnector.GetMoves(name, false, pokemon.Shadow);
+         pokemon.Counter = POGODBConnector.GetCounters(name);
+
+         foreach (Counter counter in pokemon.Counter)
+         {
+            counter.FastAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.FastAttack.Name);
+            counter.ChargeAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.ChargeAttack.Name);
+         }
 
          pokemon.CPMax = CPCalculator.CalcCPPerLevel(
             pokemon.Attack, pokemon.Defense, pokemon.Stamina,
