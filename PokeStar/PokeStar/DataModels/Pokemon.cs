@@ -290,10 +290,17 @@ namespace PokeStar.DataModels
          StringBuilder sb = new StringBuilder();
          foreach (Move fastMove in FastMove)
          {
-            sb.Append(fastMove.ToString());
+            if (!Name.Equals("Mew"))
+            {
+               sb.Append(fastMove.ToString());
+            }
+            else
+            {
+               sb.Append($"{fastMove.Name} ({fastMove.Type})");
+            }
             if (Type.Contains(fastMove.Type))
             {
-               sb.Append(" *");
+               sb.Append("*");
             }
             sb.AppendLine();
          }
@@ -312,10 +319,17 @@ namespace PokeStar.DataModels
          StringBuilder sb = new StringBuilder();
          foreach (Move chargeMove in ChargeMove)
          {
-            sb.Append(chargeMove.ToString());
+            if (!Name.Equals("Mew"))
+            {
+               sb.Append(chargeMove.ToString());
+            }
+            else
+            {
+               sb.Append($"{chargeMove.Name} ({chargeMove.Type})");
+            }
             if (Type.Contains(chargeMove.Type))
             {
-               sb.Append(" *");
+               sb.Append("*");
             }
             sb.AppendLine();
          }

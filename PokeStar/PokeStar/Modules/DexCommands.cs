@@ -51,7 +51,7 @@ namespace PokeStar.Modules
                embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
                embed.AddField("Counters", pokemon.CounterToString(), false);
                embed.WithColor(Color.Red);
-               embed.WithFooter("**\\*** denotes STAB move **!** denotes Legacy move");
+               embed.WithFooter("* denotes STAB move ! denotes Legacy move");
 
                await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
 
