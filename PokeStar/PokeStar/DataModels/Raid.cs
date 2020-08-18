@@ -87,12 +87,11 @@ namespace PokeStar.DataModels
 
       /// <summary>
       /// Gets all users that want an invite to the raid.
-      /// A user's party will always be 1.
       /// </summary>
-      /// <returns>Dictionary of users with a party of 1.</returns>
-      public ImmutableDictionary<SocketGuildUser, int> GetReadonlyInvite()
+      /// <returns>List of users that want an invite.</returns>
+      public ImmutableList<SocketGuildUser> GetReadonlyInvite()
       {
-         return Invite.ToImmutableDictionary(k => k, v => 1);
+         return Invite.ToImmutableList();
       }
 
       /// <summary>

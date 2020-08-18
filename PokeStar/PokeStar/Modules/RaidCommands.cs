@@ -21,7 +21,7 @@ namespace PokeStar.Modules
       private static readonly Dictionary<ulong, ulong> remoteMessages = new Dictionary<ulong, ulong>();
       private static readonly Dictionary<ulong, ulong> inviteMessages = new Dictionary<ulong, ulong>();
 
-      private static readonly Emoji[] raidEmojis = {
+      private static readonly IEmote[] raidEmojis = {
          new Emoji("1️⃣"),
          new Emoji("2️⃣"),
          new Emoji("3️⃣"),
@@ -57,7 +57,7 @@ namespace PokeStar.Modules
          ADD_PLAYER_4,
          ADD_PLAYER_5,
          PLAYER_READY,
-         REQUEST_INVITE,
+         REMOTE,
          INVITE_PLAYER,
          REMOVE_PLAYER,
          HELP
@@ -223,7 +223,7 @@ namespace PokeStar.Modules
                   if (group != -1)
                      await reaction.Channel.SendMessageAsync(BuildPingList(raid.Groups.ElementAt(group).GetPingList(), raid.Location, group));
                }
-               else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]))
+               else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE]))
                {
                   if (raid.IsInRaid(player) == -1)
                   {
@@ -359,7 +359,7 @@ namespace PokeStar.Modules
             {
                for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
                {
-                  var player = raid.GetReadonlyInvite().Keys.ElementAt(i);
+                  var player = raid.GetReadonlyInvite().ElementAt(i);
                   if (raid.InvitePlayer(player, reactingPlayer))
                   {
                      if (raid.InvitePlayer(player, reactingPlayer))
@@ -407,7 +407,7 @@ namespace PokeStar.Modules
             embed.AddField($"Group {i + 1} Attending", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyAttending())}");
             embed.AddField($"Group {i + 1} Remote", $"{BuildInvitedList(raid.Groups.ElementAt(i).GetReadonlyInvited())}");
          }
-         embed.AddField($"Need Invite:", $"{BuildPlayerList(raid.GetReadonlyInvite())}");
+         embed.AddField($"Need Invite:", $"{BuildRequestInviteList(raid.GetReadonlyInvite())}");
          embed.WithFooter("Note: the max number of members in a raid is 20, and the max number of invites is 10.");
 
          return embed.Build();
@@ -443,7 +443,9 @@ namespace PokeStar.Modules
       {
          StringBuilder sb = new StringBuilder();
          for (int i = 0; i < invite.Count; i++)
+         {
             sb.AppendLine($"{raidEmojis[i]} {(invite.ElementAt(i).Nickname ?? invite.ElementAt(i).Username)}");
+         }
          sb.AppendLine($"{cancelEmoji} Cancel");
 
          EmbedBuilder embed = new EmbedBuilder();
@@ -518,8 +520,7 @@ namespace PokeStar.Modules
          StringBuilder sb = new StringBuilder();
          foreach (var player in players)
          {
-            string teamString = GetPlayerTeam(player.Key);
-            sb.AppendLine($"{raidEmojis[player.Value - 1]} {player.Key.Nickname ?? player.Key.Username} {teamString}");
+            sb.AppendLine($"{raidEmojis[player.Value - 1]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)}");
          }
          return sb.ToString();
       }
@@ -537,12 +538,25 @@ namespace PokeStar.Modules
          StringBuilder sb = new StringBuilder();
          foreach (var player in players)
          {
-            string teamString = GetPlayerTeam(player.Key);
-            string remoteName = player.Key.Nickname ?? player.Key.Username;
-            if (player.Key.Equals(player.Value))
-               sb.AppendLine($"{remoteName} {teamString} will be raiding remote.");
-            else
-               sb.AppendLine($"{remoteName} {teamString} invited by {player.Value.Nickname ?? player.Value.Username}");
+            sb.AppendLine($"{player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} invited by {player.Value.Nickname ?? player.Value.Username}");
+         }
+         return sb.ToString();
+      }
+
+      /// <summary>
+      /// Builds the requested invites list for a raid.
+      /// </summary>
+      /// <param name="players">List of players who requested an invite.</param>
+      /// <returns>List of players requesting an invite as a string.</returns>
+      private static string BuildRequestInviteList(ImmutableList<SocketGuildUser> players)
+      {
+         if (players.Count == 0)
+            return "-----";
+
+         StringBuilder sb = new StringBuilder();
+         foreach (var player in players)
+         {
+            sb.AppendLine($"{player.Nickname ?? player.Username} {GetPlayerTeam(player)}");
          }
          return sb.ToString();
       }
@@ -559,7 +573,7 @@ namespace PokeStar.Modules
             " React with one of the numbers to show that you intend to participate in the raid in person.");
          sb.AppendLine($"Once you are ready for the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]} to show others that you are ready." +
             $" When all players have marked that they are ready, Nona will send a message to the group.");
-         sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REQUEST_INVITE]}.");
+         sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE]}.");
          sb.AppendLine($"To invite someone to a raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]} and react with the coresponding emote for the player.");
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
 
@@ -626,6 +640,14 @@ namespace PokeStar.Modules
       public static bool IsInviteMessage(ulong id)
       {
          return inviteMessages.ContainsKey(id);
+      }
+
+      /// <summary>
+      /// Sets the remote pass emote on startup.
+      /// </summary>
+      public static void SetRemotePassEmote()
+      {
+         raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE] = Emote.Parse(Environment.GetEnvironmentVariable("REMOTE_PASS_EMOTE"));
       }
    }
 }
