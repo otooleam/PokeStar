@@ -25,21 +25,21 @@ namespace PokeStar.Modules
          {
             if (Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
             {
-               await ReplyAsync($"Error: Roles not setup. Please run setup command");
+               await ReplyAsync($"Error: Roles not setup. Please run setup command").ConfigureAwait(false);
                return;
             }
 
             if (((SocketGuildUser)Context.User).Roles.FirstOrDefault(x => x.Name.ToString().Equals("Trainer", StringComparison.OrdinalIgnoreCase)) == null)
             {
-               await ReplyAsync($"Error: You are not authorized to run this command.");
+               await ReplyAsync($"Error: You are not authorized to run this command.").ConfigureAwait(false);
                return;
             }
 
-            var team = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(teamName, StringComparison.OrdinalIgnoreCase));
+            SocketRole team = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(teamName, StringComparison.OrdinalIgnoreCase));
 
             if (team == null)
             {
-               await ReplyAsync($"Error: {teamName} is not a valid role");
+               await ReplyAsync($"Error: {teamName} is not a valid role").ConfigureAwait(false);
                return;
             }
 
@@ -53,24 +53,32 @@ namespace PokeStar.Modules
                await ReplyAsync($"Warning: Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{Context.Guild.Name}\"").ConfigureAwait(false);
             }
 
-            var valor = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase));
-            var mystic = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase));
-            var instinct = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase));
+            SocketRole valor = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase));
+            SocketRole mystic = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase));
+            SocketRole instinct = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase));
             if (user.RoleIds.Contains(valor.Id))
-               await user.RemoveRoleAsync(valor);
+            {
+               await user.RemoveRoleAsync(valor).ConfigureAwait(false);
+            }
             else if (user.RoleIds.Contains(mystic.Id))
-               await user.RemoveRoleAsync(mystic);
+            {
+               await user.RemoveRoleAsync(mystic).ConfigureAwait(false);
+            }
             else if (user.RoleIds.Contains(instinct.Id))
-               await user.RemoveRoleAsync(instinct);
-            await user.AddRoleAsync(team);
+            {
+               await user.RemoveRoleAsync(instinct).ConfigureAwait(false);
+            }
+            await user.AddRoleAsync(team).ConfigureAwait(false);
 
-            var role = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Trainer", StringComparison.OrdinalIgnoreCase));
-            await user.AddRoleAsync(role);
+            SocketRole role = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Trainer", StringComparison.OrdinalIgnoreCase));
+            await user.AddRoleAsync(role).ConfigureAwait(false);
 
-            await ReplyAsync($"{user.Username} nickname set to {nickname} and now has the Trainer and {teamName} roles");
+            await ReplyAsync($"{user.Username} nickname set to {nickname} and now has the Trainer and {teamName} roles").ConfigureAwait(false);
          }
          else
-            await ReplyAsync("Error: This channel is not registered to process Player Role commands.");
+         {
+            await ReplyAsync("Error: This channel is not registered to process Player Role commands.").ConfigureAwait(false);
+         }
       }
    }
 }
