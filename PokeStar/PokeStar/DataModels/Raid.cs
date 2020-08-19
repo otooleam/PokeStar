@@ -4,7 +4,6 @@ using System.Collections.Generic;
 using System.Collections.Immutable;
 using Discord.WebSocket;
 using PokeStar.ConnectionInterface;
-using System.Runtime.CompilerServices;
 
 namespace PokeStar.DataModels
 {
@@ -13,8 +12,15 @@ namespace PokeStar.DataModels
    /// </summary>
    class Raid
    {
-      //if we have more groups, the embed breaks
-      private const int GROUP_LIMIT = 3;
+      /// <summary>
+      /// Maximum number of raid groups.
+      /// </summary>
+      private readonly int RaidGroupLimit;
+
+      /// <summary>
+      /// Maximum number of invites per group.
+      /// </summary>
+      private readonly int InviteLimit;
 
       /// <summary>
       /// When the raid starts.
@@ -62,6 +68,8 @@ namespace PokeStar.DataModels
       /// </summary>
       public SocketGuildUser InvitingPlayer { get; set; }
 
+      public int InvitePage { get; private set; } = 0;
+
       /// <summary>
       /// Creates a new raid.
       /// </summary>
@@ -69,29 +77,22 @@ namespace PokeStar.DataModels
       /// <param name="time">When the raid starts.</param>
       /// <param name="location">Where the raid is.</param>
       /// <param name="boss">Name of the raid boss.</param>
-      public Raid(short tier, string time, string location, string boss = null)
+      public Raid(int groupLimit, int inviteLimit, short tier, string time, string location, string boss = null)
       {
+         RaidGroupLimit = groupLimit;
+         InviteLimit = inviteLimit;
          Tier = tier;
          Time = time;
          Location = location;
          SetBoss(boss);
          Groups = new List<RaidGroup>
          {
-            new RaidGroup()
+            new RaidGroup(InviteLimit)
          };
          Invite = new List<SocketGuildUser>();
          RaidBossSelections = new List<string>();
          CreatedAt = DateTime.Now;
          InvitingPlayer = null;
-      }
-
-      /// <summary>
-      /// Gets all users that want an invite to the raid.
-      /// </summary>
-      /// <returns>List of users that want an invite.</returns>
-      public ImmutableList<SocketGuildUser> GetReadonlyInvite()
-      {
-         return Invite.ToImmutableList();
       }
 
       /// <summary>
@@ -149,7 +150,7 @@ namespace PokeStar.DataModels
          }
 
          RaidGroup newGroup;
-         if (Groups.Count < GROUP_LIMIT)
+         if (Groups.Count < RaidGroupLimit)
          {
             newGroup = Groups.ElementAt(group).SplitGroup();
             if (newGroup != null)
@@ -274,6 +275,20 @@ namespace PokeStar.DataModels
          return -1;
       }
 
+      public void ChangeInvitePage(bool isPositiveChage, int maxOptions)
+      {
+         if (isPositiveChage)
+         {
+            if ((InvitePage + 1) * maxOptions < Invite.Count)
+               InvitePage++;
+         }
+         else
+         {
+            if (InvitePage != 0)
+               InvitePage--;
+         }
+      }
+
       /// <summary>
       /// Finds the smallest group.
       /// </summary>
@@ -304,7 +319,7 @@ namespace PokeStar.DataModels
                group.MergeGroup(check);
          Groups.RemoveAll(x => x.TotalPlayers() == 0);
          if (Groups.Count == 0)
-            Groups.Add(new RaidGroup());
+            Groups.Add(new RaidGroup(InviteLimit));
       }
    }
 

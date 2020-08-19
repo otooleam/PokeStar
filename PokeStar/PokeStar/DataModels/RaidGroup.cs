@@ -10,8 +10,8 @@ namespace PokeStar.DataModels
    /// </summary>
    public class RaidGroup
    {
-      public readonly int playerLimit = 20;
-      public readonly int inviteLimit = 10;
+      public readonly int PlayerLimit = 20;
+      public int InviteLimit { get; private set; }
 
       /// <summary>
       /// Dictionary of players attending the raid.
@@ -37,11 +37,12 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Creates a new raid group.
       /// </summary>
-      public RaidGroup()
+      public RaidGroup(int inviteLimit)
       {
          Attending = new Dictionary<SocketGuildUser, int>();
          Ready = new Dictionary<SocketGuildUser, int>();
          Invited = new Dictionary<SocketGuildUser, SocketGuildUser>();
+         InviteLimit = inviteLimit;
       }
 
       /// <summary>
@@ -168,7 +169,7 @@ namespace PokeStar.DataModels
       /// <returns>True if the requester is added to the raid, otherwise false.</returns>
       public bool Invite(SocketGuildUser requester, SocketGuildUser accepter)
       {
-         if ((TotalPlayers() + 1) <= playerLimit && (Invited.Count + 1) <= inviteLimit && 
+         if ((TotalPlayers() + 1) <= PlayerLimit && (Invited.Count + 1) <= InviteLimit && 
             ((HasPlayer(accepter, false) && !HasPlayer(requester)) || requester.Equals(accepter)))                             
          {
             Invited.Add(requester, accepter);
@@ -221,14 +222,14 @@ namespace PokeStar.DataModels
       /// <returns>A new raid group if the raid can be split, else null.</returns>
       public RaidGroup SplitGroup()
       {
-         if (TotalPlayers() <= playerLimit)
+         if (TotalPlayers() <= PlayerLimit)
             return null;
 
          
-         var newGroup = new RaidGroup();
+         var newGroup = new RaidGroup(InviteLimit);
          foreach (var player in Attending)
          {
-            if ((newGroup.TotalPlayers() + player.Value) <= playerLimit / 2)
+            if ((newGroup.TotalPlayers() + player.Value) <= PlayerLimit / 2)
             {
                newGroup.Attending.Add(player.Key, player.Value);
 
@@ -238,11 +239,11 @@ namespace PokeStar.DataModels
             }
          }
 
-         if (newGroup.TotalPlayers() < playerLimit / 2)
+         if (newGroup.TotalPlayers() < PlayerLimit / 2)
          {
             foreach (var player in Ready)
             {
-               if (newGroup.TotalPlayers() < playerLimit / 2)
+               if (newGroup.TotalPlayers() < PlayerLimit / 2)
                {
                   newGroup.Ready.Add(player.Key, player.Value);
                   foreach (var invite in Invited)
@@ -269,7 +270,7 @@ namespace PokeStar.DataModels
       {
          if (!group.Equals(this) &&
             group.TotalPlayers() != 0 && TotalPlayers() != 0 &&
-            (group.TotalPlayers() + TotalPlayers()) <= playerLimit)
+            (group.TotalPlayers() + TotalPlayers()) <= PlayerLimit)
          {
             Attending = Attending.Union(group.Attending).ToDictionary(k => k.Key, v => v.Value);
             Ready = Ready.Union(group.Ready).ToDictionary(k => k.Key, v => v.Value);
