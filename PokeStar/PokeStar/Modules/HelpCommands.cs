@@ -30,12 +30,15 @@ namespace PokeStar.Modules
             }
 
             embedBuilder.WithTitle("Command List");
-            embedBuilder.WithDescription($"List of commands supported by this bot.\nThe command prefix for this bot is \" {prefix} \"");
+            embedBuilder.WithDescription($"List of commands supported by this bot.");
             foreach (CommandInfo cmdInfo in commands)
             {
-               embedBuilder.AddField(cmdInfo.Name, cmdInfo.Summary ?? "No description available");
+               if (!cmdInfo.Name.Equals("ping"))
+               {
+                  embedBuilder.AddField($"{prefix}{cmdInfo.Name}", cmdInfo.Summary ?? "No description available");
+               }
             }
-            embedBuilder.WithFooter("Run \"help <command name>\" to get help for a specific command.");
+            embedBuilder.WithFooter($"Run \"{prefix}help <command name>\" to get help for a specific command.");
 
             await ReplyAsync(embed: embedBuilder.Build()).ConfigureAwait(false);
          }

@@ -65,7 +65,7 @@ namespace PokeStar.Modules
       }
 
       [Command("cp")]
-      [Summary("Gets common max CP values for a pokemon")]
+      [Summary("Gets common max CP values for a pokemon.")]
       public async Task CP([Summary("Get CPs for this pokemon.")][Remainder] string pokemonName)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))

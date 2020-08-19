@@ -300,7 +300,7 @@ namespace PokeStar.DataModels
             }
             if (Type.Contains(fastMove.Type))
             {
-               sb.Append("*");
+               sb.Append(" *");
             }
             sb.AppendLine();
          }
@@ -329,7 +329,7 @@ namespace PokeStar.DataModels
             }
             if (Type.Contains(chargeMove.Type))
             {
-               sb.Append("*");
+               sb.Append(" *");
             }
             sb.AppendLine();
          }
