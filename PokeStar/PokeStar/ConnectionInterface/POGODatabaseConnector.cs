@@ -252,10 +252,10 @@ namespace PokeStar.ConnectionInterface
                                  AND obtainable = 1
                                  ORDER BY rank;";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
                {
@@ -290,10 +290,10 @@ namespace PokeStar.ConnectionInterface
                                  WHERE pokemon = '{pokemonName}' 
                                  AND move = '{moveName}';";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
                {

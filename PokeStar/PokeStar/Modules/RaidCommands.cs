@@ -359,7 +359,7 @@ namespace PokeStar.Modules
             {
                for (int i = 0; i < raid.GetReadonlyInvite().Count; i++)
                {
-                  var player = raid.GetReadonlyInvite().ElementAt(i);
+                  SocketGuildUser player = raid.GetReadonlyInvite().ElementAt(i);
                   if (raid.InvitePlayer(player, reactingPlayer))
                   {
                      if (raid.InvitePlayer(player, reactingPlayer))
@@ -554,7 +554,7 @@ namespace PokeStar.Modules
             return "-----";
 
          StringBuilder sb = new StringBuilder();
-         foreach (var player in players)
+         foreach (SocketGuildUser player in players)
          {
             sb.AppendLine($"{player.Nickname ?? player.Username} {GetPlayerTeam(player)}");
          }
