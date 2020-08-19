@@ -576,7 +576,7 @@ namespace PokeStar.Modules
             " React with one of the numbers to show that you intend to participate in the raid in person.");
          sb.AppendLine($"Once you are ready for the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]} to show others that you are ready." +
             $" When all players have marked that they are ready, Nona will send a message to the group.");
-         sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE]}.");
+         sb.AppendLine($"If you plan to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE]}.");
          sb.AppendLine($"To invite someone to a raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]} and react with the coresponding emote for the player.");
          sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
 
