@@ -538,7 +538,10 @@ namespace PokeStar.Modules
          StringBuilder sb = new StringBuilder();
          foreach (var player in players)
          {
-            sb.AppendLine($"{player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} invited by {player.Value.Nickname ?? player.Value.Username}");
+            if (player.Key.Equals(player.Value))
+               sb.AppendLine($"{player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} will be raiding remotly");
+            else
+               sb.AppendLine($"{player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} invited by {player.Value.Nickname ?? player.Value.Username}");
          }
          return sb.ToString();
       }
