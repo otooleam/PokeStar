@@ -21,6 +21,11 @@ namespace PokeStar.Modules
          EmbedBuilder embedBuilder = new EmbedBuilder();
          embedBuilder.WithColor(Color.Green);
 
+         List<string> hiddenCommands = new List<string>()
+         {
+            "ping",
+         };
+
          if (command == null)
          {
             string prefix = Connections.Instance().GetPrefix(Context.Guild.Id);
@@ -33,7 +38,7 @@ namespace PokeStar.Modules
             embedBuilder.WithDescription($"List of commands supported by this bot.");
             foreach (CommandInfo cmdInfo in commands)
             {
-               if (!cmdInfo.Name.Equals("ping"))
+               if (!hiddenCommands.Contains(cmdInfo.Name))
                {
                   embedBuilder.AddField($"{prefix}{cmdInfo.Name}", cmdInfo.Summary ?? "No description available");
                }
