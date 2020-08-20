@@ -10,22 +10,32 @@ namespace PokeStar.DataModels
    /// <summary>
    /// Raid to fight against a raid boss.
    /// </summary>
-   class Raid
+   class RaidMule
    {
       /// <summary>
       /// Maximum number of raid groups.
       /// </summary>
-      private readonly int RaidGroupLimit = 3;
+      private readonly int RaidGroupLimit = 6;
+
+      /// <summary>
+      /// Maximum number of players for mule group.
+      /// </summary>
+      private readonly int MulePlayerLimit = 1;
 
       /// <summary>
       /// Maximum number of players per group.
       /// </summary>
-      private readonly int PlayerLimit = 20;
+      private readonly int PlayerLimit = 5;
 
       /// <summary>
       /// Maximum number of invites per group.
       /// </summary>
-      private readonly int InviteLimit = 10;
+      private readonly int InviteLimit = 5;
+
+      /// <summary>
+      /// Group number used for Mule group.
+      /// </summary>
+      private readonly int MuleGroupNumber = 100;
 
       /// <summary>
       /// When the raid starts.
@@ -46,6 +56,11 @@ namespace PokeStar.DataModels
       /// Raid boss that the raid is for.
       /// </summary>
       public RaidBoss Boss { get; private set; }
+
+      /// <summary>
+      /// Raid group for raid mules.
+      /// </summary>
+      public RaidGroup Mules { get; private set; }
 
       /// <summary>
       /// List of raid groups in the raid.
@@ -82,12 +97,13 @@ namespace PokeStar.DataModels
       /// <param name="time">When the raid starts.</param>
       /// <param name="location">Where the raid is.</param>
       /// <param name="boss">Name of the raid boss.</param>
-      public Raid(short tier, string time, string location, string boss = null)
+      public RaidMule(short tier, string time, string location, string boss = null)
       {
          Tier = tier;
          Time = time;
          Location = location;
          SetBoss(boss);
+         Mules = new RaidGroup(MulePlayerLimit, 0);
          Groups = new List<RaidGroup>
          {
             new RaidGroup(PlayerLimit, InviteLimit)
@@ -122,51 +138,39 @@ namespace PokeStar.DataModels
       /// raid groups over the group limit.
       /// </summary>
       /// <param name="player">Player to add.</param>
-      /// <param name="partySize">Number of accounts the user is bringing.</param>
       /// <param name="invitedBy">Who invited the user.</param>
       /// <returns>True if the user was added, otherwise false.</returns>
-      public bool PlayerAdd(SocketGuildUser player, int partySize, SocketGuildUser invitedBy = null)
+      public bool PlayerAdd(SocketGuildUser player, SocketGuildUser invitedBy = null)
       {
-         int group;
          if (invitedBy == null)
          {
-            group = IsInRaid(player);
-            if (group == -1)
-               group = FindSmallestGroup();
-            Groups.ElementAt(group).Add(player, partySize);
-         }
-         else // is remote
-         {
-            group = IsInRaid(invitedBy);
-            if (group != -1)
+            if (!Mules.HasPlayer(player, false) && Mules.GetAttendingCount() < MulePlayerLimit)
             {
-               Groups.ElementAt(group).Invite(player, invitedBy);
-               Invite.Remove(player);
+               Mules.Add(player, 1);
+               return true;
             }
-            else if (player.Equals(invitedBy))
-            {
-               group = FindSmallestGroup();
-               Groups.ElementAt(group).Invite(player, invitedBy);
-            }
-            else
-               return false;
          }
-
-         bool shouldSplit = Groups.ElementAt(group).ShouldSplit();
-
-         if (shouldSplit && Groups.Count < RaidGroupLimit)
+         else // is invite
          {
-            RaidGroup newGroup = Groups.ElementAt(group).SplitGroup();
-            Groups.Add(newGroup);
-            CheckMergeGroups();
-            return true;
-         }
-         else if (!shouldSplit)
-            return true;
+            int group = FindSmallestGroup();
+            Groups.ElementAt(group).Invite(player, invitedBy);
+            Invite.Remove(player);
 
-         Groups.ElementAt(group).Remove(player);
-         if (invitedBy != null)
+            bool shouldSplit = Groups.ElementAt(group).ShouldSplit();
+
+            if (shouldSplit && Groups.Count < RaidGroupLimit)
+            {
+               RaidGroup newGroup = Groups.ElementAt(group).SplitGroup();
+               Groups.Add(newGroup);
+               CheckMergeGroups();
+               return true;
+            }
+            else if (!shouldSplit)
+               return true;
+
+            Groups.ElementAt(group).Remove(player);
             Invite.Add(player);
+         }
          return false;
       }
 
@@ -175,46 +179,32 @@ namespace PokeStar.DataModels
       /// </summary>
       /// <param name="player">Player to remove.</param>
       /// <returns>Struct with raid group and list of invited users.</returns>
-      public RemovePlayerReturn RemovePlayer(SocketGuildUser player)
+      public List<SocketGuildUser> RemovePlayer(SocketGuildUser player)
       {
-         RemovePlayerReturn returnValue = new RemovePlayerReturn
-         {
-            GroupNum = -1,
-            invited = new List<SocketGuildUser>()
-         };
          if (Invite.Contains(player))
             Invite.Remove(player);
          else
          {
-            int group = IsInRaid(player);
-            if (group != -1)
+            int groupNum = IsInRaid(player);
+            if(groupNum != -1)
             {
-               RaidGroup foundGroup = Groups.ElementAt(group);
-               returnValue.invited = foundGroup.Remove(player);
-               foreach (SocketGuildUser invite in returnValue.invited)
-                  Invite.Add(invite);
+               if (groupNum == MuleGroupNumber)
+               {
+                  foreach (RaidGroup group in Groups)
+                  {
+                     List<SocketGuildUser> invited = new List<SocketGuildUser>();
+                     invited.AddRange(group.Remove(player));
+                     return invited;
+                  }
+               }
+               else
+               {
+                  RaidGroup foundGroup = Groups.ElementAt(groupNum);
+                  foundGroup.Remove(player);
+               }
             }
          }
-         return returnValue;
-      }
-
-      /// <summary>
-      /// Marks the player as ready.
-      /// </summary>
-      /// <param name="player">Player to mark ready.</param>
-      /// <returns>Group number if all members of the group are ready, otherwise -1.</returns>
-      public int PlayerReady(SocketGuildUser player)
-      {
-         int groupNum = IsInRaid(player);
-         if (groupNum != -1)
-         {
-            RaidGroup group = Groups.ElementAt(groupNum);
-            group.PlayerReady(player);
-            if (group.AllPlayersReady())
-               return groupNum;
-            return -1;
-         }
-         return -1;
+         return new List<SocketGuildUser>();
       }
 
       /// <summary>
@@ -235,8 +225,8 @@ namespace PokeStar.DataModels
       /// <returns>True if the requester was invited, otherwise false.</returns>
       public bool InvitePlayer(SocketGuildUser requester, SocketGuildUser accepter)
       {
-         if ((Invite.Contains(requester) && IsInRaid(accepter, false) != 1) || requester.Equals(accepter))
-            return PlayerAdd(requester, 1, accepter);
+         if (Invite.Contains(requester) && Mules.HasPlayer(accepter, false))
+            return PlayerAdd(requester, accepter);
          return false;
       }
 
@@ -258,6 +248,8 @@ namespace PokeStar.DataModels
       /// <returns>Group number the player is in, else -1.</returns>
       public int IsInRaid(SocketGuildUser player, bool checkInvite = true)
       {
+         if (Mules.HasPlayer(player, false))
+            return MuleGroupNumber;
          for (int i = 0; i < Groups.Count; i++)
             if (Groups.ElementAt(i).HasPlayer(player, checkInvite))
                return i;
@@ -308,21 +300,12 @@ namespace PokeStar.DataModels
       /// </summary>
       private void CheckMergeGroups()
       {
-         foreach (RaidGroup group in Groups)
-            foreach (RaidGroup check in Groups)
+         foreach (var group in Groups)
+            foreach (var check in Groups)
                group.MergeGroup(check);
          Groups.RemoveAll(x => x.TotalPlayers() == 0);
          if (Groups.Count == 0)
             Groups.Add(new RaidGroup(PlayerLimit, InviteLimit));
       }
-   }
-
-   /// <summary>
-   /// Return values for remove player method.
-   /// </summary>
-   public struct RemovePlayerReturn
-   {
-      public int GroupNum;
-      public List<SocketGuildUser> invited;
    }
 }
