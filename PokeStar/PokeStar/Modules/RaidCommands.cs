@@ -947,7 +947,6 @@ namespace PokeStar.Modules
       {
          StringBuilder sb = new StringBuilder();
          sb.AppendLine("Raid Help:");
-
          for (int i = 0; i < emojis.Length; i++)
             sb.AppendLine($"{emojis[i]}: {descriptions[i]}");
 
