@@ -114,7 +114,9 @@ namespace PokeStar.DataModels
       /// <param name="partySize">Number of accounts the user is bringing.</param>
       public void Add(SocketGuildUser player, int partySize)
       {
-         if (Attending.ContainsKey(player))
+         if (Invited.ContainsKey(player))
+            return;
+         else if (Attending.ContainsKey(player))
             Attending[player] = partySize;
          else if (Ready.ContainsKey(player))
             Ready[player] = partySize;
@@ -153,10 +155,15 @@ namespace PokeStar.DataModels
       /// Marks a player as ready.
       /// </summary>
       /// <param name="player">Player to mark ready.</param>
-      public void PlayerReady(SocketGuildUser player)
+      public bool PlayerReady(SocketGuildUser player)
       {
-         Ready.Add(player, Attending[player]);
-         Attending.Remove(player);
+         if (Attending.ContainsKey(player))
+         {
+            Ready.Add(player, Attending[player]);
+            Attending.Remove(player);
+            return true;
+         }
+         return false;
       }
 
       /// <summary>

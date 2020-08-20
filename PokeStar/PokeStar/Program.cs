@@ -181,17 +181,9 @@ namespace PokeStar
          if (message != null && reaction.User.IsSpecified && !user.IsBot)
          {
             if (RaidCommands.IsRaidMessage(message.Id))
-               await RaidCommands.RaidReaction(message, reaction);
-            else if (RaidCommands.IsRaidMuleMessage(message.Id))
-               await RaidCommands.RaidMuleReaction(message, reaction);
-            else if (RaidCommands.IsRaidInviteMessage(message.Id))
-               await RaidCommands.RaidInviteReaction(message, reaction, originChannel);
-            else if (RaidCommands.IsRaidMuleInviteMessage(message.Id))
-               await RaidCommands.RaidMuleInviteReaction(message, reaction, originChannel);
-            else if (RaidCommands.IsRemoteMessage(message.Id))
-               await RaidCommands.RaidRemoteReaction(message, reaction, originChannel);
-            else if (RaidCommands.IsRaidMuleReadyMessage(message.Id))
-               await RaidCommands.RaidMuleReadyReaction(message, reaction, originChannel);
+               await RaidCommands.RaidMessageReactionHandle(message, reaction);
+            else if (RaidCommands.IsRaidSubMessage(message.Id))
+               await RaidCommands.RaidSubMessageReactionHandle(message, reaction);
          }
          return Task.CompletedTask;
       }
