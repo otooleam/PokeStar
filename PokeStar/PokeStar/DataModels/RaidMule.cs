@@ -7,8 +7,23 @@ namespace PokeStar.DataModels
    /// <summary>
    /// Raid to fight against a raid boss.
    /// </summary>
-   public class Raid : RaidParent
+   public class RaidMule : RaidParent
    {
+      /// <summary>
+      /// Maximum number of players for mule group.
+      /// </summary>
+      private readonly int MulePlayerLimit = 2;
+
+      /// <summary>
+      /// Group number used for Mule group.
+      /// </summary>
+      private readonly int MuleGroupNumber = 100;
+
+      /// <summary>
+      /// Raid group for raid mules.
+      /// </summary>
+      public RaidGroup Mules { get; private set; }
+
       /// <summary>
       /// Creates a new raid.
       /// </summary>
@@ -16,11 +31,12 @@ namespace PokeStar.DataModels
       /// <param name="time">When the raid starts.</param>
       /// <param name="location">Where the raid is.</param>
       /// <param name="boss">Name of the raid boss.</param>
-      public Raid(short tier, string time, string location, string boss = null) : base(tier, time, location, boss) 
+      public RaidMule(short tier, string time, string location, string boss = null) : base(tier, time, location, boss)
       {
-         RaidGroupLimit = 3;
-         PlayerLimit = 20;
-         InviteLimit = 10;
+         RaidGroupLimit = 6;
+         PlayerLimit = 5;
+         InviteLimit = 5;
+         Mules = new RaidGroup(MulePlayerLimit, 0);
       }
 
       /// <summary>
@@ -29,54 +45,39 @@ namespace PokeStar.DataModels
       /// raid groups over the group limit.
       /// </summary>
       /// <param name="player">Player to add.</param>
-      /// <param name="partySize">Number of accounts the user is bringing.</param>
       /// <param name="invitedBy">Who invited the user.</param>
       /// <returns>True if the user was added, otherwise false.</returns>
       public override bool PlayerAdd(SocketGuildUser player, int partySize, SocketGuildUser invitedBy = null)
       {
-         int group;
          if (invitedBy == null)
          {
-            group = IsInRaid(player);
-            if (group == NotInRaid)
-               group = FindSmallestGroup();
-            if (group != InviteListNumber)
-               Groups.ElementAt(group).Add(player, partySize);
-            else
-               return false;
-         }
-         else // is remote
-         {
-            group = IsInRaid(invitedBy);
-            if (group != NotInRaid)
+            if (IsInRaid(player) == NotInRaid && Mules.GetAttendingCount() < MulePlayerLimit)
             {
-               Groups.ElementAt(group).Invite(player, invitedBy);
-               Invite.Remove(player);
+               Mules.Add(player, partySize);
+               return true;
             }
-            else if (player.Equals(invitedBy))
-            {
-               group = FindSmallestGroup();
-               Groups.ElementAt(group).Invite(player, invitedBy);
-            }
-            else
-               return false;
          }
-
-         bool shouldSplit = Groups.ElementAt(group).ShouldSplit();
-
-         if (shouldSplit && Groups.Count < RaidGroupLimit)
+         else // is invite
          {
-            RaidGroup newGroup = Groups.ElementAt(group).SplitGroup();
-            Groups.Add(newGroup);
-            CheckMergeGroups();
-            return true;
-         }
-         else if (!shouldSplit)
-            return true;
+            int group = FindSmallestGroup();
+            Groups.ElementAt(group).Invite(player, invitedBy);
+            Invite.Remove(player);
 
-         Groups.ElementAt(group).Remove(player);
-         if (invitedBy != null)
+            bool shouldSplit = Groups.ElementAt(group).ShouldSplit();
+
+            if (shouldSplit && Groups.Count < RaidGroupLimit)
+            {
+               RaidGroup newGroup = Groups.ElementAt(group).SplitGroup();
+               Groups.Add(newGroup);
+               CheckMergeGroups();
+               return true;
+            }
+            else if (!shouldSplit)
+               return true;
+
+            Groups.ElementAt(group).Remove(player);
             Invite.Add(player);
+         }
          return false;
       }
 
@@ -92,19 +93,22 @@ namespace PokeStar.DataModels
             GroupNum = NotInRaid,
             invited = new List<SocketGuildUser>()
          };
-
-         int group = IsInRaid(player);
-         if (group == InviteListNumber)
+         int groupNum = IsInRaid(player);
+         if (groupNum == InviteListNumber)
             Invite.Remove(player);
-         else
+         else if (groupNum == MuleGroupNumber)
          {
-            if (group != NotInRaid)
-            {
-               RaidGroup foundGroup = Groups.ElementAt(group);
-               returnValue.invited = foundGroup.Remove(player);
-               foreach (SocketGuildUser invite in returnValue.invited)
-                  Invite.Add(invite);
-            }
+            Mules.Remove(player);
+            foreach (RaidGroup group in Groups)
+               returnValue.invited.AddRange(group.Remove(player));
+            foreach (SocketGuildUser invite in returnValue.invited)
+               Invite.Add(invite);
+            return returnValue;
+         }
+         else if (groupNum != NotInRaid)
+         {
+            RaidGroup foundGroup = Groups.ElementAt(groupNum);
+            foundGroup.Remove(player);
          }
          return returnValue;
       }
@@ -127,7 +131,7 @@ namespace PokeStar.DataModels
       /// <returns>True if the requester was invited, otherwise false.</returns>
       public override bool InvitePlayer(SocketGuildUser requester, SocketGuildUser accepter)
       {
-         if ((IsInRaid(requester) == InviteListNumber && IsInRaid(accepter, false) != 1) || requester.Equals(accepter))
+         if (Invite.Contains(requester) && Mules.HasPlayer(accepter, false))
             return PlayerAdd(requester, 1, accepter);
          return false;
       }
@@ -141,6 +145,8 @@ namespace PokeStar.DataModels
       /// <returns>Group number the player is in, else NotInRaid.</returns>
       public override int IsInRaid(SocketGuildUser player, bool checkInvite = true)
       {
+         if (Mules.HasPlayer(player, false))
+            return MuleGroupNumber;
          if (checkInvite && Invite.Contains(player))
             return InviteListNumber;
          for (int i = 0; i < Groups.Count; i++)
@@ -149,15 +155,14 @@ namespace PokeStar.DataModels
          return NotInRaid;
       }
 
-      public int PlayerReady(SocketGuildUser player)
+      public bool HasInvites()
       {
-         int groupNum = IsInRaid(player, false);
-         if (groupNum != NotInRaid && groupNum != InviteListNumber)
+         foreach (RaidGroup group in Groups)
          {
-            RaidGroup group = Groups.ElementAt(groupNum);
-            return (group.PlayerReady(player) && group.AllPlayersReady()) ? groupNum : NotInRaid;
+            if (!group.GetReadonlyInvited().IsEmpty)
+               return true;
          }
-         return NotInRaid;
+         return false;
       }
    }
 }
