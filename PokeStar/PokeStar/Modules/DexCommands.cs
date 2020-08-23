@@ -16,8 +16,8 @@ namespace PokeStar.Modules
    {
       [Command("dex")]
       [Alias("pokedex")]
-      [Summary("Gets information for a pokemon.")]
-      public async Task Dex([Summary("Get information for this pokemon.")][Remainder] string pokemonName)
+      [Summary("Gets the PokéDex entry for a given pokémon.")]
+      public async Task Dex([Summary("Get information for this pokémon.")][Remainder] string pokemonName)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
@@ -26,8 +26,8 @@ namespace PokeStar.Modules
             if (pokemon == null)
             {
                EmbedBuilder embed = new EmbedBuilder();
-               embed.WithTitle("PokeDex Command Error");
-               embed.WithDescription($"Pokemon {name} cannot be found.");
+               embed.WithTitle("PokéDex Command Error");
+               embed.WithDescription($"The Pokémon {name} cannot be found.");
                embed.WithColor(Color.DarkRed);
 
                await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
@@ -60,13 +60,13 @@ namespace PokeStar.Modules
          }
          else
          {
-            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.").ConfigureAwait(false);
+            await Context.Channel.SendMessageAsync("This channel is not registered to process PokéDex commands.").ConfigureAwait(false);
          }
       }
 
       [Command("cp")]
-      [Summary("Gets common max CP values for a pokemon.")]
-      public async Task CP([Summary("Get CPs for this pokemon.")][Remainder] string pokemonName)
+      [Summary("Gets max CP values for a given pokémon.")]
+      public async Task CP([Summary("Get CPs for this pokémon.")][Remainder] string pokemonName)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
@@ -76,7 +76,7 @@ namespace PokeStar.Modules
             {
                EmbedBuilder embed = new EmbedBuilder();
                embed.WithTitle("CP Command Error");
-               embed.WithDescription($"Pokemon {name} cannot be found.");
+               embed.WithDescription($"The Pokémon {name} cannot be found.");
                embed.WithColor(Color.DarkRed);
 
                await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
@@ -107,12 +107,12 @@ namespace PokeStar.Modules
          }
          else
          {
-            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.").ConfigureAwait(false);
+            await Context.Channel.SendMessageAsync("This channel is not registered to process PokéDex commands.").ConfigureAwait(false);
          }
       }
 
       [Command("type")]
-      [Summary("Gets information for a pokemon type.")]
+      [Summary("Gets information for a given pokémon type.")]
       public async Task PokeType([Summary("Primary type.")] string type1,
                                  [Summary("(Optional) Secondary type.")] string type2 = null)
       {
@@ -130,7 +130,7 @@ namespace PokeStar.Modules
             if (!CheckValidType(type1) || (types.Count == 2 && !CheckValidType(type2)))
             {
                EmbedBuilder embed = new EmbedBuilder();
-               embed.WithTitle("CP Command Error");
+               embed.WithTitle("Type Command Error");
                embed.WithDescription($"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
                embed.WithColor(Color.DarkRed);
 
@@ -172,7 +172,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.").ConfigureAwait(false);
+            await Context.Channel.SendMessageAsync("This channel is not registered to process PokéDex commands.").ConfigureAwait(false);
          }
       }
 

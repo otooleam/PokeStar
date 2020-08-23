@@ -13,14 +13,14 @@ namespace PokeStar.Modules
       private static bool CheckSetupComplete = false;
 
       [Command("register")]
-      [Summary("Registers a channel for a type of command.")]
-      [Remarks("Valid registration values are:\n" +
-               "Command Type.....Registration Value\n" +
-               "Players/Roles.........player / role / p\n" +
-               "Raids.........................raid / r\n" +
-               "EX Raids...................ex / e\n" +
-               "Raid Trains..............train / t\n" +
-               "Pokedex...................pokedex / dex / d\n" +
+      [Summary("Registers a channel to run a given type of command.")]
+      [Remarks("To register a channel\n" +
+               "for this..........................use one of these:\n" +
+               "Player Registration....player / role / p\n" +
+               "Raids.............................raid / r\n" +
+               "EX Raids.......................ex / e\n" +
+               "Raid Trains..................train / t\n" +
+               "Pokedex........................pokedex / dex / d\n" +
                "Leave blank to register for all.")]
       public async Task Register([Summary("(Optional) Register the channel for these commands.")] string register = "ALL")
       {

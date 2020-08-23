@@ -64,7 +64,7 @@ namespace PokeStar.Modules
       }
 
       [Command("raid")]
-      [Summary("Creates a new Raid message.")]
+      [Summary("Creates a new interactive raid coordination message.")]
       public async Task Raid([Summary("Tier of the raid.")] short tier,
                              [Summary("Time the raid will start.")] string time,
                              [Summary("Where the raid will be.")][Remainder] string location)
@@ -122,8 +122,8 @@ namespace PokeStar.Modules
       }
 
       [Command("edit")]
-      [Summary("Edit the tier, time, or location of a Raid message.")]
-      public async Task Edit([Summary("Raid code given by the help message.")] ulong code,
+      [Summary("Edit the time or location of a raid.")]
+      public async Task Edit([Summary("Raid code given by the raid help message.")] ulong code,
                              [Summary("Raid attribute to change.")] string attribute,
                              [Summary("New value of the raid attribute.")][Remainder] string edit)
       {
@@ -349,7 +349,7 @@ namespace PokeStar.Modules
       /// <param name="raid">Raid to display in the embed.</param>
       /// <param name="fileName">Name of picture to use for the raid.</param>
       /// <returns>Embed for viewing a raid.</returns>
-      private static Embed BuildRaidEmbed(Raid raid, string fileName = null)
+      private static Embed BuildRaidEmbed(Raid raid, string fileName = null) 
       {
          if (fileName != null)
          {
@@ -361,17 +361,18 @@ namespace PokeStar.Modules
          embed.WithColor(Color.DarkBlue);
          embed.WithTitle($"{(raid.Boss.Name.Equals("Bossless") ? "" : raid.Boss.Name)} {BuildRaidTitle(raid.Tier)}");
          embed.WithThumbnailUrl($"attachment://{fileName}");
+         embed.WithDescription("Press ? for help.");
          embed.AddField("Time", raid.Time, true);
          embed.AddField("Location", raid.Location, true);
 
          for (int i = 0; i < raid.Groups.Count; i++)
          {
-            embed.AddField($"Group {i + 1} Ready ({raid.Groups.ElementAt(i).GetHereCount()}/{raid.Groups.ElementAt(i).TotalPlayers()})", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyHere())}");
-            embed.AddField($"Group {i + 1} Attending", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyAttending())}");
-            embed.AddField($"Group {i + 1} Invited", $"{BuildInvitedList(raid.Groups.ElementAt(i).GetReadonlyInvited())}");
+            embed.AddField($"{(raid.Groups.Count == 1 ? "" : $"Group {i + 1} ")}Ready ({raid.Groups.ElementAt(i).GetHereCount()}/{raid.Groups.ElementAt(i).TotalPlayers()})", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyHere())}");
+            embed.AddField($"{(raid.Groups.Count == 1 ? "" : $"Group {i + 1} ")}Attending", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyAttending())}");
+            embed.AddField($"{(raid.Groups.Count == 1 ? "" : $"Group {i + 1} ")}Remote", $"{BuildInvitedList(raid.Groups.ElementAt(i).GetReadonlyInvited())}");
          }
          embed.AddField($"Need Invite:", $"{BuildPlayerList(raid.GetReadonlyInvite())}");
-         embed.WithFooter("Note: the max number of members in a raid is 20, and the max number of invites is 10.\nPress ? for help.");
+         embed.WithFooter("Note: the max number of members in a raid is 20, and the max number of invites is 10.");
 
          return embed.Build();
       }

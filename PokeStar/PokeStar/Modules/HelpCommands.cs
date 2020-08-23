@@ -13,7 +13,7 @@ namespace PokeStar.Modules
    /// </summary>
    public class HelpCommands : ModuleBase<SocketCommandContext>
    {
-      [Command("Help")]
+      [Command("help")]
       [Summary("Displays info about commands.")]
       public async Task Help([Summary("(Optional) Get help with this command.")] string command = null)
       {
@@ -24,6 +24,7 @@ namespace PokeStar.Modules
          List<string> hiddenCommands = new List<string>()
          {
             "ping",
+            "help",
          };
 
          if (command == null)

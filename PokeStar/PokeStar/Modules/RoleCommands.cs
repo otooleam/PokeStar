@@ -13,7 +13,7 @@ namespace PokeStar.Modules
    public class RoleCommands : ModuleBase<SocketCommandContext>
    {
       [Command("role")]
-      [Summary("Sets a user\'s nickname and role (team)")]
+      [Summary("Sets a player\'s nickname and team.")]
       [Remarks("The user will get their team role and the trainer role\n." +
                "An error will be thrown if the setup command has not yet been run, the user does not have the trainer role, or the user has a role higher than this bot\'s role.\n" +
                "It is recomended that the user\'s nick name is their in game name.")]
@@ -25,7 +25,7 @@ namespace PokeStar.Modules
          {
             if (Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
             {
-               await ReplyAsync($"Error: Roles not setup. Please run setup command").ConfigureAwait(false);
+               await ReplyAsync($"Error: Roles not setup. Please run the setup command").ConfigureAwait(false);
                return;
             }
 
@@ -50,7 +50,7 @@ namespace PokeStar.Modules
             catch (Exception e)
             {
                Console.WriteLine(e.Message);
-               await ReplyAsync($"Warning: Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{Context.Guild.Name}\"").ConfigureAwait(false);
+               await ReplyAsync($"Warning: Unable to set nickname for {user.Username}. Please set your server nickname to match your Pokémon Go trainer name.").ConfigureAwait(false);
             }
 
             SocketRole valor = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase));
@@ -73,7 +73,7 @@ namespace PokeStar.Modules
             SocketRole role = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Trainer", StringComparison.OrdinalIgnoreCase));
             await user.AddRoleAsync(role).ConfigureAwait(false);
 
-            await ReplyAsync($"{user.Username} nickname set to {nickname} and now has the Trainer and {teamName} roles").ConfigureAwait(false);
+            await ReplyAsync($"{user.Username} nickname set to {nickname} and now has the \'Trainer\' and \'{teamName}\' roles").ConfigureAwait(false);
          }
          else
          {
