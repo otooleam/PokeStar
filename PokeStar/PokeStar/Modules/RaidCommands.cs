@@ -432,9 +432,6 @@ namespace PokeStar.Modules
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
             {
                string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
-               if (prefix == null)
-                  prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
-
                await reactingPlayer.SendMessageAsync(BuildRaidHelpMessage(raidEmojis, raidEmojisDesc));
                await reactingPlayer.SendMessageAsync($"{prefix}edit {message.Id}");
                needsUpdate = false;
@@ -539,9 +536,6 @@ namespace PokeStar.Modules
             else if (reaction.Emote.Equals(muleEmojis[(int)MULE_EMOJI_INDEX.HELP]))
             {
                string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
-               if (prefix == null)
-                  prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
-
                await reactingPlayer.SendMessageAsync(BuildRaidHelpMessage(muleEmojis, muleEmojisDesc));
                await reactingPlayer.SendMessageAsync($"{prefix}edit {message.Id}");
                needsUpdate = false;
