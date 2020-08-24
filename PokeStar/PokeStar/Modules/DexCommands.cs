@@ -16,20 +16,6 @@ namespace PokeStar.Modules
    /// </summary>
    public class DexCommands : ModuleBase<SocketCommandContext>
    {
-      /*
-       * select * from pokemon
-inner join 
-(select number from pokemon group by number having count(number) > 1) as dup
-ON pokemon.number=dup.number
-order by pokemon.number;
-
-
-select TOP 10 * 
-from pokemon 
-where name like '%pika%'
-order by DIFFERENCE(name, 'pika') desc;
-       * 
-       */
       private static Dictionary<string, PokemonForm> pokemonForms = new Dictionary<string, PokemonForm>(StringComparer.OrdinalIgnoreCase)
       {
          ["Rattata"] = new PokemonForm { formList = "-alola", defaultForm = "" },

@@ -133,7 +133,7 @@ namespace PokeStar
       private async Task<Task> HandleCommandAsync(SocketMessage cmdMessage)
       {
          SocketUserMessage message = cmdMessage as SocketUserMessage;
-         if (message == null || message.Author.IsBot)
+         if (message == null || (message.Author.IsBot && !message.Author.Username.Equals("NonaTest", StringComparison.OrdinalIgnoreCase)))
             return Task.CompletedTask;
          var context = new SocketCommandContext(_client, message);
 
@@ -181,11 +181,9 @@ namespace PokeStar
          if (message != null && reaction.User.IsSpecified && !user.IsBot)
          {
             if (RaidCommands.IsRaidMessage(message.Id))
-               await RaidCommands.RaidReaction(message, reaction);
-            else if (RaidCommands.IsRemoteMessage(message.Id))
-               await RaidCommands.RaidRemoteReaction(message, reaction, originChannel);
-            else if (RaidCommands.IsInviteMessage(message.Id))
-               await RaidCommands.RaidInviteReaction(message, reaction, originChannel);
+               await RaidCommands.RaidMessageReactionHandle(message, reaction);
+            else if (RaidCommands.IsRaidSubMessage(message.Id))
+               await RaidCommands.RaidSubMessageReactionHandle(message, reaction);
          }
          return Task.CompletedTask;
       }
@@ -202,6 +200,7 @@ namespace PokeStar
          var server = _client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(homeGuildName, StringComparison.OrdinalIgnoreCase));
 
          SetEmotes(server, json);
+         RaidCommands.SetRemotePassEmote();
 
          return Task.CompletedTask;
       }
@@ -230,7 +229,8 @@ namespace PokeStar
             "fire_emote", "flying_emote", "ghost_emote", "grass_emote", "ground_emote", "ice_emote",
             "normal_emote", "poison_emote", "psychic_emote", "rock_emote", "steel_emote", "water_emote",
             "raid_emote", "valor_emote", "mystic_emote", "instinct_emote", "sunny_emote", "clear_emote",
-            "rain_emote", "partly_cloudy_emote", "cloudy_emote", "windy_emote", "snow_emote", "fog_emote"
+            "rain_emote", "partly_cloudy_emote", "cloudy_emote", "windy_emote", "snow_emote", "fog_emote",
+            "remote_pass_emote"
          };
 
          foreach (string emote in emoteNames)

@@ -1,5 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using Discord;
 
 namespace PokeStar.DataModels
@@ -92,7 +94,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Is the pokemon a regional.
       /// </summary>
-      public bool Regional { get; set; }
+      public string Regional { get; set; }
 
       /// <summary>
       /// List of the pokemon's fast moves.
@@ -164,6 +166,11 @@ namespace PokeStar.DataModels
       /// </summary>
       public List<int> CPWild { get; } = new List<int>();
 
+      public bool IsRegional()
+      {
+         return Regional != null;
+      }
+
       /// <summary>
       /// Gets the details of the pokemon as a string.
       /// Details include but are not limited to region, 
@@ -180,8 +187,16 @@ namespace PokeStar.DataModels
          str += $"Can be Obtained  : {Obtainable}\n";
          str += $"Can be Shiny     : {Shiny}\n";
          str += $"Can be Shadow    : {Shadow}\n";
-         str += $"Is a Regional    : {Regional}\n";
          return str.Trim();
+      }
+
+      public string RegionalToString()
+      {
+         List<string> regions = Regional.Split(',').ToList();
+         StringBuilder sb = new StringBuilder();
+         foreach (string r in regions)
+            sb.AppendLine($"-{r}\n");
+         return sb.ToString().Trim();
       }
 
       /// <summary>
@@ -313,12 +328,13 @@ namespace PokeStar.DataModels
       /// <returns>Pokemon counter string.</returns>
       public string CounterToString()
       {
-         /*
-          * foreach (Counter counter in Counter)
-          *    str += counter.ToString() + "\n";
-          * return str;
-         /**/
-         return "Not Implemented";
+         if (Counter.Count == 0)
+            return "No Counters Listed.";
+         string str = "";
+         int num = 1;
+         foreach (Counter counter in Counter)
+            str += $"#{num++} {counter}\n";
+         return str;
       }
 
       /// <summary>

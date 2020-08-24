@@ -86,7 +86,7 @@ namespace PokeStar.ConnectionInterface
                      Shadow = Convert.ToInt32(reader["shadow"]) == TRUE,
                      Shiny = Convert.ToInt32(reader["shiny"]) == TRUE,
                      Obtainable = Convert.ToInt32(reader["obtainable"]) == TRUE,
-                     Regional = Convert.ToInt32(reader["regional"]) == TRUE
+                     Regional = (reader["regional"].GetType() == typeof(DBNull))? null :Convert.ToString(reader["regional"])
                   };
                   pokemon.Type.Add(Convert.ToString(reader["type_1"]));
                   if (reader["type_2"].GetType() != typeof(DBNull))
@@ -233,6 +233,81 @@ namespace PokeStar.ConnectionInterface
             });
          }
          return moves;
+      }
+
+      /// <summary>
+      /// Gets the top counters of a pokemon.
+      /// </summary>
+      /// <param name="pokemonName">Pokemon to get counters for.</param>
+      /// <returns>List of counters to a pokemon.</returns>
+      public List<Counter> GetCounters(string pokemonName)
+      {
+         List<Counter> counters = new List<Counter>();
+         int numCounters = 6;
+         string queryString = $@"SELECT TOP {numCounters} counter, type_1, type_2, fastAttack, chargeAttack
+                                 FROM pokemon_counter 
+                                 INNER JOIN pokemon
+                                 ON pokemon_counter.counter = pokemon.name
+                                 WHERE pokemon = '{pokemonName}' 
+                                 AND obtainable = 1
+                                 ORDER BY rank;";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  Counter counter = new Counter
+                  {
+                     Name = Convert.ToString(reader["counter"]),
+                     FastAttack = new Move { Name = Convert.ToString(reader["fastAttack"]) },
+                     ChargeAttack = new Move { Name = Convert.ToString(reader["chargeAttack"]) },
+                  };
+                  counters.Add(counter);
+               }
+            }
+            conn.Close();
+         }
+         return counters;
+      }
+
+      /// <summary>
+      /// Gets a move that a pokemon can learn.
+      /// Returns null if pokemon cannot learn the move.
+      /// </summary>
+      /// <param name="pokemonName">Pokemon to get move for.</param>
+      /// <param name="moveName">Name of the move.</param>
+      /// <returns>Move that the pokemon can learn, otherwise null.</returns>
+      public Move GetPokemonMove(string pokemonName, string moveName)
+      {
+         Move move = null;
+         string queryString = $@"SELECT move, type, is_legacy
+                                 FROM pokemon_move
+                                 INNER JOIN move
+                                 ON pokemon_move.move = move.name
+                                 WHERE pokemon = '{pokemonName}' 
+                                 AND move = '{moveName}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  move = new Move
+                  {
+                     Name = Convert.ToString(reader["move"]),
+                     Type = Convert.ToString(reader["type"]),
+                     IsLegacy = Convert.ToInt32(reader["is_legacy"]) == TRUE,
+                  };
+               }
+            }
+            conn.Close();
+         }
+         return move;
       }
 
       /// <summary>
