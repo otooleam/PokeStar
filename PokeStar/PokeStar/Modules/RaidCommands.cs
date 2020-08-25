@@ -45,25 +45,21 @@ namespace PokeStar.Modules
       };
 
       private static readonly string[] raidEmojisDesc = {
-         "Adds a user with 1 account.",
-         "Adds a user with 2 accounts.",
-         "Adds a user with 3 accounts.",
-         "Adds a user with 4 accounts.",
-         "Adds a user with 5 accounts.",
-         "Marks a user as ready for the raid.",
-         "Allows a user to join the raid remotely.",
-         "Allows a user to accept an invite from a user that has requested one.",
-         "Removes a user from the raid. Any users invited by the user that leaves will be moved to requesting invite.",
-         "Generates this help message."
+         "are the number of Trainers in your party, physically at the raid and that you are inviting remotely.",
+         "means you are present/ready for the raid to begin. Nona will tag you in a post when all trainers are ready and the raid can then begin.",
+         "means you will be either doing the raid remotely yourself or need another trainer to send you an invite to be done remotely.",
+         "means you are willing to invite one of the trainers who are asking for a remote invite. Nona will walk you thru who you want to invite and you do NOT need to count that person in YOUR PARTY; they will be part of the physical count that Nona makes.",
+         "means you are not able to make the raid any longer and you will be removed from the list. Nona will send a message to anyone you were planning to invite.",
+         "generates this help message."
       };
 
       private static readonly string[] muleEmojisDesc = {
-         "Adds a user as a raid mule.",
-         "Allows a raid mule to announce that a raid group is ready to go.",
-         "Adds a user as requesting an invite.",
-         "Adds a user that has requested an invite to a raid group.",
-         "Removes a user from the raid. Any users invited by a raid mule that leaves will be moved to requesting invite.",
-         "Generates this help message."
+         "means you are planning on being a raid mule.",
+         "means that a raid group is ready to go. Nona will tag you in a post when the raid mule is ready to start the raid.",
+         "means you need a raid mule to send you an invite to be done remotely.",
+         "means you are willing to invite one of the trainers who are asking for a remote invite. Nona will walk you thru who you want to invite.",
+         "means you are not able to make the raid any longer and you will be removed from the list. Nona will send a message to anyone you were planning to invite.",
+         "generates this help message."
       };
 
       private static readonly Emoji[] selectionEmojis = {
@@ -92,6 +88,7 @@ namespace PokeStar.Modules
          ADD_PLAYER_3,
          ADD_PLAYER_4,
          ADD_PLAYER_5,
+         ADD_PLAYER_6,
          PLAYER_READY,
          REMOTE_RAID,
          INVITE_PLAYER,
@@ -364,6 +361,10 @@ namespace PokeStar.Modules
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_5]))
             {
                raid.PlayerAdd(reactingPlayer, 5);
+            }
+            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_6]))
+            {
+               raid.PlayerAdd(reactingPlayer, 6);
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]))
             {
@@ -946,10 +947,25 @@ namespace PokeStar.Modules
       /// <returns>Raid help messsage as a string.</returns>
       private static string BuildRaidHelpMessage(IEmote[] emojis, string[] descriptions)
       {
+         int offset = 0;
          StringBuilder sb = new StringBuilder();
          sb.AppendLine("Raid Help:");
-         for (int i = 0; i < emojis.Length; i++)
-            sb.AppendLine($"{emojis[i]}: {descriptions[i]}");
+
+         if (selectionEmojis.Contains(emojis[0]))
+         {
+            foreach (IEmote emoji in emojis)
+               if (selectionEmojis.Contains(emoji))
+                  offset++;
+            sb.AppendLine($"{emojis[0]} - {emojis[offset - 1]} {descriptions[0]}");
+         }
+
+         for (int i = offset; i < emojis.Length; i++)
+         {
+            if (offset == 0)
+               sb.AppendLine($"{emojis[i]} {descriptions[i]}");
+            else
+               sb.AppendLine($"{emojis[i]} {descriptions[i - offset + 1]}");
+         }
 
          sb.AppendLine("\nRaid Edit:");
          sb.AppendLine("To edit the raid send the edit command with the following code: ");
