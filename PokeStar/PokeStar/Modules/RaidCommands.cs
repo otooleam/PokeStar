@@ -512,16 +512,14 @@ namespace PokeStar.Modules
       {
          StringBuilder sb = new StringBuilder();
          sb.AppendLine("Raid Help:");
-         sb.AppendLine("The numbers represent the number of accounts that you have with you." +
-            " React with one of the numbers to show that you intend to participate in the raid.");
-         sb.AppendLine($"Once you are ready for the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]} to show others that you are ready." +
-            $" When all players have marked that they are ready, Nona will send a message to the group.");
-         sb.AppendLine($"If you need an invite to participate in the raid remotely, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE]}.");
-         sb.AppendLine($"To invite someone to a raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]} and react with the coresponding emote for the player.");
-         sb.AppendLine($"If you wish to remove yourself from the raid, react with {raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]}.");
+         sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_1]}-{raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_5]} You and this many other accounts will participate in the raid.");
+         sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]} You and others with you are ready. Nona will ping the group when all other players marked themselves as ready.");
+         sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE]} You will participate in the raid remotely, either by remoting in or requesting an invite from another player.");
+         sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]} will allow you to claim someone who is requesting an invite. Nona will ask you which player you want to invite, and then send a message to that person to watch for an invite from you. (You do not need to update your party size, Nona will take care of the counting.)");
+         sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]} If you want to remove yourself from the raid.");
 
          sb.AppendLine("\nRaid Edit:");
-         sb.AppendLine("To edit the desired raid send the edit command with the following code: ");
+         sb.AppendLine("To edit this raid, copy and paste the following command, and then add the portion of the raid you want to update and the new value: ");
          return sb.ToString();
       }
 
