@@ -234,11 +234,21 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="pokemonNumber"></param>
+      /// <returns></returns>
+      public List<string> GetPokemonByNumber(int pokemonNumber)
+      {
+         return POGODBConnector.GetPokemonByNumber(pokemonNumber);
+      }
+
+      /// <summary>
       /// Reformats the name from user input to the POGO database format.
       /// </summary>
       /// <param name="originalName">User input name.</param>
       /// <returns>Name formated for the POGO database</returns>
-      private static string ReformatName(string originalName)
+      private string ReformatName(string originalName)
       {
          int index = originalName.IndexOf('\'');
          return index == -1 ? originalName : originalName.Insert(index, "\'");

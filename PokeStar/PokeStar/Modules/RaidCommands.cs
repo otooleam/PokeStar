@@ -19,7 +19,7 @@ namespace PokeStar.Modules
    public class RaidCommands : ModuleBase<SocketCommandContext>
    {
       private static readonly Dictionary<ulong, RaidParent> raidMessages = new Dictionary<ulong, RaidParent>();
-      private static readonly Dictionary<ulong, SubMessage> subMessages = new Dictionary<ulong, SubMessage>();
+      private static readonly Dictionary<ulong, RaidSubMessage> subMessages = new Dictionary<ulong, RaidSubMessage>();
 
       private static readonly IEmote[] raidEmojis = {
          new Emoji("1️⃣"),
@@ -276,33 +276,26 @@ namespace PokeStar.Modules
 
          if (parent.Boss == null)
          {
-            bool validReactionAdded = false;
             for (int i = 0; i < parent.RaidBossSelections.Count; i++)
             {
                if (reaction.Emote.Equals(selectionEmojis[i]))
                {
                   parent.SetBoss(parent.RaidBossSelections[i]);
-                  validReactionAdded = true;
+                  await reaction.Channel.DeleteMessageAsync(message);
+
+                  string filename = Connections.GetPokemonPicture(parent.Boss.Name);
+                  Connections.CopyFile(filename);
+                  RestUserMessage raidMsg = await reaction.Channel.SendFileAsync(filename, embed: BuildRaidEmbed(parent, filename));
+
+                  if (parent is Raid)
+                     await raidMsg.AddReactionsAsync(raidEmojis);
+                  else if (parent is RaidMule)
+                     await raidMsg.AddReactionsAsync(muleEmojis);
+
+                  raidMessages.Add(raidMsg.Id, parent);
+                  Connections.DeleteFile(filename);
+                  return;
                }
-            }
-
-            if (validReactionAdded)
-            {
-               await reaction.Channel.DeleteMessageAsync(message);
-
-               string filename = Connections.GetPokemonPicture(parent.Boss.Name);
-               Connections.CopyFile(filename);
-               RestUserMessage raidMsg = await reaction.Channel.SendFileAsync(filename, embed: BuildRaidEmbed(parent, filename));
-
-               if (parent is Raid)
-                  await raidMsg.AddReactionsAsync(raidEmojis);
-               else if (parent is RaidMule)
-                  await raidMsg.AddReactionsAsync(muleEmojis);
-
-
-
-               raidMessages.Add(raidMsg.Id, parent);
-               Connections.DeleteFile(filename);
             }
          }
          else
@@ -380,7 +373,7 @@ namespace PokeStar.Modules
                   await remoteMsg.AddReactionAsync(selectionEmojis[0]);
                   await remoteMsg.AddReactionAsync(selectionEmojis[1]);
                   await remoteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
-                  subMessages.Add(remoteMsg.Id, new SubMessage
+                  subMessages.Add(remoteMsg.Id, new RaidSubMessage
                   {
                      SubMessageType = (int)SUB_MESSAGE_TYPES.RAID_REMOTE_SUB_MESSAGE,
                      MainMessageId = message.Id
@@ -412,7 +405,7 @@ namespace PokeStar.Modules
                         }
 
                         await inviteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
-                        subMessages.Add(inviteMsg.Id, new SubMessage
+                        subMessages.Add(inviteMsg.Id, new RaidSubMessage
                         {
                            SubMessageType = (int)SUB_MESSAGE_TYPES.INVITE_SUB_MESSAGE,
                            MainMessageId = message.Id
@@ -486,7 +479,7 @@ namespace PokeStar.Modules
                   for (int i = 0; i < raid.Groups.Count; i++)
                      await readyMsg.AddReactionAsync(selectionEmojis[i]);
                   await readyMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
-                  subMessages.Add(readyMsg.Id, new SubMessage
+                  subMessages.Add(readyMsg.Id, new RaidSubMessage
                   {
                      SubMessageType = (int)SUB_MESSAGE_TYPES.MULE_READY_SUB_MESSAGE,
                      MainMessageId = message.Id
@@ -522,7 +515,7 @@ namespace PokeStar.Modules
                         }
 
                         await inviteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
-                        subMessages.Add(inviteMsg.Id, new SubMessage
+                        subMessages.Add(inviteMsg.Id, new RaidSubMessage
                         {
                            SubMessageType = (int)SUB_MESSAGE_TYPES.INVITE_SUB_MESSAGE,
                            MainMessageId = message.Id
@@ -1037,7 +1030,7 @@ namespace PokeStar.Modules
    /// <summary>
    /// 
    /// </summary>
-   public struct SubMessage
+   public struct RaidSubMessage
    {
       public int SubMessageType;
       public ulong MainMessageId;
