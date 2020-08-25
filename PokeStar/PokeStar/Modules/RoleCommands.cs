@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
@@ -23,7 +24,7 @@ namespace PokeStar.Modules
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "P"))
          {
-            if (Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
+            if (!Connections.Instance().GetSetupComplete(Context.Guild.Id))
             {
                await ReplyAsync($"Error: Roles not setup. Please run setup command");
                return;

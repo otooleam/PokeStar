@@ -48,8 +48,6 @@ namespace PokeStar
          Environment.SetEnvironmentVariable("NONA_DB_CONNECTION_STRING", json.GetValue("nona_db_sql").ToString());
          Environment.SetEnvironmentVariable("DEFAULT_PREFIX", json.GetValue("default_prefix").ToString());
 
-         Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
-
          var logLevel = Convert.ToInt32(json.GetValue("log_level").ToString());
          var logSeverity = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? LogSeverity.Info : (LogSeverity)logLevel;
 
@@ -96,6 +94,7 @@ namespace PokeStar
          await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services).ConfigureAwait(false);
          _client.ReactionAdded += HandleReactionAddedAsync;
          _client.Ready += HandleReady;
+         _client.JoinedGuild += HandleJoinGuild;
          _client.LeftGuild += HandleLeftGuild;
          return Task.CompletedTask;
       }
@@ -138,10 +137,7 @@ namespace PokeStar
          var context = new SocketCommandContext(_client, message);
 
          int argPos = 0;
-
          string prefix = Connections.Instance().GetPrefix(context.Guild.Id);
-         if (prefix == null)
-            prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
 
          if (message.Attachments.Count != 0)
          {
@@ -204,6 +200,23 @@ namespace PokeStar
          SetEmotes(server, json);
          RaidCommands.SetRemotePassEmote();
 
+         foreach (SocketGuild guild in _client.Guilds)
+         {
+            if (Connections.Instance().GetPrefix(guild.Id) == null)
+               Connections.Instance().InitSettings(guild.Id);
+         }
+
+         return Task.CompletedTask;
+      }
+
+      /// <summary>
+      /// Handles the Join Guild event.
+      /// </summary>
+      /// <param name="guild">Guild that the bot joined.</param>
+      /// <returns>Task Complete.</returns>
+      private Task HandleJoinGuild(SocketGuild guild)
+      {
+         Connections.Instance().InitSettings(guild.Id);
          return Task.CompletedTask;
       }
 
@@ -215,7 +228,7 @@ namespace PokeStar
       private Task HandleLeftGuild(SocketGuild guild)
       {
          Connections.Instance().DeleteRegistration(guild.Id);
-         Connections.Instance().DeletePrefix(guild.Id);
+         Connections.Instance().DeleteSettings(guild.Id);
          return Task.CompletedTask;
       }
 
