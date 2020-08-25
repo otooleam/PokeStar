@@ -2,6 +2,7 @@
 using System.Data.SqlClient;
 using System.Collections.Generic;
 using PokeStar.DataModels;
+using PokeStar.Modules;
 
 namespace PokeStar.ConnectionInterface
 {
@@ -92,6 +93,34 @@ namespace PokeStar.ConnectionInterface
                   if (reader["type_2"].GetType() != typeof(DBNull))
                      pokemon.Type.Add(Convert.ToString(reader["type_2"]));
                }
+            }
+            conn.Close();
+         }
+         return pokemon;
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="pokemonNumber"></param>
+      /// <returns></returns>
+      public List<string> GetPokemonByNumber(int pokemonNumber)
+      {
+         List<string> pokemon = new List<string>();
+         string order = (pokemonNumber == DexCommands.ARCEUS || pokemonNumber == DexCommands.UNOWN) ? "ORDER BY NEWID()" : "";
+
+         string queryString = $@"SELECT name 
+                                 FROM pokemon 
+                                 WHERE number={pokemonNumber}
+                                 {order};";
+
+         using (var conn = GetConnection())
+         {
+            conn.Open();
+            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+                  pokemon.Add(Convert.ToString(reader["name"]));
             }
             conn.Close();
          }

@@ -184,6 +184,8 @@ namespace PokeStar
                await RaidCommands.RaidMessageReactionHandle(message, reaction);
             else if (RaidCommands.IsRaidSubMessage(message.Id))
                await RaidCommands.RaidSubMessageReactionHandle(message, reaction);
+            else if (DexCommands.IsDexSubMessage(message.Id))
+               await DexCommands.DexMessageReactionHandle(message, reaction);
          }
          return Task.CompletedTask;
       }

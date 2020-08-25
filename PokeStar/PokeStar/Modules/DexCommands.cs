@@ -3,11 +3,12 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Discord;
+using Discord.Rest;
 using Discord.Commands;
+using Discord.WebSocket;
 using PokeStar.DataModels;
 using PokeStar.Calculators;
 using PokeStar.ConnectionInterface;
-using System.Linq;
 
 namespace PokeStar.Modules
 {
@@ -16,7 +17,9 @@ namespace PokeStar.Modules
    /// </summary>
    public class DexCommands : ModuleBase<SocketCommandContext>
    {
-      private static Dictionary<string, PokemonForm> pokemonForms = new Dictionary<string, PokemonForm>(StringComparer.OrdinalIgnoreCase)
+      private static readonly Dictionary<ulong, DexSelectionMessage> dexMessages = new Dictionary<ulong, DexSelectionMessage>();
+
+      private static readonly Dictionary<string, PokemonForm> pokemonForms = new Dictionary<string, PokemonForm>(StringComparer.OrdinalIgnoreCase)
       {
          ["Rattata"] = new PokemonForm { formList = "-alola", defaultForm = "" },
          ["Raticate"] = new PokemonForm { formList = "-alola", defaultForm = "" },
@@ -68,98 +71,154 @@ namespace PokeStar.Modules
          ["Meloetta"] = new PokemonForm { formList = "-aria,-pirouette", defaultForm = "-aria" },
       };
 
+      private static readonly Emoji[] selectionEmojis = {
+         new Emoji("1️⃣"),
+         new Emoji("2️⃣"),
+         new Emoji("3️⃣"),
+         new Emoji("4️⃣"),
+         new Emoji("5️⃣"),
+         new Emoji("6️⃣"),
+         new Emoji("7️⃣"),
+         new Emoji("8️⃣"),
+         new Emoji("9️⃣"),
+         new Emoji("🔟")
+      };
 
+      public static readonly int UNOWN = 201;
+      public static readonly int ARCEUS = 493;
+
+      private enum DEX_MESSAGE_TYPES
+      {
+         DEX_MESSAGE,
+         CP_MESSAGE,
+      }
 
       [Command("dex")]
       [Alias("pokedex")]
       [Summary("Gets information for a pokemon.")]
-      public async Task Dex([Summary("Get information for this pokemon.")][Remainder] string pokemonName)
+      [Remarks("Can search by pokemon name or my number.")]
+      public async Task Dex([Summary("Get information for this pokemon.")][Remainder] string pkmn)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
-            var name = GetPokemon(pokemonName);
-            Pokemon pokemon = Connections.Instance().GetPokemon(name);
-            if (pokemon == null)
+            bool isNumber = int.TryParse(pkmn, out int pokemonNum);
+
+            if (isNumber)
             {
-               EmbedBuilder embed = new EmbedBuilder();
-               embed.WithTitle("PokeDex Command Error");
-               embed.WithDescription($"Pokemon {name} cannot be found.");
-               embed.WithColor(Color.DarkRed);
-               await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+               List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
+
+               if (pokemonWithNumber.Count == 0)
+               {
+                  await ErrorMessage.SendErrorMessage(Context, "dex", $"Pokemon with number {pokemonNum} cannot be found.");
+               }
+               else if (pokemonNum == ARCEUS)
+               {
+                  await ErrorMessage.SendErrorMessage(Context, "dex", $"Arceus #{pokemonNum} has too many forms to display, please search by name.");
+               }
+               else if (pokemonWithNumber.Count > 1 && pokemonNum != UNOWN)
+               {
+                  string fileName = "pokeball.png";
+                  Connections.CopyFile(fileName);
+                  RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonWithNumber, fileName));
+                  for (int i = 0; i < pokemonWithNumber.Count; i++)
+                     await dexMessage.AddReactionAsync(selectionEmojis[i]);
+                  dexMessages.Add(dexMessage.Id, new DexSelectionMessage
+                  {
+                     SubMessageType = (int)DEX_MESSAGE_TYPES.DEX_MESSAGE,
+                     potentials = pokemonWithNumber
+                  });
+               }
+               else
+               {
+                  Pokemon pokemon = Connections.Instance().GetPokemon(pokemonWithNumber[0]);
+                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CopyFile(fileName);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pokemon, fileName)).ConfigureAwait(false);
+                  Connections.DeleteFile(fileName);
+               }
             }
             else
             {
-               var fileName = Connections.GetPokemonPicture(pokemon.Name);
-               Connections.CopyFile(fileName);
-
-               EmbedBuilder embed = new EmbedBuilder();
-               embed.WithTitle($@"#{pokemon.Number} {pokemon.Name}");
-               embed.WithDescription(pokemon.Description);
-               embed.WithThumbnailUrl($"attachment://{fileName}");
-               embed.AddField("Type", pokemon.TypeToString(), true);
-               embed.AddField("Weather Boosts", pokemon.WeatherToString(), true);
-               embed.AddField("Details", pokemon.DetailsToString(), true);
-               embed.AddField("Stats", pokemon.StatsToString(), true);
-               embed.AddField("Resistances", pokemon.ResistanceToString(), true);
-               embed.AddField("Weaknesses", pokemon.WeaknessToString(), true);
-               embed.AddField("Fast Moves", pokemon.FastMoveToString(), true);
-               embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
-               embed.AddField("Counters", pokemon.CounterToString(), false);
-               embed.WithColor(Color.Red);
-               embed.WithFooter("* denotes STAB move ! denotes Legacy move");
-
-               await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
-
-               Connections.DeleteFile(fileName);
+               string name = GetPokemon(pkmn);
+               Pokemon pokemon = Connections.Instance().GetPokemon(name);
+               if (pokemon == null)
+               {
+                  await ErrorMessage.SendErrorMessage(Context, "dex", $"Pokemon {name} cannot be found.");
+               }
+               else
+               {
+                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CopyFile(fileName);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pokemon, fileName)).ConfigureAwait(false);
+                  Connections.DeleteFile(fileName);
+               }
             }
          }
          else
-            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
+            await ErrorMessage.SendErrorMessage(Context, "dex", "This channel is not registered to process PokéDex commands.");
       }
 
       [Command("cp")]
       [Summary("Gets common max CP values for a pokemon")]
-      public async Task CP([Summary("Get CPs for this pokemon.")][Remainder] string pokemonName)
+      [Remarks("Can search by pokemon name or my number.")]
+      public async Task CP([Summary("Get CPs for this pokemon.")][Remainder] string pkmn)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
-            var name = GetPokemon(pokemonName);
-            Pokemon pokemon = Connections.Instance().GetPokemon(name);
-            if (pokemon == null)
+            bool isNumber = int.TryParse(pkmn, out int pokemonNum);
+
+            if (isNumber)
             {
-               EmbedBuilder embed = new EmbedBuilder();
-               embed.WithTitle("CP Command Error");
-               embed.WithDescription($"Pokemon {name} cannot be found.");
-               embed.WithColor(Color.DarkRed);
-               await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+               List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
+
+               if (pokemonWithNumber.Count == 0)
+               {
+                  await ErrorMessage.SendErrorMessage(Context, "cp", $"Pokemon with number {pokemonNum} cannot be found.");
+               }
+               else if (pokemonWithNumber.Count > 1 && pokemonNum != UNOWN && pokemonNum != ARCEUS)
+               {
+                  string fileName = "pokeball.png";
+                  Connections.CopyFile(fileName);
+                  RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonWithNumber, fileName));
+                  Connections.DeleteFile(fileName);
+                  for (int i = 0; i < pokemonWithNumber.Count; i++)
+                     await dexMessage.AddReactionAsync(selectionEmojis[i]);
+                  dexMessages.Add(dexMessage.Id, new DexSelectionMessage
+                  {
+                     SubMessageType = (int)DEX_MESSAGE_TYPES.CP_MESSAGE,
+                     potentials = pokemonWithNumber
+                  });
+               }
+               else
+               {
+                  Pokemon pokemon = Connections.Instance().GetPokemon(pokemonWithNumber[0]);
+                  Connections.CalcAllCP(ref pokemon);
+                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CopyFile(fileName);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName)).ConfigureAwait(false);
+                  Connections.DeleteFile(fileName);
+               }
             }
             else
             {
-               Connections.CalcAllCP(ref pokemon);
-               var fileName = Connections.GetPokemonPicture(pokemon.Name);
-               Connections.CopyFile(fileName);
-
-               EmbedBuilder embed = new EmbedBuilder();
-               embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
-               embed.WithDescription($"Max CP values for {pokemon.Name}");
-               embed.WithThumbnailUrl($"attachment://{fileName}");
-               embed.AddField($"Max CP (Level 40)", pokemon.CPMax, true);
-               embed.AddField($"Max Buddy CP (Level 41)", pokemon.CPBestBuddy, true);
-               embed.AddField($"Raid CP (Level 20)", pokemon.RaidCPToString(), false);
-               embed.AddField($"Hatch CP (Level 20)", pokemon.HatchCPToString(), false);
-               embed.AddField($"Quest CP (Level 15)", pokemon.QuestCPToString(), false);
-               embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
-               embed.WithColor(Color.Red);
-               embed.WithFooter("* denotes Weather Boosted CP");
-
-
-               await Context.Channel.SendFileAsync(fileName, embed: embed.Build()).ConfigureAwait(false);
-
-               Connections.DeleteFile(fileName);
+               string name = GetPokemon(pkmn);
+               Pokemon pokemon = Connections.Instance().GetPokemon(name);
+               if (pokemon == null)
+               {
+                  await ErrorMessage.SendErrorMessage(Context, "cp", $"Pokemon {name} cannot be found.");
+               }
+               else
+               {
+                  Connections.CalcAllCP(ref pokemon);
+                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CopyFile(fileName);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName)).ConfigureAwait(false);
+                  Connections.DeleteFile(fileName);
+               }
             }
          }
          else
-            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
+            await ErrorMessage.SendErrorMessage(Context, "cp", "This channel is not registered to process PokéDex commands.");
       }
 
       [Command("form")]
@@ -168,52 +227,55 @@ namespace PokeStar.Modules
                "Send \"Alias\" to get variations for form names.")]
       public async Task Form([Summary("(Optional) Pokemon with the form.")] string pokemonName = null)
       {
-         EmbedBuilder embed = new EmbedBuilder();
-         if (pokemonName == null)
+         if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
-            StringBuilder sb = new StringBuilder();
-            foreach (string key in pokemonForms.Keys)
-               sb.AppendLine(key);
-            embed.AddField($"Pokemon With Forms", sb.ToString(), true);
-            embed.WithColor(Color.Red);
-         }
-         else if (pokemonForms.ContainsKey(pokemonName))
-         {
-            StringBuilder sb = new StringBuilder();
-            PokemonForm forms = pokemonForms[pokemonName];
-            var formsList = forms.formList.Split(',');
-
-            foreach (string form in formsList)
+            EmbedBuilder embed = new EmbedBuilder();
+            if (pokemonName == null)
             {
-               sb.Append(form);
-               if (form.Equals(forms.defaultForm))
-                  sb.Append("*");
-               sb.Append('\n');
+               StringBuilder sb = new StringBuilder();
+               foreach (string key in pokemonForms.Keys)
+                  sb.AppendLine(key);
+               embed.AddField($"Pokemon With Forms", sb.ToString(), true);
+               embed.WithColor(Color.Red);
             }
-            embed.AddField($"Forms for {pokemonName}", sb.ToString(), true);
-            embed.WithColor(Color.Red);
-            embed.WithFooter("* Form is default form");
-         }
-         else if (pokemonName.Equals("Alias", StringComparison.OrdinalIgnoreCase))
-         {
-            embed.WithTitle("Form tag variations");
-            embed.AddField($"-alola", "-alolan", true);
-            embed.AddField($"-galar", "-garlarian", true);
-            embed.AddField($"-armor", "-armored", true);
-            embed.AddField($"-fighting", "-fight", true);
-            embed.AddField($"-flying", "-fly", true);
-            embed.AddField($"-psychic", "-psy", true);
-            embed.AddField($"-galar-zen", "-garlarian-zen", true);
-            embed.AddField($"-autumn", "-fall", true);
-            embed.WithColor(Color.Red);
+            else if (pokemonForms.ContainsKey(pokemonName))
+            {
+               StringBuilder sb = new StringBuilder();
+               PokemonForm forms = pokemonForms[pokemonName];
+               var formsList = forms.formList.Split(',');
+
+               foreach (string form in formsList)
+               {
+                  sb.Append(form);
+                  if (form.Equals(forms.defaultForm))
+                     sb.Append("*");
+                  sb.Append('\n');
+               }
+               embed.AddField($"Forms for {pokemonName}", sb.ToString(), true);
+               embed.WithColor(Color.Red);
+               embed.WithFooter("* Form is default form");
+            }
+            else if (pokemonName.Equals("Alias", StringComparison.OrdinalIgnoreCase))
+            {
+               embed.WithTitle("Form tag variations");
+               embed.AddField($"-alola", "-alolan", true);
+               embed.AddField($"-galar", "-garlarian", true);
+               embed.AddField($"-armor", "-armored", true);
+               embed.AddField($"-fighting", "-fight", true);
+               embed.AddField($"-flying", "-fly", true);
+               embed.AddField($"-psychic", "-psy", true);
+               embed.AddField($"-galar-zen", "-garlarian-zen", true);
+               embed.AddField($"-autumn", "-fall", true);
+               embed.WithColor(Color.Red);
+            }
+            else
+            {
+               await ErrorMessage.SendErrorMessage(Context, "form", $"Pokemon {pokemonName} cannot be found or has no forms.");
+            }
+            await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
          }
          else
-         {
-            embed.WithTitle("PokeDex Command Error");
-            embed.WithDescription($"Pokemon {pokemonName} cannot be found or has no forms.");
-            embed.WithColor(Color.DarkRed);
-         }
-         await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+            await ErrorMessage.SendErrorMessage(Context, "form", "This channel is not registered to process PokéDex commands.");
       }
 
       [Command("type")]
@@ -232,11 +294,7 @@ namespace PokeStar.Modules
 
             if (!CheckValidType(type1) || (types.Count == 2 && !CheckValidType(type2)))
             {
-               EmbedBuilder embed = new EmbedBuilder();
-               embed.WithTitle("CP Command Error");
-               embed.WithDescription($"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
-               embed.WithColor(Color.DarkRed);
-               await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+               await ErrorMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
             }
             else
             {
@@ -257,7 +315,7 @@ namespace PokeStar.Modules
                embed.WithDescription(description);
                embed.AddField("Weather Boosts:", FormatWeatherList(weather), false);
                if (type1AttackRelations.HasValue)
-               { 
+               {
                   embed.AddField($"Super Effective against:", FormatTypeList(type1AttackRelations.Value.strong), false);
                   embed.AddField($"Not Very Effective against:", FormatTypeList(type1AttackRelations.Value.weak), false);
                }
@@ -268,9 +326,96 @@ namespace PokeStar.Modules
             }
          }
          else
-            await Context.Channel.SendMessageAsync("This channel is not registered to process PokeDex commands.");
+            await ErrorMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
       }
 
+
+      public static async Task DexMessageReactionHandle(IMessage message, SocketReaction reaction)
+      {
+         DexSelectionMessage dexMessage = dexMessages[message.Id];
+
+         for (int i = 0; i < dexMessage.potentials.Count; i++)
+         {
+            if (reaction.Emote.Equals(selectionEmojis[i]))
+            {
+               await reaction.Channel.DeleteMessageAsync(message);
+               Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.potentials[i]);
+               string fileName = Connections.GetPokemonPicture(pokemon.Name);
+               Connections.CopyFile(fileName);
+
+               if (dexMessage.SubMessageType == (int)DEX_MESSAGE_TYPES.DEX_MESSAGE)
+               {
+                  await reaction.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pokemon, fileName)).ConfigureAwait(false);
+               }
+               else if (dexMessage.SubMessageType == (int)DEX_MESSAGE_TYPES.CP_MESSAGE)
+               {
+                  Connections.CalcAllCP(ref pokemon);
+                  await reaction.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName)).ConfigureAwait(false);
+               }
+               Connections.DeleteFile(fileName);
+               return;
+            }
+         }
+      }
+
+      private static Embed BuildDexEmbed(Pokemon pokemon, string fileName)
+      {
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithTitle($@"#{pokemon.Number} {pokemon.Name}");
+         embed.WithDescription(pokemon.Description);
+         embed.WithThumbnailUrl($"attachment://{fileName}");
+         embed.AddField("Type", pokemon.TypeToString(), true);
+         embed.AddField("Weather Boosts", pokemon.WeatherToString(), true);
+         embed.AddField("Details", pokemon.DetailsToString(), true);
+         embed.AddField("Stats", pokemon.StatsToString(), true);
+         embed.AddField("Resistances", pokemon.ResistanceToString(), true);
+         embed.AddField("Weaknesses", pokemon.WeaknessToString(), true);
+         embed.AddField("Fast Moves", pokemon.FastMoveToString(), true);
+         embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
+         embed.AddField("Counters", pokemon.CounterToString(), false);
+         embed.WithColor(Color.Red);
+         embed.WithFooter("* denotes STAB move ! denotes Legacy move");
+
+         return embed.Build();
+      }
+
+      private static Embed BuildCPEmbed(Pokemon pokemon, string fileName)
+      {
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
+         embed.WithDescription($"Max CP values for {pokemon.Name}");
+         embed.WithThumbnailUrl($"attachment://{fileName}");
+         embed.AddField($"Max CP (Level 40)", pokemon.CPMax, true);
+         embed.AddField($"Max Buddy CP (Level 41)", pokemon.CPBestBuddy, true);
+         embed.AddField($"Raid CP (Level 20)", pokemon.RaidCPToString(), false);
+         embed.AddField($"Hatch CP (Level 20)", pokemon.HatchCPToString(), false);
+         embed.AddField($"Quest CP (Level 15)", pokemon.QuestCPToString(), false);
+         embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
+         embed.WithColor(Color.Red);
+         embed.WithFooter("* denotes Weather Boosted CP");
+
+         return embed.Build();
+      }
+
+      /// <summary>
+      /// Builds the pokedex select embed.
+      /// </summary>
+      /// <param name="potentials">List of potential Pokemon.</param>
+      /// <param name="selectPic">Name of picture file to get.</param>
+      /// <returns>Embed for selecting raid boss.</returns>
+      private static Embed BuildDexSelectEmbed(List<string> potentials, string selectPic)
+      {
+         StringBuilder sb = new StringBuilder();
+         for (int i = 0; i < potentials.Count; i++)
+            sb.AppendLine($"{selectionEmojis[i]} {potentials[i]}");
+
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithColor(Color.Red);
+         embed.WithTitle($"Pokemon Selection");
+         embed.WithThumbnailUrl($"attachment://{selectPic}");
+         embed.AddField("Please Select Pokemon", sb.ToString());
+         return embed.Build();
+      }
 
       /// <summary>
       /// Processes the pokemon name given from a command.
@@ -501,7 +646,7 @@ namespace PokeStar.Modules
          if (relations.Count == 0)
             return "-----";
          string relationString = "";
-         foreach(var relation in relations)
+         foreach (var relation in relations)
          {
             double multiplier = TypeCalculator.CalcTypeEffectivness(relation.Value) * 100.0;
             string typeEmote = Emote.Parse(Environment.GetEnvironmentVariable($"{relation.Key.ToUpper()}_EMOTE")).ToString();
@@ -519,11 +664,33 @@ namespace PokeStar.Modules
       {
          return Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE") != null;
       }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="id"></param>
+      /// <returns></returns>
+      public static bool IsDexSubMessage(ulong id)
+      {
+         return dexMessages.ContainsKey(id);
+      }
    }
 
+   /// <summary>
+   /// 
+   /// </summary>
    public struct PokemonForm
    {
       public string formList;
       public string defaultForm;
+   }
+
+   /// <summary>
+   /// 
+   /// </summary>
+   public struct DexSelectionMessage
+   {
+      public int SubMessageType;
+      public List<string> potentials;
    }
 }
