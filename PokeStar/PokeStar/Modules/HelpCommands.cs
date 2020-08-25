@@ -51,7 +51,7 @@ namespace PokeStar.Modules
          else if (commands.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase)) != null)
          {
             CommandInfo cmdInfo = commands.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase));
-            embedBuilder.WithTitle($"{command} Command Parameter List");
+            embedBuilder.WithTitle($"{command} command help");
             embedBuilder.WithDescription(cmdInfo.Summary ?? "No description available");
             if (cmdInfo.Aliases.Count > 1)
             {

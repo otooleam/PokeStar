@@ -14,12 +14,12 @@ namespace PokeStar.Modules
    {
       [Command("role")]
       [Summary("Sets a player\'s nickname and team.")]
-      [Remarks("The user will get their team role and the trainer role\n." +
-               "An error will be thrown if the setup command has not yet been run, the user does not have the trainer role, or the user has a role higher than this bot\'s role.\n" +
-               "It is recomended that the user\'s nick name is their in game name.")]
+      [Remarks("The user will get their team role and the trainer role.\n" +
+               "An error will show if the setup command has not yet been run, the user does not have the trainer role, or the user has a role higher than Nona\'s role.\n" +
+               "It is recomended that the user\'s nick name is their Pokémon Go trainer name.")]
       public async Task Role([Summary("Set nickname and role for this user.")] IGuildUser user,
                              [Summary("User\'s nickname.")] string nickname,
-                             [Summary("User's team name (Valor, Mystic, or Instinct)")] string teamName)
+                             [Summary("User\'s team (Valor, Mystic, or Instinct)")] string teamName)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "P"))
          {

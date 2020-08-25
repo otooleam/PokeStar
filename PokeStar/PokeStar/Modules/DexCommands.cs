@@ -17,7 +17,7 @@ namespace PokeStar.Modules
       [Command("dex")]
       [Alias("pokedex")]
       [Summary("Gets the PokéDex entry for a given pokémon.")]
-      public async Task Dex([Summary("Get information for this pokémon.")][Remainder] string pokemonName)
+      public async Task Dex([Summary("The pokémon you want information about.")][Remainder] string pokemonName)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
@@ -66,7 +66,7 @@ namespace PokeStar.Modules
 
       [Command("cp")]
       [Summary("Gets max CP values for a given pokémon.")]
-      public async Task CP([Summary("Get CPs for this pokémon.")][Remainder] string pokemonName)
+      public async Task CP([Summary("The pokémon you want CP information about.")][Remainder] string pokemonName)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
@@ -113,8 +113,8 @@ namespace PokeStar.Modules
 
       [Command("type")]
       [Summary("Gets information for a given pokémon type.")]
-      public async Task PokeType([Summary("Primary type.")] string type1,
-                                 [Summary("(Optional) Secondary type.")] string type2 = null)
+      public async Task PokeType([Summary("The typing you want info about.")] string type1,
+                                 [Summary("(Optional) Secondary typing you want info about.")] string type2 = null)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {

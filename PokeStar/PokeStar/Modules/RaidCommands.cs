@@ -123,9 +123,9 @@ namespace PokeStar.Modules
 
       [Command("edit")]
       [Summary("Edit the time or location of a raid.")]
-      public async Task Edit([Summary("Raid code given by the raid help message.")] ulong code,
-                             [Summary("Raid attribute to change.")] string attribute,
-                             [Summary("New value of the raid attribute.")][Remainder] string edit)
+      public async Task Edit([Summary("Raid code given by the raid help message. (copy and paste this)")] ulong code,
+                             [Summary("Portion of the raid message you want to change.")] string attribute,
+                             [Summary("New value of you want the raid to display.")][Remainder] string edit)
       {
 
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
