@@ -27,6 +27,7 @@ namespace PokeStar.Modules
          new Emoji("3️⃣"),
          new Emoji("4️⃣"),
          new Emoji("5️⃣"),
+         new Emoji("6️⃣"),
          new Emoji("✅"),
          new Emoji("✈️"),
          new Emoji("🤝"),
