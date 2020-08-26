@@ -243,7 +243,17 @@ namespace PokeStar.Modules
             Connections.DeleteFile(fileName);
          }
          else //silph is mid-update or something else went wrong
-            await ErrorMessage.SendErrorMessage(Context, command, $"No bosses found for tier {tier}.");
+         {
+            string boss = RaidBoss.DefaultName;
+            raid = GenerateType(command.Equals("raid", StringComparison.OrdinalIgnoreCase), tier, time, location, boss);
+            fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+
+            Connections.CopyFile(fileName);
+            RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
+            await raidMsg.AddReactionsAsync(emojis);
+            raidMessages.Add(raidMsg.Id, raid);
+            Connections.DeleteFile(fileName);
+         }
       }
 
       /// <summary>
