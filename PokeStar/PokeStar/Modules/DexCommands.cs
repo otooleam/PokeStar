@@ -110,11 +110,11 @@ namespace PokeStar.Modules
 
                if (pokemonWithNumber.Count == 0)
                {
-                  await ErrorMessage.SendErrorMessage(Context, "dex", $"Pokemon with number {pokemonNum} cannot be found.");
+                  await ResponseMessage.SendErrorMessage(Context, "dex", $"Pokemon with number {pokemonNum} cannot be found.");
                }
                else if (pokemonNum == ARCEUS)
                {
-                  await ErrorMessage.SendErrorMessage(Context, "dex", $"Arceus #{pokemonNum} has too many forms to display, please search by name.");
+                  await ResponseMessage.SendErrorMessage(Context, "dex", $"Arceus #{pokemonNum} has too many forms to display, please search by name.");
                }
                else if (pokemonWithNumber.Count > 1 && pokemonNum != UNOWN)
                {
@@ -144,7 +144,17 @@ namespace PokeStar.Modules
                Pokemon pokemon = Connections.Instance().GetPokemon(name);
                if (pokemon == null)
                {
-                  await ErrorMessage.SendErrorMessage(Context, "dex", $"Pokemon {name} cannot be found.");
+                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(pkmn);
+                  string fileName = "pokeball.png";
+                  Connections.CopyFile(fileName);
+                  RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
+                  await dexMessage.AddReactionsAsync(selectionEmojis);
+
+                  dexMessages.Add(dexMessage.Id, new DexSelectionMessage
+                  {
+                     SubMessageType = (int)DEX_MESSAGE_TYPES.DEX_MESSAGE,
+                     potentials = pokemonNames
+                  });
                }
                else
                {
@@ -156,7 +166,7 @@ namespace PokeStar.Modules
             }
          }
          else
-            await ErrorMessage.SendErrorMessage(Context, "dex", "This channel is not registered to process PokéDex commands.");
+            await ResponseMessage.SendErrorMessage(Context, "dex", "This channel is not registered to process PokéDex commands.");
       }
 
       [Command("cp")]
@@ -174,7 +184,7 @@ namespace PokeStar.Modules
 
                if (pokemonWithNumber.Count == 0)
                {
-                  await ErrorMessage.SendErrorMessage(Context, "cp", $"Pokemon with number {pokemonNum} cannot be found.");
+                  await ResponseMessage.SendErrorMessage(Context, "cp", $"Pokemon with number {pokemonNum} cannot be found.");
                }
                else if (pokemonWithNumber.Count > 1 && pokemonNum != UNOWN && pokemonNum != ARCEUS)
                {
@@ -206,7 +216,17 @@ namespace PokeStar.Modules
                Pokemon pokemon = Connections.Instance().GetPokemon(name);
                if (pokemon == null)
                {
-                  await ErrorMessage.SendErrorMessage(Context, "cp", $"Pokemon {name} cannot be found.");
+                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(pkmn);
+                  string fileName = "pokeball.png";
+                  Connections.CopyFile(fileName);
+                  RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
+                  await dexMessage.AddReactionsAsync(selectionEmojis);
+
+                  dexMessages.Add(dexMessage.Id, new DexSelectionMessage
+                  {
+                     SubMessageType = (int)DEX_MESSAGE_TYPES.CP_MESSAGE,
+                     potentials = pokemonNames
+                  });
                }
                else
                {
@@ -219,7 +239,7 @@ namespace PokeStar.Modules
             }
          }
          else
-            await ErrorMessage.SendErrorMessage(Context, "cp", "This channel is not registered to process PokéDex commands.");
+            await ResponseMessage.SendErrorMessage(Context, "cp", "This channel is not registered to process PokéDex commands.");
       }
 
       [Command("form")]
@@ -271,12 +291,12 @@ namespace PokeStar.Modules
             }
             else
             {
-               await ErrorMessage.SendErrorMessage(Context, "form", $"Pokemon {pokemonName} cannot be found or has no forms.");
+               await ResponseMessage.SendErrorMessage(Context, "form", $"Pokemon {pokemonName} cannot be found or has no forms.");
             }
             await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
          }
          else
-            await ErrorMessage.SendErrorMessage(Context, "form", "This channel is not registered to process PokéDex commands.");
+            await ResponseMessage.SendErrorMessage(Context, "form", "This channel is not registered to process PokéDex commands.");
       }
 
       [Command("type")]
@@ -295,7 +315,7 @@ namespace PokeStar.Modules
 
             if (!CheckValidType(type1) || (types.Count == 2 && !CheckValidType(type2)))
             {
-               await ErrorMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
+               await ResponseMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
             }
             else
             {
@@ -327,7 +347,7 @@ namespace PokeStar.Modules
             }
          }
          else
-            await ErrorMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
+            await ResponseMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
       }
 
 
@@ -414,7 +434,7 @@ namespace PokeStar.Modules
          embed.WithColor(Color.Red);
          embed.WithTitle($"Pokemon Selection");
          embed.WithThumbnailUrl($"attachment://{selectPic}");
-         embed.AddField("Please Select Pokemon", sb.ToString());
+         embed.AddField("Do you mean...?", sb.ToString());
          return embed.Build();
       }
 
