@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
@@ -17,7 +18,7 @@ namespace PokeStar.Modules
                "This needs to be run to use the role commands.")]
       public async Task Setup()
       {
-         if (Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
+         if (!Connections.Instance().GetSetupComplete(Context.Guild.Id))
          {
             if (Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Trainer", StringComparison.OrdinalIgnoreCase)) == null)
             {
@@ -34,8 +35,7 @@ namespace PokeStar.Modules
             if (Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) == null)
             {
                await Context.Guild.CreateRoleAsync("Instinct", null, new Color(241, 196, 15), false, false, null).ConfigureAwait(false);
-            }
-            Environment.SetEnvironmentVariable("SETUP_COMPLETE", "TRUE");
+            Connections.Instance().CompleteSetup(Context.Guild.Id);
          }
          await ReplyAsync("Setup for Nona has been complete.").ConfigureAwait(false);
       }

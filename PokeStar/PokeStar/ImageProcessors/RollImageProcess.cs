@@ -9,6 +9,7 @@ using Discord.Commands;
 using Patagames.Ocr;
 using Patagames.Ocr.Enums;
 using Discord.WebSocket;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.ImageProcessors
 {
@@ -29,6 +30,8 @@ namespace PokeStar.ImageProcessors
 
          IReadOnlyCollection<Discord.Attachment> attachments = context.Message.Attachments;
          SocketGuildUser user = context.Guild.Users.FirstOrDefault(x => x.Username.ToString().Equals(context.Message.Author.Username, StringComparison.OrdinalIgnoreCase));
+         if (!Connections.Instance().GetSetupComplete(context.Guild.Id))
+            return;
          string url = attachments.ElementAt(0).Url;
          string imagePath = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\Images\profile\{user.Username}.png";
          string plainText = null;

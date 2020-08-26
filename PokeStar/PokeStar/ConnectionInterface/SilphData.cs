@@ -113,7 +113,7 @@ namespace PokeStar.ConnectionInterface
    /// </summary>
    public struct RaidBossListElement
    {
-      public int Tier { get; set; }
-      public string Name { get; set; }
+      public int Tier;
+      public string Name;
    }
 }

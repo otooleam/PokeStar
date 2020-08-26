@@ -14,11 +14,6 @@ namespace PokeStar.DataModels
       public string Name { get; set; }
 
       /// <summary>
-      /// List of pokemon's type(s).
-      /// </summary>
-      public List<string> Type { get; } = new List<string>();
-
-      /// <summary>
       /// Recommended Fast move.
       /// </summary>
       public Move FastAttack { get; set; }
@@ -26,27 +21,15 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Recommended charge move.
       /// </summary>
-      public Move ChargedAttack { get; set; }
+      public Move ChargeAttack { get; set; }
 
       /// <summary>
       /// Gets the counter to a string.
       /// </summary>
       /// <returns>Counter string.</returns>
-      public string ToString()
+      public override string ToString()
       {
-         StringBuilder sb = new StringBuilder();
-
-         sb.Append($@"{Name}: {FastAttack}");
-         if (Type.Contains(FastAttack.Type))
-         {
-            sb.Append(" * ");
-         }
-         sb.Append($@"\{ChargedAttack}");
-         if (Type.Contains(FastAttack.Type))
-         {
-            sb.Append(" *");
-         }
-         return sb.ToString();
+         return $@"**{Name}**: {FastAttack} / {ChargeAttack}";
       }
    }
 }

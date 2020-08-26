@@ -30,10 +30,6 @@ namespace PokeStar.Modules
          if (command == null)
          {
             string prefix = Connections.Instance().GetPrefix(Context.Guild.Id);
-            if (prefix == null)
-            {
-               prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
-            }
 
             embedBuilder.WithTitle("Command List");
             embedBuilder.WithDescription($"List of commands supported by this bot.");

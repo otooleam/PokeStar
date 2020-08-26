@@ -159,9 +159,12 @@
     <Compile Include="ConnectionInterface\DatabaseConnector.cs" />
     <Compile Include="ConnectionInterface\NONADatabaseConnector.cs" />
     <Compile Include="ConnectionInterface\POGODatabaseConnector.cs" />
+    <Compile Include="DataModels\ErrorMessage.cs" />
     <Compile Include="DataModels\Move.cs" />
     <Compile Include="DataModels\Pokemon.cs" />
     <Compile Include="DataModels\RaidGroup.cs" />
+    <Compile Include="DataModels\RaidMule.cs" />
+    <Compile Include="DataModels\RaidParent.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ImageProcessors\ImageProcess.cs" />
     <Compile Include="ImageProcessors\RollImageProcess.cs" />

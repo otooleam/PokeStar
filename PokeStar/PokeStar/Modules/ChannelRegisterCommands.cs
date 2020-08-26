@@ -38,7 +38,7 @@ namespace PokeStar.Modules
 
          await Context.Channel.SendMessageAsync($"Channel is now registered for the following command types {GenerateSummaryString(registration)}").ConfigureAwait(false);
 
-         if (CheckSetupComplete && Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
+         if (CheckSetupComplete && !Connections.Instance().GetSetupComplete(guild))
          {
             await Context.Channel.SendMessageAsync($"Please run the .setup command to ensure required roles have been setup.").ConfigureAwait(false);
             CheckSetupComplete = false;

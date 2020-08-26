@@ -1,66 +1,14 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using Discord.WebSocket;
-using PokeStar.ConnectionInterface;
 
 namespace PokeStar.DataModels
 {
    /// <summary>
    /// Raid to fight against a raid boss.
    /// </summary>
-   class Raid
+   public class Raid : RaidParent
    {
-      //if we have more groups, the embed breaks
-      private const int GROUP_LIMIT = 3;
-
-      /// <summary>
-      /// When the raid starts.
-      /// </summary>
-      public string Time { get; set; }
-
-      /// <summary>
-      /// Where the raid is.
-      /// </summary>
-      public string Location { get; set; }
-
-      /// <summary>
-      /// Tier of the raid (1-5).
-      /// </summary>
-      public short Tier { get; set; }
-
-      /// <summary>
-      /// Raid boss that the raid is for.
-      /// </summary>
-      public RaidBoss Boss { get; private set; }
-
-      /// <summary>
-      /// List of raid groups in the raid.
-      /// </summary>
-      public List<RaidGroup> Groups { get; private set; }
-
-      /// <summary>
-      /// List of possible raid bosses.
-      /// Only used if no raid boss is selected.
-      /// </summary>
-      public List<string> RaidBossSelections { get; set; }
-
-      /// <summary>
-      /// When the raid was created at.
-      /// </summary>
-      public DateTime CreatedAt { get; private set; }
-
-      /// <summary>
-      /// List of players looking for an invite to the raid.
-      /// </summary>
-      private List<SocketGuildUser> Invite { get; set; }
-
-      /// <summary>
-      /// Player who is in the process of inviting someone.
-      /// </summary>
-      public SocketGuildUser InvitingPlayer { get; set; }
-
       /// <summary>
       /// Creates a new raid.
       /// </summary>
@@ -68,72 +16,47 @@ namespace PokeStar.DataModels
       /// <param name="time">When the raid starts.</param>
       /// <param name="location">Where the raid is.</param>
       /// <param name="boss">Name of the raid boss.</param>
-      public Raid(short tier, string time, string location, string boss = null)
+      public Raid(short tier, string time, string location, string boss = null) : base(tier, time, location, boss) 
       {
-         Tier = tier;
-         Time = time;
-         Location = location;
-         SetBoss(boss);
-         Groups = new List<RaidGroup>
-         {
-            new RaidGroup()
-         };
-         Invite = new List<SocketGuildUser>();
-         RaidBossSelections = new List<string>();
-         CreatedAt = DateTime.Now;
-         InvitingPlayer = null;
-      }
-
-      /// <summary>
-      /// Gets all users that want an invite to the raid.
-      /// A user's party will always be 1.
-      /// </summary>
-      /// <returns>Dictionary of users with a party of 1.</returns>
-      public ImmutableDictionary<SocketGuildUser, int> GetReadonlyInvite()
-      {
-         return Invite.ToImmutableDictionary(k => k, v => 1);
-      }
-
-      /// <summary>
-      /// Gets all users that want an invite to the raid.
-      /// </summary>
-      /// <returns>List of users.</returns>
-      public ImmutableList<SocketGuildUser> GetReadonlyInviteList()
-      {
-         return Invite.ToImmutableList();
-      }
-
-      public bool HasActiveInvite()
-      {
-         return InvitingPlayer != null;
+         RaidGroupLimit = 3;
+         PlayerLimit = 20;
+         InviteLimit = 10;
       }
 
       /// <summary>
       /// Adds a player to a raid.
+      /// The player will not be added if splitting the group brings the number of
+      /// raid groups over the group limit.
       /// </summary>
       /// <param name="player">Player to add.</param>
       /// <param name="partySize">Number of accounts the user is bringing.</param>
       /// <param name="invitedBy">Who invited the user.</param>
       /// <returns>True if the user was added, otherwise false.</returns>
-      public bool PlayerAdd(SocketGuildUser player, int partySize, SocketGuildUser invitedBy = null)
+      public override bool PlayerAdd(SocketGuildUser player, int partySize, SocketGuildUser invitedBy = null)
       {
          int group;
          if (invitedBy == null)
          {
             group = IsInRaid(player);
-            if (group == -1)
-            {
+            if (group == NotInRaid)
                group = FindSmallestGroup();
-            }
-            Groups.ElementAt(group).Add(player, partySize);
+            if (group != InviteListNumber)
+               Groups.ElementAt(group).Add(player, partySize);
+            else
+               return false;
          }
-         else // is invite
+         else // is remote
          {
             group = IsInRaid(invitedBy);
-            if (group != -1)
+            if (group != NotInRaid)
             {
                Groups.ElementAt(group).Invite(player, invitedBy);
                Invite.Remove(player);
+            }
+            else if (player.Equals(invitedBy))
+            {
+               group = FindSmallestGroup();
+               Groups.ElementAt(group).Invite(player, invitedBy);
             }
             else
             {
@@ -141,31 +64,39 @@ namespace PokeStar.DataModels
             }
          }
 
-         RaidGroup newGroup;
-         if (Groups.Count < GROUP_LIMIT)
+         bool shouldSplit = Groups.ElementAt(group).ShouldSplit();
+
+         if (shouldSplit && Groups.Count < RaidGroupLimit)
          {
-            newGroup = Groups.ElementAt(group).SplitGroup();
-            if (newGroup != null)
-            {
-               Groups.Add(newGroup);
-            }
+            RaidGroup newGroup = Groups.ElementAt(group).SplitGroup();
+            Groups.Add(newGroup);
             CheckMergeGroups();
             return true;
          }
-         else
-         {
-            Groups.ElementAt(group).Remove(player);
-            return false;
-         }
+         else if (!shouldSplit)
+            return true;
+
+         Groups.ElementAt(group).Remove(player);
+         if (invitedBy != null)
+            Invite.Add(player);
+         return false;
       }
 
       /// <summary>
       /// Removes a player from the raid.
       /// </summary>
       /// <param name="player">Player to remove.</param>
-      public int RemovePlayer(SocketGuildUser player)
+      /// <returns>Struct with raid group and list of invited users.</returns>
+      public override RemovePlayerReturn RemovePlayer(SocketGuildUser player)
       {
-         if (Invite.Contains(player))
+         RemovePlayerReturn returnValue = new RemovePlayerReturn
+         {
+            GroupNum = NotInRaid,
+            invited = new List<SocketGuildUser>()
+         };
+
+         int group = IsInRaid(player);
+         if (group == InviteListNumber)
          {
             Invite.Remove(player);
          }
@@ -211,19 +142,17 @@ namespace PokeStar.DataModels
                }
             }
          }
-         return -1;
+         return returnValue;
       }
 
       /// <summary>
       /// Requests an invite to a raid for a player.
       /// </summary>
       /// <param name="player">Player that requested the invite.</param>
-      public void PlayerRequestInvite(SocketGuildUser player)
+      public override void RequestInvite(SocketGuildUser player)
       {
-         if (!Invite.Contains(player) && IsInRaid(player) == -1)
-         {
+         if (IsInRaid(player) == NotInRaid)
             Invite.Add(player);
-         }
       }
 
       /// <summary>
@@ -231,31 +160,12 @@ namespace PokeStar.DataModels
       /// </summary>
       /// <param name="requester">Player that requested the invite.</param>
       /// <param name="accepter">Player that accepted the invite.</param>
-      /// <returns></returns>
-      public bool InvitePlayer(SocketGuildUser requester, SocketGuildUser accepter)
+      /// <returns>True if the requester was invited, otherwise false.</returns>
+      public override bool InvitePlayer(SocketGuildUser requester, SocketGuildUser accepter)
       {
-         if (Invite.Contains(requester))
-         {
+         if ((IsInRaid(requester) == InviteListNumber && IsInRaid(accepter, false) != 1) || requester.Equals(accepter))
             return PlayerAdd(requester, 1, accepter);
-         }
          return false;
-      }
-
-      /// <summary>
-      /// Sets the boss of the raid.
-      /// </summary>
-      /// <param name="bossName">Name of the raid boss.</param>
-      public void SetBoss(string bossName)
-      {
-         if (bossName != null)
-         {
-            if (bossName.Equals("noboss"))
-            {
-               Boss = new RaidBoss();
-               return;
-            }
-            Boss = Connections.Instance().GetRaidBoss(bossName);
-         }
       }
 
       /// <summary>
@@ -264,9 +174,11 @@ namespace PokeStar.DataModels
       /// </summary>
       /// <param name="player">Player to check.</param>
       /// <param name="checkInvite">If invited players should be checked.</param>
-      /// <returns>Group number the player is in, else -1.</returns>
-      public int IsInRaid(SocketGuildUser player, bool checkInvite = true)
+      /// <returns>Group number the player is in, else NotInRaid.</returns>
+      public override int IsInRaid(SocketGuildUser player, bool checkInvite = true)
       {
+         if (checkInvite && Invite.Contains(player))
+            return InviteListNumber;
          for (int i = 0; i < Groups.Count; i++)
          {
             if (Groups.ElementAt(i).HasPlayer(player, checkInvite))
@@ -277,22 +189,13 @@ namespace PokeStar.DataModels
          return -1;
       }
 
-      /// <summary>
-      /// Finds the smallest group.
-      /// </summary>
-      /// <returns>Group number of the smallest group.</returns>
-      private int FindSmallestGroup()
+      public int PlayerReady(SocketGuildUser player)
       {
-         int minSize = int.MaxValue;
-         int minGroup = 0;
-         for (int i = 0; i < Groups.Count; i++)
+         int groupNum = IsInRaid(player, false);
+         if (groupNum != NotInRaid && groupNum != InviteListNumber)
          {
-            int groupSize = Groups.ElementAt(i).TotalPlayers();
-            if (groupSize < minSize)
-            {
-               minSize = groupSize;
-               minGroup = i;
-            }
+            RaidGroup group = Groups.ElementAt(groupNum);
+            return (group.PlayerReady(player) && group.AllPlayersReady()) ? groupNum : NotInRaid;
          }
          return minGroup;
       }

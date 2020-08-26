@@ -6,6 +6,9 @@ using PokeStar.Calculators;
 
 namespace PokeStar.ConnectionInterface
 {
+   /// <summary>
+   /// Manages backend connections
+   /// </summary>
    public class Connections
    {
       private static Connections connections;
@@ -69,6 +72,7 @@ namespace PokeStar.ConnectionInterface
       {
          pokemonName = pokemonName.Replace(" ", "_");
          pokemonName = pokemonName.Replace(".", "");
+         pokemonName = pokemonName.Replace("\'", "");
          pokemonName = pokemonName.Replace("?", "QU");
          return pokemonName + ".png";
       }
@@ -152,6 +156,13 @@ namespace PokeStar.ConnectionInterface
          pokemon.Weather = GetWeather(pokemon.Type);
          pokemon.FastMove = POGODBConnector.GetMoves(name, true);
          pokemon.ChargeMove = POGODBConnector.GetMoves(name, false, pokemon.Shadow);
+         pokemon.Counter = POGODBConnector.GetCounters(name);
+
+         foreach (Counter counter in pokemon.Counter)
+         {
+            counter.FastAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.FastAttack.Name);
+            counter.ChargeAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.ChargeAttack.Name);
+         }
 
          pokemon.CPMax = CPCalculator.CalcCPPerLevel(
             pokemon.Attack, pokemon.Defense, pokemon.Stamina,
@@ -227,11 +238,21 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="pokemonNumber"></param>
+      /// <returns></returns>
+      public List<string> GetPokemonByNumber(int pokemonNumber)
+      {
+         return POGODBConnector.GetPokemonByNumber(pokemonNumber);
+      }
+
+      /// <summary>
       /// Reformats the name from user input to the POGO database format.
       /// </summary>
       /// <param name="originalName">User input name.</param>
       /// <returns>Name formated for the POGO database</returns>
-      private static string ReformatName(string originalName)
+      private string ReformatName(string originalName)
       {
          int index = originalName.IndexOf('\'');
          return index == -1 ? originalName : originalName.Insert(index, "\'");
@@ -259,7 +280,7 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       /// <param name="type">Move type.</param>
       /// <returns>Dictionaries of types and modifiers.</returns>
-      public Nullable<TypeRelation> GetTypeAttackRelations(string type)
+      public TypeRelation? GetTypeAttackRelations(string type)
       {
          var allRelations = POGODBConnector.GetTypeAttackRelations(type);
          return new TypeRelation
@@ -279,16 +300,33 @@ namespace PokeStar.ConnectionInterface
          return POGODBConnector.GetWeather(types);
       }
 
+      /// <summary>
+      /// Adds settings to the database for a guild.
+      /// </summary>
+      /// <param name="guild">Id of guild to add settings for.</param>
+      public void InitSettings(ulong guild)
+      {
+         NONADBConnector.AddSettings(guild);
+      }
 
       /// <summary>
       /// Gets the prefix of a guild.
       /// </summary>
       /// <param name="guild">Id of guild to get prefix of.</param>
-      /// <returns>Prefix of the guild if it is not default, otherwise null.</returns>
+      /// <returns>Prefix registerd for the guild.</returns>
       public string GetPrefix(ulong guild)
       {
-         string prefix = NONADBConnector.GetPrefix(guild);
-         return prefix?[0].ToString();
+         return NONADBConnector.GetPrefix(guild);
+      }
+
+      /// <summary>
+      /// Check if setup is completed for a guild.
+      /// </summary>
+      /// <param name="guild">Id of guild to get setup status of.</param>
+      /// <returns>True if setup is complete for the guild, otherwise false.</returns>
+      public bool GetSetupComplete(ulong guild)
+      {
+         return NONADBConnector.GetSetupComplete(guild);
       }
 
       /// <summary>
@@ -298,26 +336,25 @@ namespace PokeStar.ConnectionInterface
       /// <param name="prefix">New prefix value.</param>
       public void UpdatePrefix(ulong guild, string prefix)
       {
-         if (GetPrefix(guild) == null)
-         {
-            NONADBConnector.AddPrefix(guild, prefix);
-         }
-         else
-         {
-            NONADBConnector.UpdatePrefix(guild, prefix);
-         }
+         NONADBConnector.UpdatePrefix(guild, prefix);
       }
 
       /// <summary>
-      /// Deletes the prefix of a guild.
+      /// Marks a guild setup as complete
       /// </summary>
-      /// <param name="guild">Id of guild to delete prefix of.</param>
-      public void DeletePrefix(ulong guild)
+      /// <param name="guild">Id of the guild to complete setup for.</param>
+      public void CompleteSetup(ulong guild)
       {
-         if (GetPrefix(guild) != null)
-         {
-            NONADBConnector.DeletePrefix(guild);
-         }
+         NONADBConnector.CompleteSetup(guild);
+      }
+
+      /// <summary>
+      /// Deletes the settings of a guild.
+      /// </summary>
+      /// <param name="guild">Id of guild to delete settings of.</param>
+      public void DeleteSettings(ulong guild)
+      {
+         NONADBConnector.DeleteSettings(guild);
       }
 
       /// <summary>
@@ -359,17 +396,10 @@ namespace PokeStar.ConnectionInterface
       /// <param name="channel">Id of the channel to remove the registration from.</param>
       public void DeleteRegistration(ulong guild, ulong? channel = null)
       {
-         if (GetPrefix(guild) != null)
-         {
-            if (channel == null)
-            {
-               NONADBConnector.DeleteAllRegistration(guild);
-            }
-            else
-            {
-               NONADBConnector.DeleteRegistration(guild, (ulong)channel);
-            }
-         }
+         if (channel == null)
+            NONADBConnector.DeleteAllRegistration(guild);
+         else
+            NONADBConnector.DeleteRegistration(guild, (ulong)channel);
       }
    }
 
