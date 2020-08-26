@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using Discord.Commands;
 using Patagames.Ocr;
 using Patagames.Ocr.Enums;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.ImageProcessors
 {
@@ -26,7 +27,7 @@ namespace PokeStar.ImageProcessors
          if (context == null)
             return;
 
-         if (Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
+         if (!Connections.Instance().GetSetupComplete(context.Guild.Id))
             return;
 
          var attachments = context.Message.Attachments;

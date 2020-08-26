@@ -48,8 +48,6 @@ namespace PokeStar
          Environment.SetEnvironmentVariable("NONA_DB_CONNECTION_STRING", json.GetValue("nona_db_sql").ToString());
          Environment.SetEnvironmentVariable("DEFAULT_PREFIX", json.GetValue("default_prefix").ToString());
 
-         Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
-
          var logLevel = Convert.ToInt32(json.GetValue("log_level").ToString());
          var logSeverity = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? LogSeverity.Info : (LogSeverity)logLevel;
 
@@ -96,6 +94,7 @@ namespace PokeStar
          await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services).ConfigureAwait(false);
          _client.ReactionAdded += HandleReactionAddedAsync;
          _client.Ready += HandleReady;
+         _client.JoinedGuild += HandleJoinGuild;
          _client.LeftGuild += HandleLeftGuild;
          return Task.CompletedTask;
       }
@@ -133,15 +132,12 @@ namespace PokeStar
       private async Task<Task> HandleCommandAsync(SocketMessage cmdMessage)
       {
          SocketUserMessage message = cmdMessage as SocketUserMessage;
-         if (message == null || message.Author.IsBot)
+         if (message == null || (message.Author.IsBot && !message.Author.Username.Equals("NonaTest", StringComparison.OrdinalIgnoreCase)))
             return Task.CompletedTask;
          var context = new SocketCommandContext(_client, message);
 
          int argPos = 0;
-
          string prefix = Connections.Instance().GetPrefix(context.Guild.Id);
-         if (prefix == null)
-            prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
 
          if (message.Attachments.Count != 0)
          {
@@ -180,10 +176,12 @@ namespace PokeStar
          var user = reaction.User.Value;
          if (message != null && reaction.User.IsSpecified && !user.IsBot)
          {
-            if (RaidCommands.IsCurrentRaid(message.Id))
-               await RaidCommands.RaidReaction(message, reaction);
-            else if (RaidCommands.IsRaidInvite(message.Id))
-               await RaidCommands.RaidInviteReaction(message, reaction, originChannel);
+            if (RaidCommands.IsRaidMessage(message.Id))
+               await RaidCommands.RaidMessageReactionHandle(message, reaction);
+            else if (RaidCommands.IsRaidSubMessage(message.Id))
+               await RaidCommands.RaidSubMessageReactionHandle(message, reaction);
+            else if (DexCommands.IsDexSubMessage(message.Id))
+               await DexCommands.DexMessageReactionHandle(message, reaction);
          }
          return Task.CompletedTask;
       }
@@ -200,7 +198,25 @@ namespace PokeStar
          var server = _client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(homeGuildName, StringComparison.OrdinalIgnoreCase));
 
          SetEmotes(server, json);
+         RaidCommands.SetRemotePassEmote();
 
+         foreach (SocketGuild guild in _client.Guilds)
+         {
+            if (Connections.Instance().GetPrefix(guild.Id) == null)
+               Connections.Instance().InitSettings(guild.Id);
+         }
+
+         return Task.CompletedTask;
+      }
+
+      /// <summary>
+      /// Handles the Join Guild event.
+      /// </summary>
+      /// <param name="guild">Guild that the bot joined.</param>
+      /// <returns>Task Complete.</returns>
+      private Task HandleJoinGuild(SocketGuild guild)
+      {
+         Connections.Instance().InitSettings(guild.Id);
          return Task.CompletedTask;
       }
 
@@ -212,7 +228,7 @@ namespace PokeStar
       private Task HandleLeftGuild(SocketGuild guild)
       {
          Connections.Instance().DeleteRegistration(guild.Id);
-         Connections.Instance().DeletePrefix(guild.Id);
+         Connections.Instance().DeleteSettings(guild.Id);
          return Task.CompletedTask;
       }
 
@@ -228,7 +244,8 @@ namespace PokeStar
             "fire_emote", "flying_emote", "ghost_emote", "grass_emote", "ground_emote", "ice_emote",
             "normal_emote", "poison_emote", "psychic_emote", "rock_emote", "steel_emote", "water_emote",
             "raid_emote", "valor_emote", "mystic_emote", "instinct_emote", "sunny_emote", "clear_emote",
-            "rain_emote", "partly_cloudy_emote", "cloudy_emote", "windy_emote", "snow_emote", "fog_emote"
+            "rain_emote", "partly_cloudy_emote", "cloudy_emote", "windy_emote", "snow_emote", "fog_emote",
+            "remote_pass_emote"
          };
 
          foreach (string emote in emoteNames)
