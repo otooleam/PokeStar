@@ -17,5 +17,13 @@ namespace PokeStar.Modules
          Connections.Instance().UpdatePrefix(Context.Guild.Id, prefix.ToString());
          await ReplyAsync($"Command prefix has been set to \'{prefix}\' for this server.").ConfigureAwait(false);
       }
+
+      [Command("updatePokemonNames")]
+      [Summary("Updates the saved list of pokemon names from the database.")]
+      public async Task UpdatePokemonNames()
+      {
+         Connections.Instance().UpdateNameList();
+         await ReplyAsync($"Pokemon name list has been updated.").ConfigureAwait(false);
+      }
    }
 }

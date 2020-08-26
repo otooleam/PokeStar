@@ -3,6 +3,7 @@ using System.Linq;
 using System.Collections.Generic;
 using PokeStar.DataModels;
 using PokeStar.Calculators;
+using DuoVia.FuzzyStrings;
 
 namespace PokeStar.ConnectionInterface
 {
@@ -20,6 +21,8 @@ namespace PokeStar.ConnectionInterface
       public static string RAID_BOSS_HTML => raidBossHTML;
       private const string raidBossHTML = "//*[@class = 'col-md-4']";
 
+      private List<string> PokemonNames;
+
       /// <summary>
       /// Creates a new Connections object.
       /// Private to implement the singleton design patturn.
@@ -28,6 +31,7 @@ namespace PokeStar.ConnectionInterface
       {
          POGODBConnector = new POGODatabaseConnector(Environment.GetEnvironmentVariable("POGO_DB_CONNECTION_STRING"));
          NONADBConnector = new NONADatabaseConnector(Environment.GetEnvironmentVariable("NONA_DB_CONNECTION_STRING"));
+         UpdateNameList();
       }
 
       /// <summary>
@@ -82,6 +86,25 @@ namespace PokeStar.ConnectionInterface
       public static List<string> GetBossList(short tier)
       {
          return SilphData.GetRaidBossesTier(tier);
+      }
+
+      public void UpdateNameList()
+      {
+         PokemonNames = POGODBConnector.GetNameList();
+      }
+
+      public List<string> FuzzyNameSearch(string name)
+      {
+         Dictionary<string, double> fuzzy = new Dictionary<string, double>();
+
+         foreach (string pokemonName in PokemonNames)
+            fuzzy.Add(pokemonName, pokemonName.FuzzyMatch(name));
+
+         var myList = fuzzy.ToList();
+         myList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
+         fuzzy = myList.ToDictionary(x => x.Key, x => x.Value);
+
+         return fuzzy.Keys.Take(10).ToList();
       }
 
       /// <summary>
