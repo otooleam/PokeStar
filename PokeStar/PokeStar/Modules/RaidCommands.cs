@@ -732,7 +732,7 @@ namespace PokeStar.Modules
       {
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.DarkBlue);
-         embed.WithTitle($"{(raid.Boss.Name.Equals("Bossless") ? "" : raid.Boss.Name)} {BuildRaidTitle(raid.Tier)}");
+         embed.WithTitle(raid.Boss.Name.Equals(RaidBoss.DefaultName) ? "Empty Raid" : $"{raid.Boss.Name} Raid {BuildRaidTitle(raid.Tier)}");
          embed.WithDescription("Press ? for help.");
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Time", raid.Time, true);
@@ -857,7 +857,6 @@ namespace PokeStar.Modules
       private static string BuildRaidTitle(int tier)
       {
          StringBuilder sb = new StringBuilder();
-         sb.Append("Raid ");
          string raidSymbol = Emote.Parse(Environment.GetEnvironmentVariable("RAID_EMOTE")).ToString();
          for (int i = 0; i < tier; i++)
             sb.Append(raidSymbol);

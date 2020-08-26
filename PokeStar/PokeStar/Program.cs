@@ -25,6 +25,7 @@ namespace PokeStar
       private static IServiceProvider _services;
 
       private bool logging = false;
+      private bool AcceptFromNonaTest = false;
 
       /// <summary>
       /// Main function for the system.
@@ -132,7 +133,7 @@ namespace PokeStar
       private async Task<Task> HandleCommandAsync(SocketMessage cmdMessage)
       {
          SocketUserMessage message = cmdMessage as SocketUserMessage;
-         if (message == null || (message.Author.IsBot && !message.Author.Username.Equals("NonaTest", StringComparison.OrdinalIgnoreCase)))
+         if (message == null || (message.Author.IsBot && (!AcceptFromNonaTest || !message.Author.Username.Equals("NonaTest", StringComparison.OrdinalIgnoreCase))))
             return Task.CompletedTask;
          var context = new SocketCommandContext(_client, message);
 
