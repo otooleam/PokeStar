@@ -16,7 +16,7 @@ namespace PokeStar.ConnectionInterface
       /// <returns>List of current raid bosses for the tier.</returns>
       public static List<string> GetRaidBossesTier(int tier)
       {
-         var raidbossList = GetRaidBosses();
+         List<RaidBossListElement> raidbossList = GetRaidBosses();
          List<string> bossTier = new List<string>();
          foreach (RaidBossListElement boss in raidbossList)
             if (boss.Tier == tier)
@@ -36,26 +36,34 @@ namespace PokeStar.ConnectionInterface
          int tier = -1;
          bool tierStart = false;
          bool nextInTier = false;
-         var web = new HtmlWeb();
-         var doc = web.Load(Connections.Instance().RAID_BOSS_URL);
-         var bosses = doc.DocumentNode.SelectNodes(Connections.RAID_BOSS_HTML);
+         bool megaTierStarted = false;
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(Connections.Instance().RAID_BOSS_URL);
+         HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(Connections.RAID_BOSS_HTML);
 
          List<RaidBossListElement> raidBossList = new List<RaidBossListElement>();
 
-         foreach (var col in bosses)
+         foreach (HtmlNode col in bosses)
          {
             string[] words = col.InnerText.Split('\n');
             foreach (string word in words)
             {
                if (!string.IsNullOrEmpty(word.Replace(" ", string.Empty)))
                {
-                  var temp = word.Trim();
+                  string temp = word.Trim();
                   temp = temp.Substring(0, Math.Min(temp.Length, 4));
                   if (temp.Equals("Tier", StringComparison.OrdinalIgnoreCase))
                   {
                      tier = Convert.ToInt32(word.Trim().Substring(4));
                      tierStart = true;
                      nextInTier = false;
+                  }
+                  else if (temp.Equals("Mega", StringComparison.OrdinalIgnoreCase) && !megaTierStarted)
+                  {
+                     tier = 7;
+                     tierStart = true;
+                     nextInTier = false;
+                     megaTierStarted = true;
                   }
                   else if (temp.Equals("8+", StringComparison.OrdinalIgnoreCase))
                      nextInTier = true;

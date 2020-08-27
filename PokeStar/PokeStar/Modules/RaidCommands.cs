@@ -120,6 +120,8 @@ namespace PokeStar.Modules
          MULE_READY_SUB_MESSAGE,
       }
 
+      private static readonly int MEGA_TIER = 7;
+
       [Command("raid")]
       [Summary("Creates a new Raid message.")]
       public async Task Raid([Summary("Tier of the raid.")] short tier,
@@ -856,6 +858,8 @@ namespace PokeStar.Modules
       /// <returns>Raid title as a string.</returns>
       private static string BuildRaidTitle(int tier)
       {
+         if(tier == MEGA_TIER)
+            return Emote.Parse(Environment.GetEnvironmentVariable("MEGA_EMOTE")).ToString();
          StringBuilder sb = new StringBuilder();
          string raidSymbol = Emote.Parse(Environment.GetEnvironmentVariable("RAID_EMOTE")).ToString();
          for (int i = 0; i < tier; i++)
