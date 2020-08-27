@@ -49,6 +49,9 @@ namespace PokeStar
          Environment.SetEnvironmentVariable("NONA_DB_CONNECTION_STRING", json.GetValue("nona_db_sql").ToString());
          Environment.SetEnvironmentVariable("DEFAULT_PREFIX", json.GetValue("default_prefix").ToString());
 
+         AcceptFromNonaTest = json.GetValue("accept_nona_test").ToString().Equals("FALSE", StringComparison.OrdinalIgnoreCase);
+         Environment.SetEnvironmentVariable("USE_EMPTY_RAID", json.GetValue("use_empty_raid").ToString().ToUpper());
+
          var logLevel = Convert.ToInt32(json.GetValue("log_level").ToString());
          var logSeverity = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? LogSeverity.Info : (LogSeverity)logLevel;
 

@@ -244,7 +244,7 @@ namespace PokeStar.Modules
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
          }
-         else //silph is mid-update or something else went wrong
+         else if (Environment.GetEnvironmentVariable("USE_EMPTY_RAID").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
          {
             string boss = RaidBoss.DefaultName;
             raid = GenerateType(command.Equals("raid", StringComparison.OrdinalIgnoreCase), tier, time, location, boss);
@@ -256,6 +256,8 @@ namespace PokeStar.Modules
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
          }
+         else
+            await ErrorMessage.SendErrorMessage(Context, command, $"No raid bosses found for tier {tier}");
       }
 
       /// <summary>
