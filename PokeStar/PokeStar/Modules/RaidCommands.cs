@@ -243,7 +243,17 @@ namespace PokeStar.Modules
             Connections.DeleteFile(fileName);
          }
          else //silph is mid-update or something else went wrong
-            await ErrorMessage.SendErrorMessage(Context, command, $"No bosses found for tier {tier}.");
+         {
+            string boss = RaidBoss.DefaultName;
+            raid = GenerateType(command.Equals("raid", StringComparison.OrdinalIgnoreCase), tier, time, location, boss);
+            fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+
+            Connections.CopyFile(fileName);
+            RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
+            await raidMsg.AddReactionsAsync(emojis);
+            raidMessages.Add(raidMsg.Id, raid);
+            Connections.DeleteFile(fileName);
+         }
       }
 
       /// <summary>
@@ -722,7 +732,7 @@ namespace PokeStar.Modules
       {
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.DarkBlue);
-         embed.WithTitle($"{(raid.Boss.Name.Equals("Bossless") ? "" : raid.Boss.Name)} {BuildRaidTitle(raid.Tier)}");
+         embed.WithTitle(raid.Boss.Name.Equals(RaidBoss.DefaultName) ? "Empty Raid" : $"{raid.Boss.Name} Raid {BuildRaidTitle(raid.Tier)}");
          embed.WithDescription("Press ? for help.");
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Time", raid.Time, true);
@@ -847,7 +857,6 @@ namespace PokeStar.Modules
       private static string BuildRaidTitle(int tier)
       {
          StringBuilder sb = new StringBuilder();
-         sb.Append("Raid ");
          string raidSymbol = Emote.Parse(Environment.GetEnvironmentVariable("RAID_EMOTE")).ToString();
          for (int i = 0; i < tier; i++)
             sb.Append(raidSymbol);

@@ -107,7 +107,7 @@ namespace PokeStar.DataModels
       /// <param name="bossName">Name of the raid boss.</param>
       public void SetBoss(string bossName)
       {
-         Boss = (bossName == null) ? null : Connections.Instance().GetRaidBoss(bossName);
+         Boss = (string.IsNullOrEmpty(bossName)) ? null : bossName.Equals(RaidBoss.DefaultName) ? new RaidBoss() :  Connections.Instance().GetRaidBoss(bossName);
       }
 
       /// <summary>
