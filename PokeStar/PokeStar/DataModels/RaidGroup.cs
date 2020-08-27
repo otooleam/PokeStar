@@ -121,6 +121,7 @@ namespace PokeStar.DataModels
          if (Invited.ContainsKey(player))
             return;
          else if (Attending.ContainsKey(player))
+         {
             Attending[player] = partySize;
          }
          else if (Ready.ContainsKey(player))

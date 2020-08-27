@@ -124,28 +124,6 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Marks the player as ready.
-      /// </summary>
-      /// <param name="player">Player to mark ready.</param>
-      /// <returns>Group number if all members of the group are ready, else -1.</returns>
-      public int PlayerReady(SocketGuildUser player)
-      {
-         for (int i = 0; i < Groups.Count; i++)
-         {
-            RaidGroup group = Groups.ElementAt(i);
-            if (group.HasPlayer(player))
-            {
-               group.PlayerReady(player);
-               if (group.AllPlayersReady())
-               {
-                  return i;
-               }
-            }
-         }
-         return returnValue;
-      }
-
-      /// <summary>
       /// Requests an invite to a raid for a player.
       /// </summary>
       /// <param name="player">Player that requested the invite.</param>
@@ -197,7 +175,7 @@ namespace PokeStar.DataModels
             RaidGroup group = Groups.ElementAt(groupNum);
             return (group.PlayerReady(player) && group.AllPlayersReady()) ? groupNum : NotInRaid;
          }
-         return minGroup;
+         return NotInRaid;
       }
 
       /// <summary>
@@ -215,7 +193,7 @@ namespace PokeStar.DataModels
          Groups.RemoveAll(x => x.TotalPlayers() == 0);
          if (Groups.Count == 0)
          {
-            Groups.Add(new RaidGroup());
+            Groups.Add(new RaidGroup(PlayerLimit, InviteLimit));
          }
       }
    }

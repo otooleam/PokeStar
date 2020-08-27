@@ -35,6 +35,7 @@ namespace PokeStar.Modules
             if (Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) == null)
             {
                await Context.Guild.CreateRoleAsync("Instinct", null, new Color(241, 196, 15), false, false, null).ConfigureAwait(false);
+            }
             Connections.Instance().CompleteSetup(Context.Guild.Id);
          }
          await ReplyAsync("Setup for Nona has been complete.").ConfigureAwait(false);

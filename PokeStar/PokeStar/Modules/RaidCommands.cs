@@ -387,9 +387,9 @@ namespace PokeStar.Modules
             {
                if (raid.IsInRaid(reactingPlayer, false) != RaidParent.NotInRaid)
                {
-                  if (raid.GetReadonlyInvite().IsEmpty)
+                  if (raid.GetReadonlyInviteList().IsEmpty)
                   {
-                     await reaction.Channel.SendMessageAsync($"{player.Mention}, There are no players to invite.").ConfigureAwait(false);
+                     await reaction.Channel.SendMessageAsync($"{reactingPlayer.Mention}, There are no players to invite.").ConfigureAwait(false);
                   }
                   else
                   {
@@ -735,9 +735,22 @@ namespace PokeStar.Modules
 
          if (raid is Raid)
          {
-            embed.AddField($"{(raid.Groups.Count == 1 ? "" : $"Group {i + 1} ")}Ready ({raid.Groups.ElementAt(i).GetHereCount()}/{raid.Groups.ElementAt(i).TotalPlayers()})", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyHere())}");
-            embed.AddField($"{(raid.Groups.Count == 1 ? "" : $"Group {i + 1} ")}Attending", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyAttending())}");
-            embed.AddField($"{(raid.Groups.Count == 1 ? "" : $"Group {i + 1} ")}Remote", $"{BuildInvitedList(raid.Groups.ElementAt(i).GetReadonlyInvited())}");
+            for (int i = 0; i < raid.Groups.Count; i++)
+            {
+               embed.AddField($"{(raid.Groups.Count == 1 ? "" : $"Group {i + 1} ")}Ready ({raid.Groups.ElementAt(i).GetHereCount()}/{raid.Groups.ElementAt(i).TotalPlayers()})", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyHere())}");
+               embed.AddField($"{(raid.Groups.Count == 1 ? "" : $"Group {i + 1} ")}Attending", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyAttending())}");
+               embed.AddField($"{(raid.Groups.Count == 1 ? "" : $"Group {i + 1} ")}Remote", $"{BuildInvitedList(raid.Groups.ElementAt(i).GetReadonlyInvited())}");
+            }
+            embed.AddField($"Need Invite:", $"{BuildRequestInviteList(raid.GetReadonlyInviteList())}");
+            embed.WithFooter("Note: the max number of members in a raid is 20, and the max number of invites is 10.");
+         }
+         else if (raid is RaidMule mule)
+         {
+            embed.AddField($"Mules", $"{BuildPlayerList(mule.Mules.GetReadonlyAttending())}");
+            for (int i = 0; i < raid.Groups.Count; i++)
+               embed.AddField($"{(raid.Groups.Count == 1 ? "" : $"Group {i + 1} ")}Remote", $"{BuildInvitedList(raid.Groups.ElementAt(i).GetReadonlyInvited())}");
+            embed.AddField($"Need Invite:", $"{BuildRequestInviteList(raid.GetReadonlyInviteList())}");
+            embed.WithFooter("Note: The max number of invites is 10, and the max number of invites per person is 5.");
          }
          return embed.Build();
       }
@@ -883,12 +896,12 @@ namespace PokeStar.Modules
       private static string BuildEditPingList(List<SocketGuildUser> players, SocketGuildUser editor, string field, string value)
       {
          StringBuilder sb = new StringBuilder();
+         sb.Append("Edit Alert: ");
 
          foreach (SocketGuildUser player in players)
          {
             sb.Append($"{player.Mention} ");
          }
-         sb.Append($"Everyone in group {groupNumber + 1} is ready at {location}");
 
          sb.Append($"{editor.Nickname ?? editor.Username} has changed {field} to {value} for a raid you are in.");
          return sb.ToString();
@@ -1028,6 +1041,7 @@ namespace PokeStar.Modules
             if (Math.Abs((temp.Value.CreatedAt - DateTime.Now).TotalDays) >= 1)
             {
                ids.Add(temp.Key);
+            }
          foreach (ulong id in ids)
             raidMessages.Remove(id);
       }
