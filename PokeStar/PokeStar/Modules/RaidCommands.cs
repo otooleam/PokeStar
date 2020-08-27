@@ -120,9 +120,21 @@ namespace PokeStar.Modules
          MULE_READY_SUB_MESSAGE,
       }
 
+      private static readonly short MEGA_RAID_TIER = 7;
+      private static readonly short LEGENDARY_RAID_TIER = 5;
+      private static readonly short RARE_RAID_TIER = 3;
+      private static readonly short COMMON_RAID_TIER = 1;
+      private static readonly short INVALID_TIER = 0;
+
       [Command("raid")]
       [Summary("Creates a new Raid message.")]
-      public async Task Raid([Summary("Tier of the raid.")] short tier,
+      [Remarks("Valid raid values are:\n" +
+               "Raid Tier........Raid Value\n" +
+               "Tier 1...............1 / Common / C\n" +
+               "Tier 3..............3 / Rare / R\n" +
+               "Tier 5..............5 / Legendary / L\n" +
+               "Mega Tier......7 / Mega / M\n")]
+      public async Task Raid([Summary("Tier of the raid.")] string tier,
                              [Summary("Time the raid will start.")] string time,
                              [Summary("Where the raid will be.")][Remainder] string location)
       {
@@ -136,7 +148,13 @@ namespace PokeStar.Modules
       [Command("mule")]
       [Alias("raidmule")]
       [Summary("Creates a new Raid Mule message.")]
-      public async Task RaidMule([Summary("Tier of the raid.")] short tier,
+      [Remarks("Valid raid values are:\n" +
+               "Raid Tier........Raid Value\n" +
+               "Tier 1...............1 / Common / C\n" +
+               "Tier 3..............3 / Rare / R\n" +
+               "Tier 5..............5 / Legendary / L\n" +
+               "Mega Tier......7 / Mega / M\n")]
+      public async Task RaidMule([Summary("Tier of the raid.")] string tier,
                                  [Summary("Time the raid will start.")] string time,
                                  [Summary("Where the raid will be.")][Remainder] string location)
       {
@@ -212,15 +230,16 @@ namespace PokeStar.Modules
       /// <param name="time"></param>
       /// <param name="location"></param>
       /// <returns></returns>
-      private async Task GenerateRaidMessage(string command, IEmote[] emojis, short tier, string time, string location)
+      private async Task GenerateRaidMessage(string command, IEmote[] emojis, string tier, string time, string location)
       {
-         List<string> potentials = Connections.GetBossList(tier);
+         short calcTier = GenerateTier(tier);
+         List<string> potentials = Connections.GetBossList(calcTier);
          RaidParent raid;
          string fileName;
          if (potentials.Count > 1)
          {
-            fileName = $"Egg{tier}.png";
-            raid = GenerateType(command.Equals("raid", StringComparison.OrdinalIgnoreCase), tier, time, location);
+            fileName = $"Egg{calcTier}.png";
+            raid = GenerateRaidType(command.Equals("raid", StringComparison.OrdinalIgnoreCase), calcTier, time, location);
             raid.RaidBossSelections = potentials;
 
             Connections.CopyFile(fileName);
@@ -233,7 +252,7 @@ namespace PokeStar.Modules
          else if (potentials.Count == 1)
          {
             string boss = potentials.First();
-            raid = GenerateType(command.Equals("raid", StringComparison.OrdinalIgnoreCase), tier, time, location, boss);
+            raid = GenerateRaidType(command.Equals("raid", StringComparison.OrdinalIgnoreCase), calcTier, time, location, boss);
             fileName = Connections.GetPokemonPicture(raid.Boss.Name);
 
             Connections.CopyFile(fileName);
@@ -242,10 +261,10 @@ namespace PokeStar.Modules
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
          }
-         else //silph is mid-update or something else went wrong
+         else if (Environment.GetEnvironmentVariable("USE_EMPTY_RAID").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
          {
             string boss = RaidBoss.DefaultName;
-            raid = GenerateType(command.Equals("raid", StringComparison.OrdinalIgnoreCase), tier, time, location, boss);
+            raid = GenerateRaidType(command.Equals("raid", StringComparison.OrdinalIgnoreCase), calcTier, time, location, boss);
             fileName = Connections.GetPokemonPicture(raid.Boss.Name);
 
             Connections.CopyFile(fileName);
@@ -254,6 +273,8 @@ namespace PokeStar.Modules
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
          }
+         else
+            await ErrorMessage.SendErrorMessage(Context, command, $"No raid bosses found for tier {tier}");
       }
 
       /// <summary>
@@ -265,11 +286,37 @@ namespace PokeStar.Modules
       /// <param name="location"></param>
       /// <param name="boss"></param>
       /// <returns></returns>
-      private RaidParent GenerateType(bool check, short tier, string time, string location, string boss = null)
+      private RaidParent GenerateRaidType(bool check, short tier, string time, string location, string boss = null)
       {
          if (check)
             return new Raid(tier, time, location, boss);
          return new RaidMule(tier, time, location, boss);
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="tier"></param>
+      /// <returns></returns>
+      private short GenerateTier(string tier)
+      {
+         if (tier.Equals("m", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("mega", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("7", StringComparison.OrdinalIgnoreCase))
+            return MEGA_RAID_TIER;
+         if (tier.Equals("l", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("legendary", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("5", StringComparison.OrdinalIgnoreCase))
+            return LEGENDARY_RAID_TIER;
+         if (tier.Equals("r", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("rare", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("3", StringComparison.OrdinalIgnoreCase))
+            return RARE_RAID_TIER;
+         if (tier.Equals("c", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("common", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("1", StringComparison.OrdinalIgnoreCase))
+            return COMMON_RAID_TIER;
+         return INVALID_TIER;
       }
 
       /// <summary>
@@ -854,8 +901,10 @@ namespace PokeStar.Modules
       /// </summary>
       /// <param name="tier">Raid tier.</param>
       /// <returns>Raid title as a string.</returns>
-      private static string BuildRaidTitle(int tier)
+      private static string BuildRaidTitle(short tier)
       {
+         if(tier == MEGA_RAID_TIER)
+            return Emote.Parse(Environment.GetEnvironmentVariable("MEGA_EMOTE")).ToString();
          StringBuilder sb = new StringBuilder();
          string raidSymbol = Emote.Parse(Environment.GetEnvironmentVariable("RAID_EMOTE")).ToString();
          for (int i = 0; i < tier; i++)
