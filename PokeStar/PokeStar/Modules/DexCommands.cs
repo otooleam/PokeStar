@@ -312,7 +312,7 @@ namespace PokeStar.Modules
                   }
 
                   TypeRelation? type1AttackRelations = (types.Count == 2) ? null : Connections.Instance().GetTypeAttackRelations(type1);
-                  TypeRelation? defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
+                  TypeRelation defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
                   List<string> weather = Connections.Instance().GetWeather(types);
 
                   EmbedBuilder embed = new EmbedBuilder();

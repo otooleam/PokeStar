@@ -188,7 +188,6 @@ namespace PokeStar.DataModels
          sb.AppendLine($"Can be Obtained\t: {(Obtainable ? "Yes" : "No")}");
          sb.AppendLine($"Can be Shiny\t: {(Shiny ? "Yes" : "No")}");
          sb.AppendLine($"Can be Shadow\t: {(Shadow ? "Yes" : "No")}");
-         sb.AppendLine($"Regional\t: {(Regional ? "Yes" : "No")}");
 
          return sb.ToString();
       }

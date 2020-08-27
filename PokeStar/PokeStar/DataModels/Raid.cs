@@ -97,30 +97,18 @@ namespace PokeStar.DataModels
 
          int group = IsInRaid(player);
          if (group == InviteListNumber)
-         {
             Invite.Remove(player);
-         }
          else
          {
-            for (int i = 0; i < Groups.Count; i++)
+            if (group != NotInRaid)
             {
-               RaidGroup group = Groups.ElementAt(i);
-               if (group.HasPlayer(player))
-               {
-                  bool everyoneWasReady = group.HasPlayer(player);
-
-                  group.Remove(player);
-                  if (group.AllPlayersReady())
-                  {
-                     if (!everyoneWasReady)
-                     {
-                        return i;
-                     }
-                  }
-               }
+               RaidGroup foundGroup = Groups.ElementAt(group);
+               returnValue.invited = foundGroup.Remove(player);
+               foreach (SocketGuildUser invite in returnValue.invited)
+                  Invite.Add(invite);
             }
          }
-         return -1;
+         return returnValue;
       }
 
       /// <summary>
@@ -176,25 +164,6 @@ namespace PokeStar.DataModels
             return (group.PlayerReady(player) && group.AllPlayersReady()) ? groupNum : NotInRaid;
          }
          return NotInRaid;
-      }
-
-      /// <summary>
-      /// Attempts to merge groups.
-      /// </summary>
-      private void CheckMergeGroups()
-      {
-         foreach (RaidGroup group in Groups)
-         {
-            foreach (RaidGroup check in Groups)
-            {
-               group.MergeGroup(check);
-            }
-         }
-         Groups.RemoveAll(x => x.TotalPlayers() == 0);
-         if (Groups.Count == 0)
-         {
-            Groups.Add(new RaidGroup(PlayerLimit, InviteLimit));
-         }
       }
    }
 }
