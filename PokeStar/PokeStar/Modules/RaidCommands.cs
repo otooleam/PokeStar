@@ -123,6 +123,11 @@ namespace PokeStar.Modules
 
       [Command("raid")]
       [Summary("Creates a new interactive raid coordination message.")]
+      [Remarks("Valid Tier values:\n" +
+         "1, common, C\n" +
+         "3, rare, R\n" +
+         "5, legendary, L\n" +
+         "7, mega, M\n")]
       public async Task Raid([Summary("Tier of the raid.")] short tier,
                              [Summary("Time the raid will start.")] string time,
                              [Summary("Where the raid will be.")][Remainder] string location)
@@ -1013,7 +1018,7 @@ namespace PokeStar.Modules
          }
 
          sb.AppendLine("\nRaid Edit:");
-         sb.AppendLine("To edit the raid send the edit command with the following code: ");
+         sb.AppendLine("To edit the raid copy and paste the following command: ");
          return sb.ToString();
       }
 

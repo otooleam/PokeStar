@@ -25,19 +25,21 @@ namespace PokeStar.Modules
          {
             "ping",
             "help",
+            "rave",
+            "screm"
          };
 
          if (command == null)
          {
             string prefix = Connections.Instance().GetPrefix(Context.Guild.Id);
 
-            embedBuilder.WithTitle("Command List");
+            embedBuilder.WithTitle("**Command List**");
             embedBuilder.WithDescription($"List of commands supported by this bot.");
             foreach (CommandInfo cmdInfo in commands)
             {
                if (!hiddenCommands.Contains(cmdInfo.Name))
                {
-                  embedBuilder.AddField($"{prefix}{cmdInfo.Name}", cmdInfo.Summary ?? "No description available");
+                  embedBuilder.AddField($"**{prefix}{cmdInfo.Name}**", cmdInfo.Summary ?? "No description available");
                }
             }
             embedBuilder.WithFooter($"Run \"{prefix}help <command name>\" to get help for a specific command.");
@@ -47,7 +49,7 @@ namespace PokeStar.Modules
          else if (commands.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase)) != null)
          {
             CommandInfo cmdInfo = commands.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase));
-            embedBuilder.WithTitle($"{command} command help");
+            embedBuilder.WithTitle($"**{command} command help**");
             embedBuilder.WithDescription(cmdInfo.Summary ?? "No description available");
             if (cmdInfo.Aliases.Count > 1)
             {
@@ -60,15 +62,15 @@ namespace PokeStar.Modules
                   }
                }
                aliases = aliases.TrimEnd().TrimEnd(',');
-               embedBuilder.AddField("Aliases:", aliases);
+               embedBuilder.AddField("Alternate Command:", aliases);
             }
             if (cmdInfo.Remarks != null)
             {
-               embedBuilder.AddField("Additional Information:", cmdInfo.Remarks);
+               embedBuilder.AddField("**Additional Information:**", cmdInfo.Remarks);
             }
             foreach (ParameterInfo param in cmdInfo.Parameters)
             {
-               embedBuilder.AddField($"<{param.Name}>", param.Summary ?? "No description available");
+               embedBuilder.AddField($"**<{param.Name}>**", param.Summary ?? "No description available");
             }
             if (cmdInfo.Parameters.Count == 0)
             {

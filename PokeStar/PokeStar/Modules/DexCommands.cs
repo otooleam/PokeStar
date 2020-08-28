@@ -95,13 +95,13 @@ namespace PokeStar.Modules
 
       [Command("dex")]
       [Alias("pokedex")]
-      [Summary("Gets information for a pokemon.")]
+      [Summary("Gets the PokéDex entry for a given pokémon.")]
       [Remarks("Can search by pokemon name or my number.")]
-      public async Task Dex([Summary("Get information for this pokemon.")][Remainder] string pkmn)
+      public async Task Dex([Summary("Get information for this pokemon.")][Remainder] string pokemon)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
-            bool isNumber = int.TryParse(pkmn, out int pokemonNum);
+            bool isNumber = int.TryParse(pokemon, out int pokemonNum);
 
             if (isNumber)
             {
@@ -130,42 +130,44 @@ namespace PokeStar.Modules
                }
                else
                {
-                  Pokemon pokemon = Connections.Instance().GetPokemon(pokemonWithNumber[0]);
-                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber[0]);
+                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
                   Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pokemon, fileName)).ConfigureAwait(false);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pkmn, fileName)).ConfigureAwait(false);
                   Connections.DeleteFile(fileName);
                }
             }
             else
             {
-               string name = GetPokemon(pkmn);
-               Pokemon pokemon = Connections.Instance().GetPokemon(name);
-               if (pokemon == null)
+               string name = GetPokemon(pokemon);
+               Pokemon pkmn = Connections.Instance().GetPokemon(name);
+               if (pkmn == null)
                {
                   await ErrorMessage.SendErrorMessage(Context, "dex", $"Pokemon {name} cannot be found.");
                }
                else
                {
-                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
                   Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pokemon, fileName)).ConfigureAwait(false);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pkmn, fileName)).ConfigureAwait(false);
                   Connections.DeleteFile(fileName);
                }
             }
          }
          else
+         {
             await ErrorMessage.SendErrorMessage(Context, "dex", "This channel is not registered to process PokéDex commands.");
+         }
       }
 
       [Command("cp")]
-      [Summary("Gets common max CP values for a pokemon")]
+      [Summary("Gets max CP values for a given pokémon.")]
       [Remarks("Can search by pokemon name or my number.")]
-      public async Task CP([Summary("Get CPs for this pokemon.")][Remainder] string pkmn)
+      public async Task CP([Summary("Get CPs for this pokemon.")][Remainder] string pokemon)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
-            bool isNumber = int.TryParse(pkmn, out int pokemonNum);
+            bool isNumber = int.TryParse(pokemon, out int pokemonNum);
 
             if (isNumber)
             {
@@ -191,46 +193,48 @@ namespace PokeStar.Modules
                }
                else
                {
-                  Pokemon pokemon = Connections.Instance().GetPokemon(pokemonWithNumber[0]);
-                  Connections.CalcAllCP(ref pokemon);
-                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber[0]);
+                  Connections.CalcAllCP(ref pkmn);
+                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
                   Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName)).ConfigureAwait(false);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pkmn, fileName)).ConfigureAwait(false);
                   Connections.DeleteFile(fileName);
                }
             }
             else
             {
-               string name = GetPokemon(pkmn);
-               Pokemon pokemon = Connections.Instance().GetPokemon(name);
-               if (pokemon == null)
+               string name = GetPokemon(pokemon);
+               Pokemon pkmn = Connections.Instance().GetPokemon(name);
+               if (pkmn == null)
                {
                   await ErrorMessage.SendErrorMessage(Context, "cp", $"Pokemon {name} cannot be found.");
                }
                else
                {
-                  Connections.CalcAllCP(ref pokemon);
-                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CalcAllCP(ref pkmn);
+                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
                   Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName)).ConfigureAwait(false);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pkmn, fileName)).ConfigureAwait(false);
                   Connections.DeleteFile(fileName);
                }
             }
          }
          else
+         {
             await ErrorMessage.SendErrorMessage(Context, "cp", "This channel is not registered to process PokéDex commands.");
+         }
       }
 
       [Command("form")]
-      [Summary("Gets all forms for a pokemon.")]
+      [Summary("Gets all forms for a given pokémon.")]
       [Remarks("Leave blank to get all pokemon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
-      public async Task Form([Summary("(Optional) Pokemon with the form.")] string pokemonName = null)
+      public async Task Form([Summary("(Optional) Pokemon with the form.")] string pokemon = null)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
             EmbedBuilder embed = new EmbedBuilder();
-            if (pokemonName == null)
+            if (pokemon == null)
             {
                StringBuilder sb = new StringBuilder();
                foreach (string key in pokemonForms.Keys)
@@ -238,10 +242,10 @@ namespace PokeStar.Modules
                embed.AddField($"Pokemon With Forms", sb.ToString(), true);
                embed.WithColor(Color.Red);
             }
-            else if (pokemonForms.ContainsKey(pokemonName))
+            else if (pokemonForms.ContainsKey(pokemon))
             {
                StringBuilder sb = new StringBuilder();
-               PokemonForm forms = pokemonForms[pokemonName];
+               PokemonForm forms = pokemonForms[pokemon];
                var formsList = forms.formList.Split(',');
 
                foreach (string form in formsList)
@@ -251,11 +255,11 @@ namespace PokeStar.Modules
                      sb.Append("*");
                   sb.Append('\n');
                }
-               embed.AddField($"Forms for {pokemonName}", sb.ToString(), true);
+               embed.AddField($"Forms for {pokemon}", sb.ToString(), true);
                embed.WithColor(Color.Red);
                embed.WithFooter("* Form is default form");
             }
-            else if (pokemonName.Equals("Alias", StringComparison.OrdinalIgnoreCase))
+            else if (pokemon.Equals("Alias", StringComparison.OrdinalIgnoreCase))
             {
                embed.WithTitle("Form tag variations");
                embed.AddField($"-alola", "-alolan", true);
@@ -270,7 +274,7 @@ namespace PokeStar.Modules
             }
             else
             {
-               await ErrorMessage.SendErrorMessage(Context, "form", $"Pokemon {pokemonName} cannot be found or has no forms.");
+               await ErrorMessage.SendErrorMessage(Context, "form", $"Pokemon {pokemon} cannot be found or has no forms.");
             }
             await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
          }
