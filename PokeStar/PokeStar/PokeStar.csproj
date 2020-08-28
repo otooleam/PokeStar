@@ -172,6 +172,7 @@
     <Compile Include="Modules\ChannelRegisterCommands.cs" />
     <Compile Include="Modules\DexCommands.cs" />
     <Compile Include="Modules\HelpCommands.cs" />
+    <Compile Include="Modules\JokeCommands.cs" />
     <Compile Include="Modules\RaidCommands.cs" />
     <Compile Include="Modules\RoleCommands.cs" />
     <Compile Include="Modules\SetupCommands.cs" />
