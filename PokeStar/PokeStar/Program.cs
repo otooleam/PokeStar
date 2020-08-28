@@ -249,8 +249,8 @@ namespace PokeStar
             "normal_emote", "poison_emote", "psychic_emote", "rock_emote", "steel_emote", "water_emote",
             "valor_emote", "mystic_emote", "instinct_emote", "raid_emote", "mega_emote", "remote_pass_emote", 
             "sunny_emote", "clear_emote", "rain_emote", "partly_cloudy_emote", "cloudy_emote", "windy_emote", 
-            "snow_emote", "fog_emote"
-            
+            "snow_emote", "fog_emote", "rave_emote", "scream_emote"
+
          };
 
          foreach (string emote in emoteNames)
