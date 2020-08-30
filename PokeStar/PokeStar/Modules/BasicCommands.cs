@@ -1,5 +1,6 @@
 ﻿using System.Threading.Tasks;
 using Discord.Commands;
+using PokeStar.DataModels;
 
 namespace PokeStar.Modules
 {
@@ -10,9 +11,6 @@ namespace PokeStar.Modules
    {
       [Command("ping")]
       [Summary("Pong Pong Pong")]
-      public async Task Ping()
-      {
-         await ReplyAsync("Pong").ConfigureAwait(false);
-      }
+      public async Task Ping() => await ResponseMessage.SendInfoMessage(Context, "Pong").ConfigureAwait(false);
    }
 }

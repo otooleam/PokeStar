@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using PokeStar.ConnectionInterface;
+using PokeStar.DataModels;
 
 namespace PokeStar.Modules
 {
@@ -30,7 +31,7 @@ namespace PokeStar.Modules
                await Context.Guild.CreateRoleAsync("Instinct", null, new Color(241, 196, 15), false, false, null).ConfigureAwait(false);
             Connections.Instance().CompleteSetup(Context.Guild.Id);
          }
-         await ReplyAsync("Setup for Nona has been complete.");
+         await ResponseMessage.SendInfoMessage(Context, "Setup for Nona has been complete.");
       }
    }
 }

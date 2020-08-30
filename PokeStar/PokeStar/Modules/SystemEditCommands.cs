@@ -1,6 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Discord.Commands;
 using PokeStar.ConnectionInterface;
+using PokeStar.DataModels;
 
 namespace PokeStar.Modules
 {
@@ -15,7 +16,7 @@ namespace PokeStar.Modules
       public async Task Prefix([Summary("Prefex to set for commands.")] char prefix)
       {
          Connections.Instance().UpdatePrefix(Context.Guild.Id, prefix.ToString());
-         await ReplyAsync($"Command prefix has been set to \'{prefix}\' for this server.").ConfigureAwait(false);
+         await ResponseMessage.SendInfoMessage(Context, $"Command prefix has been set to \'{prefix}\' for this server.");
       }
    }
 }

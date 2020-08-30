@@ -159,7 +159,7 @@
     <Compile Include="ConnectionInterface\DatabaseConnector.cs" />
     <Compile Include="ConnectionInterface\NONADatabaseConnector.cs" />
     <Compile Include="ConnectionInterface\POGODatabaseConnector.cs" />
-    <Compile Include="DataModels\ErrorMessage.cs" />
+    <Compile Include="DataModels\ResponseMessage.cs" />
     <Compile Include="DataModels\Move.cs" />
     <Compile Include="DataModels\Pokemon.cs" />
     <Compile Include="DataModels\RaidGroup.cs" />
