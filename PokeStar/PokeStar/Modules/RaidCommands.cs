@@ -133,7 +133,7 @@ namespace PokeStar.Modules
          "3, rare, R\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
-      public async Task Raid([Summary("Tier of the raid.")] short tier,
+      public async Task Raid([Summary("Tier of the raid.")] string tier,
                              [Summary("Time the raid will start.")] string time,
                              [Summary("Where the raid will be.")][Remainder] string location)
       {
@@ -153,7 +153,7 @@ namespace PokeStar.Modules
          "3, rare, R\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
-      public async Task RaidMule([Summary("Tier of the raid.")] short tier,
+      public async Task RaidMule([Summary("Tier of the raid.")] string tier,
                                  [Summary("Time the raid will start.")] string time,
                                  [Summary("Where the raid will be.")][Remainder] string location)
       {
@@ -176,11 +176,6 @@ namespace PokeStar.Modules
          {
             if (raidMessages.ContainsKey(code))
             {
-
-               // TODO: Add editing of raid tier/boss
-            }
-            else
-               await ResponseMessage.SendErrorMessage(Context, "edit", "Please enter a valid field to edit.");
                SocketUserMessage msg = (SocketUserMessage)Context.Channel.GetCachedMessage(code);
                RaidParent raid = raidMessages[code];
                bool editComplete = false;
@@ -250,10 +245,10 @@ namespace PokeStar.Modules
                      editComplete = true;
                   }
                   else
-                     await ErrorMessage.SendErrorMessage(Context, "edit", $"No raid bosses found for tier {edit}.");
+                     await ResponseMessage.SendErrorMessage(Context, "edit", $"No raid bosses found for tier {edit}.");
                }
                else
-                  await ErrorMessage.SendErrorMessage(Context, "edit", "Please enter a valid field to edit.");
+                  await ResponseMessage.SendErrorMessage(Context, "edit", "Please enter a valid field to edit.");
 
                if (simpleEdit)
                {
@@ -279,7 +274,7 @@ namespace PokeStar.Modules
                }
             }
             else
-               await ErrorMessage.SendErrorMessage(Context, "edit", "Raid message could not be found.");
+               await ResponseMessage.SendErrorMessage(Context, "edit", "Raid message could not be found.");
          }
          else
             await ResponseMessage.SendErrorMessage(Context, "edit", "This channel is not registered to process Raid commands.");
@@ -413,7 +408,7 @@ namespace PokeStar.Modules
                   else if (parent is RaidMule)
                      await raidMsg.AddReactionsAsync(muleEmojis);
 
-                  raidMessages.Add(raidMsg.Id, parent); 
+                  raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(filename);
                   return;
                }
@@ -977,7 +972,7 @@ namespace PokeStar.Modules
       /// <returns>Raid title as a string.</returns>
       private static string BuildRaidTitle(short tier)
       {
-         if(tier == MEGA_RAID_TIER)
+         if (tier == MEGA_RAID_TIER)
             return Emote.Parse(Environment.GetEnvironmentVariable("MEGA_EMOTE")).ToString();
          StringBuilder sb = new StringBuilder();
          string raidSymbol = Emote.Parse(Environment.GetEnvironmentVariable("RAID_EMOTE")).ToString();
@@ -1191,13 +1186,13 @@ namespace PokeStar.Modules
          muleEmojis[(int)MULE_EMOJI_INDEX.REQUEST_INVITE] = Emote.Parse(Environment.GetEnvironmentVariable("REMOTE_PASS_EMOTE"));
       }
    }
+}
 
-   /// <summary>
-   /// 
-   /// </summary>
-   public struct RaidSubMessage
-   {
-      public int SubMessageType;
-      public ulong MainMessageId;
-   }
+/// <summary>
+/// 
+/// </summary>
+public struct RaidSubMessage
+{
+   public int SubMessageType;
+   public ulong MainMessageId;
 }

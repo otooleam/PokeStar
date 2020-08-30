@@ -25,7 +25,8 @@ namespace PokeStar.Modules
          {
             "ping",
             "help",
-            "rave"
+            "rave",
+            "updatePokemonNames"
          };
 
          if (command == null)

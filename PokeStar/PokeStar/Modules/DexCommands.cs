@@ -144,7 +144,7 @@ namespace PokeStar.Modules
                Pokemon pkmn = Connections.Instance().GetPokemon(name);
                if (pkmn == null)
                {
-                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(pkmn);
+                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(pokemon);
                   string fileName = "pokeball.png";
                   Connections.CopyFile(fileName);
                   RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
@@ -216,7 +216,7 @@ namespace PokeStar.Modules
                Pokemon pkmn = Connections.Instance().GetPokemon(name);
                if (pkmn == null)
                {
-                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(pkmn);
+                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(pokemon);
                   string fileName = "pokeball.png";
                   Connections.CopyFile(fileName);
                   RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
@@ -273,7 +273,7 @@ namespace PokeStar.Modules
                      sb.Append("*");
                   sb.Append('\n');
                }
-               embed.AddField($"Forms for {pokemonName}", sb.ToString(), true);
+               embed.AddField($"Forms for {pokemon}", sb.ToString(), true);
                embed.WithColor(Color.DarkGreen);
 
                embed.WithFooter("* Form is default form");
@@ -293,7 +293,7 @@ namespace PokeStar.Modules
             }
             else
             {
-               await ResponseMessage.SendErrorMessage(Context, "form", $"Pokemon {pokemonName} cannot be found or has no forms.");
+               await ResponseMessage.SendErrorMessage(Context, "form", $"Pokemon {pokemon} cannot be found or has no forms.");
             }
             await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
          }
@@ -316,77 +316,62 @@ namespace PokeStar.Modules
             {
                types.Add(type2);
 
-            if (!CheckValidType(type1) || (types.Count == 2 && !CheckValidType(type2)))
-            {
-               await ResponseMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
-            }
-            else
-            {
-               string title = $"{type1}";
-               if (types.Count == 2)
-                  title += $", {type2}";
-
-               string description = Emote.Parse(Environment.GetEnvironmentVariable($"{type1.ToUpper()}_EMOTE")).ToString();
-               if (types.Count == 2)
-                  description += Emote.Parse(Environment.GetEnvironmentVariable($"{type2.ToUpper()}_EMOTE")).ToString();
-
-               var type1AttackRelations = (types.Count == 2) ? null : Connections.Instance().GetTypeAttackRelations(type1);
-               var defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
-               var weather = Connections.Instance().GetWeather(types);
-
-               EmbedBuilder embed = new EmbedBuilder();
-               embed.WithTitle($@"Type {title.ToUpper()}");
-               embed.WithDescription(description);
-               embed.AddField("Weather Boosts:", FormatWeatherList(weather), false);
-               if (type1AttackRelations.HasValue)
-
+               if (!CheckValidType(type1) || (types.Count == 2 && !CheckValidType(type2)))
                {
-                  await ErrorMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
+                  await ResponseMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
                }
                else
                {
                   string title = $"{type1}";
                   if (types.Count == 2)
-                  {
                      title += $", {type2}";
-                  }
 
                   string description = Emote.Parse(Environment.GetEnvironmentVariable($"{type1.ToUpper()}_EMOTE")).ToString();
                   if (types.Count == 2)
-                  {
                      description += Emote.Parse(Environment.GetEnvironmentVariable($"{type2.ToUpper()}_EMOTE")).ToString();
-                  }
 
-                  TypeRelation? type1AttackRelations = (types.Count == 2) ? null : Connections.Instance().GetTypeAttackRelations(type1);
-                  TypeRelation defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
-                  List<string> weather = Connections.Instance().GetWeather(types);
+                  var type1AttackRelations = (types.Count == 2) ? null : Connections.Instance().GetTypeAttackRelations(type1);
+                  var defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
+                  var weather = Connections.Instance().GetWeather(types);
 
                   EmbedBuilder embed = new EmbedBuilder();
                   embed.WithTitle($@"Type {title.ToUpper()}");
                   embed.WithDescription(description);
                   embed.AddField("Weather Boosts:", FormatWeatherList(weather), false);
                   if (type1AttackRelations.HasValue)
+
                   {
-                     embed.AddField($"Super Effective against:", FormatTypeList(type1AttackRelations.Value.strong), false);
-                     embed.AddField($"Not Very Effective against:", FormatTypeList(type1AttackRelations.Value.weak), false);
+                     await ResponseMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
                   }
+                  else
+                  {
+                     if (types.Count == 2)
+                     {
+                        description += Emote.Parse(Environment.GetEnvironmentVariable($"{type2.ToUpper()}_EMOTE")).ToString();
+                     }
+                     if (type1AttackRelations.HasValue)
+                     {
+                        embed.AddField($"Super Effective against:", FormatTypeList(type1AttackRelations.Value.strong), false);
+                        embed.AddField($"Not Very Effective against:", FormatTypeList(type1AttackRelations.Value.weak), false);
+                     }
+                     embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.weak), false);
+                     embed.AddField($"Resistances:", FormatTypeList(defenseRelations.strong), false);
+                     embed.WithColor(Color.Red);
+                     await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+                  }
+
                   embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.weak), false);
                   embed.AddField($"Resistances:", FormatTypeList(defenseRelations.strong), false);
-                  embed.WithColor(Color.Red);
+                  embed.WithColor(Color.DarkGreen);
                   await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+
                }
-
-               embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.weak), false);
-               embed.AddField($"Resistances:", FormatTypeList(defenseRelations.strong), false);
-               embed.WithColor(Color.DarkGreen);
-               await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
-
             }
             else
-               await ErrorMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
+            {
+               await ResponseMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
+            }
          }
-         else
-            await ResponseMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
       }
 
 
