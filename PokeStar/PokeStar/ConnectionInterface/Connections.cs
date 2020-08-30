@@ -37,7 +37,9 @@ namespace PokeStar.ConnectionInterface
       public static Connections Instance()
       {
          if (connections == null)
+         {
             connections = new Connections();
+         }
          return connections;
       }
 
@@ -99,7 +101,8 @@ namespace PokeStar.ConnectionInterface
 
          string name = ReformatName(raidBossName);
          RaidBoss raidBoss = POGODBConnector.GetRaidBoss(name);
-         if (raidBoss == null) return null;
+         if (raidBoss == null)
+            return null;
 
          var typeRelations = GetTypeDefenseRelations(raidBoss.Type);
          raidBoss.Weakness = typeRelations.weak.Keys.ToList();
@@ -144,7 +147,8 @@ namespace PokeStar.ConnectionInterface
 
          string name = ReformatName(pokemonName);
          Pokemon pokemon = POGODBConnector.GetPokemon(name);
-         if (pokemon == null) return null;
+         if (pokemon == null) 
+            return null;
 
          var typeRelations = GetTypeDefenseRelations(pokemon.Type);
          pokemon.Weakness = typeRelations.weak.Keys.ToList();
@@ -374,9 +378,13 @@ namespace PokeStar.ConnectionInterface
       public void UpdateRegistration(ulong guild, ulong channel, string register)
       {
          if (GetRegistration(guild, channel) == null)
+         {
             NONADBConnector.AddRegistration(guild, channel, register);
+         }
          else
+         {
             NONADBConnector.UpdateRegistration(guild, channel, register);
+         }
       }
 
       /// <summary>

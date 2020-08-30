@@ -182,8 +182,8 @@ namespace PokeStar.DataModels
       /// </summary>
       protected void CheckMergeGroups()
       {
-         foreach (var group in Groups)
-            foreach (var check in Groups)
+         foreach (RaidGroup group in Groups)
+            foreach (RaidGroup check in Groups)
                group.MergeGroup(check);
          Groups.RemoveAll(x => x.TotalPlayers() == 0);
          if (Groups.Count == 0)
