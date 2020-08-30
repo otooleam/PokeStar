@@ -33,7 +33,7 @@ namespace PokeStar.Modules
             string prefix = Connections.Instance().GetPrefix(Context.Guild.Id);
 
             embedBuilder.WithTitle("**Command List**");
-            embedBuilder.WithDescription($"List of commands supported by this bot.");
+            embedBuilder.WithDescription($"List of commands supported by Nona.");
             foreach (CommandInfo cmdInfo in commands)
             {
                if (!hiddenCommands.Contains(cmdInfo.Name))

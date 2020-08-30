@@ -141,6 +141,12 @@ namespace PokeStar.Modules
       [Command("mule")]
       [Alias("raidmule")]
       [Summary("Creates a new interactive remote raid coordination message.")]
+      [Remarks("Valid Tier values:\n" +
+         "0 (raid with no boss assigned)\n" +
+         "1, common, C\n" +
+         "3, rare, R\n" +
+         "5, legendary, L\n" +
+         "7, mega, M\n")]
       public async Task RaidMule([Summary("Tier of the raid.")] short tier,
                                  [Summary("Time the raid will start.")] string time,
                                  [Summary("Where the raid will be.")][Remainder] string location)

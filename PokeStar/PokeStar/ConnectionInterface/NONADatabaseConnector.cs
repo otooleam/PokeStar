@@ -31,7 +31,7 @@ namespace PokeStar.ConnectionInterface
          using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
                {
@@ -59,10 +59,10 @@ namespace PokeStar.ConnectionInterface
                                  FROM guild_settings 
                                  WHERE guild={guild};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
                   prefix = Convert.ToString(reader["prefix"]);
@@ -84,10 +84,10 @@ namespace PokeStar.ConnectionInterface
                                  FROM guild_settings 
                                  WHERE guild={guild};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
                   setupComplete = Convert.ToInt32(reader["setup"]) == TRUE;
@@ -186,7 +186,7 @@ namespace PokeStar.ConnectionInterface
                                  SET setup = 1
                                  WHERE guild={guild};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();

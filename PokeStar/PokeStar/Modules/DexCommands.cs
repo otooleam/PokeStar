@@ -96,8 +96,8 @@ namespace PokeStar.Modules
       [Command("dex")]
       [Alias("pokedex")]
       [Summary("Gets the PokéDex entry for a given pokémon.")]
-      [Remarks("Can search by pokemon name or my number.")]
-      public async Task Dex([Summary("Get information for this pokemon.")][Remainder] string pokemon)
+      [Remarks("Can search by pokémon name or by number.")]
+      public async Task Dex([Summary("Get information for this pokémon.")][Remainder] string pokemon)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
@@ -109,7 +109,7 @@ namespace PokeStar.Modules
 
                if (pokemonWithNumber.Count == 0)
                {
-                  await ErrorMessage.SendErrorMessage(Context, "dex", $"Pokemon with number {pokemonNum} cannot be found.");
+                  await ErrorMessage.SendErrorMessage(Context, "dex", $"Pokémon with number {pokemonNum} cannot be found.");
                }
                else if (pokemonNum == ARCEUS)
                {
@@ -143,7 +143,7 @@ namespace PokeStar.Modules
                Pokemon pkmn = Connections.Instance().GetPokemon(name);
                if (pkmn == null)
                {
-                  await ErrorMessage.SendErrorMessage(Context, "dex", $"Pokemon {name} cannot be found.");
+                  await ErrorMessage.SendErrorMessage(Context, "dex", $"Pokémon {name} cannot be found.");
                }
                else
                {
@@ -162,8 +162,8 @@ namespace PokeStar.Modules
 
       [Command("cp")]
       [Summary("Gets max CP values for a given pokémon.")]
-      [Remarks("Can search by pokemon name or my number.")]
-      public async Task CP([Summary("Get CPs for this pokemon.")][Remainder] string pokemon)
+      [Remarks("Can search by pokémon name or by number.")]
+      public async Task CP([Summary("Get CPs for this pokémon.")][Remainder] string pokemon)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
@@ -175,7 +175,7 @@ namespace PokeStar.Modules
 
                if (pokemonWithNumber.Count == 0)
                {
-                  await ErrorMessage.SendErrorMessage(Context, "cp", $"Pokemon with number {pokemonNum} cannot be found.");
+                  await ErrorMessage.SendErrorMessage(Context, "cp", $"Pokémon with number {pokemonNum} cannot be found.");
                }
                else if (pokemonWithNumber.Count > 1 && pokemonNum != UNOWN && pokemonNum != ARCEUS)
                {
@@ -207,7 +207,7 @@ namespace PokeStar.Modules
                Pokemon pkmn = Connections.Instance().GetPokemon(name);
                if (pkmn == null)
                {
-                  await ErrorMessage.SendErrorMessage(Context, "cp", $"Pokemon {name} cannot be found.");
+                  await ErrorMessage.SendErrorMessage(Context, "cp", $"Pokémon {name} cannot be found.");
                }
                else
                {
@@ -227,9 +227,9 @@ namespace PokeStar.Modules
 
       [Command("form")]
       [Summary("Gets all forms for a given pokémon.")]
-      [Remarks("Leave blank to get all pokemon with forms.\n" +
+      [Remarks("Leave blank to get all pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
-      public async Task Form([Summary("(Optional) Pokemon with the form.")] string pokemon = null)
+      public async Task Form([Summary("(Optional) Pokémon with forms.")] string pokemon = null)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
@@ -239,7 +239,7 @@ namespace PokeStar.Modules
                StringBuilder sb = new StringBuilder();
                foreach (string key in pokemonForms.Keys)
                   sb.AppendLine(key);
-               embed.AddField($"Pokemon With Forms", sb.ToString(), true);
+               embed.AddField($"Pokémon With Forms", sb.ToString(), true);
                embed.WithColor(Color.Red);
             }
             else if (pokemonForms.ContainsKey(pokemon))
@@ -421,9 +421,9 @@ namespace PokeStar.Modules
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.Red);
-         embed.WithTitle($"Pokemon Selection");
+         embed.WithTitle($"Pokémon Selection");
          embed.WithThumbnailUrl($"attachment://{selectPic}");
-         embed.AddField("Please Select Pokemon", sb.ToString());
+         embed.AddField("Please Select Pokémon", sb.ToString());
          return embed.Build();
       }
 

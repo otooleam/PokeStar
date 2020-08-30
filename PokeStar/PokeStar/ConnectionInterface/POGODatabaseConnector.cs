@@ -121,10 +121,10 @@ namespace PokeStar.ConnectionInterface
                                  WHERE number={pokemonNumber}
                                  {order};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
                   pokemon.Add(Convert.ToString(reader["name"]));
@@ -210,7 +210,7 @@ namespace PokeStar.ConnectionInterface
                                  WHERE attacker = '{type}'
                                  ORDER BY modifier;";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())

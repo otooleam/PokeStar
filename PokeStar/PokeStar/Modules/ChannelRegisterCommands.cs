@@ -46,15 +46,15 @@ namespace PokeStar.Modules
       }
 
       [Command("unregister")]
-      [Summary("Unregisters a channel from a type of command.")]
+      [Summary("Unregisters a channel from a given type of command.")]
       [Remarks("To unregister a channel\n" +
                "from this.......................use one of these:\n" +
-               "Player Registration....player / role / p\n" +
-               "Raids.............................raid / r\n" +
+               "Player Registration.....player / role / p\n" +
+               "Raids..............................raid / r\n" +
                //"EX Raids.......................ex / e\n" +
                //"Raid Trains..................train / t\n" +
                "Pokedex........................pokedex / dex / d")]
-      public async Task Unregister([Summary("(Optional) Unregister the channel from these commands. Use one of the above values, or no value to register for all command types.")] string unregister = "ALL")
+      public async Task Unregister([Summary("(Optional) Unregister the channel from these commands. Use one of the above values, or no value to unregister from all command types.")] string unregister = "ALL")
       {
          ulong guild = Context.Guild.Id;
          ulong channel = Context.Channel.Id;
