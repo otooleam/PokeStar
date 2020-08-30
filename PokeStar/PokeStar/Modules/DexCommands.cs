@@ -140,11 +140,11 @@ namespace PokeStar.Modules
             }
             else
             {
-               string name = GetPokemon(pokemon);
+               string name = GetPokemon(pokemon); 
                Pokemon pkmn = Connections.Instance().GetPokemon(name);
                if (pkmn == null)
                {
-                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(pkmn);
+                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
                   string fileName = "pokeball.png";
                   Connections.CopyFile(fileName);
                   RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
@@ -216,7 +216,7 @@ namespace PokeStar.Modules
                Pokemon pkmn = Connections.Instance().GetPokemon(name);
                if (pkmn == null)
                {
-                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(pkmn);
+                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
                   string fileName = "pokeball.png";
                   Connections.CopyFile(fileName);
                   RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
@@ -291,7 +291,7 @@ namespace PokeStar.Modules
             }
             else
             {
-               await ResponseMessage.SendErrorMessage(Context, "form", $"Pokemon {pokemonName} cannot be found or has no forms.");
+               await ResponseMessage.SendErrorMessage(Context, "form", $"Pokemon {pokemon} cannot be found or has no forms.");
             }
             await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
          }
@@ -316,7 +316,7 @@ namespace PokeStar.Modules
 
                if (!CheckValidType(type1) || (types.Count == 2 && !CheckValidType(type2)))
                {
-                  await ErrorMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
+                  await ResponseMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
                }
                else
                {
@@ -352,7 +352,7 @@ namespace PokeStar.Modules
                }
             }
             else
-               await ErrorMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
+               await ResponseMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
          }
          else
             await ResponseMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
