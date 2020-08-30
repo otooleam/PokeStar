@@ -203,9 +203,18 @@ namespace PokeStar.DataModels
       /// Gets a list of players to ping.
       /// </summary>
       /// <returns>List of players that are here</returns>
-      public List<SocketGuildUser> GetPingList()
+      public ImmutableList<SocketGuildUser> GetPingList()
       {
-         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).ToList();
+         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).ToImmutableList();
+      }
+
+      /// <summary>
+      /// Gets a list of players to notify of an edit.
+      /// </summary>
+      /// <returns></returns>
+      public ImmutableList<SocketGuildUser> GetNotifyList()
+      {
+         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).Union(Attending.Keys.ToList()).ToImmutableList();
       }
 
       /// <summary>

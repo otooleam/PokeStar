@@ -174,46 +174,107 @@ namespace PokeStar.Modules
 
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
          {
-            SocketUserMessage msg = (SocketUserMessage)Context.Channel.GetCachedMessage(code);
-            RaidParent raid = raidMessages[code];
-            bool simpleEdit = false;
-            if (attribute.Equals("time", StringComparison.OrdinalIgnoreCase))
+            if (raidMessages.ContainsKey(code))
             {
-               raid.Time = edit;
-               simpleEdit = true;
-            }
-            else if (attribute.Equals("location", StringComparison.OrdinalIgnoreCase) ||
-                     attribute.Equals("loc", StringComparison.OrdinalIgnoreCase))
-            {
-               raid.Location = edit;
-               simpleEdit = true;
-            }
-            else if (attribute.Equals("tier", StringComparison.OrdinalIgnoreCase) ||
-                     attribute.Equals("boss", StringComparison.OrdinalIgnoreCase))
-            {
-               // TODO: Add editing of raid tier/boss
+               SocketUserMessage msg = (SocketUserMessage)Context.Channel.GetCachedMessage(code);
+               RaidParent raid = raidMessages[code];
+               bool editComplete = false;
+               bool simpleEdit = false;
+               if (attribute.Equals("time", StringComparison.OrdinalIgnoreCase))
+               {
+                  raid.Time = edit;
+                  simpleEdit = true;
+               }
+               else if (attribute.Equals("location", StringComparison.OrdinalIgnoreCase) || attribute.Equals("loc", StringComparison.OrdinalIgnoreCase))
+               {
+                  raid.Location = edit;
+                  simpleEdit = true;
+               }
+               else if (attribute.Equals("tier", StringComparison.OrdinalIgnoreCase) || attribute.Equals("boss", StringComparison.OrdinalIgnoreCase))
+               {
+                  short calcTier = GenerateTier(edit);
+                  List<string> potentials = Connections.GetBossList(calcTier);
+
+                  if (potentials.Count > 1)
+                  {
+                     raid.Tier = calcTier;
+                     raid.SetBoss(null);
+                     raid.RaidBossSelections = potentials;
+                     string fileName = $"Egg{calcTier}.png";
+                     await msg.DeleteAsync();
+                     raidMessages.Remove(code);
+
+                     Connections.CopyFile(fileName);
+                     RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+                     for (int i = 0; i < potentials.Count; i++)
+                        await selectMsg.AddReactionAsync(selectionEmojis[i]);
+                     raidMessages.Add(selectMsg.Id, raid);
+                     Connections.DeleteFile(fileName);
+                     editComplete = true;
+                  }
+                  else if (potentials.Count == 1)
+                  {
+                     raid.Tier = calcTier;
+                     raid.SetBoss(potentials.First());
+                     string fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+                     IEmote[] prevReactions = msg.Reactions.Keys.ToArray();
+                     await msg.DeleteAsync();
+                     raidMessages.Remove(code);
+
+                     Connections.CopyFile(fileName);
+                     RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
+                     await raidMsg.AddReactionsAsync(prevReactions);
+                     raidMessages.Add(raidMsg.Id, raid);
+                     Connections.DeleteFile(fileName);
+                     editComplete = true;
+                  }
+                  else if (Environment.GetEnvironmentVariable("USE_EMPTY_RAID").Equals("TRUE", StringComparison.OrdinalIgnoreCase))
+                  {
+                     raid.Tier = calcTier;
+                     raid.SetBoss(RaidBoss.DefaultName);
+                     string fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+                     IEmote[] prevReactions = msg.Reactions.Keys.ToArray();
+                     await msg.DeleteAsync();
+                     raidMessages.Remove(code);
+
+                     Connections.CopyFile(fileName);
+                     RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
+                     await raidMsg.AddReactionsAsync(prevReactions);
+                     raidMessages.Add(raidMsg.Id, raid);
+                     Connections.DeleteFile(fileName);
+                     editComplete = true;
+                  }
+                  else
+                     await ErrorMessage.SendErrorMessage(Context, "edit", $"No raid bosses found for tier {edit}.");
+               }
+               else
+                  await ErrorMessage.SendErrorMessage(Context, "edit", "Please enter a valid field to edit.");
+
+               if (simpleEdit)
+               {
+                  string fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+                  Connections.CopyFile(fileName);
+                  await msg.ModifyAsync(x =>
+                  {
+                     x.Embed = BuildRaidEmbed(raid, fileName);
+                  });
+                  Connections.DeleteFile(fileName);
+               }
+
+               if (simpleEdit || editComplete)
+               {
+                  List<SocketGuildUser> allUsers = new List<SocketGuildUser>();
+                  foreach (RaidGroup group in raid.Groups)
+                     allUsers.AddRange(group.GetNotifyList());
+                  allUsers.AddRange(raid.GetReadonlyInviteList());
+                  if (raid is RaidMule mule)
+                     allUsers.AddRange(mule.Mules.GetReadonlyAttending().Keys);
+                  await ReplyAsync(BuildEditPingList(allUsers.ToImmutableList(), (SocketGuildUser)Context.User, attribute, edit));
+                  await Context.Message.DeleteAsync();
+               }
             }
             else
-               await ResponseMessage.SendErrorMessage(Context, "edit", "Please enter a valid field to edit.");
-
-            if (simpleEdit)
-            {
-               string fileName = Connections.GetPokemonPicture(raid.Boss.Name);
-               Connections.CopyFile(fileName);
-               await msg.ModifyAsync(x =>
-               {
-                  x.Embed = BuildRaidEmbed(raid, fileName);
-               });
-               Connections.DeleteFile(fileName);
-
-               List<SocketGuildUser> allUsers = new List<SocketGuildUser>();
-               foreach (RaidGroup group in raid.Groups)
-                  allUsers.AddRange(group.GetPingList());
-               allUsers.AddRange(raid.GetReadonlyInviteList());
-               if (raid is RaidMule mule)
-                  allUsers.AddRange(mule.Mules.GetReadonlyAttending().Keys);
-               await ReplyAsync(BuildEditPingList(allUsers, (SocketGuildUser)Context.User, attribute, edit));
-            }
+               await ErrorMessage.SendErrorMessage(Context, "edit", "Raid message could not be found.");
          }
          else
             await ResponseMessage.SendErrorMessage(Context, "edit", "This channel is not registered to process Raid commands.");
@@ -335,7 +396,8 @@ namespace PokeStar.Modules
                if (reaction.Emote.Equals(selectionEmojis[i]))
                {
                   parent.SetBoss(parent.RaidBossSelections[i]);
-                  await reaction.Channel.DeleteMessageAsync(message);
+                  await message.DeleteAsync();
+                  raidMessages.Remove(message.Id);
 
                   string filename = Connections.GetPokemonPicture(parent.Boss.Name);
                   Connections.CopyFile(filename);
@@ -346,7 +408,7 @@ namespace PokeStar.Modules
                   else if (parent is RaidMule)
                      await raidMsg.AddReactionsAsync(muleEmojis);
 
-                  raidMessages.Add(raidMsg.Id, parent);
+                  raidMessages.Add(raidMsg.Id, parent); 
                   Connections.DeleteFile(filename);
                   return;
                }
@@ -929,7 +991,7 @@ namespace PokeStar.Modules
       /// <param name="location">Location of the raid.</param>
       /// <param name="groupNumber">Group number the players are part of.</param>
       /// <returns>List of players to ping as a string.</returns>
-      private static string BuildRaidPingList(List<SocketGuildUser> players, string location, int groupNumber, bool isNormalRaid)
+      private static string BuildRaidPingList(ImmutableList<SocketGuildUser> players, string location, int groupNumber, bool isNormalRaid)
       {
          StringBuilder sb = new StringBuilder();
          foreach (SocketGuildUser player in players)
@@ -949,7 +1011,7 @@ namespace PokeStar.Modules
       /// <param name="field"></param>
       /// <param name="value"></param>
       /// <returns></returns>
-      private static string BuildEditPingList(List<SocketGuildUser> players, SocketGuildUser editor, string field, string value)
+      private static string BuildEditPingList(ImmutableList<SocketGuildUser> players, SocketGuildUser editor, string field, string value)
       {
          StringBuilder sb = new StringBuilder();
          sb.Append("Edit Alert: ");
