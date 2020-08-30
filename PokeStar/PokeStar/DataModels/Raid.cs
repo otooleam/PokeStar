@@ -59,7 +59,9 @@ namespace PokeStar.DataModels
                Groups.ElementAt(group).Invite(player, invitedBy);
             }
             else
+            {
                return false;
+            }
          }
 
          bool shouldSplit = Groups.ElementAt(group).ShouldSplit();
@@ -144,9 +146,13 @@ namespace PokeStar.DataModels
          if (checkInvite && Invite.Contains(player))
             return InviteListNumber;
          for (int i = 0; i < Groups.Count; i++)
+         {
             if (Groups.ElementAt(i).HasPlayer(player, checkInvite))
+            {
                return i;
-         return NotInRaid;
+            }
+         }
+         return -1;
       }
 
       public int PlayerReady(SocketGuildUser player)

@@ -176,16 +176,22 @@ namespace PokeStar
       private async Task<Task> HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
           ISocketMessageChannel originChannel, SocketReaction reaction)
       {
-         var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
-         var user = reaction.User.Value;
+         IUserMessage message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
+         IUser user = reaction.User.Value;
          if (message != null && reaction.User.IsSpecified && !user.IsBot)
          {
             if (RaidCommands.IsRaidMessage(message.Id))
+            {
                await RaidCommands.RaidMessageReactionHandle(message, reaction);
+            }
             else if (RaidCommands.IsRaidSubMessage(message.Id))
+            {
                await RaidCommands.RaidSubMessageReactionHandle(message, reaction);
+            }
             else if (DexCommands.IsDexSubMessage(message.Id))
+            {
                await DexCommands.DexMessageReactionHandle(message, reaction);
+            }
          }
          return Task.CompletedTask;
       }
@@ -249,8 +255,8 @@ namespace PokeStar
             "normal_emote", "poison_emote", "psychic_emote", "rock_emote", "steel_emote", "water_emote",
             "valor_emote", "mystic_emote", "instinct_emote", "raid_emote", "mega_emote", "remote_pass_emote", 
             "sunny_emote", "clear_emote", "rain_emote", "partly_cloudy_emote", "cloudy_emote", "windy_emote", 
-            "snow_emote", "fog_emote"
-            
+            "snow_emote", "fog_emote", "rave_emote", "scream_emote"
+
          };
 
          foreach (string emote in emoteNames)
