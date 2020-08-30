@@ -18,6 +18,28 @@ namespace PokeStar.ConnectionInterface
       public POGODatabaseConnector(string connectionString) : base(connectionString) { }
 
       /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
+      public List<string> GetNameList()
+      {
+         List<string> names = new List<string>();
+         using (var conn = GetConnection())
+         {
+            string queryString = $@"select name from pokemon order by number;";
+            conn.Open();
+            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+                  names.Add(Convert.ToString(reader["name"]));
+            }
+            conn.Close();
+         }
+         return names;
+      }
+
+
+      /// <summary>
       /// Gets a raid boss given it's name.
       /// </summary>
       /// <param name="raidBossName">The name of the raid boss.</param>
@@ -137,7 +159,8 @@ namespace PokeStar.ConnectionInterface
          List<string> weather = new List<string>();
          string queryString = $@"SELECT weather 
                                  FROM weather 
-                                 WHERE {GetTypeWhere(types, "type")};";
+                                 WHERE {GetTypeWhere(types, "type")}
+                                 GROUP BY weather;";
 
          using (var conn = GetConnection())
          {
@@ -145,8 +168,7 @@ namespace PokeStar.ConnectionInterface
             using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
-                  if (!weather.Contains(Convert.ToString(reader["weather"])))
-                     weather.Add(Convert.ToString(reader["weather"]));
+                  weather.Add(Convert.ToString(reader["weather"]));
             }
             conn.Close();
          }

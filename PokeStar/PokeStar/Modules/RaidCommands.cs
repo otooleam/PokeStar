@@ -141,7 +141,7 @@ namespace PokeStar.Modules
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
             await GenerateRaidMessage("raid", raidEmojis, tier, time, location);
          else
-            await ErrorMessage.SendErrorMessage(Context, "raid", "This channel is not registered to process Raid commands.");
+            await ResponseMessage.SendErrorMessage(Context, "raid", "This channel is not registered to process Raid commands.");
          RemoveOldRaids();
       }
 
@@ -161,7 +161,7 @@ namespace PokeStar.Modules
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "R"))
             await GenerateRaidMessage("mule", muleEmojis, tier, time, location);
          else
-            await ErrorMessage.SendErrorMessage(Context, "mule", "This channel is not registered to process Raid commands.");
+            await ResponseMessage.SendErrorMessage(Context, "mule", "This channel is not registered to process Raid commands.");
          RemoveOldRaids();
       }
 
@@ -195,7 +195,7 @@ namespace PokeStar.Modules
                // TODO: Add editing of raid tier/boss
             }
             else
-               await ErrorMessage.SendErrorMessage(Context, "edit", "Please enter a valid field to edit.");
+               await ResponseMessage.SendErrorMessage(Context, "edit", "Please enter a valid field to edit.");
 
             if (simpleEdit)
             {
@@ -217,7 +217,7 @@ namespace PokeStar.Modules
             }
          }
          else
-            await ErrorMessage.SendErrorMessage(Context, "edit", "This channel is not registered to process Raid commands.");
+            await ResponseMessage.SendErrorMessage(Context, "edit", "This channel is not registered to process Raid commands.");
       }
 
 

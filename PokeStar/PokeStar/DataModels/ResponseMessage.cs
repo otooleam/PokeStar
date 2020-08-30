@@ -7,8 +7,19 @@ namespace PokeStar.DataModels
    /// <summary>
    /// 
    /// </summary>
-   public static class ErrorMessage
+   public static class ResponseMessage
    {
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="context"></param>
+      /// <param name="message"></param>
+      /// <returns></returns>
+      public static async Task SendInfoMessage(SocketCommandContext context, string message)
+      {
+         await context.Channel.SendMessageAsync(embed: GenerateInfoEmbed(message));
+      }
+
       /// <summary>
       /// 
       /// </summary>
@@ -19,6 +30,20 @@ namespace PokeStar.DataModels
       public static async Task SendErrorMessage(SocketCommandContext context, string command, string message)
       {
          await context.Channel.SendMessageAsync(embed: GenerateErrorEmbed(command, message));
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="command"></param>
+      /// <param name="message"></param>
+      /// <returns></returns>
+      private static Embed GenerateInfoEmbed(string message)
+      {
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithColor(Color.Purple);
+         embed.WithDescription(message);
+         return embed.Build();
       }
 
       /// <summary>
