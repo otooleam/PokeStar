@@ -2,6 +2,7 @@
 using System.Data.SqlClient;
 using System.Collections.Generic;
 using PokeStar.DataModels;
+using System.Text;
 using PokeStar.Modules;
 
 namespace PokeStar.ConnectionInterface
@@ -11,11 +12,35 @@ namespace PokeStar.ConnectionInterface
    /// </summary>
    public class POGODatabaseConnector : DatabaseConnector
    {
+      private readonly int TRUE = 1;
+
       /// <summary>
       /// Creates a new POGO database connector.
       /// </summary>
       /// <param name="connectionString">Connection string for the POGO database.</param>
       public POGODatabaseConnector(string connectionString) : base(connectionString) { }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
+      public List<string> GetNameList()
+      {
+         List<string> names = new List<string>();
+         using (var conn = GetConnection())
+         {
+            string queryString = $@"select name from pokemon order by number;";
+            conn.Open();
+            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+                  names.Add(Convert.ToString(reader["name"]));
+            }
+            conn.Close();
+         }
+         return names;
+      }
+
 
       /// <summary>
       /// Gets a raid boss given it's name.
@@ -29,10 +54,10 @@ namespace PokeStar.ConnectionInterface
                                  FROM pokemon 
                                  WHERE name='{raidBossName}';";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
                {
@@ -46,7 +71,9 @@ namespace PokeStar.ConnectionInterface
 
                   raidBoss.Type.Add(Convert.ToString(reader["type_1"]));
                   if (reader["type_2"].GetType() != typeof(DBNull))
+                  {
                      raidBoss.Type.Add(Convert.ToString(reader["type_2"]));
+                  }
                }
             }
             conn.Close();
@@ -66,10 +93,10 @@ namespace PokeStar.ConnectionInterface
                                  FROM pokemon 
                                  WHERE name='{pokemonName}';";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
                {
@@ -91,7 +118,9 @@ namespace PokeStar.ConnectionInterface
                   };
                   pokemon.Type.Add(Convert.ToString(reader["type_1"]));
                   if (reader["type_2"].GetType() != typeof(DBNull))
+                  {
                      pokemon.Type.Add(Convert.ToString(reader["type_2"]));
+                  }
                }
             }
             conn.Close();
@@ -114,10 +143,10 @@ namespace PokeStar.ConnectionInterface
                                  WHERE number={pokemonNumber}
                                  {order};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
                   pokemon.Add(Convert.ToString(reader["name"]));
@@ -137,16 +166,21 @@ namespace PokeStar.ConnectionInterface
          List<string> weather = new List<string>();
          string queryString = $@"SELECT weather 
                                  FROM weather 
-                                 WHERE {GetTypeWhere(types, "type")};";
+                                 WHERE {GetTypeWhere(types, "type")}
+                                 GROUP BY weather;";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
+               {
                   if (!weather.Contains(Convert.ToString(reader["weather"])))
+                  {
                      weather.Add(Convert.ToString(reader["weather"]));
+                  }
+               }
             }
             conn.Close();
          }
@@ -171,13 +205,15 @@ namespace PokeStar.ConnectionInterface
                                  HAVING SUM(modifier) <> 0
                                  ORDER BY total_relation;";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
+               {
                   relations.Add(Convert.ToString(reader["attacker"]), Convert.ToInt32(reader["total_relation"]));
+               }
             }
             conn.Close();
          }
@@ -197,13 +233,15 @@ namespace PokeStar.ConnectionInterface
                                  WHERE attacker = '{type}'
                                  ORDER BY modifier;";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
+               {
                   relations.Add(Convert.ToString(reader["defender"]), Convert.ToInt32(reader["modifier"]));
+               }
             }
             conn.Close();
          }
@@ -228,14 +266,14 @@ namespace PokeStar.ConnectionInterface
                                  WHERE pokemon='{pokemonName}'
                                  AND category='{moveType}';";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
                {
-                  var move = new Move
+                  Move move = new Move
                   {
                      Name = Convert.ToString(reader["name"]),
                      Type = Convert.ToString(reader["type"]),
@@ -347,11 +385,15 @@ namespace PokeStar.ConnectionInterface
       /// <returns>SQL where string for pokemon types.</returns>
       private static string GetTypeWhere(List<string> types, string variable)
       {
-         string where = $@"({variable}='{types[0]}'";
+         StringBuilder sb = new StringBuilder();
+
+         sb.Append($@"({variable}='{types[0]}'");
          if (types.Count == 2)
-            where += $@" or {variable}='{types[1]}'";
-         where += ")";
-         return where;
+         {
+            sb.Append($@" or {variable}='{types[1]}'");
+         }
+         sb.Append(')');
+         return sb.ToString();
       }
    }
 }

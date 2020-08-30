@@ -80,8 +80,10 @@ namespace PokeStar.DataModels
       public int GetAttendingCount()
       {
          int total = 0;
-         foreach (KeyValuePair<SocketGuildUser, int> player in Attending)
-            total += player.Value;
+         foreach (int player in Attending.Values)
+         {
+            total += player;
+         }
          return total;
       }
 
@@ -92,8 +94,10 @@ namespace PokeStar.DataModels
       public int GetHereCount()
       {
          int total = 0;
-         foreach (KeyValuePair<SocketGuildUser, int> player in Ready)
-            total += player.Value;
+         foreach (int player in Ready.Values)
+         {
+            total += player;
+         }
          return total;
       }
 
@@ -117,11 +121,17 @@ namespace PokeStar.DataModels
          if (Invited.ContainsKey(player))
             return;
          else if (Attending.ContainsKey(player))
+         {
             Attending[player] = partySize;
+         }
          else if (Ready.ContainsKey(player))
+         {
             Ready[player] = partySize;
+         }
          else
+         {
             Attending.Add(player, partySize);
+         }
       }
 
       /// <summary>
@@ -132,9 +142,13 @@ namespace PokeStar.DataModels
       public List<SocketGuildUser> Remove(SocketGuildUser player)
       {
          if (Attending.ContainsKey(player))
+         {
             Attending.Remove(player);
+         }
          else if (Ready.ContainsKey(player))
+         {
             Ready.Remove(player);
+         }
          else if (Invited.ContainsKey(player))
          {
             Invited.Remove(player);
@@ -189,9 +203,18 @@ namespace PokeStar.DataModels
       /// Gets a list of players to ping.
       /// </summary>
       /// <returns>List of players that are here</returns>
-      public List<SocketGuildUser> GetPingList()
+      public ImmutableList<SocketGuildUser> GetPingList()
       {
-         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).ToList();
+         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).ToImmutableList();
+      }
+
+      /// <summary>
+      /// Gets a list of players to notify of an edit.
+      /// </summary>
+      /// <returns></returns>
+      public ImmutableList<SocketGuildUser> GetNotifyList()
+      {
+         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).Union(Attending.Keys.ToList()).ToImmutableList();
       }
 
       /// <summary>
@@ -237,8 +260,12 @@ namespace PokeStar.DataModels
                newGroup.Attending.Add(player.Key, player.Value);
 
                foreach (KeyValuePair<SocketGuildUser, SocketGuildUser> invite in Invited)
+               {
                   if (invite.Value.Equals(player.Key))
+                  {
                      newGroup.Invite(invite.Key, invite.Value);
+                  }
+               }
             }
          }
 
@@ -250,18 +277,28 @@ namespace PokeStar.DataModels
                {
                   newGroup.Ready.Add(player.Key, player.Value);
                   foreach (KeyValuePair<SocketGuildUser, SocketGuildUser> invite in Invited)
+                  {
                      if (invite.Value.Equals(player.Key))
+                     {
                         newGroup.Invite(invite.Key, invite.Value);
+                     }
+                  }
                }
             }
          }
 
          foreach (SocketGuildUser player in newGroup.Attending.Keys)
+         {
             Attending.Remove(player);
+         }
          foreach (SocketGuildUser player in newGroup.Ready.Keys)
+         {
             Ready.Remove(player);
+         }
          foreach (SocketGuildUser player in newGroup.Invited.Keys)
+         {
             Invited.Remove(player);
+         }
          return newGroup;
       }
 

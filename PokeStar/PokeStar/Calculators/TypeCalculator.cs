@@ -20,7 +20,9 @@ namespace PokeStar.Calculators
          for (int i = 1; i < Math.Abs(multiplier); i++)
             effectivness *= TypeCoefficient;
          if (multiplier < 0)
+         {
             effectivness = 1.0 / effectivness;
+         }
          return effectivness;
       }
    }
