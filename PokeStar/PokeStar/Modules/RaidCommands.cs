@@ -176,6 +176,11 @@ namespace PokeStar.Modules
          {
             if (raidMessages.ContainsKey(code))
             {
+
+               // TODO: Add editing of raid tier/boss
+            }
+            else
+               await ResponseMessage.SendErrorMessage(Context, "edit", "Please enter a valid field to edit.");
                SocketUserMessage msg = (SocketUserMessage)Context.Channel.GetCachedMessage(code);
                RaidParent raid = raidMessages[code];
                bool editComplete = false;
@@ -334,7 +339,7 @@ namespace PokeStar.Modules
             Connections.DeleteFile(fileName);
          }
          else
-            await ErrorMessage.SendErrorMessage(Context, command, $"No raid bosses found for tier {tier}");
+            await ResponseMessage.SendErrorMessage(Context, command, $"No raid bosses found for tier {tier}");
       }
 
       /// <summary>

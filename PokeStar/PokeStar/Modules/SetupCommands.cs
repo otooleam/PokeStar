@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Discord;
 using Discord.Commands;
 using PokeStar.ConnectionInterface;
+using PokeStar.DataModels;
 
 namespace PokeStar.Modules
 {
@@ -38,7 +39,9 @@ namespace PokeStar.Modules
             }
             Connections.Instance().CompleteSetup(Context.Guild.Id);
          }
-         await ReplyAsync("Setup for Nona has been complete.").ConfigureAwait(false);
+
+         await ResponseMessage.SendInfoMessage(Context, "Setup for Nona has been complete.");
+
       }
    }
 }

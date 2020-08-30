@@ -25,6 +25,7 @@ namespace PokeStar.Modules
       {
          Connections.Instance().UpdateNameList();
          await ResponseMessage.SendInfoMessage(Context, $"Pokemon name list has been updated.");
+
       }
    }
 }
