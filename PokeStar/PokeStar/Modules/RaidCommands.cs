@@ -46,21 +46,19 @@ namespace PokeStar.Modules
       };
 
       private static readonly string[] raidEmojisDesc = {
-         "are the number of Trainers in your party, physically at the raid and that you are inviting remotely.",
-         "means you are present/ready for the raid to begin. Nona will tag you in a post when all trainers are ready and the raid can then begin.",
-         "means you will be either doing the raid remotely yourself or need another trainer to send you an invite to be done remotely.",
-         "means you are willing to invite one of the trainers who are asking for a remote invite. Nona will walk you thru who you want to invite and you do NOT need to count that person in YOUR PARTY; they will be part of the physical count that Nona makes.",
-         "means you are not able to make the raid any longer and you will be removed from the list. Nona will send a message to anyone you were planning to invite.",
-         "generates this help message."
+         "are the number of Trainers in your group, physically with you or that you are inviting remotely.",
+         "means you are ready for the raid to begin. Nona will tag everyone in a post when all trainers are ready for the raid to begin.",
+         "means you will be either doing the raid remotely yourself or need another trainer to send you an invite to raid remotely.",
+         "means you are willing to invite one of the trainers who are asking for a remote invite. Nona will ask you which trainer you are inviting, and they will be automatically counted as part of the raid. Nona will send them a message so they know you will invite them.",
+         "means you want to remove yourself from the raid. Nona will send a message to anyone you were planning to invite."
       };
 
       private static readonly string[] muleEmojisDesc = {
-         "means you are planning on being a raid mule.",
+         "means you are able to invite others to the raid.",
          "means that a raid group is ready to go. Nona will tag you in a post when the raid mule is ready to start the raid.",
-         "means you need a raid mule to send you an invite to be done remotely.",
-         "means you are willing to invite one of the trainers who are asking for a remote invite. Nona will walk you thru who you want to invite.",
-         "means you are not able to make the raid any longer and you will be removed from the list. Nona will send a message to anyone you were planning to invite.",
-         "generates this help message."
+         "means you need a raid mule to send you an invite to the raid.",
+         "means you are willing to invite one of the trainers who are asking for a remote invite. Nona will ask you who you want to invite, and that trainer will be sent a message so they know you plan to invite them.",
+         "means you want to remove yourself from the raid. Nona will send a message to anyone you were planning to invite."
       };
 
       private static readonly Emoji[] selectionEmojis = {
@@ -124,6 +122,7 @@ namespace PokeStar.Modules
       [Command("raid")]
       [Summary("Creates a new interactive raid coordination message.")]
       [Remarks("Valid Tier values:\n" +
+         "0 (raid with no boss assigned)\n" +
          "1, common, C\n" +
          "3, rare, R\n" +
          "5, legendary, L\n" +
@@ -141,7 +140,7 @@ namespace PokeStar.Modules
 
       [Command("mule")]
       [Alias("raidmule")]
-      [Summary("Creates a new Raid Mule message.")]
+      [Summary("Creates a new interactive remote raid coordination message.")]
       public async Task RaidMule([Summary("Tier of the raid.")] short tier,
                                  [Summary("Time the raid will start.")] string time,
                                  [Summary("Where the raid will be.")][Remainder] string location)
@@ -991,34 +990,27 @@ namespace PokeStar.Modules
          StringBuilder sb = new StringBuilder();
          sb.AppendLine("Raid Help:");
 
-         /*
-         sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_1]}-{raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_5]} You and this many other accounts will participate in the raid.");
-         sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]} You and others with you are ready. Nona will ping the group when all other players marked themselves as ready.");
-         sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE]} You will participate in the raid remotely, either by remoting in or requesting an invite from another player.");
-         sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]} will allow you to claim someone who is requesting an invite. Nona will ask you which player you want to invite, and then send a message to that person to watch for an invite from you. (You do not need to update your party size, Nona will take care of the counting.)");
-         sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]} If you want to remove yourself from the raid.");
-
-          */
-
-
          if (selectionEmojis.Contains(emojis[0]))
          {
             foreach (IEmote emoji in emojis)
                if (selectionEmojis.Contains(emoji))
                   offset++;
-            sb.AppendLine($"{emojis[0]} - {emojis[offset - 1]} {descriptions[0]}");
+            sb.AppendLine($"{emojis[0]}-{emojis[offset - 1]} {descriptions[0]}");
          }
 
          for (int i = offset; i < emojis.Length; i++)
          {
-            if (offset == 0)
-               sb.AppendLine($"{emojis[i]} {descriptions[i]}");
-            else
-               sb.AppendLine($"{emojis[i]} {descriptions[i - offset + 1]}");
+            if (!emojis[i].Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
+            {
+               if (offset == 0)
+                  sb.AppendLine($"{emojis[i]} {descriptions[i]}");
+               else
+                  sb.AppendLine($"{emojis[i]} {descriptions[i - offset + 1]}");
+            }
          }
 
          sb.AppendLine("\nRaid Edit:");
-         sb.AppendLine("To edit the raid copy and paste the following command: ");
+         sb.AppendLine("To edit the raid copy and paste the following command, and add the part of the raid you want to change and the new value: ");
          return sb.ToString();
       }
 
