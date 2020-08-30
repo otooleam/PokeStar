@@ -48,8 +48,12 @@ namespace PokeStar.Calculators
       {
          double cpmStep = 0;
          for (int i = 0; i < cpm_step_list.Length && cpmStep == 0; i++)
+         {
             if (halfLevel <= cpm_step_list[i][1])
+            {
                cpmStep = cpm_step_list[i][2];
+            }
+         }
          double cpmLevelSqrt = Math.Pow(discrete_cp_multiplier[(int)(halfLevel - 1.5)], 2);
 
          return Math.Sqrt(cpmLevelSqrt + cpmStep);
@@ -63,9 +67,13 @@ namespace PokeStar.Calculators
       private static double CalcCPM(double level)
       {
          if (level % 1.0 != 0)
+         {
             return CalcHalfLevelCPM(level);
+         }
          else
+         {
             return discrete_cp_multiplier[(int)(level - 1)];
+         }
       }
 
       /// <summary>

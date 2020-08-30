@@ -96,13 +96,13 @@ namespace PokeStar.Modules
 
       [Command("dex")]
       [Alias("pokedex")]
-      [Summary("Gets information for a pokemon.")]
-      [Remarks("Can search by pokemon name or my number.")]
-      public async Task Dex([Summary("Get information for this pokemon.")][Remainder] string pkmn)
+      [Summary("Gets the PokéDex entry for a given pokémon.")]
+      [Remarks("Can search by pokémon name or by number.")]
+      public async Task Dex([Summary("Get information for this pokémon.")][Remainder] string pokemon)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
-            bool isNumber = int.TryParse(pkmn, out int pokemonNum);
+            bool isNumber = int.TryParse(pokemon, out int pokemonNum);
 
             if (isNumber)
             {
@@ -131,18 +131,18 @@ namespace PokeStar.Modules
                }
                else
                {
-                  Pokemon pokemon = Connections.Instance().GetPokemon(pokemonWithNumber[0]);
-                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber[0]);
+                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
                   Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pokemon, fileName)).ConfigureAwait(false);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pkmn, fileName)).ConfigureAwait(false);
                   Connections.DeleteFile(fileName);
                }
             }
             else
             {
-               string name = GetPokemon(pkmn);
-               Pokemon pokemon = Connections.Instance().GetPokemon(name);
-               if (pokemon == null)
+               string name = GetPokemon(pokemon);
+               Pokemon pkmn = Connections.Instance().GetPokemon(name);
+               if (pkmn == null)
                {
                   List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(pkmn);
                   string fileName = "pokeball.png";
@@ -158,9 +158,9 @@ namespace PokeStar.Modules
                }
                else
                {
-                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
                   Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pokemon, fileName)).ConfigureAwait(false);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pkmn, fileName)).ConfigureAwait(false);
                   Connections.DeleteFile(fileName);
                }
             }
@@ -170,13 +170,13 @@ namespace PokeStar.Modules
       }
 
       [Command("cp")]
-      [Summary("Gets common max CP values for a pokemon")]
-      [Remarks("Can search by pokemon name or my number.")]
-      public async Task CP([Summary("Get CPs for this pokemon.")][Remainder] string pkmn)
+      [Summary("Gets max CP values for a given pokémon.")]
+      [Remarks("Can search by pokémon name or by number.")]
+      public async Task CP([Summary("Get CPs for this pokémon.")][Remainder] string pokemon)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
-            bool isNumber = int.TryParse(pkmn, out int pokemonNum);
+            bool isNumber = int.TryParse(pokemon, out int pokemonNum);
 
             if (isNumber)
             {
@@ -202,19 +202,19 @@ namespace PokeStar.Modules
                }
                else
                {
-                  Pokemon pokemon = Connections.Instance().GetPokemon(pokemonWithNumber[0]);
-                  Connections.CalcAllCP(ref pokemon);
-                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber[0]);
+                  Connections.CalcAllCP(ref pkmn);
+                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
                   Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName)).ConfigureAwait(false);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pkmn, fileName)).ConfigureAwait(false);
                   Connections.DeleteFile(fileName);
                }
             }
             else
             {
-               string name = GetPokemon(pkmn);
-               Pokemon pokemon = Connections.Instance().GetPokemon(name);
-               if (pokemon == null)
+               string name = GetPokemon(pokemon);
+               Pokemon pkmn = Connections.Instance().GetPokemon(name);
+               if (pkmn == null)
                {
                   List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(pkmn);
                   string fileName = "pokeball.png";
@@ -230,10 +230,10 @@ namespace PokeStar.Modules
                }
                else
                {
-                  Connections.CalcAllCP(ref pokemon);
-                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CalcAllCP(ref pkmn);
+                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
                   Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName)).ConfigureAwait(false);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pkmn, fileName)).ConfigureAwait(false);
                   Connections.DeleteFile(fileName);
                }
             }
@@ -243,26 +243,26 @@ namespace PokeStar.Modules
       }
 
       [Command("form")]
-      [Summary("Gets all forms for a pokemon.")]
-      [Remarks("Leave blank to get all pokemon with forms.\n" +
+      [Summary("Gets all forms for a given pokémon.")]
+      [Remarks("Leave blank to get all pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
-      public async Task Form([Summary("(Optional) Pokemon with the form.")] string pokemonName = null)
+      public async Task Form([Summary("(Optional) Pokémon with forms.")] string pokemon = null)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
             EmbedBuilder embed = new EmbedBuilder();
-            if (pokemonName == null)
+            if (pokemon == null)
             {
                StringBuilder sb = new StringBuilder();
                foreach (string key in pokemonForms.Keys)
                   sb.AppendLine(key);
-               embed.AddField($"Pokemon With Forms", sb.ToString(), true);
+               embed.AddField($"Pokémon With Forms", sb.ToString(), true);
                embed.WithColor(Color.Red);
             }
-            else if (pokemonForms.ContainsKey(pokemonName))
+            else if (pokemonForms.ContainsKey(pokemon))
             {
                StringBuilder sb = new StringBuilder();
-               PokemonForm forms = pokemonForms[pokemonName];
+               PokemonForm forms = pokemonForms[pokemon];
                var formsList = forms.formList.Split(',');
 
                foreach (string form in formsList)
@@ -272,11 +272,11 @@ namespace PokeStar.Modules
                      sb.Append("*");
                   sb.Append('\n');
                }
-               embed.AddField($"Forms for {pokemonName}", sb.ToString(), true);
+               embed.AddField($"Forms for {pokemon}", sb.ToString(), true);
                embed.WithColor(Color.Red);
                embed.WithFooter("* Form is default form");
             }
-            else if (pokemonName.Equals("Alias", StringComparison.OrdinalIgnoreCase))
+            else if (pokemon.Equals("Alias", StringComparison.OrdinalIgnoreCase))
             {
                embed.WithTitle("Form tag variations");
                embed.AddField($"-alola", "-alolan", true);
@@ -300,9 +300,9 @@ namespace PokeStar.Modules
       }
 
       [Command("type")]
-      [Summary("Gets information for a pokemon type.")]
-      public async Task PokeType([Summary("Primary type.")] string type1,
-                                 [Summary("(Optional) Secondary type.")] string type2 = null)
+      [Summary("Gets information for a given pokémon type.")]
+      public async Task PokeType([Summary("The typing you want info about.")] string type1,
+                                 [Summary("(Optional) Secondary typing you want info about.")] string type2 = null)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, "D"))
          {
@@ -311,40 +311,48 @@ namespace PokeStar.Modules
                type1,
             };
             if (type2 != null && !type1.Equals(type2, StringComparison.OrdinalIgnoreCase))
+            {
                types.Add(type2);
 
-            if (!CheckValidType(type1) || (types.Count == 2 && !CheckValidType(type2)))
-            {
-               await ResponseMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
+               if (!CheckValidType(type1) || (types.Count == 2 && !CheckValidType(type2)))
+               {
+                  await ErrorMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
+               }
+               else
+               {
+                  string title = $"{type1}";
+                  if (types.Count == 2)
+                  {
+                     title += $", {type2}";
+                  }
+
+                  string description = Emote.Parse(Environment.GetEnvironmentVariable($"{type1.ToUpper()}_EMOTE")).ToString();
+                  if (types.Count == 2)
+                  {
+                     description += Emote.Parse(Environment.GetEnvironmentVariable($"{type2.ToUpper()}_EMOTE")).ToString();
+                  }
+
+                  TypeRelation? type1AttackRelations = (types.Count == 2) ? null : Connections.Instance().GetTypeAttackRelations(type1);
+                  TypeRelation defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
+                  List<string> weather = Connections.Instance().GetWeather(types);
+
+                  EmbedBuilder embed = new EmbedBuilder();
+                  embed.WithTitle($@"Type {title.ToUpper()}");
+                  embed.WithDescription(description);
+                  embed.AddField("Weather Boosts:", FormatWeatherList(weather), false);
+                  if (type1AttackRelations.HasValue)
+                  {
+                     embed.AddField($"Super Effective against:", FormatTypeList(type1AttackRelations.Value.strong), false);
+                     embed.AddField($"Not Very Effective against:", FormatTypeList(type1AttackRelations.Value.weak), false);
+                  }
+                  embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.weak), false);
+                  embed.AddField($"Resistances:", FormatTypeList(defenseRelations.strong), false);
+                  embed.WithColor(Color.Red);
+                  await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+               }
             }
             else
-            {
-               string title = $"{type1}";
-               if (types.Count == 2)
-                  title += $", {type2}";
-
-               string description = Emote.Parse(Environment.GetEnvironmentVariable($"{type1.ToUpper()}_EMOTE")).ToString();
-               if (types.Count == 2)
-                  description += Emote.Parse(Environment.GetEnvironmentVariable($"{type2.ToUpper()}_EMOTE")).ToString();
-
-               var type1AttackRelations = (types.Count == 2) ? null : Connections.Instance().GetTypeAttackRelations(type1);
-               var defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
-               var weather = Connections.Instance().GetWeather(types);
-
-               EmbedBuilder embed = new EmbedBuilder();
-               embed.WithTitle($@"Type {title.ToUpper()}");
-               embed.WithDescription(description);
-               embed.AddField("Weather Boosts:", FormatWeatherList(weather), false);
-               if (type1AttackRelations.HasValue)
-               {
-                  embed.AddField($"Super Effective against:", FormatTypeList(type1AttackRelations.Value.strong), false);
-                  embed.AddField($"Not Very Effective against:", FormatTypeList(type1AttackRelations.Value.weak), false);
-               }
-               embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.weak), false);
-               embed.AddField($"Resistances:", FormatTypeList(defenseRelations.strong), false);
-               embed.WithColor(Color.Red);
-               await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
-            }
+               await ErrorMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
          }
          else
             await ResponseMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
@@ -432,7 +440,7 @@ namespace PokeStar.Modules
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.Red);
-         embed.WithTitle($"Pokemon Selection");
+         embed.WithTitle($"Pokémon Selection");
          embed.WithThumbnailUrl($"attachment://{selectPic}");
          embed.AddField("Do you mean...?", sb.ToString());
          return embed.Build();
@@ -449,13 +457,19 @@ namespace PokeStar.Modules
 
          string form = words[words.Count - 1];
          if (form.Substring(0, 1).Equals("-", StringComparison.OrdinalIgnoreCase))
+         {
             words.RemoveAt(words.Count - 1);
+         }
          else
+         {
             form = "";
+         }
 
          string name = "";
          foreach (string str in words)
+         {
             name += str + " ";
+         }
          name = name.TrimEnd(' ');
 
          return GetFullName(name, form);
@@ -653,7 +667,9 @@ namespace PokeStar.Modules
       {
          string weatherString = "";
          foreach (var weather in weatherList)
+         {
             weatherString += $"{Emote.Parse(Environment.GetEnvironmentVariable($"{weather.Replace(' ', '_').ToUpper()}_EMOTE"))} ";
+         }
          return weatherString;
       }
 
@@ -666,6 +682,7 @@ namespace PokeStar.Modules
       {
          if (relations.Count == 0)
             return "-----";
+
          string relationString = "";
          foreach (var relation in relations)
          {
