@@ -140,11 +140,12 @@ namespace PokeStar.Modules
             }
             else
             {
-               string name = GetPokemon(pokemon);
+               string name = GetPokemon(pokemon); 
                Pokemon pkmn = Connections.Instance().GetPokemon(name);
                if (pkmn == null)
                {
-                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(pokemon);
+                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+
                   string fileName = "pokeball.png";
                   Connections.CopyFile(fileName);
                   RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
@@ -216,7 +217,8 @@ namespace PokeStar.Modules
                Pokemon pkmn = Connections.Instance().GetPokemon(name);
                if (pkmn == null)
                {
-                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(pokemon);
+                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+
                   string fileName = "pokeball.png";
                   Connections.CopyFile(fileName);
                   RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
@@ -371,6 +373,7 @@ namespace PokeStar.Modules
             {
                await ResponseMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
             }
+
          }
       }
 

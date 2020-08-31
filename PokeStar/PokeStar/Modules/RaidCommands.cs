@@ -10,7 +10,6 @@ using Discord.Commands;
 using Discord.WebSocket;
 using PokeStar.DataModels;
 using PokeStar.ConnectionInterface;
-using Discord.Rest;
 
 namespace PokeStar.Modules
 {
@@ -19,6 +18,8 @@ namespace PokeStar.Modules
    /// </summary>
    public class RaidCommands : ModuleBase<SocketCommandContext>
    {
+      private static Color raidMessageColor = Color.DarkBlue;
+
       private static readonly Dictionary<ulong, RaidParent> raidMessages = new Dictionary<ulong, RaidParent>();
       private static readonly Dictionary<ulong, RaidSubMessage> subMessages = new Dictionary<ulong, RaidSubMessage>();
 
@@ -119,6 +120,7 @@ namespace PokeStar.Modules
          MULE_READY_SUB_MESSAGE,
       }
 
+      private static readonly short EX_RAID_TIER = 9;
       private static readonly short MEGA_RAID_TIER = 7;
       private static readonly short LEGENDARY_RAID_TIER = 5;
       private static readonly short RARE_RAID_TIER = 3;
@@ -279,6 +281,31 @@ namespace PokeStar.Modules
          else
             await ResponseMessage.SendErrorMessage(Context, "edit", "This channel is not registered to process Raid commands.");
       }
+
+      [Command("bosslist")]
+      [Alias("boss", "bossess", "raidboss", "raidbosses")]
+      [Summary("Get the current list of raid bosses.")]
+      public async Task Bosses()
+      {
+         List<string> exBosses = SilphData.GetRaidBossesTier(EX_RAID_TIER);
+         List<string> megaBosses = SilphData.GetRaidBossesTier(MEGA_RAID_TIER);
+         List<string> legendaryBosses = SilphData.GetRaidBossesTier(LEGENDARY_RAID_TIER);
+         List<string> rareBosses = SilphData.GetRaidBossesTier(RARE_RAID_TIER);
+         List<string> commonBosses = SilphData.GetRaidBossesTier(COMMON_RAID_TIER);
+
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithColor(raidMessageColor);
+         embed.WithTitle("Current Raid Bosses:");
+         embed.AddField($"EX Raids {BuildRaidTitle(EX_RAID_TIER)}", BuildRaidBossListString(exBosses), true);
+         embed.AddField($"Mega Raids {BuildRaidTitle(MEGA_RAID_TIER)}", BuildRaidBossListString(megaBosses), true);
+         embed.AddField($"Tier 5 Raids {BuildRaidTitle(LEGENDARY_RAID_TIER)}", BuildRaidBossListString(legendaryBosses), true);
+         embed.AddField($"Tier 3 Raids {BuildRaidTitle(RARE_RAID_TIER)}", BuildRaidBossListString(rareBosses), true);
+         embed.AddField($"Tier 1 Raids {BuildRaidTitle(COMMON_RAID_TIER)}", BuildRaidBossListString(commonBosses), true);
+
+         await Context.Channel.SendMessageAsync(embed: embed.Build());
+      }
+
+
 
 
       /// <summary>
@@ -843,11 +870,10 @@ namespace PokeStar.Modules
       private static Embed BuildRaidEmbed(RaidParent raid, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(Color.DarkBlue);
+         embed.WithColor(raidMessageColor);
          embed.WithTitle(raid.Boss.Name.Equals(RaidBoss.DefaultName) ? "Empty Raid" : $"{raid.Boss.Name} Raid {BuildRaidTitle(raid.Tier)}");
          embed.WithDescription("Press ? for help.");
          embed.WithThumbnailUrl($"attachment://{fileName}");
-         embed.WithDescription("Press ? for help.");
          embed.AddField("Time", raid.Time, true);
          embed.AddField("Location", raid.Location, true);
 
@@ -888,7 +914,7 @@ namespace PokeStar.Modules
          }
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(Color.DarkBlue);
+         embed.WithColor(raidMessageColor);
          embed.WithTitle($"Boss Selection");
          embed.WithThumbnailUrl($"attachment://{selectPic}");
          embed.AddField("Please Select Boss", sb.ToString());
@@ -917,7 +943,7 @@ namespace PokeStar.Modules
          sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]} Cancel");
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(Color.DarkBlue);
+         embed.WithColor(raidMessageColor);
          embed.WithTitle($"{user} - Invite");
          embed.AddField("Please Select Player to Invite.", sb.ToString());
 
@@ -937,7 +963,7 @@ namespace PokeStar.Modules
          sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]} Cancel");
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(Color.DarkBlue);
+         embed.WithColor(raidMessageColor);
          embed.WithTitle($"{user} - Remote");
          embed.AddField("Please Select How You Will Remote to the Raid.", sb.ToString());
 
@@ -958,7 +984,7 @@ namespace PokeStar.Modules
          sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]} Cancel");
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(Color.DarkBlue);
+         embed.WithColor(raidMessageColor);
          embed.WithTitle($"{user} - Raid Mule Ready");
          embed.AddField("Please Select Which Group is Ready.", sb.ToString());
 
@@ -974,6 +1000,8 @@ namespace PokeStar.Modules
       {
          if (tier == MEGA_RAID_TIER)
             return Emote.Parse(Environment.GetEnvironmentVariable("MEGA_EMOTE")).ToString();
+         if (tier == EX_RAID_TIER)
+            return Emote.Parse(Environment.GetEnvironmentVariable("EX_EMOTE")).ToString();
          StringBuilder sb = new StringBuilder();
          string raidSymbol = Emote.Parse(Environment.GetEnvironmentVariable("RAID_EMOTE")).ToString();
          for (int i = 0; i < tier; i++)
@@ -1116,6 +1144,24 @@ namespace PokeStar.Modules
 
          sb.AppendLine("\nRaid Edit:");
          sb.AppendLine("To edit the raid copy and paste the following command, and add the part of the raid you want to change and the new value: ");
+         return sb.ToString();
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="bosses"></param>
+      /// <returns></returns>
+      private static string BuildRaidBossListString(List<string> bosses)
+      {
+         if (bosses.Count == 0)
+            return "-----";
+
+         StringBuilder sb = new StringBuilder();
+         foreach (string boss in bosses)
+         {
+            sb.AppendLine(boss);
+         }
          return sb.ToString();
       }
 

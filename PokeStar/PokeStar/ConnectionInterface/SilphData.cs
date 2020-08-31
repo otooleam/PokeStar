@@ -40,6 +40,7 @@ namespace PokeStar.ConnectionInterface
          int tier = -1;
          bool tierStart = false;
          bool nextInTier = false;
+         bool exTierStarted = false;
          bool megaTierStarted = false;
          HtmlWeb web = new HtmlWeb();
          HtmlDocument doc = web.Load(Connections.Instance().RAID_BOSS_URL);
@@ -62,6 +63,15 @@ namespace PokeStar.ConnectionInterface
                      tierStart = true;
                      nextInTier = false;
                   }
+                  /*
+                  else if (temp.Equals("ex", StringComparison.OrdinalIgnoreCase) && !exTierStarted)
+                  {
+                     tier = 9;
+                     tierStart = true;
+                     nextInTier = false;
+                     exTierStarted = true;
+                  }
+                  /**/
                   else if (temp.Equals("Mega", StringComparison.OrdinalIgnoreCase) && !megaTierStarted)
                   {
                      tier = 7;
