@@ -19,13 +19,14 @@ namespace PokeStar.Modules
       {
          List<CommandInfo> commands = Program.GetCommands();
          EmbedBuilder embedBuilder = new EmbedBuilder();
-         embedBuilder.WithColor(Color.Green);
+         embedBuilder.WithColor(Color.Gold);
 
          List<string> hiddenCommands = new List<string>()
          {
             "ping",
             "help",
-            "rave"
+            "rave",
+            "updatePokemonNames"
          };
 
          if (command == null)

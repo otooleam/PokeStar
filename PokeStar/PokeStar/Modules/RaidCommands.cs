@@ -435,7 +435,7 @@ namespace PokeStar.Modules
                   else if (parent is RaidMule)
                      await raidMsg.AddReactionsAsync(muleEmojis);
 
-                  raidMessages.Add(raidMsg.Id, parent); 
+                  raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(filename);
                   return;
                }
@@ -998,7 +998,7 @@ namespace PokeStar.Modules
       /// <returns>Raid title as a string.</returns>
       private static string BuildRaidTitle(short tier)
       {
-         if(tier == MEGA_RAID_TIER)
+         if (tier == MEGA_RAID_TIER)
             return Emote.Parse(Environment.GetEnvironmentVariable("MEGA_EMOTE")).ToString();
          if (tier == EX_RAID_TIER)
             return Emote.Parse(Environment.GetEnvironmentVariable("EX_EMOTE")).ToString();
@@ -1232,13 +1232,13 @@ namespace PokeStar.Modules
          muleEmojis[(int)MULE_EMOJI_INDEX.REQUEST_INVITE] = Emote.Parse(Environment.GetEnvironmentVariable("REMOTE_PASS_EMOTE"));
       }
    }
+}
 
-   /// <summary>
-   /// 
-   /// </summary>
-   public struct RaidSubMessage
-   {
-      public int SubMessageType;
-      public ulong MainMessageId;
-   }
+/// <summary>
+/// 
+/// </summary>
+public struct RaidSubMessage
+{
+   public int SubMessageType;
+   public ulong MainMessageId;
 }

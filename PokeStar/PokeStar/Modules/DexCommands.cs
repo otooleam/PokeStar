@@ -145,6 +145,7 @@ namespace PokeStar.Modules
                if (pkmn == null)
                {
                   List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+
                   string fileName = "pokeball.png";
                   Connections.CopyFile(fileName);
                   RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
@@ -217,6 +218,7 @@ namespace PokeStar.Modules
                if (pkmn == null)
                {
                   List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+
                   string fileName = "pokeball.png";
                   Connections.CopyFile(fileName);
                   RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
@@ -256,8 +258,9 @@ namespace PokeStar.Modules
                StringBuilder sb = new StringBuilder();
                foreach (string key in pokemonForms.Keys)
                   sb.AppendLine(key);
-               embed.AddField($"Pokémon With Forms", sb.ToString(), true);
-               embed.WithColor(Color.Red);
+
+               embed.AddField($"Pokemon With Forms", sb.ToString(), true);
+               embed.WithColor(Color.DarkGreen);
             }
             else if (pokemonForms.ContainsKey(pokemon))
             {
@@ -273,7 +276,8 @@ namespace PokeStar.Modules
                   sb.Append('\n');
                }
                embed.AddField($"Forms for {pokemon}", sb.ToString(), true);
-               embed.WithColor(Color.Red);
+               embed.WithColor(Color.DarkGreen);
+
                embed.WithFooter("* Form is default form");
             }
             else if (pokemon.Equals("Alias", StringComparison.OrdinalIgnoreCase))
@@ -287,7 +291,7 @@ namespace PokeStar.Modules
                embed.AddField($"-psychic", "-psy", true);
                embed.AddField($"-galar-zen", "-garlarian-zen", true);
                embed.AddField($"-autumn", "-fall", true);
-               embed.WithColor(Color.Red);
+               embed.WithColor(Color.DarkGreen);
             }
             else
             {
@@ -322,40 +326,55 @@ namespace PokeStar.Modules
                {
                   string title = $"{type1}";
                   if (types.Count == 2)
-                  {
                      title += $", {type2}";
-                  }
 
                   string description = Emote.Parse(Environment.GetEnvironmentVariable($"{type1.ToUpper()}_EMOTE")).ToString();
                   if (types.Count == 2)
-                  {
                      description += Emote.Parse(Environment.GetEnvironmentVariable($"{type2.ToUpper()}_EMOTE")).ToString();
-                  }
 
-                  TypeRelation? type1AttackRelations = (types.Count == 2) ? null : Connections.Instance().GetTypeAttackRelations(type1);
-                  TypeRelation defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
-                  List<string> weather = Connections.Instance().GetWeather(types);
+                  var type1AttackRelations = (types.Count == 2) ? null : Connections.Instance().GetTypeAttackRelations(type1);
+                  var defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
+                  var weather = Connections.Instance().GetWeather(types);
 
                   EmbedBuilder embed = new EmbedBuilder();
                   embed.WithTitle($@"Type {title.ToUpper()}");
                   embed.WithDescription(description);
                   embed.AddField("Weather Boosts:", FormatWeatherList(weather), false);
                   if (type1AttackRelations.HasValue)
+
                   {
-                     embed.AddField($"Super Effective against:", FormatTypeList(type1AttackRelations.Value.strong), false);
-                     embed.AddField($"Not Very Effective against:", FormatTypeList(type1AttackRelations.Value.weak), false);
+                     await ResponseMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
                   }
+                  else
+                  {
+                     if (types.Count == 2)
+                     {
+                        description += Emote.Parse(Environment.GetEnvironmentVariable($"{type2.ToUpper()}_EMOTE")).ToString();
+                     }
+                     if (type1AttackRelations.HasValue)
+                     {
+                        embed.AddField($"Super Effective against:", FormatTypeList(type1AttackRelations.Value.strong), false);
+                        embed.AddField($"Not Very Effective against:", FormatTypeList(type1AttackRelations.Value.weak), false);
+                     }
+                     embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.weak), false);
+                     embed.AddField($"Resistances:", FormatTypeList(defenseRelations.strong), false);
+                     embed.WithColor(Color.Red);
+                     await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+                  }
+
                   embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.weak), false);
                   embed.AddField($"Resistances:", FormatTypeList(defenseRelations.strong), false);
-                  embed.WithColor(Color.Red);
+                  embed.WithColor(Color.DarkGreen);
                   await Context.Channel.SendMessageAsync(null, false, embed.Build()).ConfigureAwait(false);
+
                }
             }
             else
+            {
                await ResponseMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
+            }
+
          }
-         else
-            await ResponseMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
       }
 
 
@@ -402,7 +421,7 @@ namespace PokeStar.Modules
          embed.AddField("Fast Moves", pokemon.FastMoveToString(), true);
          embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
          embed.AddField("Counters", pokemon.CounterToString(), false);
-         embed.WithColor(Color.Red);
+         embed.WithColor(Color.DarkGreen);
          embed.WithFooter("* denotes STAB move ! denotes Legacy move");
 
          return embed.Build();
@@ -420,7 +439,7 @@ namespace PokeStar.Modules
          embed.AddField($"Hatch CP (Level 20)", pokemon.HatchCPToString(), false);
          embed.AddField($"Quest CP (Level 15)", pokemon.QuestCPToString(), false);
          embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
-         embed.WithColor(Color.Red);
+         embed.WithColor(Color.DarkGreen);
          embed.WithFooter("* denotes Weather Boosted CP");
 
          return embed.Build();
@@ -439,8 +458,9 @@ namespace PokeStar.Modules
             sb.AppendLine($"{selectionEmojis[i]} {potentials[i]}");
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(Color.Red);
-         embed.WithTitle($"Pokémon Selection");
+
+         embed.WithColor(Color.DarkGreen);
+         embed.WithTitle($"Pokemon Selection");
          embed.WithThumbnailUrl($"attachment://{selectPic}");
          embed.AddField("Do you mean...?", sb.ToString());
          return embed.Build();
