@@ -105,7 +105,7 @@ namespace PokeStar.Modules
 
                if (pokemonWithNumber.Count == 0)
                {
-                  await ResponseMessage.SendErrorMessage(Context, "dex", $"Pokemon with number {pokemonNum} cannot be found.");
+                  await ResponseMessage.SendErrorMessage(Context, "dex", $"Pokémon with number {pokemonNum} cannot be found.");
                }
                else if (pokemonNum == Global.ARCEUS_NUMBER)
                {
@@ -175,7 +175,7 @@ namespace PokeStar.Modules
 
                if (pokemonWithNumber.Count == 0)
                {
-                  await ResponseMessage.SendErrorMessage(Context, "cp", $"Pokemon with number {pokemonNum} cannot be found.");
+                  await ResponseMessage.SendErrorMessage(Context, "cp", $"Pokémon with number {pokemonNum} cannot be found.");
                }
                else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER && pokemonNum != Global.ARCEUS_NUMBER)
                {
@@ -265,7 +265,7 @@ namespace PokeStar.Modules
 
                   if (pokemonWithNumber.Count == 0)
                   {
-                     await ResponseMessage.SendErrorMessage(Context, "form", $"Pokemon with number {pokemonNum} cannot be found.");
+                     await ResponseMessage.SendErrorMessage(Context, "form", $"Pokémon with number {pokemonNum} cannot be found.");
                   }
                   if (pokemonWithNumber.Count == 1)
                   {
@@ -311,7 +311,7 @@ namespace PokeStar.Modules
                   Pokemon pkmn = Connections.Instance().GetPokemon(GetPokemon(pokemon));
                   if (pkmn == null)
                   {
-                     await ResponseMessage.SendErrorMessage(Context, "form", $"Pokemon with name {pokemon} cannot be found.");
+                     await ResponseMessage.SendErrorMessage(Context, "form", $"Pokémon with name {pokemon} cannot be found.");
                   }
                   else
                   {
@@ -324,12 +324,40 @@ namespace PokeStar.Modules
 
       [Command("type")]
       [Summary("Gets information for a given pokémon type.")]
-      public async Task PokeType([Summary("The typing you want info about.")] string type1,
+      public async Task PokeType([Summary("(Optional) The typing you want info about.")] string type1 = null,
                                  [Summary("(Optional) Secondary typing you want info about.")] string type2 = null)
       {
          if (!ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, Global.REGISTER_STRING_DEX))
          {
             await ResponseMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
+         }
+         else if (type1 == null)
+         {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine($"{Global.NONA_EMOJIS["bug_emote"]} Bug");
+            sb.AppendLine($"{Global.NONA_EMOJIS["dark_emote"]} Dark");
+            sb.AppendLine($"{Global.NONA_EMOJIS["dragon_emote"]} Dragon");
+            sb.AppendLine($"{Global.NONA_EMOJIS["electric_emote"]} Electric");
+            sb.AppendLine($"{Global.NONA_EMOJIS["fairy_emote"]} Fairy");
+            sb.AppendLine($"{Global.NONA_EMOJIS["fighting_emote"]} Fighting");
+            sb.AppendLine($"{Global.NONA_EMOJIS["fire_emote"]} Fire");
+            sb.AppendLine($"{Global.NONA_EMOJIS["flying_emote"]} Flying");
+            sb.AppendLine($"{Global.NONA_EMOJIS["ghost_emote"]} Ghost");
+            sb.AppendLine($"{Global.NONA_EMOJIS["grass_emote"]} Grass");
+            sb.AppendLine($"{Global.NONA_EMOJIS["ground_emote"]} Ground");
+            sb.AppendLine($"{Global.NONA_EMOJIS["ice_emote"]} Ice");
+            sb.AppendLine($"{Global.NONA_EMOJIS["normal_emote"]} Normal");
+            sb.AppendLine($"{Global.NONA_EMOJIS["poison_emote"]} Poison");
+            sb.AppendLine($"{Global.NONA_EMOJIS["psychic_emote"]} Psychic");
+            sb.AppendLine($"{Global.NONA_EMOJIS["rock_emote"]} Rock");
+            sb.AppendLine($"{Global.NONA_EMOJIS["steel_emote"]} Steel");
+            sb.AppendLine($"{Global.NONA_EMOJIS["water_emote"]} Water");
+
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.AddField($"Pokémon Types:", sb.ToString());
+            embed.WithColor(DexMessageColor);
+            embed.WithFooter("Pokémon have 1 or 2 types. Moves always have 1 type.");
+            await ReplyAsync(embed: embed.Build());
          }
          else
          {
