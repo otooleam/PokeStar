@@ -5,7 +5,7 @@ To invite Nona to your server, invite it from [here](https://discord.com/api/oau
 
 ### Features:
 * Raid coordination
-* Pokédex lookup
+* Pokédex lookup by name or number
 * Basic Role Management
 
 ### Future Features:
@@ -13,7 +13,5 @@ To invite Nona to your server, invite it from [here](https://discord.com/api/oau
 * Raid Train Corrdination
 * Player Accounts
 * Gym/Pokéstop location tracking
-* Searching the Pokédex by number
-* Closest Pokédex results
 
-###### Current raid data is retrieved from the Silph Road.
+###### Current raid data is retrieved from the Silph Road [here](https://thesilphroad.com/raid-bosses).
