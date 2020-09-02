@@ -231,7 +231,7 @@ namespace PokeStar.Modules
       [Summary("Gets all forms for a given pokémon.")]
       [Remarks("Leave blank to get all pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
-      public async Task Form([Summary("(Optional) Pokémon with forms.")] string pokemon = null)
+      public async Task Form([Summary("Pokémon with forms.")] string pokemon)
       {
          if (!ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, Global.REGISTER_STRING_DEX))
          {
@@ -239,41 +239,9 @@ namespace PokeStar.Modules
          }
          else
          {
-            EmbedBuilder embed = null;
-            if (pokemon == null)
+            if (pokemon.Equals("Alias", StringComparison.OrdinalIgnoreCase))
             {
-               embed = new EmbedBuilder();
-               StringBuilder sb = new StringBuilder();
-               foreach (string key in pokemonForms.Keys)
-               {
-                  sb.AppendLine(key);
-               }
-               embed.AddField($"Pokemon With Forms", sb.ToString(), true);
-               embed.WithColor(DexMessageColor);
-            }
-            else if (pokemonForms.ContainsKey(pokemon))
-            {
-               embed = new EmbedBuilder();
-               StringBuilder sb = new StringBuilder();
-               Tuple<string, string> forms = pokemonForms[pokemon];
-               string[] formsList = forms.Item1.Split(',');
-
-               foreach (string form in formsList)
-               {
-                  sb.Append(form);
-                  if (form.Equals(forms.Item2))
-                  {
-                     sb.Append("*");
-                  }
-                  sb.Append('\n');
-               }
-               embed.AddField($"Forms for {pokemon}", sb.ToString(), true);
-               embed.WithColor(DexMessageColor);
-               embed.WithFooter("* Form is default form");
-            }
-            else if (pokemon.Equals("Alias", StringComparison.OrdinalIgnoreCase))
-            {
-               embed = new EmbedBuilder();
+               EmbedBuilder embed = new EmbedBuilder();
                embed.WithTitle("Form tag variations");
                embed.AddField($"-alola", "-alolan", true);
                embed.AddField($"-galar", "-garlarian", true);
@@ -285,16 +253,71 @@ namespace PokeStar.Modules
                embed.AddField($"-autumn", "-fall", true);
                embed.AddField($"-megax", "-megay-x, -x", true);
                embed.AddField($"-megay", "-megay-y, -y", true);
-
                embed.WithColor(DexMessageColor);
-            }
-            if (embed == null)
-            {
-               await ResponseMessage.SendErrorMessage(Context, "form", $"Pokemon {pokemon} cannot be found or has no forms.");
+               await ReplyAsync(embed: embed.Build());
             }
             else
             {
-               await ReplyAsync(embed: embed.Build());
+               bool isNumber = int.TryParse(pokemon, out int pokemonNum);
+               if (isNumber)
+               {
+                  List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
+
+                  if (pokemonWithNumber.Count == 0)
+                  {
+                     await ResponseMessage.SendErrorMessage(Context, "form", $"Pokemon with number {pokemonNum} cannot be found.");
+                  }
+                  if (pokemonWithNumber.Count == 1)
+                  {
+                     await ResponseMessage.SendErrorMessage(Context, "form", $"{pokemonWithNumber.First()} does not have different forms.");
+                  }
+                  else if (pokemonWithNumber.Count > 1)
+                  {
+                     EmbedBuilder embed = new EmbedBuilder();
+                     StringBuilder sb = new StringBuilder();
+
+                     foreach (string form in pokemonWithNumber)
+                     {
+                        sb.Append($"{form}\n");
+                     }
+                     embed.AddField($"Forms for pokemon with #{pokemon}", sb.ToString(), true);
+                     embed.WithColor(DexMessageColor);
+                     await ReplyAsync(embed: embed.Build());
+                  }
+               }
+               else if (pokemonForms.ContainsKey(pokemon))
+               {
+                  EmbedBuilder embed = new EmbedBuilder();
+                  StringBuilder sb = new StringBuilder();
+                  Tuple<string, string> forms = pokemonForms[pokemon];
+                  string[] formsList = forms.Item1.Split(',');
+
+                  foreach (string form in formsList)
+                  {
+                     sb.Append(form);
+                     if (form.Equals(forms.Item2))
+                     {
+                        sb.Append("*");
+                     }
+                     sb.Append('\n');
+                  }
+                  embed.AddField($"Forms for {pokemon}", sb.ToString(), true);
+                  embed.WithColor(DexMessageColor);
+                  embed.WithFooter("* Form is default form");
+                  await ReplyAsync(embed: embed.Build());
+               }
+               else
+               {
+                  Pokemon pkmn = Connections.Instance().GetPokemon(GetPokemon(pokemon));
+                  if (pkmn == null)
+                  {
+                     await ResponseMessage.SendErrorMessage(Context, "form", $"Pokemon with name {pokemon} cannot be found.");
+                  }
+                  else
+                  {
+                     await ResponseMessage.SendErrorMessage(Context, "form", $"{pkmn.Name} does not have different forms.");
+                  }
+               }
             }
          }
       }
@@ -355,6 +378,12 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="message"></param>
+      /// <param name="reaction"></param>
+      /// <returns></returns>
       public static async Task DexMessageReactionHandle(IMessage message, SocketReaction reaction)
       {
          Tuple<int, List<string>> dexMessage = dexMessages[message.Id];
@@ -382,6 +411,12 @@ namespace PokeStar.Modules
          await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="pokemon"></param>
+      /// <param name="fileName"></param>
+      /// <returns></returns>
       private static Embed BuildDexEmbed(Pokemon pokemon, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
@@ -397,11 +432,25 @@ namespace PokeStar.Modules
          embed.AddField("Fast Moves", pokemon.FastMoveToString(), true);
          embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
          embed.AddField("Counters", pokemon.CounterToString(), false);
+         if (pokemon.HasForms())
+         {
+            embed.AddField("Forms", pokemon.FormsToString(), true);
+         }
+         if (pokemon.IsRegional())
+         {
+            embed.AddField("Regions", pokemon.RegionalToString(), true);
+         }
          embed.WithColor(DexMessageColor);
          embed.WithFooter("* denotes STAB move ! denotes Legacy move");
          return embed.Build();
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="pokemon"></param>
+      /// <param name="fileName"></param>
+      /// <returns></returns>
       private static Embed BuildCPEmbed(Pokemon pokemon, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();

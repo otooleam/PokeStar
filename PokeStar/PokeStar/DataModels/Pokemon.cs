@@ -22,6 +22,11 @@ namespace PokeStar.DataModels
       public string Name { get; set; }
 
       /// <summary>
+      /// List of alternate forms.
+      /// </summary>
+      public List<string> Forms { get; set; }
+
+      /// <summary>
       /// Description of the pokemon.
       /// </summary>
       public string Description { get; set; }
@@ -166,9 +171,18 @@ namespace PokeStar.DataModels
       /// </summary>
       public List<int> CPWild { get; } = new List<int>();
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
       public bool IsRegional()
       {
          return Regional != null;
+      }
+
+      public bool HasForms()
+      {
+         return Forms.Count > 1;
       }
 
       /// <summary>
@@ -192,13 +206,31 @@ namespace PokeStar.DataModels
          return sb.ToString();
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
       public string RegionalToString()
       {
          List<string> regions = Regional.Split(',').ToList();
          StringBuilder sb = new StringBuilder();
-         foreach (string r in regions)
+         foreach (string region in regions)
          {
-            sb.AppendLine($"-{r}\n");
+            sb.AppendLine(region);
+         }
+         return sb.ToString().Trim();
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
+      public string FormsToString()
+      {
+         StringBuilder sb = new StringBuilder();
+         foreach (string form in Forms)
+         {
+            sb.AppendLine(form);
          }
          return sb.ToString().Trim();
       }
@@ -425,7 +457,6 @@ namespace PokeStar.DataModels
             sb.Append($"**{column2level}** {dash} {CPWild[column2level - 1]}");
             sb.AppendLine($"{(column3level <= 35 ? $" . **{column3level}** {dash} {CPWild[column3level - 1]}{(column3level > 30 ? "\\*" : "")}" : "")}");
          }
-
          return sb.ToString();
       }
    }

@@ -184,6 +184,8 @@ namespace PokeStar.ConnectionInterface
             return null;
          }
 
+         pokemon.Forms = POGODBConnector.GetPokemonByNumber(pokemon.Number);
+
          Tuple<Dictionary<string, int>, Dictionary<string, int>> typeRelations = GetTypeDefenseRelations(pokemon.Type);
          pokemon.Weakness = typeRelations.Item2.Keys.ToList();
          pokemon.Resistance = typeRelations.Item1.Keys.ToList();
