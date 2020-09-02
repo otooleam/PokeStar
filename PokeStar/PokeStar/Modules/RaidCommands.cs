@@ -534,7 +534,9 @@ namespace PokeStar.Modules
             {
                int group = raid.PlayerReady(reactingPlayer);
                if (group != Global.NOT_IN_RAID)
+               {
                   await reaction.Channel.SendMessageAsync(BuildRaidPingList(raid.Groups.ElementAt(group).GetPingList(), raid.Location, group + 1, true));
+               }
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE_RAID]))
             {

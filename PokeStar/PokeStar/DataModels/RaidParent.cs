@@ -80,6 +80,13 @@ namespace PokeStar.DataModels
       /// </summary>
       public int InvitePage { get; protected set; } = 0;
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="tier"></param>
+      /// <param name="time"></param>
+      /// <param name="location"></param>
+      /// <param name="boss"></param>
       public RaidParent(short tier, string time, string location, string boss = null)
       {
          Tier = tier;

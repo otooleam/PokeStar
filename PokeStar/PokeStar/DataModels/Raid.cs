@@ -143,7 +143,7 @@ namespace PokeStar.DataModels
       /// <returns>True if the requester was invited, otherwise false.</returns>
       public override bool InvitePlayer(SocketGuildUser requester, SocketGuildUser accepter)
       {
-         if ((IsInRaid(requester) == InviteListNumber && IsInRaid(accepter, false) != 1) || requester.Equals(accepter))
+         if ((IsInRaid(requester) == InviteListNumber && IsInRaid(accepter, false) != Global.NOT_IN_RAID) || requester.Equals(accepter))
          {
             return PlayerAdd(requester, 1, accepter);
          }
@@ -160,7 +160,9 @@ namespace PokeStar.DataModels
       public override int IsInRaid(SocketGuildUser player, bool checkInvite = true)
       {
          if (checkInvite && Invite.Contains(player))
+         {
             return InviteListNumber;
+         }
          for (int i = 0; i < Groups.Count; i++)
          {
             if (Groups.ElementAt(i).HasPlayer(player, checkInvite))
@@ -171,6 +173,11 @@ namespace PokeStar.DataModels
          return Global.NOT_IN_RAID;
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="player"></param>
+      /// <returns></returns>
       public int PlayerReady(SocketGuildUser player)
       {
          int groupNum = IsInRaid(player, false);

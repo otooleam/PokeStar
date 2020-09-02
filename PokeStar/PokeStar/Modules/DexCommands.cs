@@ -683,7 +683,7 @@ namespace PokeStar.Modules
       {
          if (relations.Count == 0)
          {
-            return "-----";
+            return Global.EMPTY_FIELD;
          }
 
          string relationString = "";

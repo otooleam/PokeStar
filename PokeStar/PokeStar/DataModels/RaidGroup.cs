@@ -159,10 +159,14 @@ namespace PokeStar.DataModels
 
          List<SocketGuildUser> playerInvited = new List<SocketGuildUser>();
          foreach (KeyValuePair<SocketGuildUser, SocketGuildUser> invite in Invited.Where(x => x.Value.Equals(player)))
+         {
             playerInvited.Add(invite.Key);
+         }
 
          foreach (SocketGuildUser invite in playerInvited)
+         {
             Invited.Remove(invite);
+         }
 
          return playerInvited;
       }
