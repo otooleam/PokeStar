@@ -24,6 +24,10 @@ namespace PokeStar.Modules
 
       private static readonly Dictionary<string, Tuple<string, string>> pokemonForms = new Dictionary<string, Tuple<string, string>>(StringComparer.OrdinalIgnoreCase)
       {
+         ["Venusaur"] = new Tuple<string, string>("-mega", ""),
+         ["Charizard"] = new Tuple<string, string>("-mega,-megax,-megay,-x,-y", ""),
+         ["Blastoise"] = new Tuple<string, string>("-mega", ""),
+         ["Beedrill"] = new Tuple<string, string>("-mega", ""),
          ["Rattata"] = new Tuple<string, string>("-alola", ""),
          ["Raticate"] = new Tuple<string, string>("-alola", ""),
          ["Raichu"] = new Tuple<string, string>("-alola", ""),
@@ -279,6 +283,9 @@ namespace PokeStar.Modules
                embed.AddField($"-psychic", "-psy", true);
                embed.AddField($"-galar-zen", "-garlarian-zen", true);
                embed.AddField($"-autumn", "-fall", true);
+               embed.AddField($"-megax", "-megay-x, -x", true);
+               embed.AddField($"-megay", "-megay-y, -y", true);
+
                embed.WithColor(DexMessageColor);
             }
             if (embed == null)
@@ -492,7 +499,13 @@ namespace PokeStar.Modules
       private static string GetFullName(string pokemonName, string form = "")
       {
          if (form.Length == 2)
-            return $"{pokemonName} {form.ToCharArray()[1]}";
+         {
+            string mega = "";
+            if ((form.Equals("-x", StringComparison.OrdinalIgnoreCase) || form.Equals("-y", StringComparison.OrdinalIgnoreCase)) &&
+                (pokemonName.Equals("charizard", StringComparison.OrdinalIgnoreCase) || pokemonName.Equals("mewtwo", StringComparison.OrdinalIgnoreCase)))
+               mega = "mega ";
+            return $"{mega}{pokemonName} {form.ToCharArray()[1]}";
+         }
          // Alolan
          else if (form.Equals("-alola", StringComparison.OrdinalIgnoreCase) || form.Equals("-alolan", StringComparison.OrdinalIgnoreCase))
             return $"Alolan {pokemonName}";
@@ -500,12 +513,12 @@ namespace PokeStar.Modules
          else if (form.Equals("-galar", StringComparison.OrdinalIgnoreCase) || form.Equals("-galarian", StringComparison.OrdinalIgnoreCase))
             return $"Galarian {pokemonName}";
          // Mega
+         else if (form.Equals("-megay", StringComparison.OrdinalIgnoreCase) || form.Equals("-mega-y", StringComparison.OrdinalIgnoreCase) || (form.Equals("-mega", StringComparison.OrdinalIgnoreCase) && (pokemonName.Equals("charizard", StringComparison.OrdinalIgnoreCase) || pokemonName.Equals("mewtwo", StringComparison.OrdinalIgnoreCase))))
+            return $"Mega {pokemonName} Y";
+         else if (form.Equals("-megax", StringComparison.OrdinalIgnoreCase) || form.Equals("-mega-x", StringComparison.OrdinalIgnoreCase))
+            return $"Mega {pokemonName} X";
          else if (form.Equals("-mega", StringComparison.OrdinalIgnoreCase))
             return $"Mega {pokemonName}";
-         else if (form.Equals("-megax", StringComparison.OrdinalIgnoreCase))
-            return $"Mega {pokemonName} X";
-         else if (form.Equals("-megay", StringComparison.OrdinalIgnoreCase))
-            return $"Mega {pokemonName} Y";
          // Nidoran
          else if (form.Equals("-female", StringComparison.OrdinalIgnoreCase))
             return $"{pokemonName} F";
