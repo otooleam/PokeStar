@@ -1,7 +1,7 @@
-﻿using Discord;
+﻿using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using PokeStar.ConnectionInterface;
-using System.Threading.Tasks;
 
 namespace PokeStar.DataModels
 {
@@ -10,7 +10,7 @@ namespace PokeStar.DataModels
    /// </summary>
    public static class ResponseMessage
    {
-      private static readonly string ErrorImage = "angrypuff.png";
+      private static readonly string ERROR_IMAGE = "angrypuff.png";
 
       /// <summary>
       /// 
@@ -44,15 +44,14 @@ namespace PokeStar.DataModels
       /// <returns></returns>
       public static async Task SendErrorMessage(SocketCommandContext context, string command, string message)
       {
-         Connections.CopyFile(ErrorImage);
-         await context.Channel.SendFileAsync(ErrorImage, embed: GenerateErrorEmbed(command, message));
-         Connections.DeleteFile(ErrorImage);
+         Connections.CopyFile(ERROR_IMAGE);
+         await context.Channel.SendFileAsync(ERROR_IMAGE, embed: GenerateErrorEmbed(command, message));
+         Connections.DeleteFile(ERROR_IMAGE);
       }
 
       /// <summary>
       /// 
       /// </summary>
-      /// <param name="command"></param>
       /// <param name="message"></param>
       /// <returns></returns>
       private static Embed GenerateInfoEmbed(string message)
@@ -89,7 +88,7 @@ namespace PokeStar.DataModels
       {
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.Red);
-         embed.WithThumbnailUrl($"attachment://{ErrorImage}");
+         embed.WithThumbnailUrl($"attachment://{ERROR_IMAGE}");
          embed.WithTitle($"Error while executing {command}:");
          embed.WithDescription(message);
          return embed.Build();

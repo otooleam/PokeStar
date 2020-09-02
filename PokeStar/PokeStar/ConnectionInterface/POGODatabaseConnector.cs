@@ -1,8 +1,8 @@
 ﻿using System;
+using System.Text;
 using System.Data.SqlClient;
 using System.Collections.Generic;
 using PokeStar.DataModels;
-using System.Text;
 using PokeStar.Modules;
 
 namespace PokeStar.ConnectionInterface
@@ -12,8 +12,6 @@ namespace PokeStar.ConnectionInterface
    /// </summary>
    public class POGODatabaseConnector : DatabaseConnector
    {
-      private readonly int TRUE = 1;
-
       /// <summary>
       /// Creates a new POGO database connector.
       /// </summary>
@@ -27,14 +25,16 @@ namespace PokeStar.ConnectionInterface
       public List<string> GetNameList()
       {
          List<string> names = new List<string>();
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             string queryString = $@"select name from pokemon order by number;";
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
+               {
                   names.Add(Convert.ToString(reader["name"]));
+               }
             }
             conn.Close();
          }
@@ -136,7 +136,7 @@ namespace PokeStar.ConnectionInterface
       public List<string> GetPokemonByNumber(int pokemonNumber)
       {
          List<string> pokemon = new List<string>();
-         string order = (pokemonNumber == DexCommands.ARCEUS || pokemonNumber == DexCommands.UNOWN) ? "ORDER BY NEWID()" : "";
+         string order = (pokemonNumber == Global.ARCEUS_NUMBER || pokemonNumber == Global.UNOWN_NUMBER) ? "ORDER BY NEWID()" : "";
 
          string queryString = $@"SELECT name 
                                  FROM pokemon 
@@ -149,7 +149,9 @@ namespace PokeStar.ConnectionInterface
             using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
+               {
                   pokemon.Add(Convert.ToString(reader["name"]));
+               }
             }
             conn.Close();
          }

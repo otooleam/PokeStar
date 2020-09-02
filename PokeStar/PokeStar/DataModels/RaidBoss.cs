@@ -7,8 +7,6 @@ namespace PokeStar.DataModels
    /// </summary>
    public class RaidBoss
    {
-      public static string DefaultName = "Empty";
-
       /// <summary>
       /// Name of the raid boss.
       /// </summary>
@@ -79,7 +77,7 @@ namespace PokeStar.DataModels
       /// </summary>
       public RaidBoss()
       {
-         Name = DefaultName;
+         Name = Global.DEFAULT_RAID_BOSS_NAME;
       }
    }
 }

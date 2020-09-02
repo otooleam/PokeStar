@@ -1,7 +1,7 @@
 ﻿using System.Threading.Tasks;
 using Discord.Commands;
-using PokeStar.ConnectionInterface;
 using PokeStar.DataModels;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {

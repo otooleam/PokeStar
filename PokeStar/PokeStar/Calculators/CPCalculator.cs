@@ -7,18 +7,6 @@ namespace PokeStar.Calculators
    /// </summary>
    public static class CPCalculator
    {
-      public static readonly int MAX_LEVEL = 40;
-      public static readonly int MIN_WILD_LEVEL = 1;
-      public static readonly int MAX_WILD_LEVEL = 35;
-      public static readonly int RAID_LEVEL = 20;
-      public static readonly int HATCH_LEVEL = 20;
-      public static readonly int QUEST_LEVEL = 15;
-      public static readonly int WEATHER_BOOST = 5;
-      public static readonly int BUDDY_BOOST = 1;
-
-      public static readonly int MIN_SPECIAL_IV = 10;
-      public static readonly int MAX_IV = 15;
-
       private static readonly double[] discrete_cp_multiplier = {
          0.094     ,  0.16639787,  0.21573247,  0.25572005,  0.29024988,
          0.3210876 ,  0.34921268,  0.37523559,  0.39956728,  0.42250001,

@@ -9,6 +9,9 @@ namespace PokeStar.ConnectionInterface
    /// </summary>
    public static class SilphData
    {
+      private static Uri RaidBossUrl { get; } = new Uri("https://thesilphroad.com/raid-bosses");
+      private const string RaidBossHTMLPattern = "//*[@class = 'col-md-4']";
+
       /// <summary>
       /// Gets a list of current raid bosses for a given tier.
       /// </summary>
@@ -16,13 +19,13 @@ namespace PokeStar.ConnectionInterface
       /// <returns>List of current raid bosses for the tier.</returns>
       public static List<string> GetRaidBossesTier(int tier)
       {
-         List<RaidBossListElement> raidbossList = GetRaidBosses();
+         List<Tuple<int, string>> raidbossList = GetRaidBosses();
          List<string> bossTier = new List<string>();
-         foreach (RaidBossListElement boss in raidbossList)
+         foreach (Tuple<int, string> boss in raidbossList)
          {
-            if (boss.Tier == tier)
+            if (boss.Item1 == tier)
             {
-               bossTier.Add(boss.Name);
+               bossTier.Add(boss.Item2);
             }
          }
          return bossTier;
@@ -35,18 +38,18 @@ namespace PokeStar.ConnectionInterface
       /// would constitute a change to this method.
       /// </summary>
       /// <returns>List of current raid bosses.</returns>
-      private static List<RaidBossListElement> GetRaidBosses()
+      private static List<Tuple<int, string>> GetRaidBosses()
       {
          int tier = -1;
          bool tierStart = false;
          bool nextInTier = false;
-         bool exTierStarted = false;
+         bool exTierStarted = true; // Change to false when ex raids are back
          bool megaTierStarted = false;
          HtmlWeb web = new HtmlWeb();
-         HtmlDocument doc = web.Load(Connections.Instance().RAID_BOSS_URL);
-         HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(Connections.RAID_BOSS_HTML);
+         HtmlDocument doc = web.Load(RaidBossUrl);
+         HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(RaidBossHTMLPattern);
 
-         List<RaidBossListElement> raidBossList = new List<RaidBossListElement>();
+         List<Tuple<int, string>> raidBossList = new List<Tuple<int, string>>();
 
          foreach (HtmlNode col in bosses)
          {
@@ -63,7 +66,6 @@ namespace PokeStar.ConnectionInterface
                      tierStart = true;
                      nextInTier = false;
                   }
-                  /*
                   else if (temp.Equals("ex", StringComparison.OrdinalIgnoreCase) && !exTierStarted)
                   {
                      tier = 9;
@@ -71,7 +73,6 @@ namespace PokeStar.ConnectionInterface
                      nextInTier = false;
                      exTierStarted = true;
                   }
-                  /**/
                   else if (temp.Equals("Mega", StringComparison.OrdinalIgnoreCase) && !megaTierStarted)
                   {
                      tier = 7;
@@ -85,20 +86,12 @@ namespace PokeStar.ConnectionInterface
                   }
                   else if (tierStart)
                   {
-                     raidBossList.Add(new RaidBossListElement
-                     {
-                        Tier = tier,
-                        Name = ReformatName(word.Trim())
-                     });
+                     raidBossList.Add(new Tuple<int, string>(tier, ReformatName(word.Trim())));
                      tierStart = false;
                   }
                   else if (nextInTier)
                   {
-                     raidBossList.Add(new RaidBossListElement
-                     {
-                        Tier = tier,
-                        Name = ReformatName(word.Trim())
-                     });
+                     raidBossList.Add(new Tuple<int, string>(tier, ReformatName(word.Trim())));
                      nextInTier = false;
                   }
                }
@@ -124,14 +117,5 @@ namespace PokeStar.ConnectionInterface
          }
          return name;
       }
-   }
-
-   /// <summary>
-   /// A raid boss scraped from The Silph Road.
-   /// </summary>
-   public struct RaidBossListElement
-   {
-      public int Tier;
-      public string Name;
    }
 }

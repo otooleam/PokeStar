@@ -1,5 +1,4 @@
-﻿using System;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Discord.Commands;
 
 namespace PokeStar.Modules
@@ -10,14 +9,14 @@ namespace PokeStar.Modules
       [Summary("Its time for a rave.")]
       public async Task Rave()
       {
-         await ReplyAsync(Environment.GetEnvironmentVariable("RAVE_EMOTE")).ConfigureAwait(false);
+         await ReplyAsync(Global.NONA_EMOJIS["rave_emote"]);
       }
 
       [Command("screm")]
       [Summary("AAAHHHHHHHHHHHHHHH!")]
       public async Task Screm()
       {
-         await ReplyAsync(Environment.GetEnvironmentVariable("SCREAM_EMOTE")).ConfigureAwait(false);
+         await ReplyAsync(Global.NONA_EMOJIS["scream_emote"]);
       }
    }
 }
