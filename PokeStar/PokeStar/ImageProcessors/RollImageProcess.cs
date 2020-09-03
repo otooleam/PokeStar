@@ -6,9 +6,9 @@ using System.Drawing;
 using System.Reflection;
 using System.Collections.Generic;
 using Discord.Commands;
+using Discord.WebSocket;
 using Patagames.Ocr;
 using Patagames.Ocr.Enums;
-using Discord.WebSocket;
 using PokeStar.ConnectionInterface;
 
 namespace PokeStar.ImageProcessors

@@ -10,8 +10,8 @@ namespace PokeStar.DataModels
    /// </summary>
    public class RaidGroup
    {
-      public int PlayerLimit { get; private set; }
-      public int InviteLimit { get; private set; }
+      private int PlayerLimit { get; set; }
+      private int InviteLimit { get; set; }
 
       /// <summary>
       /// Dictionary of players attending the raid.
@@ -119,7 +119,9 @@ namespace PokeStar.DataModels
       public void Add(SocketGuildUser player, int partySize)
       {
          if (Invited.ContainsKey(player))
+         {
             return;
+         }
          else if (Attending.ContainsKey(player))
          {
             Attending[player] = partySize;
@@ -157,10 +159,14 @@ namespace PokeStar.DataModels
 
          List<SocketGuildUser> playerInvited = new List<SocketGuildUser>();
          foreach (KeyValuePair<SocketGuildUser, SocketGuildUser> invite in Invited.Where(x => x.Value.Equals(player)))
+         {
             playerInvited.Add(invite.Key);
+         }
 
          foreach (SocketGuildUser invite in playerInvited)
+         {
             Invited.Remove(invite);
+         }
 
          return playerInvited;
       }

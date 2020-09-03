@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
 using Discord.WebSocket;
+using System;
 
 namespace PokeStar.DataModels
 {
@@ -38,17 +39,23 @@ namespace PokeStar.DataModels
          if (invitedBy == null)
          {
             group = IsInRaid(player);
-            if (group == NotInRaid)
+            if (group == Global.NOT_IN_RAID)
+            {
                group = FindSmallestGroup();
+            }
             if (group != InviteListNumber)
+            {
                Groups.ElementAt(group).Add(player, partySize);
+            }
             else
+            {
                return false;
+            }
          }
          else // is remote
          {
             group = IsInRaid(invitedBy);
-            if (group != NotInRaid)
+            if (group != Global.NOT_IN_RAID)
             {
                Groups.ElementAt(group).Invite(player, invitedBy);
                Invite.Remove(player);
@@ -74,11 +81,15 @@ namespace PokeStar.DataModels
             return true;
          }
          else if (!shouldSplit)
+         {
             return true;
+         }
 
          Groups.ElementAt(group).Remove(player);
          if (invitedBy != null)
+         {
             Invite.Add(player);
+         }
          return false;
       }
 
@@ -86,26 +97,27 @@ namespace PokeStar.DataModels
       /// Removes a player from the raid.
       /// </summary>
       /// <param name="player">Player to remove.</param>
-      /// <returns>Struct with raid group and list of invited users.</returns>
-      public override RemovePlayerReturn RemovePlayer(SocketGuildUser player)
+      /// <returns>Tuple with raid group and list of invited users.</returns>
+      public override Tuple<int, List<SocketGuildUser>> RemovePlayer(SocketGuildUser player)
       {
-         RemovePlayerReturn returnValue = new RemovePlayerReturn
-         {
-            GroupNum = NotInRaid,
-            invited = new List<SocketGuildUser>()
-         };
+         Tuple<int, List<SocketGuildUser>> returnValue = new Tuple<int, List<SocketGuildUser>> (Global.NOT_IN_RAID, new List<SocketGuildUser>());
 
          int group = IsInRaid(player);
          if (group == InviteListNumber)
+         {
             Invite.Remove(player);
+         }
          else
          {
-            if (group != NotInRaid)
+            if (group != Global.NOT_IN_RAID)
             {
                RaidGroup foundGroup = Groups.ElementAt(group);
-               returnValue.invited = foundGroup.Remove(player);
-               foreach (SocketGuildUser invite in returnValue.invited)
+               List<SocketGuildUser> tempList = foundGroup.Remove(player);
+               foreach (SocketGuildUser invite in tempList)
+               {
+                  returnValue.Item2.Add(invite);
                   Invite.Add(invite);
+               }
             }
          }
          return returnValue;
@@ -117,8 +129,10 @@ namespace PokeStar.DataModels
       /// <param name="player">Player that requested the invite.</param>
       public override void RequestInvite(SocketGuildUser player)
       {
-         if (IsInRaid(player) == NotInRaid)
+         if (IsInRaid(player) == Global.NOT_IN_RAID)
+         {
             Invite.Add(player);
+         }
       }
 
       /// <summary>
@@ -129,8 +143,10 @@ namespace PokeStar.DataModels
       /// <returns>True if the requester was invited, otherwise false.</returns>
       public override bool InvitePlayer(SocketGuildUser requester, SocketGuildUser accepter)
       {
-         if ((IsInRaid(requester) == InviteListNumber && IsInRaid(accepter, false) != 1) || requester.Equals(accepter))
+         if ((IsInRaid(requester) == InviteListNumber && IsInRaid(accepter, false) != Global.NOT_IN_RAID) || requester.Equals(accepter))
+         {
             return PlayerAdd(requester, 1, accepter);
+         }
          return false;
       }
 
@@ -144,7 +160,9 @@ namespace PokeStar.DataModels
       public override int IsInRaid(SocketGuildUser player, bool checkInvite = true)
       {
          if (checkInvite && Invite.Contains(player))
+         {
             return InviteListNumber;
+         }
          for (int i = 0; i < Groups.Count; i++)
          {
             if (Groups.ElementAt(i).HasPlayer(player, checkInvite))
@@ -152,18 +170,23 @@ namespace PokeStar.DataModels
                return i;
             }
          }
-         return -1;
+         return Global.NOT_IN_RAID;
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="player"></param>
+      /// <returns></returns>
       public int PlayerReady(SocketGuildUser player)
       {
          int groupNum = IsInRaid(player, false);
-         if (groupNum != NotInRaid && groupNum != InviteListNumber)
+         if (groupNum != Global.NOT_IN_RAID && groupNum != InviteListNumber)
          {
             RaidGroup group = Groups.ElementAt(groupNum);
-            return (group.PlayerReady(player) && group.AllPlayersReady()) ? groupNum : NotInRaid;
+            return (group.PlayerReady(player) && group.AllPlayersReady()) ? groupNum : Global.NOT_IN_RAID;
          }
-         return NotInRaid;
+         return Global.NOT_IN_RAID;
       }
    }
 }

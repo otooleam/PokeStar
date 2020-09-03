@@ -30,11 +30,6 @@ namespace PokeStar.DataModels
       protected readonly int InviteListNumber = 101;
 
       /// <summary>
-      /// Value used when a user is not in the raid
-      /// </summary>
-      public static readonly int NotInRaid = -1;
-
-      /// <summary>
       /// When the raid starts.
       /// </summary>
       public string Time { get; set; }
@@ -85,6 +80,13 @@ namespace PokeStar.DataModels
       /// </summary>
       public int InvitePage { get; protected set; } = 0;
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="tier"></param>
+      /// <param name="time"></param>
+      /// <param name="location"></param>
+      /// <param name="boss"></param>
       public RaidParent(short tier, string time, string location, string boss = null)
       {
          Tier = tier;
@@ -107,7 +109,7 @@ namespace PokeStar.DataModels
       /// <param name="bossName">Name of the raid boss.</param>
       public void SetBoss(string bossName)
       {
-         Boss = (string.IsNullOrEmpty(bossName)) ? null : bossName.Equals(RaidBoss.DefaultName) ? new RaidBoss() :  Connections.Instance().GetRaidBoss(bossName);
+         Boss = (string.IsNullOrEmpty(bossName)) ? null : bossName.Equals(Global.DEFAULT_RAID_BOSS_NAME) ? new RaidBoss() :  Connections.Instance().GetRaidBoss(bossName);
       }
 
       /// <summary>
@@ -138,23 +140,55 @@ namespace PokeStar.DataModels
          if (isPositiveChage)
          {
             if ((InvitePage + 1) * pageMaxOptions < Invite.Count)
+            {
                InvitePage++;
+            }
          }
          else
          {
             if (InvitePage != 0)
+            {
                InvitePage--;
+            }
          }
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="player"></param>
+      /// <param name="partySize"></param>
+      /// <param name="invitedBy"></param>
+      /// <returns></returns>
       public abstract bool PlayerAdd(SocketGuildUser player, int partySize, SocketGuildUser invitedBy = null);
 
-      public abstract RemovePlayerReturn RemovePlayer(SocketGuildUser player);
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="player"></param>
+      /// <returns></returns>
+      public abstract Tuple<int, List<SocketGuildUser>> RemovePlayer(SocketGuildUser player);
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="player"></param>
       public abstract void RequestInvite(SocketGuildUser player);
-
+      
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="requester"></param>
+      /// <param name="accepter"></param>
+      /// <returns></returns>
       public abstract bool InvitePlayer(SocketGuildUser requester, SocketGuildUser accepter);
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="player"></param>
+      /// <param name="checkInvite"></param>
+      /// <returns></returns>
       public abstract int IsInRaid(SocketGuildUser player, bool checkInvite = true);
 
       /// <summary>
@@ -183,20 +217,17 @@ namespace PokeStar.DataModels
       protected void CheckMergeGroups()
       {
          foreach (RaidGroup group in Groups)
+         { 
             foreach (RaidGroup check in Groups)
+            {
                group.MergeGroup(check);
+            }
+         }
          Groups.RemoveAll(x => x.TotalPlayers() == 0);
          if (Groups.Count == 0)
+         {
             Groups.Add(new RaidGroup(PlayerLimit, InviteLimit));
+         }
       }
-   }
-
-   /// <summary>
-   /// Return values for remove player method.
-   /// </summary>
-   public struct RemovePlayerReturn
-   {
-      public int GroupNum;
-      public List<SocketGuildUser> invited;
    }
 }

@@ -65,7 +65,9 @@ namespace PokeStar.ConnectionInterface
             using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
+               {
                   prefix = Convert.ToString(reader["prefix"]);
+               }
             }
             conn.Close();
          }
@@ -90,7 +92,9 @@ namespace PokeStar.ConnectionInterface
             using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
+               {
                   setupComplete = Convert.ToInt32(reader["setup"]) == TRUE;
+               }
             }
             conn.Close();
          }
@@ -117,16 +121,13 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Adds a new prefix to a server.
+      /// 
       /// </summary>
-      /// <param name="guild">Guild to add the prefix to.</param>
-      /// <param name="prefix">New prefix value.</param>
+      /// <param name="guild"></param>
       public void AddSettings(ulong guild)
       {
-         char prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX")[0];
-
          string queryString = $@"INSERT INTO guild_settings (guild, prefix, setup)
-                                 VALUES ({guild}, '{prefix}', 0)";
+                                 VALUES ({guild}, '{Global.DEFAULT_PREFIX}', 0)";
 
          using (SqlConnection conn = GetConnection())
          {

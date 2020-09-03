@@ -22,6 +22,11 @@ namespace PokeStar.DataModels
       public string Name { get; set; }
 
       /// <summary>
+      /// List of alternate forms.
+      /// </summary>
+      public List<string> Forms { get; set; }
+
+      /// <summary>
       /// Description of the pokemon.
       /// </summary>
       public string Description { get; set; }
@@ -166,9 +171,18 @@ namespace PokeStar.DataModels
       /// </summary>
       public List<int> CPWild { get; } = new List<int>();
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
       public bool IsRegional()
       {
          return Regional != null;
+      }
+
+      public bool HasForms()
+      {
+         return Forms.Count > 1;
       }
 
       /// <summary>
@@ -192,12 +206,32 @@ namespace PokeStar.DataModels
          return sb.ToString();
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
       public string RegionalToString()
       {
          List<string> regions = Regional.Split(',').ToList();
          StringBuilder sb = new StringBuilder();
-         foreach (string r in regions)
-            sb.AppendLine($"-{r}\n");
+         foreach (string region in regions)
+         {
+            sb.AppendLine(region);
+         }
+         return sb.ToString().Trim();
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
+      public string FormsToString()
+      {
+         StringBuilder sb = new StringBuilder();
+         foreach (string form in Forms)
+         {
+            sb.AppendLine(form);
+         }
          return sb.ToString().Trim();
       }
 
@@ -228,7 +262,7 @@ namespace PokeStar.DataModels
 
          foreach (string type in Type)
          {
-            sb.Append($"{Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE"))} ");
+            sb.Append($"{Global.NONA_EMOJIS[$"{type}_emote"]} ");
          }
 
          return sb.ToString();
@@ -241,12 +275,10 @@ namespace PokeStar.DataModels
       public string WeatherToString()
       {
          StringBuilder sb = new StringBuilder();
-
          foreach (string weather in Weather)
          {
-            sb.Append($"{Emote.Parse(Environment.GetEnvironmentVariable($"{weather.Replace(' ', '_').ToUpper()}_EMOTE"))} ");
+            sb.Append($"{Global.NONA_EMOJIS[$"{weather.Replace(' ','_')}_emote"]} ");
          }
-
          return sb.ToString();
       }
 
@@ -260,7 +292,7 @@ namespace PokeStar.DataModels
          int count = 0;
          foreach (string type in Weakness)
          {
-            sb.Append($"{Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE"))} ");
+            sb.Append($"{Global.NONA_EMOJIS[$"{type}_emote"]} ");
             if (count == 3)
             {
                count = -1;
@@ -281,7 +313,7 @@ namespace PokeStar.DataModels
          int count = 0;
          foreach (string type in Resistance)
          {
-            sb.Append($"{Emote.Parse(Environment.GetEnvironmentVariable($"{type.ToUpper()}_EMOTE"))} ");
+            sb.Append($"{Global.NONA_EMOJIS[$"{type}_emote"]} ");
             if (count == 3)
             {
                count = -1;
@@ -299,18 +331,20 @@ namespace PokeStar.DataModels
       public string FastMoveToString()
       {
          if (FastMove.Count == 0)
+         {
             return "No Fast Move Data";
+         }
 
          StringBuilder sb = new StringBuilder();
          foreach (Move fastMove in FastMove)
          {
-            if (!Name.Equals("Mew"))
+            if (Name.Equals("Mew"))
             {
-               sb.Append(fastMove.ToString());
+               sb.Append($"{fastMove.Name} ({fastMove.Type})");
             }
             else
             {
-               sb.Append($"{fastMove.Name} ({fastMove.Type})");
+               sb.Append(fastMove.ToString());
             }
             if (Type.Contains(fastMove.Type))
             {
@@ -328,18 +362,20 @@ namespace PokeStar.DataModels
       public string ChargeMoveToString()
       {
          if (ChargeMove.Count == 0)
+         {
             return "No Charge Move Data";
+         }
 
          StringBuilder sb = new StringBuilder();
          foreach (Move chargeMove in ChargeMove)
          {
-            if (!Name.Equals("Mew"))
+            if (Name.Equals("Mew"))
             {
-               sb.Append(chargeMove.ToString());
+               sb.Append($"{chargeMove.Name} ({chargeMove.Type})");
             }
             else
             {
-               sb.Append($"{chargeMove.Name} ({chargeMove.Type})");
+               sb.Append(chargeMove.ToString());
             }
             if (Type.Contains(chargeMove.Type))
             {
@@ -358,11 +394,15 @@ namespace PokeStar.DataModels
       public string CounterToString()
       {
          if (Counter.Count == 0)
+         {
             return "No Counters Listed.";
+         }
          string str = "";
          int num = 1;
          foreach (Counter counter in Counter)
+         {
             str += $"#{num++} {counter}\n";
+         }
          return str;
       }
 
@@ -417,7 +457,6 @@ namespace PokeStar.DataModels
             sb.Append($"**{column2level}** {dash} {CPWild[column2level - 1]}");
             sb.AppendLine($"{(column3level <= 35 ? $" . **{column3level}** {dash} {CPWild[column3level - 1]}{(column3level > 30 ? "\\*" : "")}" : "")}");
          }
-
          return sb.ToString();
       }
    }

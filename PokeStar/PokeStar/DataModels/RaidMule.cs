@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using Discord.WebSocket;
 
@@ -51,7 +52,7 @@ namespace PokeStar.DataModels
       {
          if (invitedBy == null)
          {
-            if (IsInRaid(player) == NotInRaid && Mules.GetAttendingCount() < MulePlayerLimit)
+            if (IsInRaid(player) == Global.NOT_IN_RAID && Mules.GetAttendingCount() < MulePlayerLimit)
             {
                Mules.Add(player, partySize);
                return true;
@@ -73,7 +74,9 @@ namespace PokeStar.DataModels
                return true;
             }
             else if (!shouldSplit)
+            {
                return true;
+            }
 
             Groups.ElementAt(group).Remove(player);
             Invite.Add(player);
@@ -85,27 +88,30 @@ namespace PokeStar.DataModels
       /// Removes a player from the raid.
       /// </summary>
       /// <param name="player">Player to remove.</param>
-      /// <returns>Struct with raid group and list of invited users.</returns>
-      public override RemovePlayerReturn RemovePlayer(SocketGuildUser player)
+      /// <returns>Tuple with raid group and list of invited users.</returns>
+      public override Tuple<int, List<SocketGuildUser>> RemovePlayer(SocketGuildUser player)
       {
-         RemovePlayerReturn returnValue = new RemovePlayerReturn
-         {
-            GroupNum = NotInRaid,
-            invited = new List<SocketGuildUser>()
-         };
+         Tuple<int, List<SocketGuildUser>> returnValue = new Tuple<int, List<SocketGuildUser>>(Global.NOT_IN_RAID, new List<SocketGuildUser>());
+
          int groupNum = IsInRaid(player);
          if (groupNum == InviteListNumber)
+         {
             Invite.Remove(player);
+         }
          else if (groupNum == MuleGroupNumber)
          {
             Mules.Remove(player);
             foreach (RaidGroup group in Groups)
-               returnValue.invited.AddRange(group.Remove(player));
-            foreach (SocketGuildUser invite in returnValue.invited)
+            {
+               returnValue.Item2.AddRange(group.Remove(player));
+            }
+            foreach (SocketGuildUser invite in returnValue.Item2)
+            {
                Invite.Add(invite);
+            }
             return returnValue;
          }
-         else if (groupNum != NotInRaid)
+         else if (groupNum != Global.NOT_IN_RAID)
          {
             RaidGroup foundGroup = Groups.ElementAt(groupNum);
             foundGroup.Remove(player);
@@ -119,8 +125,10 @@ namespace PokeStar.DataModels
       /// <param name="player">Player that requested the invite.</param>
       public override void RequestInvite(SocketGuildUser player)
       {
-         if (IsInRaid(player) == NotInRaid)
+         if (IsInRaid(player) == Global.NOT_IN_RAID)
+         {
             Invite.Add(player);
+         }
       }
 
       /// <summary>
@@ -132,7 +140,9 @@ namespace PokeStar.DataModels
       public override bool InvitePlayer(SocketGuildUser requester, SocketGuildUser accepter)
       {
          if (Invite.Contains(requester) && Mules.HasPlayer(accepter, false))
+         {
             return PlayerAdd(requester, 1, accepter);
+         }
          return false;
       }
 
@@ -146,21 +156,35 @@ namespace PokeStar.DataModels
       public override int IsInRaid(SocketGuildUser player, bool checkInvite = true)
       {
          if (Mules.HasPlayer(player, false))
+         {
             return MuleGroupNumber;
+         }
          if (checkInvite && Invite.Contains(player))
+         {
             return InviteListNumber;
+         }
          for (int i = 0; i < Groups.Count; i++)
+         {
             if (Groups.ElementAt(i).HasPlayer(player, checkInvite))
+            {
                return i;
-         return NotInRaid;
+            }
+         }
+         return Global.NOT_IN_RAID;
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <returns></returns>
       public bool HasInvites()
       {
          foreach (RaidGroup group in Groups)
          {
             if (!group.GetReadonlyInvited().IsEmpty)
+            {
                return true;
+            }
          }
          return false;
       }

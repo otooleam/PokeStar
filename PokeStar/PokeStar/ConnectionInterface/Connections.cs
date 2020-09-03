@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using DuoVia.FuzzyStrings;
 using PokeStar.DataModels;
 using PokeStar.Calculators;
-using DuoVia.FuzzyStrings;
 
 namespace PokeStar.ConnectionInterface
 {
@@ -14,14 +14,13 @@ namespace PokeStar.ConnectionInterface
    {
       private static Connections connections;
 
+      private static readonly string PokemonImageFolder = "PokemonImages";
+
       private readonly POGODatabaseConnector POGODBConnector;
       private readonly NONADatabaseConnector NONADBConnector;
-
-      public Uri RAID_BOSS_URL { get; } = new Uri("https://thesilphroad.com/raid-bosses");
-      public static string RAID_BOSS_HTML => raidBossHTML;
-      private const string raidBossHTML = "//*[@class = 'col-md-4']";
-
       private List<string> PokemonNames;
+
+      private readonly int NumSuggestions = 10;
 
       /// <summary>
       /// Creates a new Connections object.
@@ -29,8 +28,8 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       private Connections()
       {
-         POGODBConnector = new POGODatabaseConnector(Environment.GetEnvironmentVariable("POGO_DB_CONNECTION_STRING"));
-         NONADBConnector = new NONADatabaseConnector(Environment.GetEnvironmentVariable("NONA_DB_CONNECTION_STRING"));
+         POGODBConnector = new POGODatabaseConnector(Global.POGODB_CONNECTION_STRING);
+         NONADBConnector = new NONADatabaseConnector(Global.NONADB_CONNECTION_STRING);
          UpdateNameList();
       }
 
@@ -53,8 +52,8 @@ namespace PokeStar.ConnectionInterface
       /// <param name="fileName">Name of file to copy.</param>
       public static void CopyFile(string fileName)
       {
-         var location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-         System.IO.File.Copy($"{location}\\PokemonImages\\{fileName}", $"{location}\\{fileName}", true);
+         string location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+         System.IO.File.Copy($"{location}\\{PokemonImageFolder}\\{fileName}", $"{location}\\{fileName}", true);
       }
 
       /// <summary>
@@ -63,7 +62,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="fileName">Name of file to delete.</param>
       public static void DeleteFile(string fileName)
       {
-         var location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
+         string location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
          System.IO.File.Delete($"{location}\\{fileName}");
       }
 
@@ -91,23 +90,30 @@ namespace PokeStar.ConnectionInterface
          return SilphData.GetRaidBossesTier(tier);
       }
 
+      /// <summary>
+      /// Updates the list of pokemon to use for the fuzzy search.
+      /// </summary>
       public void UpdateNameList()
       {
          PokemonNames = POGODBConnector.GetNameList();
       }
 
+      /// <summary>
+      /// Searches for the closest pokemon names to a given name
+      /// </summary>
+      /// <param name="name">Name to check pokemon names against.</param>
+      /// <returns>List of the closest pokemon names.</returns>
       public List<string> FuzzyNameSearch(string name)
       {
          Dictionary<string, double> fuzzy = new Dictionary<string, double>();
-
          foreach (string pokemonName in PokemonNames)
+         {
             fuzzy.Add(pokemonName, pokemonName.FuzzyMatch(name));
-
-         var myList = fuzzy.ToList();
+         }
+         List<KeyValuePair<string, double>> myList = fuzzy.ToList();
          myList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
          fuzzy = myList.ToDictionary(x => x.Key, x => x.Value);
-
-         return fuzzy.Keys.Take(10).ToList();
+         return fuzzy.Keys.Take(NumSuggestions).ToList();
       }
 
       /// <summary>
@@ -120,39 +126,40 @@ namespace PokeStar.ConnectionInterface
       public RaidBoss GetRaidBoss(string raidBossName)
       {
          if (raidBossName == null)
+         {
             return null;
+         }
 
          string name = ReformatName(raidBossName);
          RaidBoss raidBoss = POGODBConnector.GetRaidBoss(name);
          if (raidBoss == null)
+         {
             return null;
+         }
 
-         var typeRelations = GetTypeDefenseRelations(raidBoss.Type);
-         raidBoss.Weakness = typeRelations.weak.Keys.ToList();
-         raidBoss.Resistance = typeRelations.strong.Keys.ToList();
+         Tuple<Dictionary<string, int>, Dictionary<string, int>> typeRelations = GetTypeDefenseRelations(raidBoss.Type);
+         raidBoss.Weakness = typeRelations.Item2.Keys.ToList();
+         raidBoss.Resistance = typeRelations.Item1.Keys.ToList();
          raidBoss.Weather = GetWeather(raidBoss.Type);
 
          raidBoss.CPLow = CPCalculator.CalcCPPerLevel(
             raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
-            CPCalculator.MIN_SPECIAL_IV, CPCalculator.RAID_LEVEL);
+            Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV, 
+            Global.MIN_SPECIAL_IV, Global.RAID_LEVEL);
 
          raidBoss.CPHigh = CPCalculator.CalcCPPerLevel(
             raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-            CPCalculator.MAX_IV, CPCalculator.RAID_LEVEL);
+            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.RAID_LEVEL);
 
          raidBoss.CPLowBoosted = CPCalculator.CalcCPPerLevel(
             raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
-            CPCalculator.MIN_SPECIAL_IV,
-            CPCalculator.RAID_LEVEL + CPCalculator.WEATHER_BOOST);
+            Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV, 
+            Global.RAID_LEVEL + Global.WEATHER_BOOST);
 
          raidBoss.CPHighBoosted = CPCalculator.CalcCPPerLevel(
             raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-            CPCalculator.MAX_IV,
-            CPCalculator.RAID_LEVEL + CPCalculator.WEATHER_BOOST);
+            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, 
+            Global.RAID_LEVEL + Global.WEATHER_BOOST);
 
          return raidBoss;
       }
@@ -166,16 +173,22 @@ namespace PokeStar.ConnectionInterface
       public Pokemon GetPokemon(string pokemonName)
       {
          if (pokemonName == null)
+         {
             return null;
+         }
 
          string name = ReformatName(pokemonName);
          Pokemon pokemon = POGODBConnector.GetPokemon(name);
-         if (pokemon == null) 
+         if (pokemon == null)
+         {
             return null;
+         }
 
-         var typeRelations = GetTypeDefenseRelations(pokemon.Type);
-         pokemon.Weakness = typeRelations.weak.Keys.ToList();
-         pokemon.Resistance = typeRelations.strong.Keys.ToList();
+         pokemon.Forms = POGODBConnector.GetPokemonByNumber(pokemon.Number);
+
+         Tuple<Dictionary<string, int>, Dictionary<string, int>> typeRelations = GetTypeDefenseRelations(pokemon.Type);
+         pokemon.Weakness = typeRelations.Item2.Keys.ToList();
+         pokemon.Resistance = typeRelations.Item1.Keys.ToList();
          pokemon.Weather = GetWeather(pokemon.Type);
          pokemon.FastMove = POGODBConnector.GetMoves(name, true);
          pokemon.ChargeMove = POGODBConnector.GetMoves(name, false, pokemon.Shadow);
@@ -189,8 +202,7 @@ namespace PokeStar.ConnectionInterface
 
          pokemon.CPMax = CPCalculator.CalcCPPerLevel(
             pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-            CPCalculator.MAX_IV, CPCalculator.MAX_LEVEL);
+            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_LEVEL);
 
          return pokemon;
       }
@@ -199,72 +211,65 @@ namespace PokeStar.ConnectionInterface
       /// Calculates all of the relevant CP valus of a pokemon. This
       /// includes the raid, quest, hatch, and wild perfect IV values.
       /// </summary>
-      /// <param name="pokemon"></param>
+      /// <param name="pokemon">Reference to pokemon to calc cp for.</param>
       public static void CalcAllCP(ref Pokemon pokemon)
       {
          if (pokemon != null)
          {
             pokemon.CPBestBuddy = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-               CPCalculator.MAX_IV,
-               CPCalculator.MAX_LEVEL + CPCalculator.BUDDY_BOOST);
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, 
+               Global.MAX_LEVEL + Global.BUDDY_BOOST);
 
             pokemon.CPRaidMin = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
-               CPCalculator.MIN_SPECIAL_IV, CPCalculator.RAID_LEVEL);
+               Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV, 
+               Global.MIN_SPECIAL_IV, Global.RAID_LEVEL);
 
             pokemon.CPRaidMax = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-               CPCalculator.MAX_IV, CPCalculator.RAID_LEVEL);
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.RAID_LEVEL);
 
             pokemon.CPRaidBoostedMin = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
-               CPCalculator.MIN_SPECIAL_IV,
-               CPCalculator.RAID_LEVEL + CPCalculator.WEATHER_BOOST);
+               Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV,
+               Global.RAID_LEVEL + Global.WEATHER_BOOST);
 
             pokemon.CPRaidBoostedMax = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-               CPCalculator.MAX_IV,
-               CPCalculator.RAID_LEVEL + CPCalculator.WEATHER_BOOST);
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV,
+               Global.RAID_LEVEL + Global.WEATHER_BOOST);
 
             pokemon.CPQuestMin = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
-               CPCalculator.MIN_SPECIAL_IV, CPCalculator.QUEST_LEVEL);
+               Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV,
+               Global.MIN_SPECIAL_IV, Global.QUEST_LEVEL);
 
             pokemon.CPQuestMax = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-               CPCalculator.MAX_IV, CPCalculator.QUEST_LEVEL);
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.QUEST_LEVEL);
 
             pokemon.CPHatchMin = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               CPCalculator.MIN_SPECIAL_IV, CPCalculator.MIN_SPECIAL_IV,
-               CPCalculator.MIN_SPECIAL_IV, CPCalculator.HATCH_LEVEL);
+               Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV,
+               Global.MIN_SPECIAL_IV, Global.HATCH_LEVEL);
 
             pokemon.CPHatchMax = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-               CPCalculator.MAX_IV, CPCalculator.HATCH_LEVEL);
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.HATCH_LEVEL);
 
-            for (int level = CPCalculator.MIN_WILD_LEVEL; level <= CPCalculator.MAX_WILD_LEVEL; level++)
+            for (int level = Global.MIN_WILD_LEVEL; level <= Global.MAX_WILD_LEVEL; level++)
                pokemon.CPWild.Add(CPCalculator.CalcCPPerLevel(
                   pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-                  CPCalculator.MAX_IV, CPCalculator.MAX_IV,
-                  CPCalculator.MAX_IV, level));
+                  Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, level));
          }
       }
 
       /// <summary>
-      /// 
+      /// Gets all pokemon that have a given number.
       /// </summary>
-      /// <param name="pokemonNumber"></param>
-      /// <returns></returns>
+      /// <param name="pokemonNumber">Pokemon number to find</param>
+      /// <returns>List of pokemon with the given number.</returns>
       public List<string> GetPokemonByNumber(int pokemonNumber)
       {
          return POGODBConnector.GetPokemonByNumber(pokemonNumber);
@@ -287,14 +292,13 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       /// <param name="types">List of pokemon types.</param>
       /// <returns>Dictionaries of types and modifiers.</returns>
-      public TypeRelation GetTypeDefenseRelations(List<string> types)
+      public Tuple<Dictionary<string, int>, Dictionary<string, int>> GetTypeDefenseRelations(List<string> types)
       {
-         var allRelations = POGODBConnector.GetTypeDefenseRelations(types);
-         return new TypeRelation
-         {
-            strong = allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value),
-            weak = allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value)
-         };
+         Dictionary<string, int> allRelations = POGODBConnector.GetTypeDefenseRelations(types);
+         return new Tuple<Dictionary<string, int>, Dictionary<string, int>>(
+            allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value),
+            allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value)
+         );
       }
 
       /// <summary>
@@ -303,14 +307,13 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       /// <param name="type">Move type.</param>
       /// <returns>Dictionaries of types and modifiers.</returns>
-      public TypeRelation? GetTypeAttackRelations(string type)
+      public Tuple<Dictionary<string, int>, Dictionary<string, int>> GetTypeAttackRelations(string type)
       {
-         var allRelations = POGODBConnector.GetTypeAttackRelations(type);
-         return new TypeRelation
-         {
-            strong = allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value),
-            weak = allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value)
-         };
+         Dictionary<string, int> allRelations = POGODBConnector.GetTypeAttackRelations(type);
+         return new Tuple<Dictionary<string, int>, Dictionary<string, int>> (
+            allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value),
+            allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value)
+         );
       }
 
       /// <summary>
@@ -424,14 +427,5 @@ namespace PokeStar.ConnectionInterface
          else
             NONADBConnector.DeleteRegistration(guild, (ulong)channel);
       }
-   }
-
-   /// <summary>
-   /// Relations for pokemon type(s).
-   /// </summary>
-   public struct TypeRelation
-   {
-      public Dictionary<string, int> strong;
-      public Dictionary<string, int> weak;
    }
 }
