@@ -28,6 +28,10 @@ namespace PokeStar
       public static readonly int UNOWN_NUMBER = 201;
       public static readonly int ARCEUS_NUMBER = 493;
 
+      public static readonly int ATTEND_MASK = 7;   // 0000 0XXX mask will clear 4th bit
+      public static readonly int REMOTE_MASK = 112; // 0YYY 0000 mask will clear 8th bit
+      public static readonly int REMOTE_SHIFT = 4;  // 0YYY 0XXX where Y is the remote value and X is the attending value 
+
       public static readonly int NOT_IN_RAID = -1;
       public static readonly string DEFAULT_RAID_BOSS_NAME = "Empty";
 
