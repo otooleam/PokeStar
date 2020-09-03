@@ -25,7 +25,7 @@ namespace PokeStar.ImageProcessors
       /// <param name="context">Command context that has the image.</param>
       public static async void RoleImageProcess(SocketCommandContext context)
       {
-         if (context == null || Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
+         if (context == null)
             return;
 
          IReadOnlyCollection<Discord.Attachment> attachments = context.Message.Attachments;
