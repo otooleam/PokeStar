@@ -88,11 +88,21 @@ namespace PokeStar.DataModels
          return total;
       }
 
+      public int GetAttendingRemoteCount()
+      {
+         int total = 0;
+         foreach (int player in Attending.Values)
+         {
+            total += GetRemote(player);
+         }
+         return total;
+      }
+
       /// <summary>
       /// Gets how many players are ready.
       /// </summary>
       /// <returns>Number of ready players.</returns>
-      public int GetHereCount()
+      public int GetReadyCount()
       {
          int total = 0;
          foreach (int player in Ready.Values)
@@ -102,22 +112,23 @@ namespace PokeStar.DataModels
          return total;
       }
 
-      /// <summary>
-      /// Gets how many players have been invited to the group.
-      /// </summary>
-      /// <returns>Number of invited players.</returns>
-      public int GetRemoteCount()
+      public int GetReadyRemoteCount()
       {
-         int total = Invited.Count;
-         foreach (int player in Attending.Values)
-         {
-            total += GetRemote(player);
-         }
+         int total = 0;
          foreach (int player in Ready.Values)
          {
             total += GetRemote(player);
          }
          return total;
+      }
+
+      /// <summary>
+      /// Gets how many players have been invited to the group.
+      /// </summary>
+      /// <returns>Number of invited players.</returns>
+      public int GetInviteCount()
+      {
+         return Invited.Count;
       }
 
       /// <summary>
@@ -253,7 +264,12 @@ namespace PokeStar.DataModels
       /// <returns>Total players in raid group.</returns>
       public int TotalPlayers()
       {
-         return GetAttendingCount() + GetHereCount() + GetRemoteCount();
+         return GetAttendingCount() + GetReadyCount() + GetRemoteCount();
+      }
+
+      public int GetRemoteCount()
+      {
+         return GetAttendingRemoteCount() + GetReadyRemoteCount() + GetInviteCount();
       }
 
       /// <summary>

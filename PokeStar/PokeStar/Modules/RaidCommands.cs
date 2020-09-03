@@ -592,7 +592,7 @@ namespace PokeStar.Modules
                         }
 
                         await inviteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
-                        subMessages.Add(inviteMsg.Id, new Tuple<int, ulong>((int)SUB_MESSAGE_TYPES.RAID_REMOTE_SUB_MESSAGE, message.Id));
+                        subMessages.Add(inviteMsg.Id, new Tuple<int, ulong>((int)SUB_MESSAGE_TYPES.INVITE_SUB_MESSAGE, message.Id));
                      }
                   }
                }
@@ -930,9 +930,14 @@ namespace PokeStar.Modules
             for (int i = 0; i < raid.Groups.Count; i++)
             {
                string groupPrefix = raid.Groups.Count == 1 ? "" : $"Group {i + 1} ";
-               embed.AddField($"{groupPrefix}Ready", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyHere())}");
-               embed.AddField($"{groupPrefix}Attending", $"{BuildPlayerList(raid.Groups.ElementAt(i).GetReadonlyAttending())}");
-               embed.AddField($"{groupPrefix}Invited", $"{BuildInvitedList(raid.Groups.ElementAt(i).GetReadonlyInvited())}");
+               RaidGroup group = raid.Groups.ElementAt(i);
+               int total = group.TotalPlayers();
+               int ready = group.GetReadyCount() + group.GetReadyRemoteCount() + group.GetInviteCount();
+               int remote = group.GetRemoteCount();
+
+               embed.AddField($"{groupPrefix}Ready {ready}/{total} (Remote {remote}/10)", $"{BuildPlayerList(group.GetReadonlyHere())}");
+               embed.AddField($"{groupPrefix}Attending", $"{BuildPlayerList(group.GetReadonlyAttending())}");
+               embed.AddField($"{groupPrefix}Invited", $"{BuildInvitedList(group.GetReadonlyInvited())}");
             }
             embed.AddField($"Need Invite:", $"{BuildRequestInviteList(raid.GetReadonlyInviteList())}");
             embed.WithFooter("Note: the max number of members in a raid is 20, and the max number of invites is 10.");
