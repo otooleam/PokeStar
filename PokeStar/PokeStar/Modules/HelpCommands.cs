@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using PokeStar.DataModels;
@@ -15,31 +14,26 @@ namespace PokeStar.Modules
    /// </summary>
    public class HelpCommands : ModuleBase<SocketCommandContext>
    {
-      private static readonly List<string> HiddenCommands = new List<string>()
-      {
-         "ping",
-         "help",
-         "rave",
-         "screm",
-         "updatePokemonNames"
-      };
-
       [Command("help")]
       [Summary("Displays info about commands.")]
       public async Task Help([Summary("(Optional) Get help with this command.")] string command = null)
       {
-         List<CommandInfo> commands = Program.GetCommands();
+         bool showHidden = command == null ? false : command.Equals(Global.ADMIN_KEY, StringComparison.OrdinalIgnoreCase);
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.Gold);
 
-         if (command == null)
+         if (command == null || showHidden)
          {
             string prefix = Connections.Instance().GetPrefix(Context.Guild.Id);
             embed.WithTitle("**Command List**");
             embed.WithDescription($"List of commands supported by Nona.");
-            foreach (CommandInfo cmdInfo in commands)
+            foreach (CommandInfo cmdInfo in Global.COMMAND_INFO)
             {
-               if (!HiddenCommands.Contains(cmdInfo.Name))
+               if (!Global.HIDDEN_COMMANDS.Contains(cmdInfo.Name) && !showHidden)
+               {
+                  embed.AddField($"**{prefix}{cmdInfo.Name}**", cmdInfo.Summary ?? "No description available");
+               }
+               else if (Global.HIDDEN_COMMANDS.Contains(cmdInfo.Name) && showHidden)
                {
                   embed.AddField($"**{prefix}{cmdInfo.Name}**", cmdInfo.Summary ?? "No description available");
                }
@@ -47,9 +41,9 @@ namespace PokeStar.Modules
             embed.WithFooter($"Run \"{prefix}help <command name>\" to get help for a specific command.");
             await ReplyAsync(embed: embed.Build());
          }
-         else if (commands.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase)) != null)
+         else if (Global.COMMAND_INFO.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase)) != null)
          {
-            CommandInfo cmdInfo = commands.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase));
+            CommandInfo cmdInfo = Global.COMMAND_INFO.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase));
             embed.WithTitle($"**{command} command help**");
             embed.WithDescription(cmdInfo.Summary ?? "No description available");
             if (cmdInfo.Aliases.Count > 1)

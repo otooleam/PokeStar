@@ -25,7 +25,24 @@ namespace PokeStar.Modules
       {
          Connections.Instance().UpdateNameList();
          await ResponseMessage.SendInfoMessage(Context, $"Pokemon name list has been updated.");
+      }
 
+      [Command("toggleUseEmptyRaid")]
+      [Summary("Toggle empty raid feature for all servers.")]
+      public async Task UseEmptyRaid()
+      {
+         Global.USE_EMPTY_RAID = !Global.USE_EMPTY_RAID;
+         string text = Global.USE_EMPTY_RAID ? "" : "not";
+         await ResponseMessage.SendInfoMessage(Context, $"Nona will {text} use the empty raid feature.");
+      }
+
+      [Command("toggleUseNonaTest")]
+      [Summary("Toggle accepting messages from Nona Test Bot")]
+      public async Task UseNonaTest()
+      {
+         Global.USE_NONA_TEST = !Global.USE_NONA_TEST;
+         string text = Global.USE_NONA_TEST ? "" : "not";
+         await ResponseMessage.SendInfoMessage(Context, $"Nona will {text} accept message from a Nona Test Bot.");
       }
    }
 }

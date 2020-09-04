@@ -1,17 +1,40 @@
 ﻿using System;
 using System.Collections.Generic;
 using Discord;
+using Discord.Commands;
+using Newtonsoft.Json.Linq;
 
 namespace PokeStar
 {
    public static class Global
    {
+      public static string PROGRAM_PATH { get; set; }
+      public static JObject ENV_FILE { get; set; }
 
       public static string DEFAULT_PREFIX { get; set; }
+      public static string VERSION { get; set; }
+      public static string HOME_SERVER { get; set; }
+      public static LogSeverity LOG_LEVEL { get; set; }
       public static string POGODB_CONNECTION_STRING { get; set; }
       public static string NONADB_CONNECTION_STRING { get; set; }
 
+      public static bool USE_NONA_TEST { get; set; }
       public static bool USE_EMPTY_RAID { get; set; }
+
+
+      public static List<CommandInfo> COMMAND_INFO { get; set; }
+      public static readonly string ADMIN_KEY = "Hidden";
+      public static readonly List<string> HIDDEN_COMMANDS = new List<string>()
+      {
+         "ping",
+         "status",
+         "help",
+         "rave",
+         "screm",
+         "updatePokemonNames",
+         "useEmptyRaid",
+         "useNonaTest"
+      };
 
       public static readonly int MAX_LEVEL      = 40;
       public static readonly int MIN_WILD_LEVEL = 1;

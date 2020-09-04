@@ -584,7 +584,7 @@ namespace PokeStar.Modules
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]))
             {
-               var returnValue = raid.RemovePlayer(reactingPlayer);
+               Tuple<int, List<SocketGuildUser>> returnValue = raid.RemovePlayer(reactingPlayer);
 
                foreach (SocketGuildUser invite in returnValue.Item2)
                   await invite.SendMessageAsync($"{reactingPlayer.Nickname ?? reactingPlayer.Username} has left the raid. You have been moved back to \"Need Invite\".");

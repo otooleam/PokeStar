@@ -52,8 +52,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="fileName">Name of file to copy.</param>
       public static void CopyFile(string fileName)
       {
-         string location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-         System.IO.File.Copy($"{location}\\{PokemonImageFolder}\\{fileName}", $"{location}\\{fileName}", true);
+         System.IO.File.Copy($"{Global.PROGRAM_PATH}\\{PokemonImageFolder}\\{fileName}", $"{Global.PROGRAM_PATH}\\{fileName}", true);
       }
 
       /// <summary>
@@ -62,8 +61,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="fileName">Name of file to delete.</param>
       public static void DeleteFile(string fileName)
       {
-         string location = System.IO.Path.GetDirectoryName(System.Reflection.Assembly.GetEntryAssembly().Location);
-         System.IO.File.Delete($"{location}\\{fileName}");
+         System.IO.File.Delete($"{Global.PROGRAM_PATH}\\{fileName}");
       }
 
       /// <summary>
@@ -85,7 +83,7 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       /// <param name="tier">Tier of bosses to get.</param>
       /// <returns>List of current raid bosses in the given tier.</returns>
-      public static List<string> GetBossList(short tier)
+      public static List<string> GetBossList(int tier)
       {
          return SilphData.GetRaidBossesTier(tier);
       }

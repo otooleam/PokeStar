@@ -24,8 +24,7 @@ namespace PokeStar
       private static CommandService commands;
       private static IServiceProvider services;
 
-      private bool logging = false;
-      private bool AcceptFromNonaTest = false;
+      private bool loggingInProgress = false;
 
       private readonly int SizeMessageCashe = 100;
       private readonly LogSeverity DefaultLogLevel = LogSeverity.Info;
@@ -44,32 +43,33 @@ namespace PokeStar
       /// <returns>No task is returned as function ends on system termination.</returns>
       public async Task MainAsync()
       {
-         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-         JObject json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
+         Global.PROGRAM_PATH = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+         Global.ENV_FILE = JObject.Parse(File.ReadAllText($"{Global.PROGRAM_PATH}\\env.json"));
 
-         string token = json.GetValue("token").ToString();
-         string version = json.GetValue("version").ToString();
-         Global.POGODB_CONNECTION_STRING = json.GetValue("pogo_db_sql").ToString();
-         Global.NONADB_CONNECTION_STRING = json.GetValue("nona_db_sql").ToString();
-         Global.DEFAULT_PREFIX = json.GetValue("default_prefix").ToString();
+         string token = Global.ENV_FILE.GetValue("token").ToString();
+         Global.VERSION = Global.ENV_FILE.GetValue("version").ToString();
+         Global.HOME_SERVER = Global.ENV_FILE.GetValue("home_server").ToString();
+         Global.POGODB_CONNECTION_STRING = Global.ENV_FILE.GetValue("pogo_db_sql").ToString();
+         Global.NONADB_CONNECTION_STRING = Global.ENV_FILE.GetValue("nona_db_sql").ToString();
+         Global.DEFAULT_PREFIX = Global.ENV_FILE.GetValue("default_prefix").ToString();
 
-         AcceptFromNonaTest = json.GetValue("accept_nona_test").ToString().Equals("TRUE", StringComparison.OrdinalIgnoreCase);
-         Global.USE_EMPTY_RAID = json.GetValue("use_empty_raid").ToString().Equals("TRUE", StringComparison.OrdinalIgnoreCase);
+         Global.USE_NONA_TEST = Global.ENV_FILE.GetValue("accept_nona_test").ToString().Equals("TRUE", StringComparison.OrdinalIgnoreCase);
+         Global.USE_EMPTY_RAID = Global.ENV_FILE.GetValue("use_empty_raid").ToString().Equals("TRUE", StringComparison.OrdinalIgnoreCase);
 
-         int logLevel = Convert.ToInt32(json.GetValue("log_level").ToString());
-         LogSeverity logSeverity = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? DefaultLogLevel : (LogSeverity)logLevel;
+         int logLevel = Convert.ToInt32(Global.ENV_FILE.GetValue("log_level").ToString());
+         Global.LOG_LEVEL = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? DefaultLogLevel : (LogSeverity)logLevel;
 
          DiscordSocketConfig clientConfig = new DiscordSocketConfig
          {
             MessageCacheSize = SizeMessageCashe,
-            LogLevel = logSeverity,
+            LogLevel = Global.LOG_LEVEL,
             ExclusiveBulkDelete = true
          };
          client = new DiscordSocketClient(clientConfig);
          CommandServiceConfig commandConfig = new CommandServiceConfig
          {
             DefaultRunMode = RunMode.Async,
-            LogLevel = logSeverity
+            LogLevel = Global.LOG_LEVEL
          };
          commands = new CommandService(commandConfig);
 
@@ -81,7 +81,9 @@ namespace PokeStar
          await HookEvents();
          await client.LoginAsync(TokenType.Bot, token);
          await client.StartAsync();
-         await client.SetGameAsync($".help | v{version}");
+         await client.SetGameAsync($".help | v{Global.VERSION}");
+
+         Global.COMMAND_INFO = commands.Commands.ToList();
 
          // Block this task until the program is closed.
          await Task.Delay(-1);
@@ -112,17 +114,16 @@ namespace PokeStar
       /// <returns>Task Complete.</returns>
       private Task Log(LogMessage msg)
       {
-         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
          string fileName = DateTime.Now.ToString("MM-dd-yyyy");
-         string logFile = $"{path}\\Logs\\{fileName}.txt";
+         string logFile = $"{Global.PROGRAM_PATH}\\Logs\\{fileName}.txt";
 
          string logText = $"{DateTime.Now:hh:mm:ss} [{msg.Severity}] {msg.Source}: {msg.Exception?.ToString() ?? msg.Message}";
 
-         while (logging) { }
+         while (loggingInProgress) { }
 
-         logging = true;
+         loggingInProgress = true;
          File.AppendAllText(logFile, logText + "\n");
-         logging = false;
+         loggingInProgress = false;
 
          Console.WriteLine(msg.ToString());
 
@@ -138,7 +139,7 @@ namespace PokeStar
       private async Task<Task> HandleCommandAsync(SocketMessage cmdMessage)
       {
          SocketUserMessage message = cmdMessage as SocketUserMessage;
-         if (message == null || (message.Author.IsBot && (!AcceptFromNonaTest || !message.Author.Username.Equals("NonaTest", StringComparison.OrdinalIgnoreCase))))
+         if (message == null || (message.Author.IsBot && (!Global.USE_NONA_TEST || !message.Author.Username.Equals("NonaTest", StringComparison.OrdinalIgnoreCase))))
          {
             return Task.CompletedTask;
          }
@@ -207,12 +208,8 @@ namespace PokeStar
       /// <returns>Task Complete.</returns>
       private Task HandleReady()
       {
-         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-         JObject json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
-         string homeGuildName = json.GetValue("home_server").ToString();
-         SocketGuild server = client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(homeGuildName, StringComparison.OrdinalIgnoreCase));
-
-         SetEmotes(server, json);
+         SocketGuild server = client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(Global.HOME_SERVER, StringComparison.OrdinalIgnoreCase));
+         SetEmotes(server);
          RaidCommands.SetRemotePassEmote();
 
          foreach (SocketGuild guild in client.Guilds)
@@ -253,27 +250,38 @@ namespace PokeStar
       /// Sets the emotes from a JSON file
       /// </summary>
       /// <param name="server">Server that the emotes are on.</param>
-      /// <param name="json">JSON file that has the emote names.</param>
-      private void SetEmotes(SocketGuild server, JObject json)
+      private void SetEmotes(SocketGuild server)
       {
          foreach (string emote in Global.EMOTE_NAMES)
          {
             Global.NONA_EMOJIS[emote] = Emote.Parse(
                server.Emotes.FirstOrDefault(
                   x => x.Name.Equals(
-                     json.GetValue(emote).ToString(),
+                     Global.ENV_FILE.GetValue(emote).ToString(),
                      StringComparison.OrdinalIgnoreCase)
                   ).ToString()).ToString();
          }
       }
 
-      /// <summary>
-      /// Gets the list of commands.
-      /// </summary>
-      /// <returns>List of command info objects for the commands.</returns>
-      public static List<CommandInfo> GetCommands()
+      public static string GetStatus()
       {
-         return commands.Commands.ToList();
+         return client.Status.ToString();
+      }
+      public static string GetConnectionState()
+      {
+         return client.ConnectionState.ToString();
+      }
+      public static int GetGuildCount()
+      {
+         return client.Guilds.Count;
+      }
+      public static string GetName()
+      {
+         return client.CurrentUser.Username;
+      }
+      public static int GetLatency()
+      {
+         return client.Latency;
       }
    }
 }
