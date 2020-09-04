@@ -20,10 +20,6 @@ namespace PokeStar.Modules
       {
          if (!Connections.Instance().GetSetupComplete(Context.Guild.Id))
          {
-            if (Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(Global.ROLE_TRAINER, StringComparison.OrdinalIgnoreCase)) == null)
-            {
-               await Context.Guild.CreateRoleAsync(Global.ROLE_TRAINER, null, Global.ROLE_COLOR_TRAINER, false, false, null);
-            }
             if (Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(Global.ROLE_VALOR, StringComparison.OrdinalIgnoreCase)) == null)
             {
                await Context.Guild.CreateRoleAsync(Global.ROLE_VALOR, null, Global.ROLE_COLOR_VALOR, false, false, null);
@@ -35,6 +31,10 @@ namespace PokeStar.Modules
             if (Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(Global.ROLE_INSTINCT, StringComparison.OrdinalIgnoreCase)) == null)
             {
                await Context.Guild.CreateRoleAsync(Global.ROLE_INSTINCT, null, Global.ROLE_COLOR_INSTINCT, false, false, null);
+            }
+            if (Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(Global.ROLE_TRAINER, StringComparison.OrdinalIgnoreCase)) == null)
+            {
+               await Context.Guild.CreateRoleAsync(Global.ROLE_TRAINER, null, Global.ROLE_COLOR_TRAINER, false, false, null);
             }
             Connections.Instance().CompleteSetup(Context.Guild.Id);
          }
