@@ -29,7 +29,6 @@ namespace PokeStar.Modules
          new Emoji("3️⃣"),
          new Emoji("4️⃣"),
          new Emoji("5️⃣"),
-         new Emoji("6️⃣"),
          new Emoji("✅"),
          new Emoji("✈️"),
          new Emoji("🤝"),
@@ -84,7 +83,6 @@ namespace PokeStar.Modules
          ADD_PLAYER_3,
          ADD_PLAYER_4,
          ADD_PLAYER_5,
-         ADD_PLAYER_6,
          PLAYER_READY,
          REMOTE_RAID,
          INVITE_PLAYER,
@@ -545,10 +543,6 @@ namespace PokeStar.Modules
             {
                raid.PlayerAdd(reactingPlayer, 5);
             }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_6]))
-            {
-               raid.PlayerAdd(reactingPlayer, 6);
-            }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]))
             {
                int group = raid.PlayerReady(reactingPlayer);
@@ -935,9 +929,25 @@ namespace PokeStar.Modules
                int ready = group.GetReadyCount() + group.GetReadyRemoteCount() + group.GetInviteCount();
                int remote = group.GetRemoteCount();
 
-               embed.AddField($"**{groupPrefix}Ready {ready}/{total}** (Remote {remote}/10)", $"{BuildPlayerList(group.GetReadonlyHere())}");
+               string readyList = BuildPlayerList(group.GetReadonlyHere());
+               string invitedList = BuildInvitedList(group.GetReadonlyInvited());
+
+               string text = Global.EMPTY_FIELD;
+               if (readyList.Equals(Global.EMPTY_FIELD))
+               {
+                  text = invitedList;
+               }
+               else if (invitedList.Equals(Global.EMPTY_FIELD))
+               {
+                  text = readyList;
+               }
+               else
+               {
+                  text = readyList + invitedList;
+               }
+
+               embed.AddField($"**{groupPrefix}Ready {ready}/{total}** (Remote {remote}/10)", $"{text}");
                embed.AddField($"**{groupPrefix}Attending**", $"{BuildPlayerList(group.GetReadonlyAttending())}");
-               embed.AddField($"**{groupPrefix}Invited**", $"{BuildInvitedList(group.GetReadonlyInvited())}");
             }
             embed.AddField($"**Need Invite:**", $"{BuildRequestInviteList(raid.GetReadonlyInviteList())}");
             embed.WithFooter("Note: the max number of members in a raid is 20, and the max number of invites is 10.");
@@ -1137,18 +1147,7 @@ namespace PokeStar.Modules
          {
             int attend = RaidGroup.GetAttending(player.Value);
             int remote = RaidGroup.GetRemote(player.Value);
-            if (remote == 0 && attend != 0)
-            {
-               sb.AppendLine($"{Global.SELECTION_EMOJIS[attend - 1]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} ");
-            }
-            else if(attend == 0 && remote != 0)
-            {
-               sb.AppendLine($"{Global.SELECTION_EMOJIS[remote - 1]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} will be remote");
-            }
-            else
-            {
-               sb.AppendLine($"{Global.SELECTION_EMOJIS[attend - 1]} / {Global.SELECTION_EMOJIS[remote - 1]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} (in person / remote)");
-            }
+            sb.AppendLine($"{Global.SELECTION_EMOJIS[attend + remote - 1]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} ");
          }
          return sb.ToString();
       }
@@ -1168,14 +1167,7 @@ namespace PokeStar.Modules
          StringBuilder sb = new StringBuilder();
          foreach (KeyValuePair<SocketGuildUser, SocketGuildUser> player in players)
          {
-            if (player.Key.Equals(player.Value))
-            {
-               sb.AppendLine($"{player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} will be raiding remotly");
-            }
-            else
-            {
-               sb.AppendLine($"{player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} invited by {player.Value.Nickname ?? player.Value.Username}");
-            }
+            sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE_RAID]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} invited by {player.Value.Nickname ?? player.Value.Username} {GetPlayerTeam(player.Value)}");
          }
          return sb.ToString();
       }
@@ -1236,6 +1228,7 @@ namespace PokeStar.Modules
                }
             }
          }
+         sb.AppendLine($"\nIf you are inviting players who have not requested an invite, please use the {raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE_RAID]} to indicate the amount.");
 
          sb.AppendLine("\nHow To Edit:");
          sb.AppendLine("To edit the raid copy and paste the following command, and add the part of the raid you want to change and the new value: ");
