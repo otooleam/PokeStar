@@ -192,7 +192,7 @@ namespace PokeStar.Modules
          {
             if (raidMessages.ContainsKey(code))
             {
-               SocketUserMessage msg = (SocketUserMessage)Context.Channel.GetCachedMessage(code);
+               SocketUserMessage readMessage = (SocketUserMessage)await Context.Channel.GetMessageAsync(code);
                RaidParent raid = raidMessages[code];
                bool editComplete = false;
                bool simpleEdit = false;
@@ -217,7 +217,7 @@ namespace PokeStar.Modules
                      raid.SetBoss(null);
                      raid.RaidBossSelections = potentials;
                      string fileName = $"Egg{calcTier}.png";
-                     await msg.DeleteAsync();
+                     await readMessage.DeleteAsync();
                      raidMessages.Remove(code);
 
                      Connections.CopyFile(fileName);
@@ -235,8 +235,8 @@ namespace PokeStar.Modules
                      raid.Tier = calcTier;
                      raid.SetBoss(potentials.First());
                      string fileName = Connections.GetPokemonPicture(raid.Boss.Name);
-                     IEmote[] prevReactions = msg.Reactions.Keys.ToArray();
-                     await msg.DeleteAsync();
+                     IEmote[] prevReactions = readMessage.Reactions.Keys.ToArray();
+                     await readMessage.DeleteAsync();
                      raidMessages.Remove(code);
 
                      Connections.CopyFile(fileName);
@@ -251,8 +251,8 @@ namespace PokeStar.Modules
                      raid.Tier = calcTier;
                      raid.SetBoss(Global.DEFAULT_RAID_BOSS_NAME);
                      string fileName = Connections.GetPokemonPicture(raid.Boss.Name);
-                     IEmote[] prevReactions = msg.Reactions.Keys.ToArray();
-                     await msg.DeleteAsync();
+                     IEmote[] prevReactions = readMessage.Reactions.Keys.ToArray();
+                     await readMessage.DeleteAsync();
                      raidMessages.Remove(code);
 
                      Connections.CopyFile(fileName);
@@ -276,7 +276,7 @@ namespace PokeStar.Modules
                {
                   string fileName = Connections.GetPokemonPicture(raid.Boss.Name);
                   Connections.CopyFile(fileName);
-                  await msg.ModifyAsync(x =>
+                  await readMessage.ModifyAsync(x =>
                   {
                      x.Embed = BuildRaidEmbed(raid, fileName);
                   });
@@ -760,7 +760,7 @@ namespace PokeStar.Modules
                raid.ChangeInvitePage(false, Global.SELECTION_EMOJIS.Length);
                int offset = raid.InvitePage * Global.SELECTION_EMOJIS.Length;
                int listSize = Math.Min(raid.GetReadonlyInviteList().Count - offset, Global.SELECTION_EMOJIS.Length);
-               SocketUserMessage inviteMessage = (SocketUserMessage)reaction.Channel.CachedMessages.FirstOrDefault(x => x.Id == raidMessageId);
+               SocketUserMessage inviteMessage = (SocketUserMessage)await reaction.Channel.GetMessageAsync(raidMessageId);
                await inviteMessage.ModifyAsync(x =>
                {
                   x.Embed = BuildPlayerInviteEmbed(raid.GetReadonlyInviteList(), reactingPlayer.Nickname ?? reactingPlayer.Username, offset, listSize);
@@ -771,7 +771,7 @@ namespace PokeStar.Modules
                raid.ChangeInvitePage(true, Global.SELECTION_EMOJIS.Length);
                int offset = raid.InvitePage * Global.SELECTION_EMOJIS.Length;
                int listSize = Math.Min(raid.GetReadonlyInviteList().Count - offset, Global.SELECTION_EMOJIS.Length);
-               SocketUserMessage inviteMessage = (SocketUserMessage)reaction.Channel.CachedMessages.FirstOrDefault(x => x.Id == raidMessageId);
+               SocketUserMessage inviteMessage = (SocketUserMessage)await reaction.Channel.GetMessageAsync(raidMessageId);
                await inviteMessage.ModifyAsync(x =>
                {
                   x.Embed = BuildPlayerInviteEmbed(raid.GetReadonlyInviteList(), reactingPlayer.Nickname ?? reactingPlayer.Username, offset, listSize);
@@ -787,7 +787,7 @@ namespace PokeStar.Modules
                      SocketGuildUser player = raid.GetReadonlyInviteList().ElementAt(i + offset);
                      if (raid.InvitePlayer(player, reactingPlayer))
                      {
-                        SocketUserMessage raidMessage = (SocketUserMessage)reaction.Channel.CachedMessages.FirstOrDefault(x => x.Id == raidMessageId);
+                        SocketUserMessage raidMessage = (SocketUserMessage)await reaction.Channel.GetMessageAsync(raidMessageId);
                         string fileName = Connections.GetPokemonPicture(raid.Boss.Name);
                         Connections.CopyFile(fileName);
                         await raidMessage.ModifyAsync(x =>
@@ -861,7 +861,7 @@ namespace PokeStar.Modules
 
             if (needEdit)
             {
-               SocketUserMessage raidMessage = (SocketUserMessage)reaction.Channel.CachedMessages.FirstOrDefault(x => x.Id == raidMessageId);
+               SocketUserMessage raidMessage = (SocketUserMessage)await reaction.Channel.GetMessageAsync(raidMessageId);
                string fileName = Connections.GetPokemonPicture(raid.Boss.Name);
                Connections.CopyFile(fileName);
                await raidMessage.ModifyAsync(x =>

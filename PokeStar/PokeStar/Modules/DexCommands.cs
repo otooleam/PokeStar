@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
@@ -9,7 +10,6 @@ using Discord.WebSocket;
 using PokeStar.DataModels;
 using PokeStar.Calculators;
 using PokeStar.ConnectionInterface;
-using System.Linq;
 
 namespace PokeStar.Modules
 {
