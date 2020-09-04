@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Discord.WebSocket;
@@ -82,7 +83,17 @@ namespace PokeStar.DataModels
          int total = 0;
          foreach (int player in Attending.Values)
          {
-            total += player;
+            total += GetAttending(player);
+         }
+         return total;
+      }
+
+      public int GetAttendingRemoteCount()
+      {
+         int total = 0;
+         foreach (int player in Attending.Values)
+         {
+            total += GetRemote(player);
          }
          return total;
       }
@@ -91,12 +102,22 @@ namespace PokeStar.DataModels
       /// Gets how many players are ready.
       /// </summary>
       /// <returns>Number of ready players.</returns>
-      public int GetHereCount()
+      public int GetReadyCount()
       {
          int total = 0;
          foreach (int player in Ready.Values)
          {
-            total += player;
+            total += GetAttending(player);
+         }
+         return total;
+      }
+
+      public int GetReadyRemoteCount()
+      {
+         int total = 0;
+         foreach (int player in Ready.Values)
+         {
+            total += GetRemote(player);
          }
          return total;
       }
@@ -105,7 +126,7 @@ namespace PokeStar.DataModels
       /// Gets how many players have been invited to the group.
       /// </summary>
       /// <returns>Number of invited players.</returns>
-      public int GetInvitedCount()
+      public int GetInviteCount()
       {
          return Invited.Count;
       }
@@ -116,23 +137,37 @@ namespace PokeStar.DataModels
       /// </summary>
       /// <param name="player">Player to add.</param>
       /// <param name="partySize">Number of accounts the user is bringing.</param>
-      public void Add(SocketGuildUser player, int partySize)
+      public void Add(SocketGuildUser player, int attendSize, int remoteSize)
       {
-         if (Invited.ContainsKey(player))
+         if (!Invited.ContainsKey(player))
          {
-            return;
-         }
-         else if (Attending.ContainsKey(player))
-         {
-            Attending[player] = partySize;
-         }
-         else if (Ready.ContainsKey(player))
-         {
-            Ready[player] = partySize;
-         }
-         else
-         {
-            Attending.Add(player, partySize);
+            if (Attending.ContainsKey(player))
+            {
+               if (remoteSize == 0)
+               {
+                  Attending[player] = SetValue(attendSize, GetRemote(Attending[player]));
+               }
+               else if (attendSize == 0)
+               {
+                  Attending[player] = SetValue(GetAttending(Attending[player]), remoteSize);
+               }
+            }
+            else if (Ready.ContainsKey(player))
+            {
+               if (remoteSize == 0)
+               {
+                  Ready[player] = SetValue(attendSize, GetRemote(Ready[player]));
+               }
+               else if (attendSize == 0)
+               {
+                  Ready[player] = SetValue(GetAttending(Ready[player]), remoteSize);
+               }
+            }
+            else
+            {
+               int partySize = (remoteSize << Global.REMOTE_SHIFT) | attendSize;
+               Attending.Add(player, partySize);
+            }
          }
       }
 
@@ -211,7 +246,7 @@ namespace PokeStar.DataModels
       /// <returns>List of players that are here</returns>
       public ImmutableList<SocketGuildUser> GetPingList()
       {
-         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).ToImmutableList();
+         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).Distinct().ToImmutableList();
       }
 
       /// <summary>
@@ -220,7 +255,7 @@ namespace PokeStar.DataModels
       /// <returns></returns>
       public ImmutableList<SocketGuildUser> GetNotifyList()
       {
-         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).Union(Attending.Keys.ToList()).ToImmutableList();
+         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).Union(Attending.Keys.ToList()).Distinct().ToImmutableList();
       }
 
       /// <summary>
@@ -229,7 +264,12 @@ namespace PokeStar.DataModels
       /// <returns>Total players in raid group.</returns>
       public int TotalPlayers()
       {
-         return GetAttendingCount() + GetHereCount() + GetInvitedCount();
+         return GetAttendingCount() + GetReadyCount() + GetRemoteCount();
+      }
+
+      public int GetRemoteCount()
+      {
+         return GetAttendingRemoteCount() + GetReadyRemoteCount() + GetInviteCount();
       }
 
       /// <summary>
@@ -249,7 +289,7 @@ namespace PokeStar.DataModels
       /// <returns>True if the total players is greater than the player limit, otherwise false.</returns>
       public bool ShouldSplit()
       {
-         return TotalPlayers() > PlayerLimit;
+         return TotalPlayers() > PlayerLimit || GetRemoteCount() > InviteLimit;
       }
 
       /// <summary>
@@ -326,5 +366,8 @@ namespace PokeStar.DataModels
             group.Invited.Clear();
          }
       }
+      public static int GetAttending(int value) => value & Global.ATTEND_MASK;
+      public static int GetRemote(int value) => (value & Global.REMOTE_MASK) >> Global.REMOTE_SHIFT;
+      private int SetValue(int attend, int remote) => (remote << Global.REMOTE_SHIFT) | attend;
    }
 }
