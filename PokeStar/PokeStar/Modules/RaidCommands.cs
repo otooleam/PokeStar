@@ -919,11 +919,11 @@ namespace PokeStar.Modules
       {
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(RaidMessageColor);
-         embed.WithTitle(raid.Boss.Name.Equals(Global.DEFAULT_RAID_BOSS_NAME) ? "Empty Raid" : $"{raid.Boss.Name} Raid {BuildRaidTitle(raid.Tier)}");
+         embed.WithTitle(raid.Boss.Name.Equals(Global.DEFAULT_RAID_BOSS_NAME) ? "**Empty Raid**" : $"**{raid.Boss.Name} Raid {BuildRaidTitle(raid.Tier)}**");
          embed.WithDescription("Press ? for help.");
          embed.WithThumbnailUrl($"attachment://{fileName}");
-         embed.AddField("Time", raid.Time, true);
-         embed.AddField("Location", raid.Location, true);
+         embed.AddField("**Time**", raid.Time, true);
+         embed.AddField("**Location**", raid.Location, true);
 
          if (raid is Raid)
          {
@@ -935,11 +935,11 @@ namespace PokeStar.Modules
                int ready = group.GetReadyCount() + group.GetReadyRemoteCount() + group.GetInviteCount();
                int remote = group.GetRemoteCount();
 
-               embed.AddField($"{groupPrefix}Ready {ready}/{total} (Remote {remote}/10)", $"{BuildPlayerList(group.GetReadonlyHere())}");
-               embed.AddField($"{groupPrefix}Attending", $"{BuildPlayerList(group.GetReadonlyAttending())}");
-               embed.AddField($"{groupPrefix}Invited", $"{BuildInvitedList(group.GetReadonlyInvited())}");
+               embed.AddField($"**{groupPrefix}Ready {ready}/{total}** (Remote {remote}/10)", $"{BuildPlayerList(group.GetReadonlyHere())}");
+               embed.AddField($"**{groupPrefix}Attending**", $"{BuildPlayerList(group.GetReadonlyAttending())}");
+               embed.AddField($"**{groupPrefix}Invited**", $"{BuildInvitedList(group.GetReadonlyInvited())}");
             }
-            embed.AddField($"Need Invite:", $"{BuildRequestInviteList(raid.GetReadonlyInviteList())}");
+            embed.AddField($"**Need Invite:**", $"{BuildRequestInviteList(raid.GetReadonlyInviteList())}");
             embed.WithFooter("Note: the max number of members in a raid is 20, and the max number of invites is 10.");
          }
          else if (raid is RaidMule mule)
@@ -1014,16 +1014,16 @@ namespace PokeStar.Modules
       {
          StringBuilder sb = new StringBuilder();
          sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REQUEST_INVITE]} Need Invite");
-         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_1]} Remote with 1 account");
-         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_2]} Remote with 2 accounts");
-         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_3]} Remote with 3 accounts");
-         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_4]} Remote with 4 accounts");
-         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_5]} Remote with 5 accounts");
+         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_1]} 1 Remote Raider");
+         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_2]} 2 Remote Raiders");
+         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_3]} 3 Remote Raiders");
+         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_4]} 4 Remote Raiders");
+         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_5]} 5 Remote Raiders");
          sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]} Cancel");
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(RaidMessageColor);
-         embed.WithTitle($"{user} - Remote");
+         embed.WithTitle($"**{user} - Remote**");
          embed.AddField("Please Select How You Will Remote to the Raid.", sb.ToString());
 
          return embed.Build();
