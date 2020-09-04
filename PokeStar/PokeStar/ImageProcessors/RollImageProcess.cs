@@ -11,6 +11,7 @@ using Patagames.Ocr;
 using Patagames.Ocr.Enums;
 using PokeStar.ConnectionInterface;
 
+
 namespace PokeStar.ImageProcessors
 {
    /// <summary>
@@ -25,11 +26,12 @@ namespace PokeStar.ImageProcessors
       /// <param name="context">Command context that has the image.</param>
       public static async void RoleImageProcess(SocketCommandContext context)
       {
-         if (context == null || Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
+         if (context == null)
             return;
 
          IReadOnlyCollection<Discord.Attachment> attachments = context.Message.Attachments;
-         SocketGuildUser user = context.Guild.Users.FirstOrDefault(x => x.Username.ToString().Equals(context.Message.Author.Username, StringComparison.OrdinalIgnoreCase));
+         //SocketGuildUser user = context.Guild.Users.FirstOrDefault(x => x.Username.ToString().Equals(context.Message.Author.Username, StringComparison.OrdinalIgnoreCase));
+         SocketGuildUser user = (SocketGuildUser)context.Message.Author;
          if (!Connections.Instance().GetSetupComplete(context.Guild.Id))
             return;
          string url = attachments.ElementAt(0).Url;
@@ -79,15 +81,15 @@ namespace PokeStar.ImageProcessors
             var valor = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase));
             var mystic = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase));
             var instinct = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase));
-            if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) == null)
+            if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) != null)
             {
                await user.RemoveRoleAsync(valor).ConfigureAwait(false);
             }
-            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) == null)
+            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) != null)
             {
                await user.RemoveRoleAsync(mystic).ConfigureAwait(false);
             }
-            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) == null)
+            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) != null)
             {
                await user.RemoveRoleAsync(instinct).ConfigureAwait(false);
             }
@@ -106,11 +108,11 @@ namespace PokeStar.ImageProcessors
                teamName = "Instinct";
             }
 
-            SocketRole team = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(teamName, StringComparison.OrdinalIgnoreCase));
-            await user.AddRoleAsync(team).ConfigureAwait(false);
+            Discord.IRole team = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(teamName, StringComparison.OrdinalIgnoreCase));
+            await (user as Discord.IGuildUser).AddRoleAsync(team).ConfigureAwait(false);
 
             SocketRole role = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Trainer", StringComparison.OrdinalIgnoreCase));
-            await user.AddRoleAsync(role).ConfigureAwait(false);
+            await (user as Discord.IGuildUser).AddRoleAsync(role).ConfigureAwait(false);
 
             await context.Channel.SendMessageAsync($"{user.Username} now has the Trainer role and the {teamName} role").ConfigureAwait(false);
          }
