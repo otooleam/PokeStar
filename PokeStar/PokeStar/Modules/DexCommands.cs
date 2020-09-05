@@ -229,9 +229,9 @@ namespace PokeStar.Modules
 
       [Command("form")]
       [Summary("Gets all forms for a given pokémon.")]
-      [Remarks("Leave blank to get all pokémon with forms.\n" +
+      [Remarks("Leave blank to get all Pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
-      public async Task Form([Summary("Pokémon with forms.")] string pokemon)
+      public async Task Form([Summary("(Optional) Pokémon with forms.")] string pokemon = null)
       {
          if (!ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, Global.REGISTER_STRING_DEX))
          {
@@ -239,7 +239,27 @@ namespace PokeStar.Modules
          }
          else
          {
-            if (pokemon.Equals("Alias", StringComparison.OrdinalIgnoreCase))
+            if (pokemon == null)
+            {
+               List<string> keys = pokemonForms.Keys.ToList();
+               StringBuilder sb = new StringBuilder();
+               for (int i = 1; i <= keys.Count; i++)
+               {
+                  string bold = (i % 2 == 0) ? "" : "**";
+                  sb.Append($"{bold}{keys.ElementAt(i - 1)}{bold} ");
+                  if (i % 4 == 0)
+                  {
+                     sb.Append("\n");
+                  }
+               }
+
+               EmbedBuilder embed = new EmbedBuilder();
+               embed.AddField($"Pokémon with form differences:", sb.ToString());
+               embed.WithColor(DexMessageColor);
+               await ReplyAsync(embed: embed.Build());
+
+            }
+            else if (pokemon.Equals("Alias", StringComparison.OrdinalIgnoreCase))
             {
                EmbedBuilder embed = new EmbedBuilder();
                embed.WithTitle("Form tag variations");
