@@ -21,7 +21,6 @@ namespace PokeStar
       public static bool USE_NONA_TEST { get; set; }
       public static bool USE_EMPTY_RAID { get; set; }
 
-
       public static List<CommandInfo> COMMAND_INFO { get; set; }
       public static readonly string ADMIN_KEY = "Hidden";
       public static readonly List<string> HIDDEN_COMMANDS = new List<string>()
@@ -71,6 +70,9 @@ namespace PokeStar
       public static readonly Color ROLE_COLOR_VALOR    = new Color(153, 45, 34);
       public static readonly Color ROLE_COLOR_MYSTIC   = new Color(39, 126, 205);
       public static readonly Color ROLE_COLOR_INSTINCT = new Color(241, 196, 15);
+
+      public static readonly System.Drawing.Rectangle IMAGE_RECT_NICKNAME   = new System.Drawing.Rectangle(10, 120, 480, 100);
+      public static readonly System.Drawing.Rectangle IMAGE_RECT_TEAM_COLOR = new System.Drawing.Rectangle(410, 60, 10, 10);
 
       public static readonly Emoji[] SELECTION_EMOJIS = {
          new Emoji("1️⃣"),
