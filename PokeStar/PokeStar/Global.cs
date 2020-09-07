@@ -70,6 +70,11 @@ namespace PokeStar
       public static readonly string ROLE_MYSTIC   = "Mystic";
       public static readonly string ROLE_INSTINCT = "Instinct";
 
+      public static readonly int ROLE_INDEX_NO_TEAM_FOUND = -1;
+      public static readonly int ROLE_INDEX_VALOR         = 0;
+      public static readonly int ROLE_INDEX_MYSTIC        = 1;
+      public static readonly int ROLE_INDEX_INSTINCT      = 2;
+
       public static readonly Color ROLE_COLOR_TRAINER  = new Color(185, 187, 190);
       public static readonly Color ROLE_COLOR_VALOR    = new Color(153, 45, 34);
       public static readonly Color ROLE_COLOR_MYSTIC   = new Color(39, 126, 205);

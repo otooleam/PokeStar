@@ -1,9 +1,7 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Drawing;
-using System.Reflection;
 using System.Collections.Generic;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -36,7 +34,8 @@ namespace PokeStar.ImageProcessors
          string url = attachments.ElementAt(0).Url;
          string imagePath = $@"{Global.PROGRAM_PATH}\Images\profile\{user.Username}.png";
          string plainText = null;
-         Color teamColor = Color.White;
+         int colorIndex = -1;
+         Color[] teamColors = { Global.ROLE_COLOR_VALOR, Global.ROLE_COLOR_MYSTIC, Global.ROLE_COLOR_INSTINCT };
 
          using (WebClient client = new WebClient())
          {
@@ -52,9 +51,8 @@ namespace PokeStar.ImageProcessors
                   api.Init(Languages.English);
                   plainText = api.GetTextFromImage(bitmap, Global.IMAGE_RECT_NICKNAME);
                }
-               Color[] teamColors = { Global.ROLE_COLOR_VALOR, Global.ROLE_COLOR_MYSTIC, Global.ROLE_COLOR_INSTINCT };
                Color avgColor = GetAvgColor(bitmap, Global.IMAGE_RECT_TEAM_COLOR);
-               teamColor = teamColors.ElementAt(ClosestColor(new List<Color>(teamColors), avgColor));
+               colorIndex = ClosestColor(new List<Color>(teamColors), avgColor);
             }
          }
 
@@ -75,7 +73,7 @@ namespace PokeStar.ImageProcessors
             }
          }
 
-         if (!teamColor.Equals(Color.White))
+         if (colorIndex != Global.ROLE_INDEX_NO_TEAM_FOUND)
          {
             var valor = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase));
             var mystic = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase));
@@ -94,15 +92,15 @@ namespace PokeStar.ImageProcessors
             }
 
             string teamName = "";
-            if (teamColor.Equals(Global.ROLE_COLOR_VALOR))
+            if (colorIndex == Global.ROLE_INDEX_VALOR)
             {
                teamName = "Valor";
             }
-            if (teamColor.Equals(Global.ROLE_COLOR_MYSTIC))
+            else if (colorIndex == Global.ROLE_INDEX_MYSTIC)
             {
                teamName = "Mystic";
             }
-            if (teamColor.Equals(Global.ROLE_COLOR_INSTINCT))
+            else if (colorIndex == Global.ROLE_INDEX_INSTINCT)
             {
                teamName = "Instinct";
             }
