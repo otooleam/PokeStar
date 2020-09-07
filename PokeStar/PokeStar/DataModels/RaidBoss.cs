@@ -77,7 +77,7 @@ namespace PokeStar.DataModels
       /// </summary>
       public RaidBoss()
       {
-         Name = "Bossless";
+         Name = Global.DEFAULT_RAID_BOSS_NAME;
       }
    }
 }

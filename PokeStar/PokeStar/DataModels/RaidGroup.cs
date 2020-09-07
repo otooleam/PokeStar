@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Discord.WebSocket;
@@ -10,8 +11,8 @@ namespace PokeStar.DataModels
    /// </summary>
    public class RaidGroup
    {
-      public readonly int playerLimit = 20;
-      public readonly int inviteLimit = 10;
+      private int PlayerLimit { get; set; }
+      private int InviteLimit { get; set; }
 
       /// <summary>
       /// Dictionary of players attending the raid.
@@ -37,11 +38,13 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Creates a new raid group.
       /// </summary>
-      public RaidGroup()
+      public RaidGroup(int playerLimit, int inviteLimit)
       {
          Attending = new Dictionary<SocketGuildUser, int>();
          Ready = new Dictionary<SocketGuildUser, int>();
          Invited = new Dictionary<SocketGuildUser, SocketGuildUser>();
+         PlayerLimit = playerLimit;
+         InviteLimit = inviteLimit;
       }
 
       /// <summary>
@@ -78,8 +81,20 @@ namespace PokeStar.DataModels
       public int GetAttendingCount()
       {
          int total = 0;
-         foreach (var player in Attending)
-            total += player.Value;
+         foreach (int player in Attending.Values)
+         {
+            total += GetAttending(player);
+         }
+         return total;
+      }
+
+      public int GetAttendingRemoteCount()
+      {
+         int total = 0;
+         foreach (int player in Attending.Values)
+         {
+            total += GetRemote(player);
+         }
          return total;
       }
 
@@ -87,11 +102,23 @@ namespace PokeStar.DataModels
       /// Gets how many players are ready.
       /// </summary>
       /// <returns>Number of ready players.</returns>
-      public int GetHereCount()
+      public int GetReadyCount()
       {
          int total = 0;
-         foreach (var player in Ready)
-            total += player.Value;
+         foreach (int player in Ready.Values)
+         {
+            total += GetAttending(player);
+         }
+         return total;
+      }
+
+      public int GetReadyRemoteCount()
+      {
+         int total = 0;
+         foreach (int player in Ready.Values)
+         {
+            total += GetRemote(player);
+         }
          return total;
       }
 
@@ -99,7 +126,7 @@ namespace PokeStar.DataModels
       /// Gets how many players have been invited to the group.
       /// </summary>
       /// <returns>Number of invited players.</returns>
-      public int GetInvitedCount()
+      public int GetInviteCount()
       {
          return Invited.Count;
       }
@@ -110,41 +137,88 @@ namespace PokeStar.DataModels
       /// </summary>
       /// <param name="player">Player to add.</param>
       /// <param name="partySize">Number of accounts the user is bringing.</param>
-      public void Add(SocketGuildUser player, int partySize)
+      public void Add(SocketGuildUser player, int attendSize, int remoteSize)
       {
-         if (Attending.ContainsKey(player))
-            Attending[player] = partySize;
-         else if (Ready.ContainsKey(player))
-            Ready[player] = partySize;
-         else
-            Attending.Add(player, partySize);
+         if (!Invited.ContainsKey(player))
+         {
+            if (Attending.ContainsKey(player))
+            {
+               if (remoteSize == 0)
+               {
+                  Attending[player] = SetValue(attendSize, GetRemote(Attending[player]));
+               }
+               else if (attendSize == 0)
+               {
+                  Attending[player] = SetValue(GetAttending(Attending[player]), remoteSize);
+               }
+            }
+            else if (Ready.ContainsKey(player))
+            {
+               if (remoteSize == 0)
+               {
+                  Ready[player] = SetValue(attendSize, GetRemote(Ready[player]));
+               }
+               else if (attendSize == 0)
+               {
+                  Ready[player] = SetValue(GetAttending(Ready[player]), remoteSize);
+               }
+            }
+            else
+            {
+               int partySize = (remoteSize << Global.REMOTE_SHIFT) | attendSize;
+               Attending.Add(player, partySize);
+            }
+         }
       }
 
       /// <summary>
       /// Removes a player from the raid group.
       /// </summary>
       /// <param name="player">Player to remove.</param>
-      public void Remove(SocketGuildUser player)
+      /// <returns>List of players invited by the player.</returns>
+      public List<SocketGuildUser> Remove(SocketGuildUser player)
       {
          if (Attending.ContainsKey(player))
+         {
             Attending.Remove(player);
+         }
          else if (Ready.ContainsKey(player))
+         {
             Ready.Remove(player);
+         }
          else if (Invited.ContainsKey(player))
+         {
             Invited.Remove(player);
+            return new List<SocketGuildUser>();
+         }
+
+         List<SocketGuildUser> playerInvited = new List<SocketGuildUser>();
+         foreach (KeyValuePair<SocketGuildUser, SocketGuildUser> invite in Invited.Where(x => x.Value.Equals(player)))
+         {
+            playerInvited.Add(invite.Key);
+         }
+
+         foreach (SocketGuildUser invite in playerInvited)
+         {
+            Invited.Remove(invite);
+         }
+
+         return playerInvited;
       }
 
       /// <summary>
       /// Marks a player as ready.
       /// </summary>
       /// <param name="player">Player to mark ready.</param>
-      public void PlayerReady(SocketGuildUser player)
+      public bool PlayerReady(SocketGuildUser player)
       {
          if (Attending.ContainsKey(player))
          {
             Ready.Add(player, Attending[player]);
             Attending.Remove(player);
+            return true;
          }
+         return false;
       }
 
       /// <summary>
@@ -152,15 +226,9 @@ namespace PokeStar.DataModels
       /// </summary>
       /// <param name="requester">Player that requested the invite.</param>
       /// <param name="accepter">Player that accepted the invite.</param>
-      /// <returns>True if the requester is added to the raid, otherwise false.</returns>
-      public bool Invite(SocketGuildUser requester, SocketGuildUser accepter)
+      public void Invite(SocketGuildUser requester, SocketGuildUser accepter)
       {
-         if (HasPlayer(accepter, false) && !HasPlayer(requester) && (TotalPlayers() + 1) <= playerLimit && (Invited.Count + 1) <= inviteLimit)
-         {
-            Invited.Add(requester, accepter);
-            return true;
-         }
-         return false;
+         Invited.Add(requester, accepter);
       }
 
       /// <summary>
@@ -176,9 +244,18 @@ namespace PokeStar.DataModels
       /// Gets a list of players to ping.
       /// </summary>
       /// <returns>List of players that are here</returns>
-      public List<SocketGuildUser> GetPingList()
+      public ImmutableList<SocketGuildUser> GetPingList()
       {
-         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).ToList();
+         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).Distinct().ToImmutableList();
+      }
+
+      /// <summary>
+      /// Gets a list of players to notify of an edit.
+      /// </summary>
+      /// <returns></returns>
+      public ImmutableList<SocketGuildUser> GetNotifyList()
+      {
+         return Ready.Keys.ToList().Union(Invited.Keys.ToList()).Union(Attending.Keys.ToList()).Distinct().ToImmutableList();
       }
 
       /// <summary>
@@ -187,7 +264,12 @@ namespace PokeStar.DataModels
       /// <returns>Total players in raid group.</returns>
       public int TotalPlayers()
       {
-         return GetAttendingCount() + GetHereCount() + GetInvitedCount();
+         return GetAttendingCount() + GetReadyCount() + GetRemoteCount();
+      }
+
+      public int GetRemoteCount()
+      {
+         return GetAttendingRemoteCount() + GetReadyRemoteCount() + GetInviteCount();
       }
 
       /// <summary>
@@ -202,48 +284,67 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
+      /// Checks if the group should be split.
+      /// </summary>
+      /// <returns>True if the total players is greater than the player limit, otherwise false.</returns>
+      public bool ShouldSplit()
+      {
+         return TotalPlayers() > PlayerLimit || GetRemoteCount() > InviteLimit;
+      }
+
+      /// <summary>
       /// Attempts to split the raid group. 
       /// </summary>
       /// <returns>A new raid group if the raid can be split, else null.</returns>
       public RaidGroup SplitGroup()
       {
-         if (TotalPlayers() <= playerLimit)
-            return null;
-
-         
-         var newGroup = new RaidGroup();
-         foreach (var player in Attending)
+         RaidGroup newGroup = new RaidGroup(PlayerLimit, InviteLimit);
+         foreach (KeyValuePair<SocketGuildUser, int> player in Attending)
          {
-            if ((newGroup.TotalPlayers() + player.Value) <= playerLimit / 2)
+            if ((newGroup.TotalPlayers() + player.Value) <= PlayerLimit / 2)
             {
                newGroup.Attending.Add(player.Key, player.Value);
 
-               foreach (var invite in Invited)
-                  if (invite.Value.Equals(player.Key))
-                     newGroup.Invite(invite.Key, invite.Value);
-            }
-         }
-
-         if (newGroup.TotalPlayers() < playerLimit / 2)
-         {
-            foreach (var player in Ready)
-            {
-               if (newGroup.TotalPlayers() < playerLimit / 2)
+               foreach (KeyValuePair<SocketGuildUser, SocketGuildUser> invite in Invited)
                {
-                  newGroup.Ready.Add(player.Key, player.Value);
-                  foreach (var invite in Invited)
-                     if (invite.Value.Equals(player.Key))
-                        newGroup.Invite(invite.Key, invite.Value);
+                  if (invite.Value.Equals(player.Key))
+                  {
+                     newGroup.Invite(invite.Key, invite.Value);
+                  }
                }
             }
          }
 
-         foreach (var player in newGroup.Attending.Keys)
+         if (newGroup.TotalPlayers() < PlayerLimit / 2)
+         {
+            foreach (KeyValuePair<SocketGuildUser, int> player in Ready)
+            {
+               if (newGroup.TotalPlayers() < PlayerLimit / 2)
+               {
+                  newGroup.Ready.Add(player.Key, player.Value);
+                  foreach (KeyValuePair<SocketGuildUser, SocketGuildUser> invite in Invited)
+                  {
+                     if (invite.Value.Equals(player.Key))
+                     {
+                        newGroup.Invite(invite.Key, invite.Value);
+                     }
+                  }
+               }
+            }
+         }
+
+         foreach (SocketGuildUser player in newGroup.Attending.Keys)
+         {
             Attending.Remove(player);
-         foreach (var player in newGroup.Ready.Keys)
+         }
+         foreach (SocketGuildUser player in newGroup.Ready.Keys)
+         {
             Ready.Remove(player);
-         foreach (var player in newGroup.Invited.Keys)
+         }
+         foreach (SocketGuildUser player in newGroup.Invited.Keys)
+         {
             Invited.Remove(player);
+         }
          return newGroup;
       }
 
@@ -255,7 +356,7 @@ namespace PokeStar.DataModels
       {
          if (!group.Equals(this) &&
             group.TotalPlayers() != 0 && TotalPlayers() != 0 &&
-            (group.TotalPlayers() + TotalPlayers()) <= playerLimit)
+            (group.TotalPlayers() + TotalPlayers()) <= PlayerLimit)
          {
             Attending = Attending.Union(group.Attending).ToDictionary(k => k.Key, v => v.Value);
             Ready = Ready.Union(group.Ready).ToDictionary(k => k.Key, v => v.Value);
@@ -265,5 +366,8 @@ namespace PokeStar.DataModels
             group.Invited.Clear();
          }
       }
+      public static int GetAttending(int value) => value & Global.ATTEND_MASK;
+      public static int GetRemote(int value) => (value & Global.REMOTE_MASK) >> Global.REMOTE_SHIFT;
+      private int SetValue(int attend, int remote) => (remote << Global.REMOTE_SHIFT) | attend;
    }
 }

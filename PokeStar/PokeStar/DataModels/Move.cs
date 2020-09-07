@@ -27,12 +27,13 @@ namespace PokeStar.DataModels
       /// Gets the move to a string.
       /// </summary>
       /// <returns>Move string.</returns>
-      public string ToString()
+      public override string ToString()
       {
-         string typeString = Emote.Parse(Environment.GetEnvironmentVariable($"{Type.ToUpper()}_EMOTE")).ToString();
-         string str = $@"{Name} {typeString}";
+         string str = $@"{Name} {Global.NONA_EMOJIS[$"{Type}_emote"]}";
          if (IsLegacy)
+         {
             str += " !";
+         }
          return str;
       }
    }

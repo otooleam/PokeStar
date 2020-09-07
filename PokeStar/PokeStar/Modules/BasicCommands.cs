@@ -1,5 +1,7 @@
 ﻿using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
+using PokeStar.DataModels;
 
 namespace PokeStar.Modules
 {
@@ -10,9 +12,22 @@ namespace PokeStar.Modules
    {
       [Command("ping")]
       [Summary("Pong Pong Pong")]
-      public async Task Ping()
+      public async Task Ping() => await ResponseMessage.SendInfoMessage(Context, "Pong");
+
+      [Command("status")]
+      [Summary("Get Nona's status")]
+      public async Task Status()
       {
-         await ReplyAsync("Pong").ConfigureAwait(false);
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithTitle(Program.GetName());
+         embed.WithDescription($"Currently running version v{Global.VERSION}");
+         embed.AddField("Latency", $"{Program.GetLatency()}ms");
+         embed.AddField("Status", Program.GetStatus());
+         embed.AddField("Connection", Program.GetConnectionState());
+         embed.AddField("Guild Count", Program.GetGuildCount());
+         embed.AddField("Using empty raid", Global.USE_EMPTY_RAID);
+         embed.AddField("Accept from Nona Test Bot", Global.USE_NONA_TEST);
+         await ReplyAsync(embed: embed.Build());
       }
    }
 }

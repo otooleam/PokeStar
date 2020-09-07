@@ -20,11 +20,14 @@ namespace PokeStar
    /// </summary>
    public class Program
    {
-      private static DiscordSocketClient _client;
-      private static CommandService _commands;
-      private static IServiceProvider _services;
+      private static DiscordSocketClient client;
+      private static CommandService commands;
+      private static IServiceProvider services;
 
-      private bool logging = false;
+      private bool loggingInProgress = false;
+
+      private readonly int SizeMessageCashe = 100;
+      private readonly LogSeverity DefaultLogLevel = LogSeverity.Info;
 
       /// <summary>
       /// Main function for the system.
@@ -40,47 +43,50 @@ namespace PokeStar
       /// <returns>No task is returned as function ends on system termination.</returns>
       public async Task MainAsync()
       {
-         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-         var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
+         Global.PROGRAM_PATH = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+         Global.ENV_FILE = JObject.Parse(File.ReadAllText($"{Global.PROGRAM_PATH}\\env.json"));
 
-         var token = json.GetValue("token").ToString();
-         Environment.SetEnvironmentVariable("POGO_DB_CONNECTION_STRING", json.GetValue("pogo_db_sql").ToString());
-         Environment.SetEnvironmentVariable("NONA_DB_CONNECTION_STRING", json.GetValue("nona_db_sql").ToString());
-         Environment.SetEnvironmentVariable("DEFAULT_PREFIX", json.GetValue("default_prefix").ToString());
+         string token = Global.ENV_FILE.GetValue("token").ToString();
+         Global.VERSION = Global.ENV_FILE.GetValue("version").ToString();
+         Global.HOME_SERVER = Global.ENV_FILE.GetValue("home_server").ToString();
+         Global.POGODB_CONNECTION_STRING = Global.ENV_FILE.GetValue("pogo_db_sql").ToString();
+         Global.NONADB_CONNECTION_STRING = Global.ENV_FILE.GetValue("nona_db_sql").ToString();
+         Global.DEFAULT_PREFIX = Global.ENV_FILE.GetValue("default_prefix").ToString();
 
-         Environment.SetEnvironmentVariable("SETUP_COMPLETE", "FALSE");
+         Global.USE_NONA_TEST = Global.ENV_FILE.GetValue("accept_nona_test").ToString().Equals("TRUE", StringComparison.OrdinalIgnoreCase);
+         Global.USE_EMPTY_RAID = Global.ENV_FILE.GetValue("use_empty_raid").ToString().Equals("TRUE", StringComparison.OrdinalIgnoreCase);
 
-         var logLevel = Convert.ToInt32(json.GetValue("log_level").ToString());
-         var logSeverity = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? LogSeverity.Info : (LogSeverity)logLevel;
+         int logLevel = Convert.ToInt32(Global.ENV_FILE.GetValue("log_level").ToString());
+         Global.LOG_LEVEL = !Enum.IsDefined(typeof(LogSeverity), logLevel) ? DefaultLogLevel : (LogSeverity)logLevel;
 
-         var _config = new DiscordSocketConfig
+         DiscordSocketConfig clientConfig = new DiscordSocketConfig
          {
-            MessageCacheSize = 100,
-            LogLevel = logSeverity,
+            MessageCacheSize = SizeMessageCashe,
+            LogLevel = Global.LOG_LEVEL,
             ExclusiveBulkDelete = true
          };
-         _client = new DiscordSocketClient(_config);
-         CommandServiceConfig config = new CommandServiceConfig
+         client = new DiscordSocketClient(clientConfig);
+         CommandServiceConfig commandConfig = new CommandServiceConfig
          {
             DefaultRunMode = RunMode.Async,
-            LogLevel = logSeverity
+            LogLevel = Global.LOG_LEVEL
          };
-         _commands = new CommandService(config);
+         commands = new CommandService(commandConfig);
 
-         _services = new ServiceCollection()
-             .AddSingleton(_client)
-             .AddSingleton(_commands)
+         services = new ServiceCollection()
+             .AddSingleton(client)
+             .AddSingleton(commands)
              .BuildServiceProvider();
 
          await HookEvents();
-         await _client.LoginAsync(TokenType.Bot, token).ConfigureAwait(false);
-         await _client.StartAsync().ConfigureAwait(false);
+         await client.LoginAsync(TokenType.Bot, token);
+         await client.StartAsync();
+         await client.SetGameAsync($".help | v{Global.VERSION}");
 
-         string version = json.GetValue("version").ToString();
-         await _client.SetGameAsync($".help | v{version}");
+         Global.COMMAND_INFO = commands.Commands.ToList();
 
          // Block this task until the program is closed.
-         await Task.Delay(-1).ConfigureAwait(false);
+         await Task.Delay(-1);
       }
 
       /// <summary>
@@ -90,13 +96,14 @@ namespace PokeStar
       /// <returns>Task Complete.</returns>
       private async Task<Task> HookEvents()
       {
-         _client.Log += Log;
-         _commands.Log += Log;
-         _client.MessageReceived += HandleCommandAsync;
-         await _commands.AddModulesAsync(Assembly.GetEntryAssembly(), _services).ConfigureAwait(false);
-         _client.ReactionAdded += HandleReactionAddedAsync;
-         _client.Ready += HandleReady;
-         _client.LeftGuild += HandleLeftGuild;
+         client.Log += Log;
+         commands.Log += Log;
+         client.MessageReceived += HandleCommandAsync;
+         await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
+         client.ReactionAdded += HandleReactionAddedAsync;
+         client.Ready += HandleReady;
+         client.JoinedGuild += HandleJoinGuild;
+         client.LeftGuild += HandleLeftGuild;
          return Task.CompletedTask;
       }
 
@@ -107,17 +114,16 @@ namespace PokeStar
       /// <returns>Task Complete.</returns>
       private Task Log(LogMessage msg)
       {
-         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
          string fileName = DateTime.Now.ToString("MM-dd-yyyy");
-         string logFile = $"{path}\\Logs\\{fileName}.txt";
+         string logFile = $"{Global.PROGRAM_PATH}\\Logs\\{fileName}.txt";
 
          string logText = $"{DateTime.Now:hh:mm:ss} [{msg.Severity}] {msg.Source}: {msg.Exception?.ToString() ?? msg.Message}";
 
-         while (logging) { }
+         while (loggingInProgress) { }
 
-         logging = true;
+         loggingInProgress = true;
          File.AppendAllText(logFile, logText + "\n");
-         logging = false;
+         loggingInProgress = false;
 
          Console.WriteLine(msg.ToString());
 
@@ -133,33 +139,35 @@ namespace PokeStar
       private async Task<Task> HandleCommandAsync(SocketMessage cmdMessage)
       {
          SocketUserMessage message = cmdMessage as SocketUserMessage;
-         if (message == null || message.Author.IsBot)
+         if (message == null || (message.Author.IsBot && (!Global.USE_NONA_TEST || !message.Author.Username.Equals("NonaTest", StringComparison.OrdinalIgnoreCase))))
+         {
             return Task.CompletedTask;
-         var context = new SocketCommandContext(_client, message);
+         }
+         SocketCommandContext context = new SocketCommandContext(client, message);
 
          int argPos = 0;
-
          string prefix = Connections.Instance().GetPrefix(context.Guild.Id);
-         if (prefix == null)
-            prefix = Environment.GetEnvironmentVariable("DEFAULT_PREFIX");
 
          if (message.Attachments.Count != 0)
          {
-            if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "P"))
+            if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, Global.REGISTER_STRING_ROLE))
+            {
                RollImageProcess.RoleImageProcess(context);
-            else if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "R"))
-               RaidImageProcess.ProcessImage(context);
-            else if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, "E"))
+            }
+            else if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, Global.REGISTER_STRING_RAID))
+            {
+               //TODO: Add call for raid image processing
+            }
+            else if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, Global.REGISTER_STRING_EX))
             {
                //TODO: Add call for ex raid image processing
             }
          }
          else if (message.HasStringPrefix(prefix, ref argPos))
          {
-            var result = await _commands.ExecuteAsync(context, argPos, _services).ConfigureAwait(false);
+            IResult result = await commands.ExecuteAsync(context, argPos, services);
             if (!result.IsSuccess) Console.WriteLine(result.ErrorReason);
          }
-
          return Task.CompletedTask;
       }
 
@@ -174,14 +182,22 @@ namespace PokeStar
       private async Task<Task> HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
           ISocketMessageChannel originChannel, SocketReaction reaction)
       {
-         var message = await cachedMessage.GetOrDownloadAsync().ConfigureAwait(false);
-         var user = reaction.User.Value;
+         IUserMessage message = await cachedMessage.GetOrDownloadAsync();
+         IUser user = reaction.User.Value;
          if (message != null && reaction.User.IsSpecified && !user.IsBot)
          {
-            if (RaidCommands.IsCurrentRaid(message.Id))
-               await RaidCommands.RaidReaction(message, reaction);
-            else if (RaidCommands.IsRaidInvite(message.Id))
-               await RaidCommands.RaidInviteReaction(message, reaction, originChannel);
+            if (RaidCommands.IsRaidMessage(message.Id))
+            {
+               await RaidCommands.RaidMessageReactionHandle(message, reaction);
+            }
+            else if (RaidCommands.IsRaidSubMessage(message.Id))
+            {
+               await RaidCommands.RaidSubMessageReactionHandle(message, reaction);
+            }
+            else if (DexCommands.IsDexSubMessage(message.Id))
+            {
+               await DexCommands.DexMessageReactionHandle(message, reaction);
+            }
          }
          return Task.CompletedTask;
       }
@@ -192,13 +208,29 @@ namespace PokeStar
       /// <returns>Task Complete.</returns>
       private Task HandleReady()
       {
-         string path = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-         var json = JObject.Parse(File.ReadAllText($"{path}\\env.json"));
-         var homeGuildName = json.GetValue("home_server").ToString();
-         var server = _client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(homeGuildName, StringComparison.OrdinalIgnoreCase));
+         SocketGuild server = client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(Global.HOME_SERVER, StringComparison.OrdinalIgnoreCase));
+         SetEmotes(server);
+         RaidCommands.SetRemotePassEmote();
 
-         SetEmotes(server, json);
+         foreach (SocketGuild guild in client.Guilds)
+         {
+            if (Connections.Instance().GetPrefix(guild.Id) == null)
+            {
+               Connections.Instance().InitSettings(guild.Id);
+            }
+         }
 
+         return Task.CompletedTask;
+      }
+
+      /// <summary>
+      /// Handles the Join Guild event.
+      /// </summary>
+      /// <param name="guild">Guild that the bot joined.</param>
+      /// <returns>Task Complete.</returns>
+      private Task HandleJoinGuild(SocketGuild guild)
+      {
+         Connections.Instance().InitSettings(guild.Id);
          return Task.CompletedTask;
       }
 
@@ -210,7 +242,7 @@ namespace PokeStar
       private Task HandleLeftGuild(SocketGuild guild)
       {
          Connections.Instance().DeleteRegistration(guild.Id);
-         Connections.Instance().DeletePrefix(guild.Id);
+         Connections.Instance().DeleteSettings(guild.Id);
          return Task.CompletedTask;
       }
 
@@ -218,32 +250,38 @@ namespace PokeStar
       /// Sets the emotes from a JSON file
       /// </summary>
       /// <param name="server">Server that the emotes are on.</param>
-      /// <param name="json">JSON file that has the emote names.</param>
-      private void SetEmotes(SocketGuild server, JObject json)
+      private void SetEmotes(SocketGuild server)
       {
-         string[] emoteNames = {
-            "bug_emote", "dark_emote", "dragon_emote", "electric_emote", "fairy_emote", "fighting_emote",
-            "fire_emote", "flying_emote", "ghost_emote", "grass_emote", "ground_emote", "ice_emote",
-            "normal_emote", "poison_emote", "psychic_emote", "rock_emote", "steel_emote", "water_emote",
-            "raid_emote", "valor_emote", "mystic_emote", "instinct_emote", "sunny_emote", "clear_emote",
-            "rain_emote", "partly_cloudy_emote", "cloudy_emote", "windy_emote", "snow_emote", "fog_emote"
-         };
-
-         foreach (string emote in emoteNames)
-            Environment.SetEnvironmentVariable(
-               emote.ToUpper(), server.Emotes.FirstOrDefault(
-                  x => x.Name.ToString().Equals(
-                     json.GetValue(emote.ToLower()).ToString(),
-                     StringComparison.OrdinalIgnoreCase)).ToString());
+         foreach (string emote in Global.EMOTE_NAMES)
+         {
+            Global.NONA_EMOJIS[emote] = Emote.Parse(
+               server.Emotes.FirstOrDefault(
+                  x => x.Name.Equals(
+                     Global.ENV_FILE.GetValue(emote).ToString(),
+                     StringComparison.OrdinalIgnoreCase)
+                  ).ToString()).ToString();
+         }
       }
 
-      /// <summary>
-      /// Gets the list of commands.
-      /// </summary>
-      /// <returns>List of command info objects for the commands.</returns>
-      public static List<CommandInfo> GetCommands()
+      public static string GetStatus()
       {
-         return _commands.Commands.ToList();
+         return client.Status.ToString();
+      }
+      public static string GetConnectionState()
+      {
+         return client.ConnectionState.ToString();
+      }
+      public static int GetGuildCount()
+      {
+         return client.Guilds.Count;
+      }
+      public static string GetName()
+      {
+         return client.CurrentUser.Username;
+      }
+      public static int GetLatency()
+      {
+         return client.Latency;
       }
    }
 }

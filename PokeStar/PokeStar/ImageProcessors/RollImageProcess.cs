@@ -1,13 +1,14 @@
 ﻿using System;
-using System.IO;
 using System.Linq;
 using System.Net;
 using System.Drawing;
-using System.Reflection;
 using System.Collections.Generic;
 using Discord.Commands;
+using Discord.WebSocket;
 using Patagames.Ocr;
 using Patagames.Ocr.Enums;
+using PokeStar.ConnectionInterface;
+using PokeStar.DataModels;
 
 namespace PokeStar.ImageProcessors
 {
@@ -23,18 +24,18 @@ namespace PokeStar.ImageProcessors
       /// <param name="context">Command context that has the image.</param>
       public static async void RoleImageProcess(SocketCommandContext context)
       {
-         if (context == null)
+         IReadOnlyCollection<Discord.Attachment> attachments = context.Message.Attachments;
+         SocketGuildUser user = (SocketGuildUser)context.Message.Author;
+         if (!Connections.Instance().GetSetupComplete(context.Guild.Id))
+         {
+            await ResponseMessage.SendWarningMessage(context, "Roll image proccessing", "Setup has not been completed for this server.");
             return;
-
-         if (Environment.GetEnvironmentVariable("SETUP_COMPLETE").Equals("FALSE", StringComparison.OrdinalIgnoreCase))
-            return;
-
-         var attachments = context.Message.Attachments;
-         var user = context.Guild.Users.FirstOrDefault(x => x.Username.ToString().Equals(context.Message.Author.Username, StringComparison.OrdinalIgnoreCase));
+         }
          string url = attachments.ElementAt(0).Url;
-         string imagePath = $@"{Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)}\Images\profile\{user.Username}.png";
+         string imagePath = $@"{Global.PROGRAM_PATH}\Images\profile\{user.Username}.png";
          string plainText = null;
-         Color teamColor = Color.White;
+         int colorIndex = -1;
+         Color[] teamColors = { Global.ROLE_COLOR_VALOR, Global.ROLE_COLOR_MYSTIC, Global.ROLE_COLOR_INSTINCT };
 
          using (WebClient client = new WebClient())
          {
@@ -45,14 +46,13 @@ namespace PokeStar.ImageProcessors
          {
             using (Bitmap bitmap = ImageProcess.ScaleImage(image, 495, 880))
             {
-               using (var api = OcrApi.Create())
+               using (OcrApi api = OcrApi.Create())
                {
                   api.Init(Languages.English);
-                  plainText = api.GetTextFromImage(bitmap, new Rectangle(10, 120, 480, 100));
+                  plainText = api.GetTextFromImage(bitmap, Global.IMAGE_RECT_NICKNAME);
                }
-               Color[] teamColors = { Color.Red, Color.Blue, Color.Yellow };
-               Color avgColor = GetAvgColor(bitmap, new Rectangle(410, 60, 10, 10));
-               teamColor = teamColors.ElementAt(ClosestColor(new List<Color>(teamColors), avgColor));
+               Color avgColor = GetAvgColor(bitmap, Global.IMAGE_RECT_TEAM_COLOR);
+               colorIndex = ClosestColor(new List<Color>(teamColors), avgColor);
             }
          }
 
@@ -62,44 +62,60 @@ namespace PokeStar.ImageProcessors
             try
             {
                string nickname = plainText.Substring(0, nameEndIndex);
-               await user.ModifyAsync(x => { x.Nickname = nickname; }).ConfigureAwait(false);
+               await user.ModifyAsync(x => { x.Nickname = nickname; });
 
-               await context.Channel.SendMessageAsync($"{user.Username} now has the nickname {nickname}").ConfigureAwait(false);
+               await ResponseMessage.SendInfoMessage(context, $"{user.Username} now has the nickname {nickname}");
             }
             catch (Exception e)
             {
                Console.WriteLine(e.Message);
-               await context.Channel.SendMessageAsync($"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{context.Guild.Name}\"").ConfigureAwait(false);
+               await ResponseMessage.SendWarningMessage(context, "Roll image proccessing", $"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{context.Guild.Name}\"");
             }
          }
 
-         if (!teamColor.Equals(Color.White))
+         if (colorIndex != Global.ROLE_INDEX_NO_TEAM_FOUND)
          {
             var valor = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase));
             var mystic = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase));
             var instinct = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase));
-            if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) == null)
-               await user.RemoveRoleAsync(valor).ConfigureAwait(false);
-            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) == null)
-               await user.RemoveRoleAsync(mystic).ConfigureAwait(false);
-            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) == null)
-               await user.RemoveRoleAsync(instinct).ConfigureAwait(false);
+            if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) != null)
+            {
+               await user.RemoveRoleAsync(valor);
+            }
+            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) != null)
+            {
+               await user.RemoveRoleAsync(mystic);
+            }
+            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) != null)
+            {
+               await user.RemoveRoleAsync(instinct);
+            }
 
             string teamName = "";
-            if (teamColor.Equals(Color.Red))
+            if (colorIndex == Global.ROLE_INDEX_VALOR)
+            {
                teamName = "Valor";
-            if (teamColor.Equals(Color.Blue))
+            }
+            else if (colorIndex == Global.ROLE_INDEX_MYSTIC)
+            {
                teamName = "Mystic";
-            if (teamColor.Equals(Color.Yellow))
+            }
+            else if (colorIndex == Global.ROLE_INDEX_INSTINCT)
+            {
                teamName = "Instinct";
+            }
 
-            var team = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(teamName, StringComparison.OrdinalIgnoreCase));
-            await user.AddRoleAsync(team).ConfigureAwait(false);
+            Discord.IRole team = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(teamName, StringComparison.OrdinalIgnoreCase));
+            await (user as Discord.IGuildUser).AddRoleAsync(team);
 
-            var role = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Trainer", StringComparison.OrdinalIgnoreCase));
-            await user.AddRoleAsync(role).ConfigureAwait(false);
+            SocketRole role = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(Global.ROLE_TRAINER, StringComparison.OrdinalIgnoreCase));
+            await (user as Discord.IGuildUser).AddRoleAsync(role);
 
-            await context.Channel.SendMessageAsync($"{user.Username} now has the Trainer role and the {teamName} role").ConfigureAwait(false);
+            await ResponseMessage.SendInfoMessage(context, $"{user.Username} now has the {Global.ROLE_TRAINER} role and the {teamName} role");
+         }
+         else
+         {
+            await ResponseMessage.SendWarningMessage(context, "Roll image proccessing", $"An error occured while attempting to determine a team for {user.Username}.");
          }
       }
 
@@ -113,6 +129,7 @@ namespace PokeStar.ImageProcessors
       {
          int[] avgRGB = { 0, 0, 0 };
          for (int x = rect.X; x < (rect.X + rect.Width); x++)
+         {
             for (int y = rect.Y; y < (rect.Y + rect.Height); y++)
             {
                Color c = bitmap.GetPixel(x, y);
@@ -120,9 +137,12 @@ namespace PokeStar.ImageProcessors
                avgRGB[1] += c.G;
                avgRGB[2] += c.B;
             }
+         }
          int pixelCount = rect.Width * rect.Height;
          for (int i = 0; i < avgRGB.Length; i++)
+         {
             avgRGB[i] /= pixelCount;
+         }
          return Color.FromArgb(avgRGB[0], avgRGB[1], avgRGB[2]);
       }
 
@@ -134,9 +154,9 @@ namespace PokeStar.ImageProcessors
       /// <returns>Closest color to the target color.</returns>
       private static int ClosestColor(List<Color> colors, Color target)
       {
-         var hue1 = target.GetHue();
-         var diffs = colors.Select(n => GetHueDistance(n.GetHue(), hue1));
-         var diffMin = diffs.Min(n => n);
+         float hue1 = target.GetHue();
+         IEnumerable<float> diffs = colors.Select(n => GetHueDistance(n.GetHue(), hue1));
+         float diffMin = diffs.Min(n => n);
          return diffs.ToList().FindIndex(n => n == diffMin);
       }
 

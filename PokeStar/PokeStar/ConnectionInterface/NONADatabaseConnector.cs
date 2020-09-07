@@ -28,16 +28,21 @@ namespace PokeStar.ConnectionInterface
                                  WHERE guild={guild}
                                  AND channel={channel};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
+               {
                   if (reader["register"].GetType() != typeof(DBNull))
+                  {
                      registration = Convert.ToString(reader["register"]);
+                  }
+               }
             }
             conn.Close();
+
          }
          return registration;
       }
@@ -46,26 +51,54 @@ namespace PokeStar.ConnectionInterface
       /// Gets the prefix of a guild.
       /// </summary>
       /// <param name="guild">Guild to get the prefix for.</param>
-      /// <returns>The guild prefix, otherwise null.</returns>
+      /// <returns>The guild prefix.</returns>
       public string GetPrefix(ulong guild)
       {
          string prefix = null;
          string queryString = $@"SELECT prefix 
-                                 FROM command_prefix 
+                                 FROM guild_settings 
                                  WHERE guild={guild};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
-            using (var reader = new SqlCommand(queryString, conn).ExecuteReader())
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
-                  if (reader["prefix"].GetType() != typeof(DBNull))
-                     prefix = Convert.ToString(reader["prefix"]);
+               {
+                  prefix = Convert.ToString(reader["prefix"]);
+               }
             }
             conn.Close();
          }
          return prefix;
+      }
+
+      /// <summary>
+      /// Checks if setup has been completed for a guild.
+      /// </summary>
+      /// <param name="guild">Guild to get setup status for.</param>
+      /// <returns>True if setup has been complete, otherwise false.</returns>
+      public bool GetSetupComplete(ulong guild)
+      {
+         bool setupComplete = false;
+         string queryString = $@"SELECT setup 
+                                 FROM guild_settings 
+                                 WHERE guild={guild};";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  setupComplete = Convert.ToInt32(reader["setup"]) == TRUE;
+               }
+            }
+            conn.Close();
+         }
+         return setupComplete;
       }
 
       /// <summary>
@@ -79,7 +112,7 @@ namespace PokeStar.ConnectionInterface
          string queryString = $@"INSERT INTO channel_registration (guild, channel, register)
                                  VALUES ({guild}, {channel}, '{registration}')";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -88,16 +121,15 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Adds a new prefix to a server.
+      /// 
       /// </summary>
-      /// <param name="guild">Guild to add the prefix to.</param>
-      /// <param name="prefix">New prefix value.</param>
-      public void AddPrefix(ulong guild, string prefix)
+      /// <param name="guild"></param>
+      public void AddSettings(ulong guild)
       {
-         string queryString = $@"INSERT INTO command_prefix (guild, prefix)
-                                 VALUES ({guild}, '{prefix[0]}')";
+         string queryString = $@"INSERT INTO guild_settings (guild, prefix, setup)
+                                 VALUES ({guild}, '{Global.DEFAULT_PREFIX}', 0)";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -118,7 +150,7 @@ namespace PokeStar.ConnectionInterface
                                  WHERE guild={guild}
                                  AND channel={channel};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -133,11 +165,29 @@ namespace PokeStar.ConnectionInterface
       /// <param name="prefix">New prefix value.</param>
       public void UpdatePrefix(ulong guild, string prefix)
       {
-         string queryString = $@"UPDATE command_prefix 
+         string queryString = $@"UPDATE guild_settings 
                                  SET prefix = '{prefix}'
                                  WHERE guild={guild};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+      /// <summary>
+      /// Mark setup as completed for a guild.
+      /// </summary>
+      /// <param name="guild">Guild that completed setup.</param>
+      public void CompleteSetup(ulong guild)
+      {
+         string queryString = $@"UPDATE guild_settings 
+                                 SET setup = 1
+                                 WHERE guild={guild};";
+
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -154,7 +204,7 @@ namespace PokeStar.ConnectionInterface
          string queryString = $@"DELETE FROM channel_registration
                                  WHERE guild={guild};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -173,7 +223,7 @@ namespace PokeStar.ConnectionInterface
                                  WHERE guild={guild}
                                  AND channel={channel};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
@@ -182,15 +232,15 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Deletes the prefix saved for a guild.
+      /// Deletes the settings saved for a guild.
       /// </summary>
-      /// <param name="guild">Guild to remove the prefix from.</param>
-      public void DeletePrefix(ulong guild)
+      /// <param name="guild">Guild to remove the settings from.</param>
+      public void DeleteSettings(ulong guild)
       {
-         string queryString = $@"DELETE FROM command_prefix
+         string queryString = $@"DELETE FROM guild_settings
                                  WHERE guild={guild};";
 
-         using (var conn = GetConnection())
+         using (SqlConnection conn = GetConnection())
          {
             conn.Open();
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
