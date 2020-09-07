@@ -32,7 +32,9 @@ namespace PokeStar
          "screm",
          "updatePokemonNames",
          "useEmptyRaid",
-         "useNonaTest"
+         "useNonaTest",
+         "toggleUseEmptyRaid",
+         "toggleUseNonaTest"
       };
 
       public static readonly int MAX_LEVEL      = 40;
