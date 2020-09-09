@@ -419,7 +419,7 @@ namespace PokeStar.Modules
          else 
          {
             string name = GetPokemon(pokemon);
-            var pkmn = Connections.Instance().GetPokemon(name);
+            Pokemon pkmn = Connections.Instance().GetPokemon(name);
             if (pkmn == null)
             {
                List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
@@ -434,7 +434,7 @@ namespace PokeStar.Modules
             }
             else
             {
-               var evolutions = GenerateEvoDict(name);
+               Dictionary<string, string> evolutions = GenerateEvoDict(pkmn.Name);
                string firstFileName = Connections.GetPokemonPicture(evolutions.First().Key);
                Connections.CopyFile(firstFileName);
                await Context.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, firstFileName));
@@ -471,7 +471,7 @@ namespace PokeStar.Modules
                }
                else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.EVO_MESSAGE)
                {
-                  var evolutions = GenerateEvoDict(pokemon.Name);
+                  Dictionary<string, string> evolutions = GenerateEvoDict(pokemon.Name);
                   string firstFileName = Connections.GetPokemonPicture(pokemon.Name);
                   Connections.CopyFile(firstFileName);
                   await reaction.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, firstFileName));
