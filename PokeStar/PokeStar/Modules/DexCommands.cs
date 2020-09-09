@@ -437,7 +437,7 @@ namespace PokeStar.Modules
                Dictionary<string, string> evolutions = GenerateEvoDict(pkmn.Name);
                string firstFileName = Connections.GetPokemonPicture(evolutions.First().Key);
                Connections.CopyFile(firstFileName);
-               await Context.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, firstFileName));
+               await Context.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, pkmn.Name, firstFileName));
                Connections.DeleteFile(firstFileName);
             }
          }
@@ -474,7 +474,7 @@ namespace PokeStar.Modules
                   Dictionary<string, string> evolutions = GenerateEvoDict(pokemon.Name);
                   string firstFileName = Connections.GetPokemonPicture(pokemon.Name);
                   Connections.CopyFile(firstFileName);
-                  await reaction.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, firstFileName));
+                  await reaction.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, pokemon.Name, firstFileName));
                   Connections.DeleteFile(firstFileName);
                }
                Connections.DeleteFile(fileName);
@@ -541,7 +541,14 @@ namespace PokeStar.Modules
          return embed.Build();
       }
 
-      private static Embed BuildEvoEmbed(Dictionary<string, string> evolutions, string fileName)
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="evolutions"></param>
+      /// <param name="initialPokemon"></param>
+      /// <param name="fileName"></param>
+      /// <returns></returns>
+      private static Embed BuildEvoEmbed(Dictionary<string, string> evolutions, string initialPokemon, string fileName)
       {
 
          EmbedBuilder embed = new EmbedBuilder();
@@ -558,7 +565,9 @@ namespace PokeStar.Modules
             embed.WithThumbnailUrl($"attachment://{fileName}");
             foreach (string key in evolutions.Keys)
             {
-               embed.AddField($"**{key}**", evolutions[key]);
+               string markdown = (key.Equals(initialPokemon, StringComparison.OrdinalIgnoreCase)) ? "***" : "**";
+
+               embed.AddField($"{markdown}{key}{markdown}", evolutions[key]);
             }
             embed.WithColor(DexMessageColor);
          }
