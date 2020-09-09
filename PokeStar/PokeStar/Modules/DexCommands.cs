@@ -416,7 +416,7 @@ namespace PokeStar.Modules
          {
             await ResponseMessage.SendErrorMessage(Context, "evo", "This channel is not registered to process PokéDex commands.");
          }
-         else 
+         else
          {
             string name = GetPokemon(pokemon);
             Pokemon pkmn = Connections.Instance().GetPokemon(name);
@@ -543,7 +543,7 @@ namespace PokeStar.Modules
 
       private static Embed BuildEvoEmbed(Dictionary<string, string> evolutions, string fileName)
       {
-         
+
          EmbedBuilder embed = new EmbedBuilder();
          if (evolutions.Count == 1)
          {
@@ -579,11 +579,17 @@ namespace PokeStar.Modules
 
          List<Evolution> normalEvoFamily = NormalizeEvolutions(initEvoFamily);
          string basePokemon = normalEvoFamily.First().Start;
-         foreach (Evolution evo in normalEvoFamily)
+         bool baseChanged = true;
+         while (baseChanged)
          {
-            if (evo.End.Equals(basePokemon, StringComparison.OrdinalIgnoreCase))
+            baseChanged = false;
+            foreach (Evolution evo in normalEvoFamily)
             {
-               basePokemon = evo.Start;
+               if (evo.End.Equals(basePokemon, StringComparison.OrdinalIgnoreCase))
+               {
+                  basePokemon = evo.Start;
+                  baseChanged = true;
+               }
             }
          }
 

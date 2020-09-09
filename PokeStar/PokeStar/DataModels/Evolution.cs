@@ -6,13 +6,9 @@ namespace PokeStar.DataModels
    public class Evolution : IEquatable<Evolution>
    {
       public string Start { get; set; }
-
       public string End { get; set; }
-
       public int Candy { get; set; }
-
       public string Item { get; set; }
-
       public string OtherMethod { get; set; } = null;
 
       public bool Equals(Evolution evo)
