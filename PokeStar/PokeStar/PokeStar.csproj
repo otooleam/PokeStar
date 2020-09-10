@@ -177,12 +177,14 @@
     <Compile Include="Modules\DexCommands.cs" />
     <Compile Include="Modules\HelpCommands.cs" />
     <Compile Include="Modules\JokeCommands.cs" />
+    <Compile Include="Modules\NicknameCommands.cs" />
     <Compile Include="Modules\RaidCommands.cs" />
     <Compile Include="Modules\RoleCommands.cs" />
     <Compile Include="Modules\SetupCommands.cs" />
     <Compile Include="DataModels\RaidBoss.cs" />
     <Compile Include="DataModels\Counter.cs" />
     <Compile Include="Modules\SystemEditCommands.cs" />
+    <Compile Include="PreConditions\RegisterChannelAttribute.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="DataModels\Raid.cs" />
     <Compile Include="ConnectionInterface\Connections.cs" />

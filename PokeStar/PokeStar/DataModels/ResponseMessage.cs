@@ -49,6 +49,13 @@ namespace PokeStar.DataModels
          Connections.DeleteFile(ERROR_IMAGE);
       }
 
+      public static async Task SendErrorMessage(ICommandContext context, string command, string message)
+      {
+         Connections.CopyFile(ERROR_IMAGE);
+         await context.Channel.SendFileAsync(ERROR_IMAGE, embed: GenerateErrorEmbed(command, message));
+         Connections.DeleteFile(ERROR_IMAGE);
+      }
+
       /// <summary>
       /// 
       /// </summary>

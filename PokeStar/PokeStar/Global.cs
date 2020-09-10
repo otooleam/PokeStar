@@ -60,12 +60,21 @@ namespace PokeStar
       public static readonly string DEFAULT_RAID_BOSS_NAME = "Empty";
 
       public static readonly string EMPTY_FIELD = "-----";
-
+      
+      public static readonly char REGISTER_STRING_DEX   = 'D';
+      public static readonly char REGISTER_STRING_EX    = 'E';
       public static readonly char REGISTER_STRING_ROLE  = 'P';
       public static readonly char REGISTER_STRING_RAID  = 'R';
-      public static readonly char REGISTER_STRING_EX    = 'E';
       public static readonly char REGISTER_STRING_TRAIN = 'T';
-      public static readonly char REGISTER_STRING_DEX   = 'D';
+
+      public static readonly Dictionary<char, string> REGISTER_STRING_TYPE = new Dictionary<char, string>()
+      {
+         [REGISTER_STRING_DEX]   = "PokéDex",
+         [REGISTER_STRING_EX]    = "EX Raid",
+         [REGISTER_STRING_ROLE]  = "Player Roles",
+         [REGISTER_STRING_RAID]  = "Raid",
+         [REGISTER_STRING_TRAIN] = "Raid Train",
+      };
 
       public static readonly string ROLE_TRAINER  = "Trainer";
       public static readonly string ROLE_VALOR    = "Valor";

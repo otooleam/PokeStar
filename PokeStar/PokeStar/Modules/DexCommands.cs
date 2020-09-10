@@ -10,6 +10,7 @@ using Discord.WebSocket;
 using PokeStar.DataModels;
 using PokeStar.Calculators;
 using PokeStar.ConnectionInterface;
+using PokeStar.PreConditions;
 
 namespace PokeStar.Modules
 {
@@ -90,69 +91,63 @@ namespace PokeStar.Modules
       [Alias("pokedex")]
       [Summary("Gets the PokéDex entry for a given pokémon.")]
       [Remarks("Can search by pokémon name or by number.")]
+      [RegisterChannel('D')]
       public async Task Dex([Summary("Get information for this pokémon.")][Remainder] string pokemon)
       {
-         if (!ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, Global.REGISTER_STRING_DEX))
+         bool isNumber = int.TryParse(pokemon, out int pokemonNum);
+         if (isNumber)
          {
-            await ResponseMessage.SendErrorMessage(Context, "dex", "This channel is not registered to process PokéDex commands.");
-         }
-         else
-         {
-            bool isNumber = int.TryParse(pokemon, out int pokemonNum);
-            if (isNumber)
-            {
-               List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
+            List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
 
-               if (pokemonWithNumber.Count == 0)
+            if (pokemonWithNumber.Count == 0)
+            {
+               await ResponseMessage.SendErrorMessage(Context, "dex", $"Pokémon with number {pokemonNum} cannot be found.");
+            }
+            else if (pokemonNum == Global.ARCEUS_NUMBER)
+            {
+               await ResponseMessage.SendErrorMessage(Context, "dex", $"Arceus #{pokemonNum} has too many forms to display, please search by name.");
+            }
+            else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER)
+            {
+               string fileName = POKEDEX_SELECTION_IMAGE;
+               Connections.CopyFile(fileName);
+               RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonWithNumber, fileName));
+               for (int i = 0; i < pokemonWithNumber.Count; i++)
                {
-                  await ResponseMessage.SendErrorMessage(Context, "dex", $"Pokémon with number {pokemonNum} cannot be found.");
+                  await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
                }
-               else if (pokemonNum == Global.ARCEUS_NUMBER)
-               {
-                  await ResponseMessage.SendErrorMessage(Context, "dex", $"Arceus #{pokemonNum} has too many forms to display, please search by name.");
-               }
-               else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER)
-               {
-                  string fileName = POKEDEX_SELECTION_IMAGE;
-                  Connections.CopyFile(fileName);
-                  RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonWithNumber, fileName));
-                  for (int i = 0; i < pokemonWithNumber.Count; i++)
-                  {
-                     await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-                  }
-                  dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, pokemonWithNumber));
-               }
-               else
-               {
-                  Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber.First());
-                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
-                  Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pkmn, fileName));
-                  Connections.DeleteFile(fileName);
-               }
+               dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, pokemonWithNumber));
             }
             else
             {
-               string name = GetPokemon(pokemon);
-               Pokemon pkmn = Connections.Instance().GetPokemon(name);
-               if (pkmn == null)
-               {
-                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+               Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber.First());
+               string fileName = Connections.GetPokemonPicture(pkmn.Name);
+               Connections.CopyFile(fileName);
+               await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pkmn, fileName));
+               Connections.DeleteFile(fileName);
+            }
+         }
+         else
+         {
+            string name = GetPokemon(pokemon);
+            Pokemon pkmn = Connections.Instance().GetPokemon(name);
+            if (pkmn == null)
+            {
+               List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
 
-                  string fileName = POKEDEX_SELECTION_IMAGE;
-                  Connections.CopyFile(fileName);
-                  RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
-                  await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
+               string fileName = POKEDEX_SELECTION_IMAGE;
+               Connections.CopyFile(fileName);
+               RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
+               await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
 
-                  dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, pokemonNames));
-               }
-               else
-               {
-                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
-                  Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pkmn, fileName));
-                  Connections.DeleteFile(fileName);
-               }
+               dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, pokemonNames));
+            }
+            else
+            {
+               string fileName = Connections.GetPokemonPicture(pkmn.Name);
+               Connections.CopyFile(fileName);
+               await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pkmn, fileName));
+               Connections.DeleteFile(fileName);
             }
          }
       }
@@ -160,69 +155,63 @@ namespace PokeStar.Modules
       [Command("cp")]
       [Summary("Gets max CP values for a given pokémon.")]
       [Remarks("Can search by pokémon name or by number.")]
+      [RegisterChannel('D')]
       public async Task CP([Summary("Get CPs for this pokémon.")][Remainder] string pokemon)
       {
-         if (!ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, Global.REGISTER_STRING_DEX))
+         bool isNumber = int.TryParse(pokemon, out int pokemonNum);
+         if (isNumber)
          {
-            await ResponseMessage.SendErrorMessage(Context, "cp", "This channel is not registered to process PokéDex commands.");
-         }
-         else
-         {
-            bool isNumber = int.TryParse(pokemon, out int pokemonNum);
-            if (isNumber)
-            {
-               List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
+            List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
 
-               if (pokemonWithNumber.Count == 0)
+            if (pokemonWithNumber.Count == 0)
+            {
+               await ResponseMessage.SendErrorMessage(Context, "cp", $"Pokémon with number {pokemonNum} cannot be found.");
+            }
+            else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER && pokemonNum != Global.ARCEUS_NUMBER)
+            {
+               string fileName = POKEDEX_SELECTION_IMAGE;
+               Connections.CopyFile(fileName);
+               RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonWithNumber, fileName));
+               Connections.DeleteFile(fileName);
+               for (int i = 0; i < pokemonWithNumber.Count; i++)
                {
-                  await ResponseMessage.SendErrorMessage(Context, "cp", $"Pokémon with number {pokemonNum} cannot be found.");
+                  await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
                }
-               else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER && pokemonNum != Global.ARCEUS_NUMBER)
-               {
-                  string fileName = POKEDEX_SELECTION_IMAGE;
-                  Connections.CopyFile(fileName);
-                  RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonWithNumber, fileName));
-                  Connections.DeleteFile(fileName);
-                  for (int i = 0; i < pokemonWithNumber.Count; i++)
-                  {
-                     await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-                  }
-                  dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.CP_MESSAGE, pokemonWithNumber));
-               }
-               else
-               {
-                  Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber.First());
-                  Connections.CalcAllCP(ref pkmn);
-                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
-                  Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pkmn, fileName));
-                  Connections.DeleteFile(fileName);
-               }
+               dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.CP_MESSAGE, pokemonWithNumber));
             }
             else
             {
-               string name = GetPokemon(pokemon);
-               Pokemon pkmn = Connections.Instance().GetPokemon(name);
-               if (pkmn == null)
-               {
-                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+               Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber.First());
+               Connections.CalcAllCP(ref pkmn);
+               string fileName = Connections.GetPokemonPicture(pkmn.Name);
+               Connections.CopyFile(fileName);
+               await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pkmn, fileName));
+               Connections.DeleteFile(fileName);
+            }
+         }
+         else
+         {
+            string name = GetPokemon(pokemon);
+            Pokemon pkmn = Connections.Instance().GetPokemon(name);
+            if (pkmn == null)
+            {
+               List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
 
-                  string fileName = POKEDEX_SELECTION_IMAGE;
-                  Connections.CopyFile(fileName);
-                  RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
-                  await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
-                  Connections.DeleteFile(fileName);
+               string fileName = POKEDEX_SELECTION_IMAGE;
+               Connections.CopyFile(fileName);
+               RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
+               await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
+               Connections.DeleteFile(fileName);
 
-                  dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.CP_MESSAGE, pokemonNames));
-               }
-               else
-               {
-                  Connections.CalcAllCP(ref pkmn);
-                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
-                  Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pkmn, fileName));
-                  Connections.DeleteFile(fileName);
-               }
+               dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.CP_MESSAGE, pokemonNames));
+            }
+            else
+            {
+               Connections.CalcAllCP(ref pkmn);
+               string fileName = Connections.GetPokemonPicture(pkmn.Name);
+               Connections.CopyFile(fileName);
+               await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pkmn, fileName));
+               Connections.DeleteFile(fileName);
             }
          }
       }
@@ -231,92 +220,86 @@ namespace PokeStar.Modules
       [Summary("Gets all forms for a given pokémon.")]
       [Remarks("Leave blank to get all pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
+      [RegisterChannel('D')]
       public async Task Form([Summary("Pokémon with forms.")] string pokemon)
       {
-         if (!ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, Global.REGISTER_STRING_DEX))
+         if (pokemon.Equals("Alias", StringComparison.OrdinalIgnoreCase))
          {
-            await ResponseMessage.SendErrorMessage(Context, "form", "This channel is not registered to process PokéDex commands.");
+            EmbedBuilder embed = new EmbedBuilder();
+            embed.WithTitle("Form tag variations");
+            embed.AddField($"-alola", "-alolan", true);
+            embed.AddField($"-galar", "-garlarian", true);
+            embed.AddField($"-armor", "-armored", true);
+            embed.AddField($"-fighting", "-fight", true);
+            embed.AddField($"-flying", "-fly", true);
+            embed.AddField($"-psychic", "-psy", true);
+            embed.AddField($"-galar-zen", "-garlarian-zen", true);
+            embed.AddField($"-autumn", "-fall", true);
+            embed.AddField($"-megax", "-megay-x, -x", true);
+            embed.AddField($"-megay", "-megay-y, -y", true);
+            embed.WithColor(DexMessageColor);
+            await ReplyAsync(embed: embed.Build());
          }
          else
          {
-            if (pokemon.Equals("Alias", StringComparison.OrdinalIgnoreCase))
+            bool isNumber = int.TryParse(pokemon, out int pokemonNum);
+            if (isNumber)
+            {
+               List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
+
+               if (pokemonWithNumber.Count == 0)
+               {
+                  await ResponseMessage.SendErrorMessage(Context, "form", $"Pokémon with number {pokemonNum} cannot be found.");
+               }
+               if (pokemonWithNumber.Count == 1)
+               {
+                  await ResponseMessage.SendErrorMessage(Context, "form", $"{pokemonWithNumber.First()} does not have different forms.");
+               }
+               else if (pokemonWithNumber.Count > 1)
+               {
+                  EmbedBuilder embed = new EmbedBuilder();
+                  StringBuilder sb = new StringBuilder();
+
+                  foreach (string form in pokemonWithNumber)
+                  {
+                     sb.Append($"{form}\n");
+                  }
+                  embed.AddField($"Forms for pokemon with #{pokemon}", sb.ToString(), true);
+                  embed.WithColor(DexMessageColor);
+                  await ReplyAsync(embed: embed.Build());
+               }
+            }
+            else if (pokemonForms.ContainsKey(pokemon))
             {
                EmbedBuilder embed = new EmbedBuilder();
-               embed.WithTitle("Form tag variations");
-               embed.AddField($"-alola", "-alolan", true);
-               embed.AddField($"-galar", "-garlarian", true);
-               embed.AddField($"-armor", "-armored", true);
-               embed.AddField($"-fighting", "-fight", true);
-               embed.AddField($"-flying", "-fly", true);
-               embed.AddField($"-psychic", "-psy", true);
-               embed.AddField($"-galar-zen", "-garlarian-zen", true);
-               embed.AddField($"-autumn", "-fall", true);
-               embed.AddField($"-megax", "-megay-x, -x", true);
-               embed.AddField($"-megay", "-megay-y, -y", true);
+               StringBuilder sb = new StringBuilder();
+               Tuple<string, string> forms = pokemonForms[pokemon];
+               string[] formsList = forms.Item1.Split(',');
+
+               foreach (string form in formsList)
+               {
+                  sb.Append(form);
+                  if (form.Equals(forms.Item2))
+                  {
+                     sb.Append("*");
+                  }
+                  sb.Append('\n');
+               }
+               embed.AddField($"Forms for {pokemon}", sb.ToString(), true);
                embed.WithColor(DexMessageColor);
+               embed.WithFooter("* Form is default form");
                await ReplyAsync(embed: embed.Build());
             }
             else
             {
-               bool isNumber = int.TryParse(pokemon, out int pokemonNum);
-               if (isNumber)
+               Pokemon pkmn = Connections.Instance().GetPokemon(GetPokemon(pokemon));
+               if (pkmn == null)
                {
-                  List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
-
-                  if (pokemonWithNumber.Count == 0)
-                  {
-                     await ResponseMessage.SendErrorMessage(Context, "form", $"Pokémon with number {pokemonNum} cannot be found.");
-                  }
-                  if (pokemonWithNumber.Count == 1)
-                  {
-                     await ResponseMessage.SendErrorMessage(Context, "form", $"{pokemonWithNumber.First()} does not have different forms.");
-                  }
-                  else if (pokemonWithNumber.Count > 1)
-                  {
-                     EmbedBuilder embed = new EmbedBuilder();
-                     StringBuilder sb = new StringBuilder();
-
-                     foreach (string form in pokemonWithNumber)
-                     {
-                        sb.Append($"{form}\n");
-                     }
-                     embed.AddField($"Forms for pokemon with #{pokemon}", sb.ToString(), true);
-                     embed.WithColor(DexMessageColor);
-                     await ReplyAsync(embed: embed.Build());
-                  }
-               }
-               else if (pokemonForms.ContainsKey(pokemon))
-               {
-                  EmbedBuilder embed = new EmbedBuilder();
-                  StringBuilder sb = new StringBuilder();
-                  Tuple<string, string> forms = pokemonForms[pokemon];
-                  string[] formsList = forms.Item1.Split(',');
-
-                  foreach (string form in formsList)
-                  {
-                     sb.Append(form);
-                     if (form.Equals(forms.Item2))
-                     {
-                        sb.Append("*");
-                     }
-                     sb.Append('\n');
-                  }
-                  embed.AddField($"Forms for {pokemon}", sb.ToString(), true);
-                  embed.WithColor(DexMessageColor);
-                  embed.WithFooter("* Form is default form");
-                  await ReplyAsync(embed: embed.Build());
+                  await ResponseMessage.SendErrorMessage(Context, "form", $"Pokémon with name {pokemon} cannot be found.");
                }
                else
                {
-                  Pokemon pkmn = Connections.Instance().GetPokemon(GetPokemon(pokemon));
-                  if (pkmn == null)
-                  {
-                     await ResponseMessage.SendErrorMessage(Context, "form", $"Pokémon with name {pokemon} cannot be found.");
-                  }
-                  else
-                  {
-                     await ResponseMessage.SendErrorMessage(Context, "form", $"{pkmn.Name} does not have different forms.");
-                  }
+                  await ResponseMessage.SendErrorMessage(Context, "form", $"{pkmn.Name} does not have different forms.");
                }
             }
          }
@@ -324,14 +307,11 @@ namespace PokeStar.Modules
 
       [Command("type")]
       [Summary("Gets information for a given pokémon type.")]
+      [RegisterChannel('D')]
       public async Task PokeType([Summary("(Optional) The typing you want info about.")] string type1 = null,
                                  [Summary("(Optional) Secondary typing you want info about.")] string type2 = null)
       {
-         if (!ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, Global.REGISTER_STRING_DEX))
-         {
-            await ResponseMessage.SendErrorMessage(Context, "type", "This channel is not registered to process PokéDex commands.");
-         }
-         else if (type1 == null)
+         if (type1 == null)
          {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine($"{Global.NONA_EMOJIS["bug_emote"]} Bug");
