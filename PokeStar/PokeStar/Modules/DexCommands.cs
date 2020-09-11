@@ -78,10 +78,10 @@ namespace PokeStar.Modules
 
       [Command("dex")]
       [Alias("pokedex")]
-      [Summary("Gets the PokéDex entry for a given pokémon.")]
-      [Remarks("Can search by pokémon name or by number.")]
+      [Summary("Gets the PokéDex entry for a given Pokémon.")]
+      [Remarks("Can search by Pokémon name or by number.")]
       [RegisterChannel('D')]
-      public async Task Dex([Summary("Get information for this pokémon.")][Remainder] string pokemon)
+      public async Task Dex([Summary("Get information for this Pokémon.")][Remainder] string pokemon)
       {
          bool isNumber = int.TryParse(pokemon, out int pokemonNum);
          if (isNumber)
@@ -154,10 +154,10 @@ namespace PokeStar.Modules
       }
 
       [Command("cp")]
-      [Summary("Gets max CP values for a given pokémon.")]
-      [Remarks("Can search by pokémon name or by number.")]
+      [Summary("Gets max CP values for a given Pokémon.")]
+      [Remarks("Can search by Pokémon name or by number.")]
       [RegisterChannel('D')]
-      public async Task CP([Summary("Get CPs for this pokémon.")][Remainder] string pokemon)
+      public async Task CP([Summary("Get CPs for this Pokémon.")][Remainder] string pokemon)
       {
          bool isNumber = int.TryParse(pokemon, out int pokemonNum);
          if (isNumber)
@@ -231,8 +231,8 @@ namespace PokeStar.Modules
       }
 
       [Command("form")]
-      [Summary("Gets all forms for a given pokémon.")]
-      [Remarks("Leave blank to get all pokémon with forms.\n" +
+      [Summary("Gets all forms for a given Pokémon.")]
+      [Remarks("Leave blank to get all Pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
       [RegisterChannel('D')]
       public async Task Form([Summary("Pokémon with forms.")] string pokemon)
@@ -320,7 +320,7 @@ namespace PokeStar.Modules
       }
 
       [Command("type")]
-      [Summary("Gets information for a given pokémon type.")]
+      [Summary("Gets information for a given Pokémon type.")]
       [RegisterChannel('D')]
       public async Task PokeType([Summary("(Optional) The typing you want info about.")] string type1 = null,
                                  [Summary("(Optional) Secondary typing you want info about.")] string type2 = null)
