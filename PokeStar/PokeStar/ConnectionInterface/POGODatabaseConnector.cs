@@ -41,7 +41,6 @@ namespace PokeStar.ConnectionInterface
          return names;
       }
 
-
       /// <summary>
       /// Gets a raid boss given it's name.
       /// </summary>
@@ -377,6 +376,40 @@ namespace PokeStar.ConnectionInterface
             conn.Close();
          }
          return move;
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="pokemonName"></param>
+      /// <returns></returns>
+      public List<Evolution> GetEvolutions(string pokemonName)
+      {
+         List<Evolution> evolutions = new List<Evolution>();
+         string queryString = $@"SELECT * 
+                                 FROM evolution 
+                                 WHERE start_pokemon = '{pokemonName}' 
+                                 OR end_pokemon = '{pokemonName}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  evolutions.Add(new Evolution
+                  {
+                     Start = Convert.ToString(reader["start_pokemon"]),
+                     End = Convert.ToString(reader["end_pokemon"]),
+                     Candy = Convert.ToInt32(reader["candy"]),
+                     Item = (reader["item"].GetType() == typeof(DBNull)) ? null : Convert.ToString(reader["item"])
+                  });
+               }
+            }
+            conn.Close();
+         }
+         return evolutions;
       }
 
       /// <summary>

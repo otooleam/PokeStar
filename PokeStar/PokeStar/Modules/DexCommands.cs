@@ -84,13 +84,14 @@ namespace PokeStar.Modules
       {
          DEX_MESSAGE,
          CP_MESSAGE,
+         EVO_MESSAGE,
       }
 
       [Command("dex")]
       [Alias("pokedex")]
-      [Summary("Gets the PokéDex entry for a given pokémon.")]
-      [Remarks("Can search by pokémon name or by number.")]
-      public async Task Dex([Summary("Get information for this pokémon.")][Remainder] string pokemon)
+      [Summary("Gets the PokéDex entry for a given Pokémon.")]
+      [Remarks("Can search by Pokémon name or by number.")]
+      public async Task Dex([Summary("Get information for this Pokémon.")][Remainder] string pokemon)
       {
          if (!ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, Global.REGISTER_STRING_DEX))
          {
@@ -158,9 +159,9 @@ namespace PokeStar.Modules
       }
 
       [Command("cp")]
-      [Summary("Gets max CP values for a given pokémon.")]
-      [Remarks("Can search by pokémon name or by number.")]
-      public async Task CP([Summary("Get CPs for this pokémon.")][Remainder] string pokemon)
+      [Summary("Gets max CP values for a given Pokémon.")]
+      [Remarks("Can search by Pokémon name or by number.")]
+      public async Task CP([Summary("Get CPs for this Pokémon.")][Remainder] string pokemon)
       {
          if (!ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, Global.REGISTER_STRING_DEX))
          {
@@ -228,7 +229,8 @@ namespace PokeStar.Modules
       }
 
       [Command("form")]
-      [Summary("Gets all forms for a given pokémon.")]
+      [Summary("Gets all forms for a given Pokémon.")]
+
       [Remarks("Leave blank to get all Pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
       public async Task Form([Summary("(Optional) Pokémon with forms.")] string pokemon = null)
@@ -343,9 +345,9 @@ namespace PokeStar.Modules
       }
 
       [Command("type")]
-      [Summary("Gets information for a given pokémon type.")]
-      public async Task PokeType([Summary("(Optional) The typing you want info about.")] string type1 = null,
-                                 [Summary("(Optional) Secondary typing you want info about.")] string type2 = null)
+      [Summary("Gets information for a given Pokémon type.")]
+      public async Task PokeType([Summary("(Optional) Typing to get info for.")] string type1 = null,
+                                 [Summary("(Optional) Secondary typing to get info for.")] string type2 = null)
       {
          if (!ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, Global.REGISTER_STRING_DEX))
          {
@@ -426,6 +428,42 @@ namespace PokeStar.Modules
          }
       }
 
+      [Command("evo")]
+      [Alias("evolution")]
+      [Summary("Gets evolution family for a given Pokémon.")]
+      public async Task Evolution([Summary("Get evolution family for this Pokémon.")][Remainder] string pokemon)
+      {
+         if (!ChannelRegisterCommands.IsRegisteredChannel(Context.Guild.Id, Context.Channel.Id, Global.REGISTER_STRING_DEX))
+         {
+            await ResponseMessage.SendErrorMessage(Context, "evo", "This channel is not registered to process PokéDex commands.");
+         }
+         else
+         {
+            string name = GetPokemon(pokemon);
+            Pokemon pkmn = Connections.Instance().GetPokemon(name);
+            if (pkmn == null)
+            {
+               List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+
+               string fileName = POKEDEX_SELECTION_IMAGE;
+               Connections.CopyFile(fileName);
+               RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
+               await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
+               Connections.DeleteFile(fileName);
+
+               dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.EVO_MESSAGE, pokemonNames));
+            }
+            else
+            {
+               Dictionary<string, string> evolutions = GenerateEvoDict(pkmn.Name);
+               string firstFileName = Connections.GetPokemonPicture(evolutions.First().Key);
+               Connections.CopyFile(firstFileName);
+               await Context.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, pkmn.Name, firstFileName));
+               Connections.DeleteFile(firstFileName);
+            }
+         }
+      }
+
       /// <summary>
       /// 
       /// </summary>
@@ -451,6 +489,14 @@ namespace PokeStar.Modules
                {
                   Connections.CalcAllCP(ref pokemon);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName));
+               }
+               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.EVO_MESSAGE)
+               {
+                  Dictionary<string, string> evolutions = GenerateEvoDict(pokemon.Name);
+                  string firstFileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CopyFile(firstFileName);
+                  await reaction.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, pokemon.Name, firstFileName));
+                  Connections.DeleteFile(firstFileName);
                }
                Connections.DeleteFile(fileName);
                return;
@@ -514,6 +560,71 @@ namespace PokeStar.Modules
          embed.WithColor(DexMessageColor);
          embed.WithFooter("* denotes Weather Boosted CP");
          return embed.Build();
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="evolutions"></param>
+      /// <param name="initialPokemon"></param>
+      /// <param name="fileName"></param>
+      /// <returns></returns>
+      private static Embed BuildEvoEmbed(Dictionary<string, string> evolutions, string initialPokemon, string fileName)
+      {
+
+         EmbedBuilder embed = new EmbedBuilder();
+         if (evolutions.Count == 1)
+         {
+            embed.WithTitle($"Evolution Family for {evolutions.First().Key}");
+            embed.WithThumbnailUrl($"attachment://{fileName}");
+            embed.WithDescription("This Pokémon does not evolve or evolve from any other Pokémon");
+            embed.WithColor(DexMessageColor);
+         }
+         else
+         {
+            embed.WithTitle($"Evolution Family for {evolutions.First().Key}");
+            embed.WithThumbnailUrl($"attachment://{fileName}");
+            foreach (string key in evolutions.Keys)
+            {
+               string markdown = (key.Equals(initialPokemon, StringComparison.OrdinalIgnoreCase)) ? "***" : "**";
+
+               embed.AddField($"{markdown}{key}{markdown}", evolutions[key]);
+            }
+            embed.WithColor(DexMessageColor);
+         }
+         return embed.Build();
+      }
+
+      public static Dictionary<string, string> GenerateEvoDict(string pokemon)
+      {
+         List<Evolution> initEvoFamily = Connections.Instance().GetEvolutionFamily(pokemon);
+
+         if (initEvoFamily.Count == 0)
+         {
+            return new Dictionary<string, string>()
+            {
+               [pokemon] = ""
+            };
+         }
+
+         List<Evolution> normalEvoFamily = NormalizeEvolutions(initEvoFamily);
+         string basePokemon = normalEvoFamily.First().Start;
+         bool baseChanged = true;
+         while (baseChanged)
+         {
+            baseChanged = false;
+            foreach (Evolution evo in normalEvoFamily)
+            {
+               if (evo.End.Equals(basePokemon, StringComparison.OrdinalIgnoreCase))
+               {
+                  basePokemon = evo.Start;
+                  baseChanged = true;
+               }
+            }
+         }
+
+         EvolutionNode tree = CreateEvolutionNode(basePokemon, normalEvoFamily);
+         return EvolutionNodesToString(tree);
       }
 
       /// <summary>
@@ -801,6 +912,60 @@ namespace PokeStar.Modules
       private static bool CheckValidType(string type)
       {
          return Global.NONA_EMOJIS.ContainsKey($"{type}_emote");
+      }
+
+      private static List<Evolution> NormalizeEvolutions(List<Evolution> evolutions)
+      {
+         foreach (Evolution evo in evolutions)
+         {
+            foreach (Evolution evoComp in evolutions)
+            {
+               evo.Combine(evoComp);
+            }
+         }
+         return evolutions.Where(x => x.Candy != Global.BAD_EVOLUTION).ToList();
+      }
+
+      private static EvolutionNode CreateEvolutionNode(string name, List<Evolution> evolutions)
+      {
+         string method = "";
+         foreach (Evolution evo in evolutions)
+         {
+            if (name.Equals(evo.End, StringComparison.OrdinalIgnoreCase))
+            {
+               method = evo.EvolutionMethod();
+            }
+         }
+
+         EvolutionNode node = new EvolutionNode
+         {
+            Name = name,
+            Method = method
+         };
+
+         foreach (Evolution evo in evolutions)
+         {
+            if (name.Equals(evo.Start, StringComparison.OrdinalIgnoreCase))
+            {
+               node.Evolutions.Add(CreateEvolutionNode(evo.End, evolutions));
+            }
+         }
+         return node;
+      }
+
+      private static Dictionary<string, string> EvolutionNodesToString(EvolutionNode node, string prevEvo = null)
+      {
+         Dictionary<string, string> evolutions = new Dictionary<string, string>();
+
+         string evoString = prevEvo == null ? "Base Form" : $"Evolves from {prevEvo} with {node.Method}";
+
+         evolutions.Add(node.Name, evoString);
+
+         foreach (EvolutionNode evo in node.Evolutions)
+         {
+            evolutions = evolutions.Union(EvolutionNodesToString(evo, node.Name)).ToDictionary(x => x.Key, x => x.Value);
+         }
+         return evolutions;
       }
 
       /// <summary>
