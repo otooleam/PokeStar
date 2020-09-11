@@ -8,6 +8,8 @@ namespace PokeStar
 {
    public static class Global
    {
+      private static string POKEMON_E = "é";
+
       public static string PROGRAM_PATH { get; set; }
       public static JObject ENV_FILE { get; set; }
 
@@ -36,6 +38,13 @@ namespace PokeStar
          "toggleUseEmptyRaid",
          "toggleUseNonaTest"
       };
+
+      public static readonly int LIMIT_RAID             = 20;
+      public static readonly int LIMIT_RAID_INVITE      = 10;
+      public static readonly int LIMIT_RAID_GROUP       = 3;
+      public static readonly int LIMIT_RAID_MULE_MULE   = 2;
+      public static readonly int LIMIT_RAID_MULE_INVITE = 5;
+      public static readonly int LIMIT_RAID_MULE_GROUP  = 6;
 
       public static readonly int MAX_LEVEL      = 40;
       public static readonly int MIN_WILD_LEVEL = 1;

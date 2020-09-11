@@ -19,9 +19,9 @@ namespace PokeStar.DataModels
       /// <param name="boss">Name of the raid boss.</param>
       public Raid(short tier, string time, string location, string boss = null) : base(tier, time, location, boss)
       {
-         RaidGroupLimit = 3;
-         PlayerLimit = 20;
-         InviteLimit = 10;
+         RaidGroupLimit = Global.LIMIT_RAID_MULE_GROUP;
+         PlayerLimit = Global.LIMIT_RAID;
+         InviteLimit = Global.LIMIT_RAID_INVITE;
       }
 
       /// <summary>

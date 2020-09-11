@@ -11,11 +11,6 @@ namespace PokeStar.DataModels
    public class RaidMule : RaidParent
    {
       /// <summary>
-      /// Maximum number of players for mule group.
-      /// </summary>
-      private readonly int MulePlayerLimit = 2;
-
-      /// <summary>
       /// Group number used for Mule group.
       /// </summary>
       private readonly int MuleGroupNumber = 100;
@@ -34,10 +29,10 @@ namespace PokeStar.DataModels
       /// <param name="boss">Name of the raid boss.</param>
       public RaidMule(short tier, string time, string location, string boss = null) : base(tier, time, location, boss)
       {
-         RaidGroupLimit = 6;
-         PlayerLimit = 5;
-         InviteLimit = 5;
-         Mules = new RaidGroup(MulePlayerLimit, 0);
+         RaidGroupLimit = Global.LIMIT_RAID_MULE_GROUP;
+         PlayerLimit = Global.LIMIT_RAID_MULE_INVITE;
+         InviteLimit = Global.LIMIT_RAID_MULE_INVITE;
+         Mules = new RaidGroup(Global.LIMIT_RAID_MULE_MULE, 0);
       }
 
       /// <summary>
@@ -181,7 +176,7 @@ namespace PokeStar.DataModels
       {
          foreach (RaidGroup group in Groups)
          {
-            if (!group.GetReadonlyInvited().IsEmpty)
+            if (!group.GetReadonlyInvitedAll().IsEmpty)
             {
                return true;
             }

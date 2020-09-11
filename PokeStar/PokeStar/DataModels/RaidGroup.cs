@@ -69,10 +69,21 @@ namespace PokeStar.DataModels
       /// Gets all invited players.
       /// </summary>
       /// <returns>Immutable dictionary of invited players.</returns>
-      public ImmutableDictionary<SocketGuildUser, SocketGuildUser> GetReadonlyInvited()
+      public ImmutableDictionary<SocketGuildUser, SocketGuildUser> GetReadonlyInvitedAll()
       {
          return Invited.ToImmutableDictionary(k => k.Key, v => v.Value);
       }
+
+      public ImmutableDictionary<SocketGuildUser, SocketGuildUser> GetReadonlyInvitedReady()
+      {
+         return Invited.Where(invite => Ready.ContainsKey(invite.Value)).ToImmutableDictionary(k => k.Key, v => v.Value);
+      }
+
+      public ImmutableDictionary<SocketGuildUser, SocketGuildUser> GetReadonlyInvitedAttending()
+      {
+         return Invited.Where(invite => Attending.ContainsKey(invite.Value)).ToImmutableDictionary(k => k.Key, v => v.Value);
+      }
+
 
       /// <summary>
       /// Gets how many players are attending.
