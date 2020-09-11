@@ -922,8 +922,8 @@ namespace PokeStar.Modules
                string invitedAttendList = BuildInvitedList(group.GetReadonlyInvitedAttending());
                string invitedReadyList = BuildInvitedList(group.GetReadonlyInvitedReady());
 
-               embed.AddField($"**{groupPrefix}Ready {ready}/{total}** (Remote {remote}/{Global.LIMIT_RAID_INVITE})", $"{BuildTotalList(attendList, invitedAttendList)}");
-               embed.AddField($"**{groupPrefix}Attending**", $"{BuildTotalList(readyList, invitedReadyList)}");
+               embed.AddField($"**{groupPrefix}Ready {ready}/{total}** (Remote {remote}/{Global.LIMIT_RAID_INVITE})", $"{BuildTotalList(readyList, invitedAttendList)}");
+               embed.AddField($"**{groupPrefix}Attending**", $"{BuildTotalList(attendList, invitedReadyList)}");
             }
             embed.AddField($"**Need Invite:**", $"{BuildRequestInviteList(raid.GetReadonlyInviteList())}");
             embed.WithFooter($"Note: the max number of members in a raid is {Global.LIMIT_RAID}, and the max number of invites is {Global.LIMIT_RAID_INVITE}.");
