@@ -8,6 +8,8 @@ namespace PokeStar
 {
    public static class Global
    {
+      private static string POKEMON_E = "é";
+
       public static string PROGRAM_PATH { get; set; }
       public static JObject ENV_FILE { get; set; }
 
