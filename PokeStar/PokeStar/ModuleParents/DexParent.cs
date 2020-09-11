@@ -22,6 +22,7 @@ namespace PokeStar.ModuleParents
       {
          DEX_MESSAGE,
          CP_MESSAGE,
+         EVO_MESSAGE,
          NICKNAME_MESSAGE,
       }
 
@@ -82,6 +83,46 @@ namespace PokeStar.ModuleParents
          return embed.Build();
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="evolutions"></param>
+      /// <param name="initialPokemon"></param>
+      /// <param name="fileName"></param>
+      /// <returns></returns>
+      protected static Embed BuildEvoEmbed(Dictionary<string, string> evolutions, string initialPokemon, string fileName)
+      {
+
+         EmbedBuilder embed = new EmbedBuilder();
+         if (evolutions.Count == 1)
+         {
+            embed.WithTitle($"Evolution Family for {evolutions.First().Key}");
+            embed.WithThumbnailUrl($"attachment://{fileName}");
+            embed.WithDescription("This Pokémon does not evolve or evolve from any other Pokémon");
+            embed.WithColor(DexMessageColor);
+         }
+         else
+         {
+            embed.WithTitle($"Evolution Family for {evolutions.First().Key}");
+            embed.WithThumbnailUrl($"attachment://{fileName}");
+            foreach (string key in evolutions.Keys)
+            {
+               string markdown = (key.Equals(initialPokemon, StringComparison.OrdinalIgnoreCase)) ? "***" : "**";
+
+               embed.AddField($"{markdown}{key}{markdown}", evolutions[key]);
+            }
+            embed.WithColor(DexMessageColor);
+         }
+         return embed.Build();
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="nicknames"></param>
+      /// <param name="name"></param>
+      /// <param name="fileName"></param>
+      /// <returns></returns>
       protected static Embed BuildNicknameEmbed(List<string> nicknames, string name, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
@@ -344,6 +385,92 @@ namespace PokeStar.ModuleParents
          return pokemonName;
       }
 
+      public static Dictionary<string, string> GenerateEvoDict(string pokemon)
+      {
+         List<Evolution> initEvoFamily = Connections.Instance().GetEvolutionFamily(pokemon);
+
+         if (initEvoFamily.Count == 0)
+         {
+            return new Dictionary<string, string>()
+            {
+               [pokemon] = ""
+            };
+         }
+
+         List<Evolution> normalEvoFamily = NormalizeEvolutions(initEvoFamily);
+         string basePokemon = normalEvoFamily.First().Start;
+         bool baseChanged = true;
+         while (baseChanged)
+         {
+            baseChanged = false;
+            foreach (Evolution evo in normalEvoFamily)
+            {
+               if (evo.End.Equals(basePokemon, StringComparison.OrdinalIgnoreCase))
+               {
+                  basePokemon = evo.Start;
+                  baseChanged = true;
+               }
+            }
+         }
+
+         EvolutionNode tree = CreateEvolutionNode(basePokemon, normalEvoFamily);
+         return EvolutionNodesToString(tree);
+      }
+
+      private static List<Evolution> NormalizeEvolutions(List<Evolution> evolutions)
+      {
+         foreach (Evolution evo in evolutions)
+         {
+            foreach (Evolution evoComp in evolutions)
+            {
+               evo.Combine(evoComp);
+            }
+         }
+         return evolutions.Where(x => x.Candy != Global.BAD_EVOLUTION).ToList();
+      }
+
+      private static EvolutionNode CreateEvolutionNode(string name, List<Evolution> evolutions)
+      {
+         string method = "";
+         foreach (Evolution evo in evolutions)
+         {
+            if (name.Equals(evo.End, StringComparison.OrdinalIgnoreCase))
+            {
+               method = evo.EvolutionMethod();
+            }
+         }
+
+         EvolutionNode node = new EvolutionNode
+         {
+            Name = name,
+            Method = method
+         };
+
+         foreach (Evolution evo in evolutions)
+         {
+            if (name.Equals(evo.Start, StringComparison.OrdinalIgnoreCase))
+            {
+               node.Evolutions.Add(CreateEvolutionNode(evo.End, evolutions));
+            }
+         }
+         return node;
+      }
+
+      private static Dictionary<string, string> EvolutionNodesToString(EvolutionNode node, string prevEvo = null)
+      {
+         Dictionary<string, string> evolutions = new Dictionary<string, string>();
+
+         string evoString = prevEvo == null ? "Base Form" : $"Evolves from {prevEvo} with {node.Method}";
+
+         evolutions.Add(node.Name, evoString);
+
+         foreach (EvolutionNode evo in node.Evolutions)
+         {
+            evolutions = evolutions.Union(EvolutionNodesToString(evo, node.Name)).ToDictionary(x => x.Key, x => x.Value);
+         }
+         return evolutions;
+      }
+
       /// <summary>
       /// 
       /// </summary>
@@ -379,6 +506,14 @@ namespace PokeStar.ModuleParents
                {
                   Connections.CalcAllCP(ref pokemon);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName));
+               }
+               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.EVO_MESSAGE)
+               {
+                  Dictionary<string, string> evolutions = GenerateEvoDict(pokemon.Name);
+                  string firstFileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CopyFile(firstFileName);
+                  await reaction.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, pokemon.Name, firstFileName));
+                  Connections.DeleteFile(firstFileName);
                }
                else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE)
                {
