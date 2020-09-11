@@ -145,7 +145,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            await ResponseMessage.SendErrorMessage(Context, "raid", $"No raid bosses found for tier {tier}");
+            await ResponseMessage.SendErrorMessage(Context, "mule", $"No raid bosses found for tier {tier}");
          }
          RemoveOldRaids();
       }
@@ -246,8 +246,6 @@ namespace PokeStar.Modules
                      await raidMsg.AddReactionsAsync(prevReactions);
                      raidMessages.Add(raidMsg.Id, parent);
                   }
-                  await raidMsg.AddReactionsAsync(prevReactions);
-                  raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
                   editComplete = true;
                }
