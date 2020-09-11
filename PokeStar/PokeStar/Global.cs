@@ -8,6 +8,8 @@ namespace PokeStar
 {
    public static class Global
    {
+      private static string POKEMON_E = "é";
+
       public static string PROGRAM_PATH { get; set; }
       public static JObject ENV_FILE { get; set; }
 
@@ -37,6 +39,13 @@ namespace PokeStar
          "toggleUseNonaTest"
       };
 
+      public static readonly int LIMIT_RAID             = 20;
+      public static readonly int LIMIT_RAID_INVITE      = 10;
+      public static readonly int LIMIT_RAID_GROUP       = 3;
+      public static readonly int LIMIT_RAID_MULE_MULE   = 2;
+      public static readonly int LIMIT_RAID_MULE_INVITE = 5;
+      public static readonly int LIMIT_RAID_MULE_GROUP  = 6;
+
       public static readonly int MAX_LEVEL      = 40;
       public static readonly int MIN_WILD_LEVEL = 1;
       public static readonly int MAX_WILD_LEVEL = 35;
@@ -49,12 +58,14 @@ namespace PokeStar
       public static readonly int MIN_SPECIAL_IV = 10;
       public static readonly int MAX_IV         = 15;
 
+      public static readonly int BAD_EVOLUTION = -1;
+
       public static readonly int UNOWN_NUMBER  = 201;
       public static readonly int ARCEUS_NUMBER = 493;
 
       public static readonly int ATTEND_MASK  = 7;   // 0000 0XXX mask will clear 4th bit
       public static readonly int REMOTE_MASK  = 112; // 0YYY 0000 mask will clear 8th bit
-      public static readonly int REMOTE_SHIFT = 4;  // 0YYY 0XXX where Y is the remote value and X is the attending value 
+      public static readonly int REMOTE_SHIFT = 4;   // 0YYY 0XXX where Y is the remote value and X is the attending value 
 
       public static readonly int NOT_IN_RAID = -1;
       public static readonly string DEFAULT_RAID_BOSS_NAME = "Empty";

@@ -917,36 +917,26 @@ namespace PokeStar.Modules
                int ready = group.GetReadyCount() + group.GetReadyRemoteCount() + group.GetInviteCount();
                int remote = group.GetRemoteCount();
 
+               string attendList = BuildPlayerList(group.GetReadonlyAttending());
                string readyList = BuildPlayerList(group.GetReadonlyHere());
-               string invitedList = BuildInvitedList(group.GetReadonlyInvited());
+               string invitedAttendList = BuildInvitedList(group.GetReadonlyInvitedAttending());
+               string invitedReadyList = BuildInvitedList(group.GetReadonlyInvitedReady());
 
-               string text = Global.EMPTY_FIELD;
-               if (readyList.Equals(Global.EMPTY_FIELD))
-               {
-                  text = invitedList;
-               }
-               else if (invitedList.Equals(Global.EMPTY_FIELD))
-               {
-                  text = readyList;
-               }
-               else
-               {
-                  text = readyList + invitedList;
-               }
-
-               embed.AddField($"**{groupPrefix}Ready {ready}/{total}** (Remote {remote}/10)", $"{text}");
-               embed.AddField($"**{groupPrefix}Attending**", $"{BuildPlayerList(group.GetReadonlyAttending())}");
+               embed.AddField($"**{groupPrefix}Ready {ready}/{total}** (Remote {remote}/{Global.LIMIT_RAID_INVITE})", $"{BuildTotalList(attendList, invitedAttendList)}");
+               embed.AddField($"**{groupPrefix}Attending**", $"{BuildTotalList(readyList, invitedReadyList)}");
             }
             embed.AddField($"**Need Invite:**", $"{BuildRequestInviteList(raid.GetReadonlyInviteList())}");
-            embed.WithFooter("Note: the max number of members in a raid is 20, and the max number of invites is 10.");
+            embed.WithFooter($"Note: the max number of members in a raid is {Global.LIMIT_RAID}, and the max number of invites is {Global.LIMIT_RAID_INVITE}.");
          }
          else if (raid is RaidMule mule)
          {
             embed.AddField($"Mules", $"{BuildPlayerList(mule.Mules.GetReadonlyAttending())}");
             for (int i = 0; i < raid.Groups.Count; i++)
-               embed.AddField($"{(raid.Groups.Count == 1 ? "" : $"Group {i + 1} ")}Remote", $"{BuildInvitedList(raid.Groups.ElementAt(i).GetReadonlyInvited())}");
+            {
+               embed.AddField($"{(raid.Groups.Count == 1 ? "" : $"Group {i + 1} ")}Remote", $"{BuildInvitedList(raid.Groups.ElementAt(i).GetReadonlyInvitedAll())}");
+            }
             embed.AddField($"Need Invite:", $"{BuildRequestInviteList(raid.GetReadonlyInviteList())}");
-            embed.WithFooter("Note: The max number of invites is 10, and the max number of invites per person is 5.");
+            embed.WithFooter($"Note: The max number of invites is {Global.LIMIT_RAID_INVITE}, and the max number of invites per person is {Global.LIMIT_RAID_MULE_INVITE}.");
          }
          return embed.Build();
       }
@@ -1158,6 +1148,19 @@ namespace PokeStar.Modules
             sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE_RAID]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} invited by {player.Value.Nickname ?? player.Value.Username} {GetPlayerTeam(player.Value)}");
          }
          return sb.ToString();
+      }
+
+      private static string BuildTotalList(string initList, string inviteList)
+      {
+         if (initList.Equals(Global.EMPTY_FIELD))
+         {
+            return inviteList;
+         }
+         else if (inviteList.Equals(Global.EMPTY_FIELD))
+         {
+            return initList;
+         }
+         return initList + inviteList;
       }
 
       /// <summary>

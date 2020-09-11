@@ -205,6 +205,39 @@ namespace PokeStar.ConnectionInterface
          return pokemon;
       }
 
+      public List<Evolution> GetEvolutionFamily(string pokemonName, List<string> namesChecked = null)
+      {
+         if (namesChecked == null)
+         {
+            namesChecked = new List<string>();
+         }
+
+         List<Evolution> evolutions = POGODBConnector.GetEvolutions(pokemonName);
+
+         if (evolutions.Count == 0)
+         {
+            return new List<Evolution>();
+         }
+         namesChecked.Add(pokemonName);
+
+         List<Evolution> evoList = new List<Evolution>();
+         foreach (Evolution evo in evolutions)
+         {
+            if (!evo.Start.Equals(pokemonName, StringComparison.OrdinalIgnoreCase) && !namesChecked.Contains(evo.Start))
+            {
+               evoList.AddRange(GetEvolutionFamily(evo.Start, namesChecked));
+            }
+            else if (!evo.End.Equals(pokemonName, StringComparison.OrdinalIgnoreCase) && !namesChecked.Contains(evo.End))
+            {
+               evoList.AddRange(GetEvolutionFamily(evo.End, namesChecked));
+            }
+         }
+         evoList.AddRange(evolutions);
+         evolutions.Clear();
+         evolutions.AddRange(evoList.Where(x => !evolutions.Contains(x)));
+         return evolutions;
+      }
+
       /// <summary>
       /// Calculates all of the relevant CP valus of a pokemon. This
       /// includes the raid, quest, hatch, and wild perfect IV values.
