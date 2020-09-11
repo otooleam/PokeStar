@@ -172,6 +172,7 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ImageProcessors\ImageProcess.cs" />
     <Compile Include="ImageProcessors\RollImageProcess.cs" />
+    <Compile Include="ModuleParents\DexParent.cs" />
     <Compile Include="Modules\BasicCommands.cs" />
     <Compile Include="Modules\ChannelRegisterCommands.cs" />
     <Compile Include="Modules\DexCommands.cs" />

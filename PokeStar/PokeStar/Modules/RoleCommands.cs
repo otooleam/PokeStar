@@ -6,6 +6,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using PokeStar.DataModels;
 using PokeStar.ConnectionInterface;
+using PokeStar.PreConditions;
 
 namespace PokeStar.Modules
 {

@@ -60,7 +60,10 @@ namespace PokeStar
       public static readonly string DEFAULT_RAID_BOSS_NAME = "Empty";
 
       public static readonly string EMPTY_FIELD = "-----";
-      
+
+      public static readonly char NICKNAME_DELIMITER = '>';
+      public static readonly int NICKNAME_DELIMITER_MISSING = -1;
+
       public static readonly char REGISTER_STRING_DEX   = 'D';
       public static readonly char REGISTER_STRING_EX    = 'E';
       public static readonly char REGISTER_STRING_ROLE  = 'P';
