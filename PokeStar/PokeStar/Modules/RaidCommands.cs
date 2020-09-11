@@ -779,7 +779,7 @@ namespace PokeStar.Modules
                         Connections.DeleteFile(fileName);
 
                         await player.SendMessageAsync($"You have been invited to a raid by {reactingPlayer.Nickname ?? reactingPlayer.Username}.");
-                        raidMessages.Remove(message.Id);
+                        subMessages.Remove(message.Id);
                         raid.InvitingPlayer = null;
                         await message.DeleteAsync();
                      }
