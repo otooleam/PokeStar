@@ -422,8 +422,7 @@ namespace PokeStar.ConnectionInterface
       /// <returns>Registration string for the channel, otherwise null.</returns>
       public string GetRegistration(ulong guild, ulong channel)
       {
-         string registration = NONADBConnector.GetRegistration(guild, channel);
-         return registration ?? null;
+         return NONADBConnector.GetRegistration(guild, channel);
       }
 
       /// <summary>
@@ -457,6 +456,31 @@ namespace PokeStar.ConnectionInterface
             NONADBConnector.DeleteAllRegistration(guild);
          else
             NONADBConnector.DeleteRegistration(guild, (ulong)channel);
+      }
+
+      public string GetPokemonWithNickname(ulong guild, string nickname)
+      {
+         return NONADBConnector.GetPokemon(guild, nickname);
+      }
+
+      public List<string> GetNicknames(ulong guild, string pokemon)
+      {
+         return NONADBConnector.GetNicknames(guild, pokemon);
+      }
+
+      public void AddNickname(ulong guild, string nickname, string pokemon)
+      {
+         NONADBConnector.AddNickname(guild, pokemon, nickname);
+      }
+
+      public void UpdateNickname(ulong guild, string oldNickname, string newNickname)
+      {
+         NONADBConnector.UpdateNickname(guild, newNickname, oldNickname);
+      }
+
+      public void DeleteNickname(ulong guild, string nickname)
+      {
+         NONADBConnector.DeleteNickname(guild, nickname);
       }
    }
 }

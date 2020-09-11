@@ -12,6 +12,7 @@ using Microsoft.Extensions.DependencyInjection;
 using PokeStar.Modules;
 using PokeStar.ImageProcessors;
 using PokeStar.ConnectionInterface;
+using PokeStar.ModuleParents;
 
 namespace PokeStar
 {
@@ -183,6 +184,10 @@ namespace PokeStar
           ISocketMessageChannel originChannel, SocketReaction reaction)
       {
          IUserMessage message = await cachedMessage.GetOrDownloadAsync();
+
+         var chnl = message.Channel as SocketGuildChannel;
+         var guild = chnl.Guild.Id;
+
          IUser user = reaction.User.Value;
          if (message != null && reaction.User.IsSpecified && !user.IsBot)
          {
@@ -194,9 +199,9 @@ namespace PokeStar
             {
                await RaidCommands.RaidSubMessageReactionHandle(message, reaction);
             }
-            else if (DexCommands.IsDexSubMessage(message.Id))
+            else if (DexParent.IsDexSubMessage(message.Id))
             {
-               await DexCommands.DexMessageReactionHandle(message, reaction);
+               await DexParent.DexMessageReactionHandle(message, reaction, guild);
             }
          }
          return Task.CompletedTask;

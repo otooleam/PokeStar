@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Data.SqlClient;
 
 namespace PokeStar.ConnectionInterface
@@ -101,6 +102,53 @@ namespace PokeStar.ConnectionInterface
          return setupComplete;
       }
 
+      public string GetPokemon(ulong guild, string nickname)
+      {
+         string prefix = null;
+         string queryString = $@"SELECT name 
+                                 FROM nickname 
+                                 WHERE guild={guild}
+                                 AND nickname = '{nickname}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  prefix = Convert.ToString(reader["name"]);
+               }
+            }
+            conn.Close();
+         }
+         return prefix;
+      }
+
+      public List<string> GetNicknames(ulong guild, string pokemon)
+      {
+         List<string> nicknames = new List<string>();
+         string queryString = $@"SELECT nickname 
+                                 FROM nickname 
+                                 WHERE guild={guild}
+                                 AND name = '{pokemon}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  nicknames.Add(Convert.ToString(reader["nickname"]));
+               }
+            }
+            conn.Close();
+         }
+         return nicknames;
+      }
+
+
       /// <summary>
       /// Adds a new registration to a channel.
       /// </summary>
@@ -128,6 +176,19 @@ namespace PokeStar.ConnectionInterface
       {
          string queryString = $@"INSERT INTO guild_settings (guild, prefix, setup)
                                  VALUES ({guild}, '{Global.DEFAULT_PREFIX}', 0)";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+      public void AddNickname(ulong guild, string pokemon, string nickname)
+      {
+         string queryString = $@"INSERT INTO nickname (guild, name, nickname)
+                                 VALUES ({guild}, '{pokemon}', '{nickname}')";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -195,6 +256,21 @@ namespace PokeStar.ConnectionInterface
          }
       }
 
+      public void UpdateNickname(ulong guild, string nickname, string original)
+      {
+         string queryString = $@"UPDATE nickname 
+                                 SET nickname = '{nickname}'
+                                 WHERE guild={guild}
+                                 AND nickname = '{original}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
       /// <summary>
       /// Deletes the registration for all channels in a guild.
       /// </summary>
@@ -239,6 +315,20 @@ namespace PokeStar.ConnectionInterface
       {
          string queryString = $@"DELETE FROM guild_settings
                                  WHERE guild={guild};";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+      public void DeleteNickname(ulong guild, string nickname)
+      {
+         string queryString = $@"DELETE FROM nickname
+                                 WHERE guild={guild}
+                                 AND nickname='{nickname}';";
 
          using (SqlConnection conn = GetConnection())
          {
