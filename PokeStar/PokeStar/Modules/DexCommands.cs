@@ -7,7 +7,6 @@ using Discord;
 using Discord.Rest;
 using Discord.Commands;
 using PokeStar.DataModels;
-using PokeStar.Calculators;
 using PokeStar.ConnectionInterface;
 using PokeStar.PreConditions;
 using PokeStar.ModuleParents;
@@ -17,7 +16,7 @@ namespace PokeStar.Modules
    /// <summary>
    /// Handles pokedex commands.
    /// </summary>
-   public class DexCommands : DexParent
+   public class DexCommands : DexCommandParent
    {
       private static readonly Dictionary<string, Tuple<string, string>> pokemonForms = new Dictionary<string, Tuple<string, string>>(StringComparer.OrdinalIgnoreCase)
       {

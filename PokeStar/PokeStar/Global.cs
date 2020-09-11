@@ -3,12 +3,13 @@ using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Newtonsoft.Json.Linq;
+using PokeStar.DataModels;
 
 namespace PokeStar
 {
    public static class Global
    {
-      private static string POKEMON_E = "é";
+      private static readonly string POKEMON_E = "é";
 
       public static string PROGRAM_PATH { get; set; }
       public static JObject ENV_FILE { get; set; }
