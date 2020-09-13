@@ -325,5 +325,39 @@ namespace PokeStar.Modules
 
          await Context.Channel.SendMessageAsync(embed: embed.Build());
       }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="tier"></param>
+      /// <returns></returns>
+      protected short GenerateTier(string tier)
+      {
+         if (tier.Equals("m", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("mega", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("7", StringComparison.OrdinalIgnoreCase))
+         {
+            return MEGA_RAID_TIER;
+         }
+         if (tier.Equals("l", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("legendary", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("5", StringComparison.OrdinalIgnoreCase))
+         {
+            return LEGENDARY_RAID_TIER;
+         }
+         if (tier.Equals("r", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("rare", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("3", StringComparison.OrdinalIgnoreCase))
+         {
+            return RARE_RAID_TIER;
+         }
+         if (tier.Equals("c", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("common", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("1", StringComparison.OrdinalIgnoreCase))
+         {
+            return COMMON_RAID_TIER;
+         }
+         return INVALID_TIER;
+      }
    }
 }
