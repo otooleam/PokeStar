@@ -26,6 +26,7 @@ namespace PokeStar.ModuleParents
          new Emoji("3️⃣"),
          new Emoji("4️⃣"),
          new Emoji("5️⃣"),
+         new Emoji("6️⃣"),
          new Emoji("✅"),
          new Emoji("✈️"),
          new Emoji("🤝"),
@@ -65,6 +66,7 @@ namespace PokeStar.ModuleParents
          new Emoji("3️⃣"),
          new Emoji("4️⃣"),
          new Emoji("5️⃣"),
+         new Emoji("6️⃣"),
       };
 
       private static readonly Emoji[] extraEmojis = {
@@ -80,6 +82,7 @@ namespace PokeStar.ModuleParents
          ADD_PLAYER_3,
          ADD_PLAYER_4,
          ADD_PLAYER_5,
+         ADD_PLAYER_6,
          PLAYER_READY,
          REMOTE_RAID,
          INVITE_PLAYER,
@@ -105,6 +108,7 @@ namespace PokeStar.ModuleParents
          REMOTE_PLAYER_3,
          REMOTE_PLAYER_4,
          REMOTE_PLAYER_5,
+         REMOTE_PLAYER_6
       }
 
       private enum EXTRA_EMOJI_INDEX
@@ -118,7 +122,7 @@ namespace PokeStar.ModuleParents
       {
          INVITE_SUB_MESSAGE,
          RAID_REMOTE_SUB_MESSAGE,
-         MULE_READY_SUB_MESSAGE,
+         MULE_READY_SUB_MESSAGE
       }
 
       protected static readonly short EX_RAID_TIER = 9;
@@ -126,46 +130,7 @@ namespace PokeStar.ModuleParents
       protected static readonly short LEGENDARY_RAID_TIER = 5;
       protected static readonly short RARE_RAID_TIER = 3;
       protected static readonly short COMMON_RAID_TIER = 1;
-      private static readonly short INVALID_TIER = 0;
-
-      /// <summary>
-      /// 
-      /// </summary>
-      /// <param name="tier"></param>
-      /// <returns></returns>
-      protected short GenerateTier(string tier)
-      {
-         if (tier.Equals("m", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("mega", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("7", StringComparison.OrdinalIgnoreCase))
-         {
-            return MEGA_RAID_TIER;
-         }
-         if (tier.Equals("l", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("legendary", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("5", StringComparison.OrdinalIgnoreCase))
-         {
-            return LEGENDARY_RAID_TIER;
-         }
-         if (tier.Equals("r", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("rare", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("3", StringComparison.OrdinalIgnoreCase))
-         {
-            return RARE_RAID_TIER;
-         }
-         if (tier.Equals("c", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("common", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("1", StringComparison.OrdinalIgnoreCase))
-         {
-            return COMMON_RAID_TIER;
-         }
-         return INVALID_TIER;
-      }
-
-
-
-
-
+      protected static readonly short INVALID_TIER = 0;
 
       /// <summary>
       /// Handles a reaction on a raid message.
@@ -199,6 +164,10 @@ namespace PokeStar.ModuleParents
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_5]))
             {
                raid.PlayerAdd(reactingPlayer, 5);
+            }
+            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_6]))
+            {
+               raid.PlayerAdd(reactingPlayer, 6);
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.PLAYER_READY]))
             {
@@ -519,6 +488,11 @@ namespace PokeStar.ModuleParents
                raid.PlayerAdd(reactingPlayer, 5, reactingPlayer);
                needEdit = true;
             }
+            else if (reaction.Emote.Equals(remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_6]))
+            {
+               raid.PlayerAdd(reactingPlayer, 6, reactingPlayer);
+               needEdit = true;
+            }
 
             if (needEdit)
             {
@@ -569,13 +543,6 @@ namespace PokeStar.ModuleParents
             }
          }
       }
-
-
-
-
-
-
-
 
       /// <summary>
       /// Builds the raid embed.
@@ -704,6 +671,7 @@ namespace PokeStar.ModuleParents
          sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_3]} 3 Remote Raiders");
          sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_4]} 4 Remote Raiders");
          sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_5]} 5 Remote Raiders");
+         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_6]} 6 Remote Raiders");
          sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]} Cancel");
 
          EmbedBuilder embed = new EmbedBuilder();
@@ -735,13 +703,6 @@ namespace PokeStar.ModuleParents
          embed.AddField("Please Select Which Group is Ready.", sb.ToString());
          return embed.Build();
       }
-
-
-
-
-
-
-
 
       /// <summary>
       /// Builds the title of the raid.
@@ -829,7 +790,8 @@ namespace PokeStar.ModuleParents
          {
             int attend = RaidGroup.GetAttending(player.Value);
             int remote = RaidGroup.GetRemote(player.Value);
-            sb.AppendLine($"{Global.SELECTION_EMOJIS[attend + remote - 1]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} ");
+
+            sb.AppendLine($"{Global.NUM_EMOJIS[attend + remote - 1]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} ");
          }
          return sb.ToString();
       }
@@ -950,9 +912,6 @@ namespace PokeStar.ModuleParents
          return sb.ToString();
       }
 
-
-
-
       /// <summary>
       /// Getss the team role registered to a user.
       /// </summary>
@@ -995,10 +954,6 @@ namespace PokeStar.ModuleParents
          }
       }
 
-
-
-
-
       /// <summary>
       /// Checks if a message is a raid message.
       /// </summary>
@@ -1022,11 +977,25 @@ namespace PokeStar.ModuleParents
       /// <summary>
       /// Sets the remote pass emote on startup.
       /// </summary>
-      public static void SetRemotePassEmote()
+      public static void SetRaidEmotes()
       {
          raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE_RAID] = Emote.Parse(Global.NONA_EMOJIS["remote_pass_emote"]);
          muleEmojis[(int)MULE_EMOJI_INDEX.REQUEST_INVITE] = Emote.Parse(Global.NONA_EMOJIS["remote_pass_emote"]);
          remoteEmojis[(int)REMOTE_EMOJI_INDEX.REQUEST_INVITE] = Emote.Parse(Global.NONA_EMOJIS["remote_pass_emote"]);
+
+         raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_1] = Global.NUM_EMOJIS[(int)RAID_EMOJI_INDEX.ADD_PLAYER_1];
+         raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_2] = Global.NUM_EMOJIS[(int)RAID_EMOJI_INDEX.ADD_PLAYER_2];
+         raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_3] = Global.NUM_EMOJIS[(int)RAID_EMOJI_INDEX.ADD_PLAYER_3];
+         raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_4] = Global.NUM_EMOJIS[(int)RAID_EMOJI_INDEX.ADD_PLAYER_4];
+         raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_5] = Global.NUM_EMOJIS[(int)RAID_EMOJI_INDEX.ADD_PLAYER_5];
+         raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_6] = Global.NUM_EMOJIS[(int)RAID_EMOJI_INDEX.ADD_PLAYER_6];
+
+         remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_1] = Global.NUM_EMOJIS[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_1 - 1];
+         remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_2] = Global.NUM_EMOJIS[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_2 - 1];
+         remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_3] = Global.NUM_EMOJIS[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_3 - 1];
+         remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_4] = Global.NUM_EMOJIS[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_4 - 1];
+         remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_5] = Global.NUM_EMOJIS[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_5 - 1];
+         remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_6] = Global.NUM_EMOJIS[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_6 - 1];
       }
 
       /// <summary>

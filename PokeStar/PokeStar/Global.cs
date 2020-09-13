@@ -109,18 +109,18 @@ namespace PokeStar
       public static readonly System.Drawing.Rectangle IMAGE_RECT_NICKNAME   = new System.Drawing.Rectangle(10, 120, 480, 100);
       public static readonly System.Drawing.Rectangle IMAGE_RECT_TEAM_COLOR = new System.Drawing.Rectangle(410, 60, 10, 10);
 
-      public static readonly Emoji[] SELECTION_EMOJIS = {
-         new Emoji("1️⃣"),
-         new Emoji("2️⃣"),
-         new Emoji("3️⃣"),
-         new Emoji("4️⃣"),
-         new Emoji("5️⃣"),
-         new Emoji("6️⃣"),
-         new Emoji("7️⃣"),
-         new Emoji("8️⃣"),
-         new Emoji("9️⃣"),
-         new Emoji("🔟")
+      public static readonly string[] NUM_EMOJI_NAMES = {
+         "number_1_emote", "number_2_emote",
+         "number_3_emote", "number_4_emote", 
+         "number_5_emote", "number_6_emote",
+         "number_7_emote", "number_8_emote",
+         "number_9_emote", "number_10_emote", 
+         "number_11_emote", "number_12_emote"
       };
+
+      public static readonly int NUM_SELECTIONS = 10;
+      public static readonly Emote[] SELECTION_EMOJIS = new Emote[NUM_SELECTIONS];
+      public static readonly List<Emote> NUM_EMOJIS = new List<Emote>();
 
       public static readonly string[] EMOTE_NAMES = {
          "valor_emote", "mystic_emote", "instinct_emote",
