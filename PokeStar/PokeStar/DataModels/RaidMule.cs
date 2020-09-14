@@ -49,7 +49,7 @@ namespace PokeStar.DataModels
          {
             if (IsInRaid(player) == Global.NOT_IN_RAID && Mules.GetAttendingCount() < Global.LIMIT_RAID_MULE_MULE)
             {
-               Mules.Add(player, partySize, 0);
+               Mules.Add(player, partySize, Global.NO_ADD_VALUE);
                return true;
             }
          }

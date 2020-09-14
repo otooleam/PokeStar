@@ -68,7 +68,8 @@ namespace PokeStar
       public static readonly int REMOTE_MASK  = 112; // 0YYY 0000 mask will clear 8th bit
       public static readonly int REMOTE_SHIFT = 4;   // 0YYY 0XXX where Y is the remote value and X is the attending value 
 
-      public static readonly int NOT_IN_RAID = -1;
+      public static readonly int NO_ADD_VALUE = -1;
+      public static readonly int NOT_IN_RAID  = -1;
       public static readonly string DEFAULT_RAID_BOSS_NAME = "Empty";
 
       public static readonly string EMPTY_FIELD = "-----";
@@ -110,12 +111,12 @@ namespace PokeStar
       public static readonly System.Drawing.Rectangle IMAGE_RECT_TEAM_COLOR = new System.Drawing.Rectangle(410, 60, 10, 10);
 
       public static readonly string[] NUM_EMOJI_NAMES = {
-         "number_1_emote", "number_2_emote",
-         "number_3_emote", "number_4_emote", 
-         "number_5_emote", "number_6_emote",
-         "number_7_emote", "number_8_emote",
-         "number_9_emote", "number_10_emote", 
-         "number_11_emote", "number_12_emote"
+         "number_0_emote", "number_1_emote",
+         "number_2_emote", "number_3_emote", 
+         "number_4_emote", "number_5_emote",
+         "number_6_emote", "number_7_emote",
+         "number_8_emote", "number_9_emote", 
+         "number_10_emote", "number_11_emote"
       };
 
       public static readonly int NUM_SELECTIONS = 10;

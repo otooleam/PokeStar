@@ -277,9 +277,9 @@ namespace PokeStar
                   ).ToString()));
          }
 
-         for (int i = 0; i < Global.NUM_SELECTIONS; i++)
+         for (int i = 1; i <= Global.NUM_SELECTIONS; i++)
          {
-            Global.SELECTION_EMOJIS[i] = Global.NUM_EMOJIS[i];
+            Global.SELECTION_EMOJIS[i - 1] = Global.NUM_EMOJIS[i];
          }
       }
 
