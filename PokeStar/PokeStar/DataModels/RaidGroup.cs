@@ -227,12 +227,12 @@ namespace PokeStar.DataModels
          foreach (KeyValuePair<SocketGuildUser, int> user in Attending.Where(user => user.Value == 0))
          {
             empty.Add(user.Key, new List<SocketGuildUser>());
-            empty[user.Key].AddRange(Invited.Where(x => x.Value.Equals(user)).Select(invite => invite.Key));
+            empty[user.Key].AddRange(Invited.Where(x => x.Value.Equals(user.Key)).Select(invite => invite.Key));
          }
          foreach (KeyValuePair<SocketGuildUser, int> user in Ready.Where(user => user.Value == 0))
          {
             empty.Add(user.Key, new List<SocketGuildUser>());
-            empty[user.Key].AddRange(Invited.Where(x => x.Value.Equals(user)).Select(invite => invite.Key));
+            empty[user.Key].AddRange(Invited.Where(x => x.Value.Equals(user.Key)).Select(invite => invite.Key));
          }
 
          foreach (SocketGuildUser user in empty.Keys)

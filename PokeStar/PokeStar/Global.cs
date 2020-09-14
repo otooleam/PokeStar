@@ -111,12 +111,12 @@ namespace PokeStar
       public static readonly System.Drawing.Rectangle IMAGE_RECT_TEAM_COLOR = new System.Drawing.Rectangle(410, 60, 10, 10);
 
       public static readonly string[] NUM_EMOJI_NAMES = {
-         "number_0_emote", "number_1_emote",
-         "number_2_emote", "number_3_emote", 
-         "number_4_emote", "number_5_emote",
-         "number_6_emote", "number_7_emote",
-         "number_8_emote", "number_9_emote", 
-         "number_10_emote", "number_11_emote"
+         "number_1_emote", "number_2_emote", 
+         "number_3_emote", "number_4_emote", 
+         "number_5_emote", "number_6_emote", 
+         "number_7_emote", "number_8_emote", 
+         "number_9_emote",  "number_10_emote", 
+         "number_11_emote"
       };
 
       public static readonly int NUM_SELECTIONS = 10;

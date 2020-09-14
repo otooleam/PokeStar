@@ -21,7 +21,6 @@ namespace PokeStar.ModuleParents
       protected static readonly Dictionary<ulong, Tuple<int, ulong>> subMessages = new Dictionary<ulong, Tuple<int, ulong>>();
 
       protected static readonly IEmote[] raidEmojis = {
-         new Emoji("0⃣"),
          new Emoji("1️⃣"),
          new Emoji("2️⃣"),
          new Emoji("3️⃣"),
@@ -59,25 +58,24 @@ namespace PokeStar.ModuleParents
 
       private static readonly IEmote[] remoteEmojis = {
          new Emoji("✈️"),
-         new Emoji("0⃣"),
          new Emoji("1️⃣"),
          new Emoji("2️⃣"),
          new Emoji("3️⃣"),
          new Emoji("4️⃣"),
          new Emoji("5️⃣"),
          new Emoji("6️⃣"),
+         new Emoji("🚫"),
       };
 
       private static readonly Emoji[] extraEmojis = {
          new Emoji("⬅️"),
          new Emoji("➡️"),
-         new Emoji("🚫"),
+         new Emoji("❌"),
          new Emoji("❓")
       };
 
       private enum RAID_EMOJI_INDEX
       {
-         ADD_PLAYER_0,
          ADD_PLAYER_1,
          ADD_PLAYER_2,
          ADD_PLAYER_3,
@@ -101,13 +99,13 @@ namespace PokeStar.ModuleParents
       private enum REMOTE_EMOJI_INDEX
       {
          REQUEST_INVITE,
-         REMOTE_PLAYER_0,
          REMOTE_PLAYER_1,
          REMOTE_PLAYER_2,
          REMOTE_PLAYER_3,
          REMOTE_PLAYER_4,
          REMOTE_PLAYER_5,
-         REMOTE_PLAYER_6
+         REMOTE_PLAYER_6,
+         REMOVE_REMOTE,
       }
 
       private enum EXTRA_EMOJI_INDEX
@@ -145,20 +143,7 @@ namespace PokeStar.ModuleParents
          if (raid.InvitingPlayer == null || !raid.InvitingPlayer.Equals(reactingPlayer))
          {
             bool needsUpdate = true;
-            if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_0]))
-            {
-               raid.PlayerAdd(reactingPlayer, 0);
-
-               Dictionary<SocketGuildUser, List<SocketGuildUser>> empty = raid.ClearEmptyPlayer(reactingPlayer);
-               foreach(KeyValuePair<SocketGuildUser, List<SocketGuildUser>> user in empty)
-               {
-                  foreach (SocketGuildUser invite in user.Value)
-                  {
-                     await invite.SendMessageAsync(BuildUnInvitedMessage(user.Key));
-                  }
-               }
-            }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_1]))
+            if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_1]))
             {
                raid.PlayerAdd(reactingPlayer, 1);
             }
@@ -476,20 +461,6 @@ namespace PokeStar.ModuleParents
                raid.RequestInvite(reactingPlayer);
                needEdit = true;
             }
-            else if (reaction.Emote.Equals(remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_0]))
-            {
-               raid.PlayerAdd(reactingPlayer, 0, reactingPlayer);
-
-               Dictionary<SocketGuildUser, List<SocketGuildUser>> empty = raid.ClearEmptyPlayer(reactingPlayer);
-               foreach (KeyValuePair<SocketGuildUser, List<SocketGuildUser>> user in empty)
-               {
-                  foreach (SocketGuildUser invite in user.Value)
-                  {
-                     await invite.SendMessageAsync(BuildUnInvitedMessage(user.Key));
-                  }
-               }
-               needEdit = true;
-            }
             else if (reaction.Emote.Equals(remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_1]))
             {
                raid.PlayerAdd(reactingPlayer, 1, reactingPlayer);
@@ -518,6 +489,20 @@ namespace PokeStar.ModuleParents
             else if (reaction.Emote.Equals(remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_6]))
             {
                raid.PlayerAdd(reactingPlayer, 6, reactingPlayer);
+               needEdit = true;
+            }
+            else if (reaction.Emote.Equals(remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOVE_REMOTE]))
+            {
+               raid.PlayerAdd(reactingPlayer, 0, reactingPlayer);
+
+               Dictionary<SocketGuildUser, List<SocketGuildUser>> empty = raid.ClearEmptyPlayer(reactingPlayer);
+               foreach (KeyValuePair<SocketGuildUser, List<SocketGuildUser>> user in empty)
+               {
+                  foreach (SocketGuildUser invite in user.Value)
+                  {
+                     await invite.SendMessageAsync(BuildUnInvitedMessage(user.Key));
+                  }
+               }
                needEdit = true;
             }
 
@@ -693,13 +678,13 @@ namespace PokeStar.ModuleParents
       {
          StringBuilder sb = new StringBuilder();
          sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REQUEST_INVITE]} Need Invite");
-         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_0]} No Remote Raiders");
          sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_1]} 1 Remote Raider");
          sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_2]} 2 Remote Raiders");
          sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_3]} 3 Remote Raiders");
          sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_4]} 4 Remote Raiders");
          sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_5]} 5 Remote Raiders");
          sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_6]} 6 Remote Raiders");
+         sb.AppendLine($"{remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOVE_REMOTE]} Remove Remote Raiders");
          sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]} Cancel");
 
          EmbedBuilder embed = new EmbedBuilder();
@@ -816,7 +801,7 @@ namespace PokeStar.ModuleParents
          StringBuilder sb = new StringBuilder();
          foreach (KeyValuePair<SocketGuildUser, int> player in players)
          {
-            sb.AppendLine($"{Global.NUM_EMOJIS[RaidGroup.GetTotalGroup(player.Value)]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} ");
+            sb.AppendLine($"{Global.NUM_EMOJIS[RaidGroup.GetTotalGroup(player.Value) - 1]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} ");
          }
          return sb.ToString();
       }
@@ -1018,14 +1003,12 @@ namespace PokeStar.ModuleParents
          muleEmojis[(int)MULE_EMOJI_INDEX.REQUEST_INVITE] = Emote.Parse(Global.NONA_EMOJIS["remote_pass_emote"]);
          remoteEmojis[(int)REMOTE_EMOJI_INDEX.REQUEST_INVITE] = Emote.Parse(Global.NONA_EMOJIS["remote_pass_emote"]);
 
-         raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_0] = Global.NUM_EMOJIS[(int)RAID_EMOJI_INDEX.ADD_PLAYER_0];
          raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_1] = Global.NUM_EMOJIS[(int)RAID_EMOJI_INDEX.ADD_PLAYER_1];
          raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_2] = Global.NUM_EMOJIS[(int)RAID_EMOJI_INDEX.ADD_PLAYER_2];
          raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_3] = Global.NUM_EMOJIS[(int)RAID_EMOJI_INDEX.ADD_PLAYER_3];
          raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_4] = Global.NUM_EMOJIS[(int)RAID_EMOJI_INDEX.ADD_PLAYER_4];
          raidEmojis[(int)RAID_EMOJI_INDEX.ADD_PLAYER_5] = Global.NUM_EMOJIS[(int)RAID_EMOJI_INDEX.ADD_PLAYER_5];
 
-         remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_0] = Global.NUM_EMOJIS[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_0 - 1];
          remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_1] = Global.NUM_EMOJIS[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_1 - 1];
          remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_2] = Global.NUM_EMOJIS[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_2 - 1];
          remoteEmojis[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_3] = Global.NUM_EMOJIS[(int)REMOTE_EMOJI_INDEX.REMOTE_PLAYER_3 - 1];
