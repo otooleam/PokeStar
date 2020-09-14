@@ -30,8 +30,7 @@ namespace PokeStar.ModuleParents
          new Emoji("✅"),
          new Emoji("✈️"),
          new Emoji("🤝"),
-         new Emoji("🚫"),
-         new Emoji("❓")
+         new Emoji("🚫")
       };
 
       protected static readonly IEmote[] muleEmojis = {
@@ -39,8 +38,7 @@ namespace PokeStar.ModuleParents
          new Emoji("✅"),
          new Emoji("✈️"),
          new Emoji("🤝"),
-         new Emoji("🚫"),
-         new Emoji("❓")
+         new Emoji("🚫")
       };
 
       private static readonly string[] raidEmojisDesc = {
@@ -73,7 +71,8 @@ namespace PokeStar.ModuleParents
       private static readonly Emoji[] extraEmojis = {
          new Emoji("⬅️"),
          new Emoji("➡️"),
-         new Emoji("🚫")
+         new Emoji("🚫"),
+         new Emoji("❓")
       };
 
       private enum RAID_EMOJI_INDEX
@@ -87,8 +86,7 @@ namespace PokeStar.ModuleParents
          PLAYER_READY,
          REMOTE_RAID,
          INVITE_PLAYER,
-         REMOVE_PLAYER,
-         HELP
+         REMOVE_PLAYER
       }
 
       private enum MULE_EMOJI_INDEX
@@ -97,8 +95,7 @@ namespace PokeStar.ModuleParents
          RAID_READY,
          REQUEST_INVITE,
          INVITE_PLAYER,
-         REMOVE_PLAYER,
-         HELP
+         REMOVE_PLAYER
       }
 
       private enum REMOTE_EMOJI_INDEX
@@ -117,7 +114,8 @@ namespace PokeStar.ModuleParents
       {
          BACK_ARROW,
          FORWARD_ARROR,
-         CANCEL
+         CANCEL,
+         HELP
       }
 
       private enum SUB_MESSAGE_TYPES
@@ -242,7 +240,7 @@ namespace PokeStar.ModuleParents
                   await reaction.Channel.SendMessageAsync(BuildRaidPingList(raid.Groups.ElementAt(returnValue.Item1).GetPingList(), raid.Location, returnValue.Item1 + 1, true));
                }
             }
-            else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
+            else if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.HELP]))
             {
                string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
                await reactingPlayer.SendMessageAsync(BuildRaidHelpMessage(raidEmojis, raidEmojisDesc));
@@ -344,7 +342,7 @@ namespace PokeStar.ModuleParents
                foreach (SocketGuildUser invite in returnValue)
                   await invite.SendMessageAsync($"{reactingPlayer.Nickname ?? reactingPlayer.Username} has left the raid. You have been moved back to \"Need Invite\".");
             }
-            else if (reaction.Emote.Equals(muleEmojis[(int)MULE_EMOJI_INDEX.HELP]))
+            else if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.HELP]))
             {
                string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
                await reactingPlayer.SendMessageAsync(BuildRaidHelpMessage(muleEmojis, muleEmojisDesc));
@@ -883,33 +881,32 @@ namespace PokeStar.ModuleParents
       private static string BuildRaidHelpMessage(IEmote[] emojis, string[] descriptions)
       {
          int offset = 0;
+         IEmote startEmoji = null;
+         IEmote endEmoji = null;
+         string desc = null;
          StringBuilder sb = new StringBuilder();
          sb.AppendLine("Raid Help:");
 
-         if (Global.SELECTION_EMOJIS.Contains(emojis[0]))
+         for (int i = 0; i < emojis.Length; i++)
          {
-            foreach (IEmote emoji in emojis)
+            if (Global.NUM_EMOJIS.Contains(emojis[i]))
             {
-               if (Global.SELECTION_EMOJIS.Contains(emoji))
+               if (startEmoji == null)
                {
-                  offset++;
+                  startEmoji = emojis[i];
+                  desc = descriptions[i];
                }
+               offset++;
             }
-            sb.AppendLine($"{emojis[0]} - {emojis[offset - 1]} {descriptions[0]}");
-         }
-
-         for (int i = offset; i < emojis.Length; i++)
-         {
-            if (!emojis[i].Equals(raidEmojis[(int)RAID_EMOJI_INDEX.HELP]))
+            else
             {
-               if (offset == 0)
+               if (startEmoji != null && endEmoji == null)
                {
-                  sb.AppendLine($"{emojis[i]} {descriptions[i]}");
+                  endEmoji = emojis[i - 1];
+                  sb.AppendLine($"{startEmoji} - {endEmoji} {descriptions[i - offset]}");
+                  offset--;
                }
-               else
-               {
-                  sb.AppendLine($"{emojis[i]} {descriptions[i - offset + 1]}");
-               }
+               sb.AppendLine($"{emojis[i]} {descriptions[i - offset]}");
             }
          }
          sb.AppendLine($"\nIf you are inviting players who have not requested an invite, please use the {raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE_RAID]} to indicate the amount.");
@@ -942,6 +939,12 @@ namespace PokeStar.ModuleParents
             sb.AppendLine(boss);
          }
          return sb.ToString();
+      }
+
+      protected static async Task SetEmojis(RestUserMessage raidMsg, IEmote[] emojis)
+      {
+         await raidMsg.AddReactionsAsync(emojis);
+         await raidMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.HELP]);
       }
 
       /// <summary>

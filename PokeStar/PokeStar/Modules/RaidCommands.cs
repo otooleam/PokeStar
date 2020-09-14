@@ -61,7 +61,7 @@ namespace PokeStar.Modules
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
-            await raidMsg.AddReactionsAsync(raidEmojis);
+            await SetEmojis(raidMsg, raidEmojis);
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
          }
@@ -73,7 +73,7 @@ namespace PokeStar.Modules
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
-            await raidMsg.AddReactionsAsync(raidEmojis);
+            await SetEmojis(raidMsg, raidEmojis);
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
          }
@@ -127,7 +127,7 @@ namespace PokeStar.Modules
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(raid, fileName));
-            await raidMsg.AddReactionsAsync(raidEmojis);
+            await SetEmojis(raidMsg, muleEmojis);
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
          }
@@ -139,7 +139,7 @@ namespace PokeStar.Modules
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(raid, fileName));
-            await raidMsg.AddReactionsAsync(raidEmojis);
+            await SetEmojis(raidMsg, muleEmojis);
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
          }
