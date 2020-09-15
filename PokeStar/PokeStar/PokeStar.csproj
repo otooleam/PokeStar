@@ -174,7 +174,8 @@
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ImageProcessors\ImageProcess.cs" />
     <Compile Include="ImageProcessors\RollImageProcess.cs" />
-    <Compile Include="ModuleParents\DexParent.cs" />
+    <Compile Include="ModuleParents\DexCommandParent.cs" />
+    <Compile Include="ModuleParents\RaidCommandParent.cs" />
     <Compile Include="Modules\BasicCommands.cs" />
     <Compile Include="Modules\ChannelRegisterCommands.cs" />
     <Compile Include="Modules\DexCommands.cs" />
@@ -187,6 +188,7 @@
     <Compile Include="DataModels\RaidBoss.cs" />
     <Compile Include="DataModels\Counter.cs" />
     <Compile Include="Modules\SystemEditCommands.cs" />
+    <Compile Include="Modules\TypeCommands.cs" />
     <Compile Include="PreConditions\RegisterChannelAttribute.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="DataModels\Raid.cs" />

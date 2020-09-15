@@ -13,7 +13,7 @@ using PokeStar.PreConditions;
 
 namespace PokeStar.Modules
 {
-   public class NicknameCommands : DexParent
+   public class NicknameCommands : DexCommandParent
    {
       private static readonly int ArrayLength = 2;
 

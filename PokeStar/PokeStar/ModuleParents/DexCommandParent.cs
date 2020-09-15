@@ -11,7 +11,7 @@ using PokeStar.DataModels;
 
 namespace PokeStar.ModuleParents
 {
-   public class DexParent : ModuleBase<SocketCommandContext>
+   public class DexCommandParent : ModuleBase<SocketCommandContext>
    {
       protected static readonly Color DexMessageColor = Color.Green;
       protected static readonly string POKEDEX_SELECTION_IMAGE = "pokeball.png";

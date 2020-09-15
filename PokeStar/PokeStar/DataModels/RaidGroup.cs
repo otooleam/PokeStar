@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Discord.WebSocket;
@@ -154,30 +153,35 @@ namespace PokeStar.DataModels
          {
             if (Attending.ContainsKey(player))
             {
-               if (remoteSize == 0)
+               if (remoteSize == Global.NO_ADD_VALUE)
                {
                   Attending[player] = SetValue(attendSize, GetRemote(Attending[player]));
                }
-               else if (attendSize == 0)
+               else if (attendSize == Global.NO_ADD_VALUE)
                {
                   Attending[player] = SetValue(GetAttending(Attending[player]), remoteSize);
                }
             }
             else if (Ready.ContainsKey(player))
             {
-               if (remoteSize == 0)
+               if (remoteSize == Global.NO_ADD_VALUE)
                {
                   Ready[player] = SetValue(attendSize, GetRemote(Ready[player]));
                }
-               else if (attendSize == 0)
+               else if (attendSize == Global.NO_ADD_VALUE)
                {
                   Ready[player] = SetValue(GetAttending(Ready[player]), remoteSize);
                }
             }
             else
             {
-               int partySize = (remoteSize << Global.REMOTE_SHIFT) | attendSize;
-               Attending.Add(player, partySize);
+               int attend = (attendSize == Global.NO_ADD_VALUE) ? 0 : attendSize;
+               int remote = (remoteSize == Global.NO_ADD_VALUE) ? 0 : remoteSize;
+               int partySize = (remote << Global.REMOTE_SHIFT) | attend;
+               if (partySize != 0)
+               {
+                  Attending.Add(player, partySize);
+               }
             }
          }
       }
@@ -215,6 +219,39 @@ namespace PokeStar.DataModels
          }
 
          return playerInvited;
+      }
+
+      public Dictionary<SocketGuildUser, List<SocketGuildUser>> ClearEmptyPlayers()
+      {
+         Dictionary<SocketGuildUser, List<SocketGuildUser>> empty = new Dictionary<SocketGuildUser, List<SocketGuildUser>>();
+         foreach (KeyValuePair<SocketGuildUser, int> user in Attending.Where(user => user.Value == 0))
+         {
+            empty.Add(user.Key, new List<SocketGuildUser>());
+            empty[user.Key].AddRange(Invited.Where(x => x.Value.Equals(user.Key)).Select(invite => invite.Key));
+         }
+         foreach (KeyValuePair<SocketGuildUser, int> user in Ready.Where(user => user.Value == 0))
+         {
+            empty.Add(user.Key, new List<SocketGuildUser>());
+            empty[user.Key].AddRange(Invited.Where(x => x.Value.Equals(user.Key)).Select(invite => invite.Key));
+         }
+
+         foreach (SocketGuildUser user in empty.Keys)
+         {
+            if (Attending.ContainsKey(user))
+            {
+               Attending.Remove(user);
+            }
+            else if (Ready.ContainsKey(user))
+            {
+               Ready.Remove(user);
+            }
+         }
+         foreach (SocketGuildUser user in empty.SelectMany(group => group.Value))
+         {
+            Invited.Remove(user);
+         }
+
+         return empty;
       }
 
       /// <summary>
@@ -377,8 +414,9 @@ namespace PokeStar.DataModels
             group.Invited.Clear();
          }
       }
-      public static int GetAttending(int value) => value & Global.ATTEND_MASK;
-      public static int GetRemote(int value) => (value & Global.REMOTE_MASK) >> Global.REMOTE_SHIFT;
+      public static int GetTotalGroup(int value) => GetAttending(value) + GetRemote(value);
+      private static int GetAttending(int value) => value & Global.ATTEND_MASK;
+      private static int GetRemote(int value) => (value & Global.REMOTE_MASK) >> Global.REMOTE_SHIFT;
       private int SetValue(int attend, int remote) => (remote << Global.REMOTE_SHIFT) | attend;
    }
 }

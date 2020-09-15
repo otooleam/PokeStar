@@ -45,7 +45,7 @@ namespace PokeStar.DataModels
             }
             if (group != InviteListNumber)
             {
-               Groups.ElementAt(group).Add(player, partySize, 0);
+               Groups.ElementAt(group).Add(player, partySize, Global.NO_ADD_VALUE);
             }
             else
             {
@@ -61,7 +61,7 @@ namespace PokeStar.DataModels
             }
             if (group != InviteListNumber)
             {
-               Groups.ElementAt(group).Add(player, 0, partySize);
+               Groups.ElementAt(group).Add(player, Global.NO_ADD_VALUE, partySize);
             }
             else
             {
@@ -188,6 +188,21 @@ namespace PokeStar.DataModels
             }
          }
          return Global.NOT_IN_RAID;
+      }
+
+      public Dictionary<SocketGuildUser, List<SocketGuildUser>> ClearEmptyPlayer(SocketGuildUser player)
+      {
+         int group = IsInRaid(player, false);
+         if (group != Global.NOT_IN_RAID)
+         {
+            Dictionary<SocketGuildUser, List<SocketGuildUser>> empty = Groups.ElementAt(group).ClearEmptyPlayers();
+            foreach (KeyValuePair<SocketGuildUser, List<SocketGuildUser>> user in empty)
+            {
+               Invite.AddRange(user.Value);
+            }
+            return empty;
+         }
+         return new Dictionary<SocketGuildUser, List<SocketGuildUser>>();
       }
 
       /// <summary>

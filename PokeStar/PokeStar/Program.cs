@@ -185,23 +185,23 @@ namespace PokeStar
       {
          IUserMessage message = await cachedMessage.GetOrDownloadAsync();
 
-         var chnl = message.Channel as SocketGuildChannel;
-         var guild = chnl.Guild.Id;
+         SocketGuildChannel chnl = message.Channel as SocketGuildChannel;
+         ulong guild = chnl.Guild.Id;
 
          IUser user = reaction.User.Value;
          if (message != null && reaction.User.IsSpecified && !user.IsBot)
          {
-            if (RaidCommands.IsRaidMessage(message.Id))
+            if (RaidCommandParent.IsRaidMessage(message.Id))
             {
-               await RaidCommands.RaidMessageReactionHandle(message, reaction);
+               await RaidCommandParent.RaidMessageReactionHandle(message, reaction);
             }
-            else if (RaidCommands.IsRaidSubMessage(message.Id))
+            else if (RaidCommandParent.IsRaidSubMessage(message.Id))
             {
-               await RaidCommands.RaidSubMessageReactionHandle(message, reaction);
+               await RaidCommandParent.RaidSubMessageReactionHandle(message, reaction);
             }
-            else if (DexParent.IsDexSubMessage(message.Id))
+            else if (DexCommandParent.IsDexSubMessage(message.Id))
             {
-               await DexParent.DexMessageReactionHandle(message, reaction, guild);
+               await DexCommandParent.DexMessageReactionHandle(message, reaction, guild);
             }
          }
          return Task.CompletedTask;
@@ -215,7 +215,7 @@ namespace PokeStar
       {
          SocketGuild server = client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(Global.HOME_SERVER, StringComparison.OrdinalIgnoreCase));
          SetEmotes(server);
-         RaidCommands.SetRemotePassEmote();
+         RaidCommandParent.SetRaidEmotes();
 
          foreach (SocketGuild guild in client.Guilds)
          {
@@ -265,6 +265,21 @@ namespace PokeStar
                      Global.ENV_FILE.GetValue(emote).ToString(),
                      StringComparison.OrdinalIgnoreCase)
                   ).ToString()).ToString();
+         }
+         
+         foreach (string emote in Global.NUM_EMOJI_NAMES)
+         {
+            Global.NUM_EMOJIS.Add(Emote.Parse(
+               server.Emotes.FirstOrDefault(
+                  x => x.Name.Equals(
+                     Global.ENV_FILE.GetValue(emote).ToString(),
+                     StringComparison.OrdinalIgnoreCase)
+                  ).ToString()));
+         }
+
+         for (int i = 0; i < Global.NUM_SELECTIONS; i++)
+         {
+            Global.SELECTION_EMOJIS[i] = Global.NUM_EMOJIS[i];
          }
       }
 
