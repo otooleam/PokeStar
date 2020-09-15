@@ -185,8 +185,8 @@ namespace PokeStar
       {
          IUserMessage message = await cachedMessage.GetOrDownloadAsync();
 
-         var chnl = message.Channel as SocketGuildChannel;
-         var guild = chnl.Guild.Id;
+         SocketGuildChannel chnl = message.Channel as SocketGuildChannel;
+         ulong guild = chnl.Guild.Id;
 
          IUser user = reaction.User.Value;
          if (message != null && reaction.User.IsSpecified && !user.IsBot)

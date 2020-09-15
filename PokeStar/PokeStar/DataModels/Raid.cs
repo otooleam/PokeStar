@@ -196,12 +196,9 @@ namespace PokeStar.DataModels
          if (group != Global.NOT_IN_RAID)
          {
             Dictionary<SocketGuildUser, List<SocketGuildUser>> empty = Groups.ElementAt(group).ClearEmptyPlayers();
-            foreach (var user in empty)
+            foreach (KeyValuePair<SocketGuildUser, List<SocketGuildUser>> user in empty)
             {
-               foreach (var invite in user.Value)
-               {
-                  Invite.Add(invite);
-               }
+               Invite.AddRange(user.Value);
             }
             return empty;
          }
