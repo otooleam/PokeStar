@@ -342,27 +342,75 @@ namespace PokeStar.Modules
       [RegisterChannel('D')]
       public async Task Evolution([Summary("Get evolution family for this Pokémon.")][Remainder] string pokemon)
       {
-         string name = GetPokemonName(pokemon);
-         Pokemon pkmn = Connections.Instance().GetPokemon(name);
-         if (pkmn == null)
+         bool isNumber = int.TryParse(pokemon, out int pokemonNum);
+         if (isNumber)
          {
-            List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+            List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
 
-            string fileName = POKEDEX_SELECTION_IMAGE;
-            Connections.CopyFile(fileName);
-            RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
-            await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
-            Connections.DeleteFile(fileName);
+            if (pokemonWithNumber.Count == 0)
+            {
+               await ResponseMessage.SendErrorMessage(Context, "evo", $"Pokémon with number {pokemonNum} cannot be found.");
+            }
+            else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER && pokemonNum != Global.ARCEUS_NUMBER)
+            {
+               string fileName = POKEDEX_SELECTION_IMAGE;
+               Connections.CopyFile(fileName);
+               RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonWithNumber, fileName));
+               Connections.DeleteFile(fileName);
+               for (int i = 0; i < pokemonWithNumber.Count; i++)
+               {
+                  await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
+               }
+               dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.EVO_MESSAGE, pokemonWithNumber));
+            }
+            else
+            {
+               Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber.First());
 
-            dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.EVO_MESSAGE, pokemonNames));
+               Dictionary<string, string> evolutions = GenerateEvoDict(pkmn.Name);
+               string fileName = Connections.GetPokemonPicture(evolutions.First().Key);
+               Connections.CopyFile(fileName);
+               await Context.Channel.SendFileAsync(fileName, embed: BuildEvoEmbed(evolutions, pkmn.Name, fileName));
+               Connections.DeleteFile(fileName);
+            }
          }
          else
          {
-            Dictionary<string, string> evolutions = GenerateEvoDict(pkmn.Name);
-            string firstFileName = Connections.GetPokemonPicture(evolutions.First().Key);
-            Connections.CopyFile(firstFileName);
-            await Context.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, pkmn.Name, firstFileName));
-            Connections.DeleteFile(firstFileName);
+            string name = GetPokemonName(pokemon);
+            Pokemon pkmn = Connections.Instance().GetPokemon(name);
+            if (pkmn == null)
+            {
+               pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
+
+               if (pkmn == null)
+               {
+                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+
+                  string fileName = POKEDEX_SELECTION_IMAGE;
+                  Connections.CopyFile(fileName);
+                  RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
+                  await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
+                  Connections.DeleteFile(fileName);
+
+                  dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.EVO_MESSAGE, pokemonNames));
+               }
+               else
+               {
+                  Dictionary<string, string> evolutions = GenerateEvoDict(pkmn.Name);
+                  string fileName = Connections.GetPokemonPicture(evolutions.First().Key);
+                  Connections.CopyFile(fileName);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildEvoEmbed(evolutions, pkmn.Name, fileName));
+                  Connections.DeleteFile(fileName);
+               }
+            }
+            else
+            {
+               Dictionary<string, string> evolutions = GenerateEvoDict(pkmn.Name);
+               string fileName = Connections.GetPokemonPicture(evolutions.First().Key);
+               Connections.CopyFile(fileName);
+               await Context.Channel.SendFileAsync(fileName, embed: BuildEvoEmbed(evolutions, pkmn.Name, fileName));
+               Connections.DeleteFile(fileName);
+            }
          }
       }
    }
