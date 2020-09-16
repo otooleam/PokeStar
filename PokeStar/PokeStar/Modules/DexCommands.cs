@@ -233,7 +233,7 @@ namespace PokeStar.Modules
       [Remarks("Leave blank to get all Pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
       [RegisterChannel('D')]
-      public async Task Form([Summary("Pokémon with forms.")] string pokemon)
+      public async Task Form([Summary("(Optional) Pokémon with forms.")] string pokemon = null)
       {
          if (pokemon == null)
          {
@@ -241,8 +241,8 @@ namespace PokeStar.Modules
             StringBuilder sb = new StringBuilder();
             for (int i = 1; i <= keys.Count; i++)
             {
-               string bold = (i % 2 == 0) ? "" : "**";
-               sb.Append($"{bold}{keys.ElementAt(i - 1)}{bold} ");
+               string format = (i % 2 == 0) ? "" : "**";
+               sb.Append($"{format}{keys.ElementAt(i - 1)}{format} ");
                if (i % 4 == 0)
                {
                   sb.Append("\n");
