@@ -68,6 +68,7 @@ namespace PokeStar.DataModels
             }
             else if (!shouldSplit)
             {
+               CheckMergeGroups();
                return true;
             }
 
