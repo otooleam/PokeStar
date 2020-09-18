@@ -27,11 +27,9 @@ namespace PokeStar.DataModels
       /// <param name="time">When the raid starts.</param>
       /// <param name="location">Where the raid is.</param>
       /// <param name="boss">Name of the raid boss.</param>
-      public RaidMule(short tier, string time, string location, string boss = null) : base(tier, time, location, boss)
+      public RaidMule(short tier, string time, string location, string boss = null) : 
+         base(Global.LIMIT_RAID_MULE_GROUP, Global.LIMIT_RAID_MULE_INVITE, Global.LIMIT_RAID_MULE_INVITE, tier, time, location, boss)
       {
-         RaidGroupLimit = Global.LIMIT_RAID_MULE_GROUP;
-         PlayerLimit = Global.LIMIT_RAID_MULE_INVITE;
-         InviteLimit = Global.LIMIT_RAID_MULE_INVITE;
          Mules = new RaidGroup(Global.LIMIT_RAID_MULE_MULE, 0);
       }
 
@@ -70,6 +68,7 @@ namespace PokeStar.DataModels
             }
             else if (!shouldSplit)
             {
+               CheckMergeGroups();
                return true;
             }
 

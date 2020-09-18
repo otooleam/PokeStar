@@ -12,17 +12,17 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Maximum number of raid groups.
       /// </summary>
-      protected int RaidGroupLimit { get; set; }
+      protected int RaidGroupLimit { get; private set; }
 
       /// <summary>
       /// Maximum number of players per group.
       /// </summary>
-      protected int PlayerLimit { get; set; }
+      protected int PlayerLimit { get; private set; }
 
       /// <summary>
       /// Maximum number of invites per group.
       /// </summary>
-      protected int InviteLimit { get; set; }
+      protected int InviteLimit { get; private set; }
 
       /// <summary>
       /// Group number used for Request Invite list.
@@ -87,8 +87,11 @@ namespace PokeStar.DataModels
       /// <param name="time"></param>
       /// <param name="location"></param>
       /// <param name="boss"></param>
-      public RaidParent(short tier, string time, string location, string boss = null)
+      public RaidParent(int groupLimit, int playerLimit, int inviteLimit, short tier, string time, string location, string boss = null)
       {
+         RaidGroupLimit = groupLimit;
+         PlayerLimit = playerLimit;
+         InviteLimit = inviteLimit;
          Tier = tier;
          Time = time;
          Location = location;
