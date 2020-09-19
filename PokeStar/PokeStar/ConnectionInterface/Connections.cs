@@ -75,6 +75,7 @@ namespace PokeStar.ConnectionInterface
          pokemonName = pokemonName.Replace(".", "");
          pokemonName = pokemonName.Replace("\'", "");
          pokemonName = pokemonName.Replace("?", "QU");
+         pokemonName = pokemonName.Replace("!", "EX");
          return pokemonName + ".png";
       }
 
