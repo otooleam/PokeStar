@@ -40,7 +40,7 @@ namespace PokeStar
          "toggleUseNonaTest"
       };
 
-      public static readonly int LIMIT_RAID             = 20;
+      public static readonly int LIMIT_RAID_PLAYER      = 20;
       public static readonly int LIMIT_RAID_INVITE      = 10;
       public static readonly int LIMIT_RAID_GROUP       = 3;
       public static readonly int LIMIT_RAID_MULE_MULE   = 2;

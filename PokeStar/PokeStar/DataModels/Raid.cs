@@ -18,7 +18,7 @@ namespace PokeStar.DataModels
       /// <param name="location">Where the raid is.</param>
       /// <param name="boss">Name of the raid boss.</param>
       public Raid(short tier, string time, string location, string boss = null) : 
-         base(Global.LIMIT_RAID_MULE_GROUP, Global.LIMIT_RAID_GROUP, Global.LIMIT_RAID_INVITE, tier, time, location, boss) { }
+         base(Global.LIMIT_RAID_GROUP, Global.LIMIT_RAID_PLAYER, Global.LIMIT_RAID_INVITE, tier, time, location, boss) { }
 
       /// <summary>
       /// Adds a player to a raid.

@@ -1042,13 +1042,13 @@ namespace PokeStar.ModuleParents
                   if (parent is Raid raid)
                   {
                      RestUserMessage raidMsg = await reaction.Channel.SendFileAsync(filename, embed: BuildRaidEmbed(raid, filename));
-                     await raidMsg.AddReactionsAsync(raidEmojis);
+                     await SetEmojis(raidMsg, raidEmojis);
                      raidMessages.Add(raidMsg.Id, parent);
                   }
                   else if (parent is RaidMule mule)
                   {
                      RestUserMessage raidMsg = await reaction.Channel.SendFileAsync(filename, embed: BuildRaidMuleEmbed(mule, filename));
-                     await raidMsg.AddReactionsAsync(muleEmojis);
+                     await SetEmojis(raidMsg, muleEmojis);
                      raidMessages.Add(raidMsg.Id, parent);
                   }
                   Connections.DeleteFile(filename);
