@@ -142,6 +142,21 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
+      /// Gets the total players in the raid group.
+      /// </summary>
+      /// <returns>Total players in raid group.</returns>
+      public int TotalPlayers()
+      {
+         return GetAttendingCount() + GetReadyCount() + GetRemoteCount();
+      }
+
+      public int GetRemoteCount()
+      {
+         return GetAttendingRemoteCount() + GetReadyRemoteCount() + GetInviteCount();
+      }
+
+
+      /// <summary>
       /// Adds a player to the raid group.
       /// If the user is already in the raid group, their party size is updated.
       /// </summary>
@@ -304,20 +319,6 @@ namespace PokeStar.DataModels
       public ImmutableList<SocketGuildUser> GetNotifyList()
       {
          return Ready.Keys.ToList().Union(Invited.Keys.ToList()).Union(Attending.Keys.ToList()).Distinct().ToImmutableList();
-      }
-
-      /// <summary>
-      /// Gets the total players in the raid group.
-      /// </summary>
-      /// <returns>Total players in raid group.</returns>
-      public int TotalPlayers()
-      {
-         return GetAttendingCount() + GetReadyCount() + GetRemoteCount();
-      }
-
-      public int GetRemoteCount()
-      {
-         return GetAttendingRemoteCount() + GetReadyRemoteCount() + GetInviteCount();
       }
 
       /// <summary>
