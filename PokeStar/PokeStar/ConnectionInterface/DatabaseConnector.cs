@@ -9,7 +9,7 @@ namespace PokeStar.ConnectionInterface
    {
       private string ConnectionString { get; set; }
 
-      protected readonly int TRUE = 1;
+      protected const int TRUE = 1;
 
       /// <summary>
       /// Creates a new DatabaseConnector.

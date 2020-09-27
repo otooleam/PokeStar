@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Text;
-using Discord;
+using System.Collections.Generic;
 
 namespace PokeStar.DataModels
 {
@@ -12,12 +10,12 @@ namespace PokeStar.DataModels
    public class Pokemon
    {
       /// <summary>
-      /// Number of the pokemon.
+      /// Number of the Pokémon.
       /// </summary>
       public int Number { get; set; }
 
       /// <summary>
-      /// Name of the pokemon.
+      /// Name of the Pokémon.
       /// </summary>
       public string Name { get; set; }
 
@@ -27,171 +25,175 @@ namespace PokeStar.DataModels
       public List<string> Forms { get; set; }
 
       /// <summary>
-      /// Description of the pokemon.
+      /// Description of the Pokémon.
       /// </summary>
       public string Description { get; set; }
 
       /// <summary>
-      /// Base attack of the pokemon.
+      /// Base attack of the Pokémon.
       /// </summary>
       public int Attack { get; set; }
 
       /// <summary>
-      /// Base defense of the pokemon.
+      /// Base defense of the Pokémon.
       /// </summary>
       public int Defense { get; set; }
 
       /// <summary>
-      /// Base stamina(hp) of the pokemon.
+      /// Base stamina(hp) of the Pokémon.
       /// </summary>
       public int Stamina { get; set; }
 
       /// <summary>
-      /// List of the pokemon's type(s).
+      /// List of the Pokémon's type(s).
       /// </summary>
       public List<string> Type { get; } = new List<string>();
 
       /// <summary>
-      /// List of weather that boosts the pokemon.
+      /// List of weather that boosts the Pokémon.
       /// </summary>
       public List<string> Weather { get; set; }
 
       /// <summary>
-      /// List of types the pokemon is weak to.
+      /// List of types the Pokémon is weak to.
       /// </summary>
       public List<string> Weakness { get; set; }
 
       /// <summary>
-      /// List of types the pokemon is resistant to.
+      /// List of types the Pokémon is resistant to.
       /// </summary>
       public List<string> Resistance { get; set; }
 
       /// <summary>
-      /// Region the pokemon is originally from.
+      /// Region the Pokémon is originally from.
       /// </summary>
       public string Region { get; set; }
 
       /// <summary>
-      /// Category of the pokemon.
+      /// Category of the Pokémon.
       /// </summary>
       public string Category { get; set; }
 
       /// <summary>
-      /// Buddy distance of the pokemon.
+      /// Buddy distance of the Pokémon.
       /// </summary>
       public int BuddyDistance { get; set; }
 
       /// <summary>
-      /// Is the pokemon obtainable.
+      /// Is the Pokémon obtainable.
       /// </summary>
       public bool Obtainable { get; set; }
 
       /// <summary>
-      /// Is the pokemon shinyable.
+      /// Is the Pokémon shinyable.
       /// </summary>
       public bool Shiny { get; set; }
 
       /// <summary>
-      /// Is the pokemon shadowable.
+      /// Is the Pokémon shadowable.
       /// </summary>
       public bool Shadow { get; set; }
 
       /// <summary>
-      /// Is the pokemon a regional.
+      /// Is the Pokémon a regional.
       /// </summary>
       public string Regional { get; set; }
 
       /// <summary>
-      /// List of the pokemon's fast moves.
+      /// List of the Pokémon's fast moves.
       /// </summary>
       public List<Move> FastMove { get; set; }
 
       /// <summary>
-      /// List of the pokemon's charge moves.
+      /// List of the Pokémon's charge moves.
       /// </summary>
       public List<Move> ChargeMove { get; set; }
 
       /// <summary>
-      /// List of counters of the pokemon.
+      /// List of counters of the Pokémon.
       /// </summary>
       public List<Counter> Counter { get; set; }
 
       /// <summary>
-      /// Maximum CP of the pokemon.
+      /// Maximum CP of the Pokémon.
       /// </summary>
       public int CPMax { get; set; }
 
       /// <summary>
-      /// Maximum best buddy CP of the pokemon.
+      /// Maximum best buddy CP of the Pokémon.
       /// </summary>
       public int CPBestBuddy { get; set; }
 
       /// <summary>
-      /// Minimum raid CP of the pokemon.
+      /// Minimum raid CP of the Pokémon.
       /// </summary>
       public int CPRaidMin { get; set; }
 
       /// <summary>
-      /// Maximum raid CP of the pokemon.
+      /// Maximum raid CP of the Pokémon.
       /// </summary>
       public int CPRaidMax { get; set; }
 
       /// <summary>
-      /// Minimum weather boosted CP of the pokemon.
+      /// Minimum weather boosted CP of the Pokémon.
       /// </summary>
       public int CPRaidBoostedMin { get; set; }
 
       /// <summary>
-      /// Maximum weather boosted CP of the pokemon.
+      /// Maximum weather boosted CP of the Pokémon.
       /// </summary>
       public int CPRaidBoostedMax { get; set; }
 
       /// <summary>
-      /// Minimum quest CP of the pokemon.
+      /// Minimum quest CP of the Pokémon.
       /// </summary>
       public int CPQuestMin { get; set; }
 
       /// <summary>
-      /// Maximum quest CP of the pokemon.
+      /// Maximum quest CP of the Pokémon.
       /// </summary>
       public int CPQuestMax { get; set; }
 
       /// <summary>
-      /// Minimum hatch CP of the pokemon.
+      /// Minimum hatch CP of the Pokémon.
       /// </summary>
       public int CPHatchMin { get; set; }
 
       /// <summary>
-      /// Maximum hatch CP of the pokemon.
+      /// Maximum hatch CP of the Pokémon.
       /// </summary>
       public int CPHatchMax { get; set; }
 
       /// <summary>
-      /// List of maximum wild CP of the pokemon.
+      /// List of maximum wild CP of the Pokémon.
       /// </summary>
       public List<int> CPWild { get; } = new List<int>();
 
       /// <summary>
-      /// 
+      /// Checks if the Pokémon is region locked.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>True if the Pokémon is region locked, otherwise false.</returns>
       public bool IsRegional()
       {
          return Regional != null;
       }
 
+      /// <summary>
+      /// Checks if the Pokémon has alternate forms.
+      /// </summary>
+      /// <returns>True if the Pokémon has alternate forms, otherwise false.</returns>
       public bool HasForms()
       {
          return Forms.Count > 1;
       }
 
       /// <summary>
-      /// Gets the details of the pokemon as a string.
+      /// Gets the details of the Pokémon as a string.
       /// Details include but are not limited to region, 
-      /// category, obtainability, shiny status, shadow status,
-      /// and if it is a regional.
+      /// category, obtainability, shiny status, and
+      /// shadow status.
       /// </summary>
-      /// <returns>Pokemon detail string.</returns>
+      /// <returns>Pokémon detail string.</returns>
       public string DetailsToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -207,9 +209,9 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// 
+      /// Gets the regions to find the Pokémon as a string.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Pokémon region string.</returns>
       public string RegionalToString()
       {
          List<string> regions = Regional.Split(',').ToList();
@@ -222,9 +224,9 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// 
+      /// Gets the forms of the Pokémon as a string.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Pokémon form string.</returns>
       public string FormsToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -236,10 +238,10 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Gets the stats of the pokemon as a string.
+      /// Gets the stats of the Pokémon as a string.
       /// Stats include Max CP, attack, defense, and stamina(hp).
       /// </summary>
-      /// <returns>Pokemon stat string.</returns>
+      /// <returns>Pokémon stats string.</returns>
       public string StatsToString() 
       {
          StringBuilder sb = new StringBuilder();
@@ -253,9 +255,9 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Gets the type(s) of the pokemon as a string.
+      /// Gets the type(s) of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokemon type string.</returns>
+      /// <returns>Pokémon type string.</returns>
       public string TypeToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -269,9 +271,9 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Gets the weather that boosts the pokemon as a string.
+      /// Gets the weather that boosts the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokemon weather string.</returns>
+      /// <returns>Pokémon weather string.</returns>
       public string WeatherToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -283,9 +285,9 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Gets the types the pokemon is weak to as a string.
+      /// Gets the types the Pokémon is weak to as a string.
       /// </summary>
-      /// <returns>Pokemon weakness string0</returns>
+      /// <returns>Pokémon weakness string.</returns>
       public string WeaknessToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -304,9 +306,9 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Gets the types the pokemon is resistant to as a string.
+      /// Gets the types the Pokémon is resistant to as a string.
       /// </summary>
-      /// <returns>Pokemon resistance string.</returns>
+      /// <returns>Pokémon resistance string.</returns>
       public string ResistanceToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -325,9 +327,9 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Gets the fast moves of the pokemon as a string.
+      /// Gets the fast moves of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokemon fast move string.</returns>
+      /// <returns>Pokémon fast move string.</returns>
       public string FastMoveToString()
       {
          if (FastMove.Count == 0)
@@ -356,9 +358,9 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Gets the charge moves of the pokemon as a string.
+      /// Gets the charge moves of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokemon charge move string.</returns>
+      /// <returns>Pokémon charge move string.</returns>
       public string ChargeMoveToString()
       {
          if (ChargeMove.Count == 0)
@@ -387,10 +389,9 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Gets the top counters of the pokemon as a string.
-      /// Note this is not yet implemented.
+      /// Gets the top counters of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokemon counter string.</returns>
+      /// <returns>Pokémon counter string.</returns>
       public string CounterToString()
       {
          if (Counter.Count == 0)
@@ -407,40 +408,40 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Gets raid CPs of the pokemon as a string.
+      /// Gets raid CPs of the Pokémon as a string.
       /// Includes min and max CPs and weather boosted
       /// min and max CPs.
       /// </summary>
-      /// <returns>Pokemon raid CP string.</returns>
+      /// <returns>Pokémon raid CP string.</returns>
       public string RaidCPToString()
       {
          return $"{CPRaidMin} - {CPRaidMax}\n{CPRaidBoostedMin}* - {CPRaidBoostedMax}*";
       }
 
       /// <summary>
-      /// Gets the min and max quest CPs of the pokemon as a string.
+      /// Gets the min and max quest CPs of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokemon quest CP string.</returns>
+      /// <returns>Pokémon quest CP string.</returns>
       public string QuestCPToString()
       {
          return $"{CPQuestMin} - {CPQuestMax}";
       }
 
       /// <summary>
-      /// Gets the min and max hatch CPs of the pokemon as a string.
+      /// Gets the min and max hatch CPs of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokemon hatch CP string.</returns>
+      /// <returns>Pokémon hatch CP string.</returns>
       public string HatchCPToString()
       {
          return $"{CPHatchMin} - {CPHatchMax}";
       }
 
       /// <summary>
-      /// Gets all max wild CPs of the pokemon as a string.
+      /// Gets all max wild CPs of the Pokémon as a string.
       /// Wild CP goes from level 1 to 35 in full level 
       /// increments.
       /// </summary>
-      /// <returns>Pokemon max wild CP string.</returns>
+      /// <returns>Pokémon max wild CP string.</returns>
       public string WildCPToString()
       {
          StringBuilder sb = new StringBuilder();

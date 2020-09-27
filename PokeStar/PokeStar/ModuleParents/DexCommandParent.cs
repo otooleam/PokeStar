@@ -1,8 +1,8 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -13,11 +13,24 @@ namespace PokeStar.ModuleParents
 {
    public class DexCommandParent : ModuleBase<SocketCommandContext>
    {
+      /// <summary>
+      /// Color used for dex command embeds.
+      /// </summary>
       protected static readonly Color DexMessageColor = Color.Green;
+
+      /// <summary>
+      /// Empty raid image file name.
+      /// </summary>
       protected static readonly string POKEDEX_SELECTION_IMAGE = "pokeball.png";
 
+      /// <summary>
+      /// Saved dex messages.
+      /// </summary>
       protected static readonly Dictionary<ulong, Tuple<int, List<string>>> dexMessages = new Dictionary<ulong, Tuple<int, List<string>>>();
 
+      /// <summary>
+      /// Types of dex sub messages.
+      /// </summary>
       protected enum DEX_MESSAGE_TYPES
       {
          DEX_MESSAGE,
@@ -26,12 +39,74 @@ namespace PokeStar.ModuleParents
          NICKNAME_MESSAGE,
       }
 
+      /// Message checkers
+
       /// <summary>
-      /// 
+      /// Checks if a message is a dex message.
       /// </summary>
-      /// <param name="pokemon"></param>
-      /// <param name="fileName"></param>
-      /// <returns></returns>
+      /// <param name="id">Id of the message.</param>
+      /// <returns>True if the message is a dex message, otherwise false.</returns>
+      public static bool IsDexSubMessage(ulong id)
+      {
+         return dexMessages.ContainsKey(id);
+      }
+
+      /// Message reaction handlers
+
+      /// <summary>
+      /// Handles a reaction on a dex message.
+      /// </summary>
+      /// <param name="message">Message that was reacted on.</param>
+      /// <param name="reaction">Reaction that was sent.</param>
+      /// <returns>Completed Task.</returns>
+      public static async Task DexMessageReactionHandle(IMessage message, SocketReaction reaction, ulong guildId)
+      {
+         Tuple<int, List<string>> dexMessage = dexMessages[message.Id];
+         for (int i = 0; i < dexMessage.Item2.Count; i++)
+         {
+            if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[i]))
+            {
+               await message.DeleteAsync();
+               Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
+               string fileName = Connections.GetPokemonPicture(pokemon.Name);
+               Connections.CopyFile(fileName);
+               if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.DEX_MESSAGE)
+               {
+                  await reaction.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pokemon, fileName));
+               }
+               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.CP_MESSAGE)
+               {
+                  Connections.CalcAllCP(ref pokemon);
+                  await reaction.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName));
+               }
+               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.EVO_MESSAGE)
+               {
+                  Dictionary<string, string> evolutions = GenerateEvoDict(pokemon.Name);
+                  string firstFileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CopyFile(firstFileName);
+                  await reaction.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, pokemon.Name, firstFileName));
+                  Connections.DeleteFile(firstFileName);
+               }
+               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE)
+               {
+                  List<string> nicknames = Connections.Instance().GetNicknames(guildId, pokemon.Name);
+                  await reaction.Channel.SendFileAsync(fileName, embed: BuildNicknameEmbed(nicknames, pokemon.Name, fileName));
+               }
+               Connections.DeleteFile(fileName);
+               return;
+            }
+         }
+         await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
+      }
+
+      /// Embed builders
+
+      /// <summary>
+      /// Builds a dex embed.
+      /// </summary>
+      /// <param name="pokemon">Pokémon to display</param>
+      /// <param name="fileName">Name of image file.</param>
+      /// <returns>Embed for viewing a Pokémon.</returns>
       protected static Embed BuildDexEmbed(Pokemon pokemon, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
@@ -61,11 +136,11 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// 
+      /// Builds a cp embed
       /// </summary>
-      /// <param name="pokemon"></param>
-      /// <param name="fileName"></param>
-      /// <returns></returns>
+      /// <param name="pokemon">Pokémon to display.</param>
+      /// <param name="fileName">Name of image file.</param>
+      /// <returns>Embed for viewing a Pokémon's CP.</returns>
       protected static Embed BuildCPEmbed(Pokemon pokemon, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
@@ -84,12 +159,12 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// 
+      /// Builds an evolution embed.
       /// </summary>
-      /// <param name="evolutions"></param>
-      /// <param name="initialPokemon"></param>
-      /// <param name="fileName"></param>
-      /// <returns></returns>
+      /// <param name="evolutions">Dictionary of evolutions.</param>
+      /// <param name="initialPokemon">Pokémon that was searched for.</param>
+      /// <param name="fileName">Name of image file.</param>
+      /// <returns>Embed for viewing a Pokémon's evolutions.</returns>
       protected static Embed BuildEvoEmbed(Dictionary<string, string> evolutions, string initialPokemon, string fileName)
       {
 
@@ -117,13 +192,13 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// 
+      /// Builds a nickname embed.
       /// </summary>
-      /// <param name="nicknames"></param>
-      /// <param name="name"></param>
-      /// <param name="fileName"></param>
-      /// <returns></returns>
-      protected static Embed BuildNicknameEmbed(List<string> nicknames, string name, string fileName)
+      /// <param name="nicknames">List of nicknames.</param>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="fileName">Name of image file.</param>
+      /// <returns>Embed for viewing a Pokémon's nicknames.</returns>
+      protected static Embed BuildNicknameEmbed(List<string> nicknames, string pokemonName, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithThumbnailUrl($"attachment://{fileName}");
@@ -131,7 +206,7 @@ namespace PokeStar.ModuleParents
 
          if (nicknames.Count == 0)
          {
-            embed.WithTitle($"There are no nicknames registered for {name}.");
+            embed.WithTitle($"There are no nicknames registered for {pokemonName}.");
          }
          else
          {
@@ -140,18 +215,18 @@ namespace PokeStar.ModuleParents
             {
                sb.AppendLine(nickname);
             }
-            embed.AddField($"**Nicknames for {name}**", sb.ToString());
+            embed.AddField($"**Nicknames for {pokemonName}**", sb.ToString());
          }
          return embed.Build();
       }
 
       /// <summary>
-      /// Builds the pokedex select embed.
+      /// Builds the PokéDex select embed.
       /// </summary>
-      /// <param name="potentials">List of potential Pokemon.</param>
-      /// <param name="selectPic">Name of picture file to get.</param>
-      /// <returns>Embed for selecting raid boss.</returns>
-      protected static Embed BuildDexSelectEmbed(List<string> potentials, string selectPic)
+      /// <param name="potentials">List of potential Pokémon.</param>
+      /// <param name="fileName">Name of image file.</param>
+      /// <returns>Embed for selecting a Pokémon.</returns>
+      protected static Embed BuildDexSelectEmbed(List<string> potentials, string fileName)
       {
          StringBuilder sb = new StringBuilder();
          for (int i = 0; i < potentials.Count; i++)
@@ -162,16 +237,18 @@ namespace PokeStar.ModuleParents
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(DexMessageColor);
          embed.WithTitle($"Pokemon Selection");
-         embed.WithThumbnailUrl($"attachment://{selectPic}");
+         embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Do you mean...?", sb.ToString());
          return embed.Build();
       }
 
+      /// Name processors
+
       /// <summary>
-      /// Processes the pokemon name given from a command.
+      /// Processes the Pokémon name given from a command.
       /// </summary>
-      /// <param name="pokemonName">Name of the pokemon.</param>
-      /// <returns>Full name of the pokemon</returns>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>Full name of the Pokémon.</returns>
       protected static string GetPokemonName(string pokemonName)
       {
          List<string> words = new List<string>(pokemonName.Split(' '));
@@ -197,8 +274,8 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// Gets the full name of a pokemon.
-      /// The following pokemon have multiple forms:
+      /// Gets the full name of a Pokémon.
+      /// The following Pokémon have multiple forms:
       /// Name       Default Form
       /// -----------------------
       /// Unown      F
@@ -217,11 +294,11 @@ namespace PokeStar.ModuleParents
       /// Thundurus  Incarnate
       /// Landorus   Incarnate
       /// Meloetta   Aria
-      /// Note: nidoran defaults to the female form.
+      /// Note: Nidoran defaults to the female form.
       /// </summary>
-      /// <param name="pokemonName">Name of the pokemon</param>
-      /// <param name="form">Form of the pokemon.</param>
-      /// <returns>Full name of the pokemon.</returns>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="form">Form of the Pokémon.</param>
+      /// <returns>Full name of the Pokémon.</returns>
       private static string GetFullName(string pokemonName, string form = "")
       {
          if (form.Length == 2)
@@ -385,19 +462,34 @@ namespace PokeStar.ModuleParents
          return pokemonName;
       }
 
-      public static Dictionary<string, string> GenerateEvoDict(string pokemon)
+      /// Evolution processors
+
+      /// <summary>
+      /// Generage an ordered dictionary of evolutions.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>Ordered dictionary of evolutions.</returns>
+      public static Dictionary<string, string> GenerateEvoDict(string pokemonName)
       {
-         List<Evolution> initEvoFamily = Connections.Instance().GetEvolutionFamily(pokemon);
+         List<Evolution> initEvoFamily = Connections.Instance().GetEvolutionFamily(pokemonName);
 
          if (initEvoFamily.Count == 0)
          {
             return new Dictionary<string, string>()
             {
-               [pokemon] = ""
+               [pokemonName] = ""
             };
          }
 
-         List<Evolution> normalEvoFamily = NormalizeEvolutions(initEvoFamily);
+         foreach (Evolution evo in initEvoFamily)
+         {
+            foreach (Evolution evoComp in initEvoFamily)
+            {
+               evo.Combine(evoComp);
+            }
+         }
+         List<Evolution> normalEvoFamily = initEvoFamily.Where(x => x.Candy != Global.BAD_EVOLUTION).ToList();
+
          string basePokemon = normalEvoFamily.First().Start;
          bool baseChanged = true;
          while (baseChanged)
@@ -413,118 +505,61 @@ namespace PokeStar.ModuleParents
             }
          }
 
-         EvolutionNode tree = CreateEvolutionNode(basePokemon, normalEvoFamily);
-         return EvolutionNodesToString(tree);
+         EvolutionNode tree = BuildEvolutionTree(basePokemon, normalEvoFamily);
+         return EvolutionTreeToString(tree);
       }
 
-      private static List<Evolution> NormalizeEvolutions(List<Evolution> evolutions)
-      {
-         foreach (Evolution evo in evolutions)
-         {
-            foreach (Evolution evoComp in evolutions)
-            {
-               evo.Combine(evoComp);
-            }
-         }
-         return evolutions.Where(x => x.Candy != Global.BAD_EVOLUTION).ToList();
-      }
-
-      private static EvolutionNode CreateEvolutionNode(string name, List<Evolution> evolutions)
+      /// <summary>
+      /// Recursivly builds an evolution tree.
+      /// A tree is made up of evolution nodes.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="evolutions">List of evolutions.</param>
+      /// <returns>Evolution node that starts the tree.</returns>
+      private static EvolutionNode BuildEvolutionTree(string pokemonName, List<Evolution> evolutions)
       {
          string method = "";
          foreach (Evolution evo in evolutions)
          {
-            if (name.Equals(evo.End, StringComparison.OrdinalIgnoreCase))
+            if (pokemonName.Equals(evo.End, StringComparison.OrdinalIgnoreCase))
             {
-               method = evo.EvolutionMethod();
+               method = evo.MethodToString();
             }
          }
 
          EvolutionNode node = new EvolutionNode
          {
-            Name = name,
+            Name = pokemonName,
             Method = method
          };
 
          foreach (Evolution evo in evolutions)
          {
-            if (name.Equals(evo.Start, StringComparison.OrdinalIgnoreCase))
+            if (pokemonName.Equals(evo.Start, StringComparison.OrdinalIgnoreCase))
             {
-               node.Evolutions.Add(CreateEvolutionNode(evo.End, evolutions));
+               node.Evolutions.Add(BuildEvolutionTree(evo.End, evolutions));
             }
          }
          return node;
       }
 
-      private static Dictionary<string, string> EvolutionNodesToString(EvolutionNode node, string prevEvo = null)
+      /// <summary>
+      /// Converts an evolution tree to a dictionary.
+      /// </summary>
+      /// <param name="node">Node to convert to dictionary.</param>
+      /// <param name="previousEvolution">Name of previous evolution.</param>
+      /// <returns>Ordered dictionary of evolutions.</returns>
+      private static Dictionary<string, string> EvolutionTreeToString(EvolutionNode node, string previousEvolution = null)
       {
          Dictionary<string, string> evolutions = new Dictionary<string, string>();
-
-         string evoString = prevEvo == null ? "Base Form" : $"Evolves from {prevEvo} with {node.Method}";
-
+         string evoString = previousEvolution == null ? "Base Form" : $"Evolves from {previousEvolution} with {node.Method}";
          evolutions.Add(node.Name, evoString);
 
          foreach (EvolutionNode evo in node.Evolutions)
          {
-            evolutions = evolutions.Union(EvolutionNodesToString(evo, node.Name)).ToDictionary(x => x.Key, x => x.Value);
+            evolutions = evolutions.Union(EvolutionTreeToString(evo, node.Name)).ToDictionary(x => x.Key, x => x.Value);
          }
          return evolutions;
-      }
-
-      /// <summary>
-      /// 
-      /// </summary>
-      /// <param name="id"></param>
-      /// <returns></returns>
-      public static bool IsDexSubMessage(ulong id)
-      {
-         return dexMessages.ContainsKey(id);
-      }
-
-      /// <summary>
-      /// 
-      /// </summary>
-      /// <param name="message"></param>
-      /// <param name="reaction"></param>
-      /// <returns></returns>
-      public static async Task DexMessageReactionHandle(IMessage message, SocketReaction reaction, ulong guildId = 0)
-      {
-         Tuple<int, List<string>> dexMessage = dexMessages[message.Id];
-         for (int i = 0; i < dexMessage.Item2.Count; i++)
-         {
-            if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[i]))
-            {
-               await message.DeleteAsync();
-               Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
-               string fileName = Connections.GetPokemonPicture(pokemon.Name);
-               Connections.CopyFile(fileName);
-               if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.DEX_MESSAGE)
-               {
-                  await reaction.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pokemon, fileName));
-               }
-               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.CP_MESSAGE)
-               {
-                  Connections.CalcAllCP(ref pokemon);
-                  await reaction.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName));
-               }
-               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.EVO_MESSAGE)
-               {
-                  Dictionary<string, string> evolutions = GenerateEvoDict(pokemon.Name);
-                  string firstFileName = Connections.GetPokemonPicture(pokemon.Name);
-                  Connections.CopyFile(firstFileName);
-                  await reaction.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, pokemon.Name, firstFileName));
-                  Connections.DeleteFile(firstFileName);
-               }
-               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE)
-               {
-                  List<string> nicknames = Connections.Instance().GetNicknames(guildId, pokemon.Name);
-                  await reaction.Channel.SendFileAsync(fileName, embed: BuildNicknameEmbed(nicknames, pokemon.Name, fileName));
-               }
-               Connections.DeleteFile(fileName);
-               return;
-            }
-         }
-         await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
       }
    }
 }

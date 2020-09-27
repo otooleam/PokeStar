@@ -3,14 +3,14 @@ using System.Collections.Generic;
 namespace PokeStar.DataModels
 {
    /// <summary>
-   /// Raid boss pokemon.
+   /// Raid boss Pokémon.
    /// </summary>
    public class RaidBoss
    {
       /// <summary>
       /// Name of the raid boss.
       /// </summary>
-      public string Name { get; set; }
+      public string Name { get; set; } = Global.DEFAULT_RAID_BOSS_NAME;
 
       /// <summary>
       /// Base attack of the raid boss.
@@ -71,13 +71,5 @@ namespace PokeStar.DataModels
       /// Maximum weather boosted CP of the raid boss.
       /// </summary>
       public int CPHighBoosted { get; set; }
-
-      /// <summary>
-      /// Creates an empty raid boss.
-      /// </summary>
-      public RaidBoss()
-      {
-         Name = Global.DEFAULT_RAID_BOSS_NAME;
-      }
    }
 }

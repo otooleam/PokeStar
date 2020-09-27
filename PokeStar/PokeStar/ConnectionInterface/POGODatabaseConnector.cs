@@ -3,7 +3,6 @@ using System.Text;
 using System.Data.SqlClient;
 using System.Collections.Generic;
 using PokeStar.DataModels;
-using PokeStar.Modules;
 
 namespace PokeStar.ConnectionInterface
 {
@@ -12,6 +11,23 @@ namespace PokeStar.ConnectionInterface
    /// </summary>
    public class POGODatabaseConnector : DatabaseConnector
    {
+      private readonly List<Move> ShadowMoves = new List<Move>()
+      {
+         new Move
+         {
+            Name = "Frustration",
+            Type = "Normal",
+            IsLegacy = false
+         },
+         new Move
+         {
+            Name = "Return",
+            Type = "Normal",
+            IsLegacy = false
+         }
+      };
+
+
       /// <summary>
       /// Creates a new POGO database connector.
       /// </summary>
@@ -19,9 +35,9 @@ namespace PokeStar.ConnectionInterface
       public POGODatabaseConnector(string connectionString) : base(connectionString) { }
 
       /// <summary>
-      /// 
+      /// Gets a list of all Pokémon names.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>List of Pokémon names.</returns>
       public List<string> GetNameList()
       {
          List<string> names = new List<string>();
@@ -42,9 +58,9 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets a raid boss given it's name.
+      /// Gets a raid boss by name.
       /// </summary>
-      /// <param name="raidBossName">The name of the raid boss.</param>
+      /// <param name="raidBossName">Name of the raid boss.</param>
       /// <returns>A raid boss if the name is in the database, otherwise null.</returns>
       public RaidBoss GetRaidBoss(string raidBossName)
       {
@@ -81,10 +97,10 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets a pokemon given it's name.
+      /// Gets a Pokémon by name.
       /// </summary>
-      /// <param name="pokemonName">Name of the pokemon.</param>
-      /// <returns>A pokemon if the name is in the database, otherwise null.</returns>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>A Pokémon if the name is in the database, otherwise null.</returns>
       public Pokemon GetPokemon(string pokemonName)
       {
          Pokemon pokemon = null;
@@ -128,10 +144,10 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// 
+      /// Gets a list of Pokémon by number
       /// </summary>
-      /// <param name="pokemonNumber"></param>
-      /// <returns></returns>
+      /// <param name="pokemonNumber">Number of the Pokémon.</param>
+      /// <returns>List of all Pokémon with the number.</returns>
       public List<string> GetPokemonByNumber(int pokemonNumber)
       {
          List<string> pokemon = new List<string>();
@@ -160,7 +176,7 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Gets all weather that boosts the given types.
       /// </summary>
-      /// <param name="types">List of types to get weather for.</param>
+      /// <param name="types">List of types.</param>
       /// <returns>List of weather that boosts the givent types.</returns>
       public List<string> GetWeather(List<string> types)
       {
@@ -189,9 +205,9 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets defensive type relations for a pokemon's type.
+      /// Gets defensive type relations for a Pokémon's type.
       /// </summary>
-      /// <param name="types">List of pokemon types.</param>
+      /// <param name="types">List of the Pokémon's types.</param>
       /// <returns>Dictionary of types and modifiers.</returns>
       public Dictionary<string, int> GetTypeDefenseRelations(List<string> types)
       {
@@ -250,12 +266,12 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets moves of a pokemon.
+      /// Gets moves of a Pokémon.
       /// </summary>
-      /// <param name="pokemonName">Name of the pokemon.</param>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="fast">Is the type of move a fast move, else charge move.</param>
-      /// <param name="shadowable">Is the pokemon shadowable.</param>
-      /// <returns>List of moves of the pokemon.</returns>
+      /// <param name="shadowable">Is the Pokémon shadowable.</param>
+      /// <returns>List of moves of the Pokémon.</returns>
       public List<Move> GetMoves(string pokemonName, bool fast = true, bool shadowable = false)
       {
          List<Move> moves = new List<Move>();
@@ -287,27 +303,16 @@ namespace PokeStar.ConnectionInterface
          }
          if (!fast && shadowable)
          {
-            moves.Add(new Move
-            {
-               Name = "Frustration",
-               Type = "Normal",
-               IsLegacy = false
-            });
-            moves.Add(new Move
-            {
-               Name = "Return",
-               Type = "Normal",
-               IsLegacy = false
-            });
+            moves.AddRange(ShadowMoves);
          }
          return moves;
       }
 
       /// <summary>
-      /// Gets the top counters of a pokemon.
+      /// Gets the top counters of a Pokémon.
       /// </summary>
-      /// <param name="pokemonName">Pokemon to get counters for.</param>
-      /// <returns>List of counters to a pokemon.</returns>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>List of counters to a Pokémon.</returns>
       public List<Counter> GetCounters(string pokemonName)
       {
          List<Counter> counters = new List<Counter>();
@@ -342,10 +347,9 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets a move that a pokemon can learn.
-      /// Returns null if pokemon cannot learn the move.
+      /// Gets a move that a Pokémon can learn.
       /// </summary>
-      /// <param name="pokemonName">Pokemon to get move for.</param>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="moveName">Name of the move.</param>
       /// <returns>Move that the pokemon can learn, otherwise null.</returns>
       public Move GetPokemonMove(string pokemonName, string moveName)
@@ -379,10 +383,10 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// 
+      /// Get all evolutions a Pokemon is part of.
       /// </summary>
-      /// <param name="pokemonName"></param>
-      /// <returns></returns>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>List of evolutions the Pokémon is part of.</returns>
       public List<Evolution> GetEvolutions(string pokemonName)
       {
          List<Evolution> evolutions = new List<Evolution>();

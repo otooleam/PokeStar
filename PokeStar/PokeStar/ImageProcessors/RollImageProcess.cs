@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Net;
+using System.Linq;
 using System.Drawing;
 using System.Collections.Generic;
 using Discord.Commands;
@@ -29,93 +29,95 @@ namespace PokeStar.ImageProcessors
          if (!Connections.Instance().GetSetupComplete(context.Guild.Id))
          {
             await ResponseMessage.SendWarningMessage(context, "Roll image proccessing", "Setup has not been completed for this server.");
-            return;
-         }
-         string url = attachments.ElementAt(0).Url;
-         string imagePath = $@"{Global.PROGRAM_PATH}\Images\profile\{user.Username}.png";
-         string plainText = null;
-         int colorIndex = -1;
-         Color[] teamColors = { Global.ROLE_COLOR_VALOR, Global.ROLE_COLOR_MYSTIC, Global.ROLE_COLOR_INSTINCT };
-
-         using (WebClient client = new WebClient())
-         {
-            client.DownloadFile(new Uri(url), imagePath);
-         }
-
-         using (Image image = Image.FromFile(imagePath))
-         {
-            using (Bitmap bitmap = ImageProcess.ScaleImage(image, 495, 880))
-            {
-               using (OcrApi api = OcrApi.Create())
-               {
-                  api.Init(Languages.English);
-                  plainText = api.GetTextFromImage(bitmap, Global.IMAGE_RECT_NICKNAME);
-               }
-               Color avgColor = GetAvgColor(bitmap, Global.IMAGE_RECT_TEAM_COLOR);
-               colorIndex = ClosestColor(new List<Color>(teamColors), avgColor);
-            }
-         }
-
-         if (plainText != null)
-         {
-            int nameEndIndex = Math.Min(plainText.IndexOf('\n'), plainText.IndexOf(' '));
-            try
-            {
-               string nickname = plainText.Substring(0, nameEndIndex);
-               await user.ModifyAsync(x => { x.Nickname = nickname; });
-
-               await ResponseMessage.SendInfoMessage(context, $"{user.Username} now has the nickname {nickname}");
-            }
-            catch (Exception e)
-            {
-               Console.WriteLine(e.Message);
-               await ResponseMessage.SendWarningMessage(context, "Roll image proccessing", $"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{context.Guild.Name}\"");
-            }
-         }
-
-         if (colorIndex != Global.ROLE_INDEX_NO_TEAM_FOUND)
-         {
-            SocketRole valor = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase));
-            SocketRole mystic = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase));
-            SocketRole instinct = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase));
-            if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) != null)
-            {
-               await user.RemoveRoleAsync(valor);
-            }
-            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) != null)
-            {
-               await user.RemoveRoleAsync(mystic);
-            }
-            else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) != null)
-            {
-               await user.RemoveRoleAsync(instinct);
-            }
-
-            string teamName = "";
-            if (colorIndex == Global.ROLE_INDEX_VALOR)
-            {
-               teamName = "Valor";
-            }
-            else if (colorIndex == Global.ROLE_INDEX_MYSTIC)
-            {
-               teamName = "Mystic";
-            }
-            else if (colorIndex == Global.ROLE_INDEX_INSTINCT)
-            {
-               teamName = "Instinct";
-            }
-
-            Discord.IRole team = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(teamName, StringComparison.OrdinalIgnoreCase));
-            await (user as Discord.IGuildUser).AddRoleAsync(team);
-
-            SocketRole role = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(Global.ROLE_TRAINER, StringComparison.OrdinalIgnoreCase));
-            await (user as Discord.IGuildUser).AddRoleAsync(role);
-
-            await ResponseMessage.SendInfoMessage(context, $"{user.Username} now has the {Global.ROLE_TRAINER} role and the {teamName} role");
          }
          else
          {
-            await ResponseMessage.SendWarningMessage(context, "Roll image proccessing", $"An error occured while attempting to determine a team for {user.Username}.");
+            string url = attachments.ElementAt(0).Url;
+            string imagePath = $@"{Global.PROGRAM_PATH}\Images\profile\{user.Username}.png";
+            string plainText = null;
+            int colorIndex = -1;
+            Color[] teamColors = { Global.ROLE_COLOR_VALOR, Global.ROLE_COLOR_MYSTIC, Global.ROLE_COLOR_INSTINCT };
+
+            using (WebClient client = new WebClient())
+            {
+               client.DownloadFile(new Uri(url), imagePath);
+            }
+
+            using (Image image = Image.FromFile(imagePath))
+            {
+               using (Bitmap bitmap = ImageProcess.ScaleImage(image, Global.SCALE_WIDTH, Global.SCALE_HEIGHT))
+               {
+                  using (OcrApi api = OcrApi.Create())
+                  {
+                     api.Init(Languages.English);
+                     plainText = api.GetTextFromImage(bitmap, Global.IMAGE_RECT_NICKNAME);
+                  }
+                  Color avgColor = GetAvgColor(bitmap, Global.IMAGE_RECT_TEAM_COLOR);
+                  colorIndex = ClosestColor(new List<Color>(teamColors), avgColor);
+               }
+            }
+
+            if (plainText != null)
+            {
+               int nameEndIndex = Math.Min(plainText.IndexOf('\n'), plainText.IndexOf(' '));
+               try
+               {
+                  string nickname = plainText.Substring(0, nameEndIndex);
+                  await user.ModifyAsync(x => { x.Nickname = nickname; });
+
+                  await ResponseMessage.SendInfoMessage(context, $"{user.Username} now has the nickname {nickname}");
+               }
+               catch (Exception e)
+               {
+                  Console.WriteLine(e.Message);
+                  await ResponseMessage.SendWarningMessage(context, "Roll image proccessing", $"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{context.Guild.Name}\"");
+               }
+            }
+
+            if (colorIndex == Global.ROLE_INDEX_NO_TEAM_FOUND)
+            {
+               await ResponseMessage.SendWarningMessage(context, "Roll image proccessing", $"An error occured while attempting to determine a team for {user.Username}.");
+            }
+            else
+            {
+               SocketRole valor = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase));
+               SocketRole mystic = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase));
+               SocketRole instinct = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase));
+               if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Valor", StringComparison.OrdinalIgnoreCase)) != null)
+               {
+                  await user.RemoveRoleAsync(valor);
+               }
+               else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Mystic", StringComparison.OrdinalIgnoreCase)) != null)
+               {
+                  await user.RemoveRoleAsync(mystic);
+               }
+               else if (user.Roles.FirstOrDefault(x => x.Name.ToString().Equals("Instinct", StringComparison.OrdinalIgnoreCase)) != null)
+               {
+                  await user.RemoveRoleAsync(instinct);
+               }
+
+               string teamName = "";
+               if (colorIndex == Global.ROLE_INDEX_VALOR)
+               {
+                  teamName = "Valor";
+               }
+               else if (colorIndex == Global.ROLE_INDEX_MYSTIC)
+               {
+                  teamName = "Mystic";
+               }
+               else if (colorIndex == Global.ROLE_INDEX_INSTINCT)
+               {
+                  teamName = "Instinct";
+               }
+
+               Discord.IRole team = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(teamName, StringComparison.OrdinalIgnoreCase));
+               await (user as Discord.IGuildUser).AddRoleAsync(team);
+
+               SocketRole role = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(Global.ROLE_TRAINER, StringComparison.OrdinalIgnoreCase));
+               await (user as Discord.IGuildUser).AddRoleAsync(role);
+
+               await ResponseMessage.SendInfoMessage(context, $"{user.Username} now has the {Global.ROLE_TRAINER} role and the {teamName} role");
+            }
          }
       }
 

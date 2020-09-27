@@ -8,19 +8,20 @@ using PokeStar.Calculators;
 namespace PokeStar.ConnectionInterface
 {
    /// <summary>
-   /// Manages backend connections
+   /// Manages backend connections to the databases.
    /// </summary>
    public class Connections
    {
       private static Connections connections;
 
-      private static readonly string PokemonImageFolder = "PokemonImages";
+      private const string PokemonImageFolder = "PokemonImages";
 
       private readonly POGODatabaseConnector POGODBConnector;
       private readonly NONADatabaseConnector NONADBConnector;
+
       private List<string> PokemonNames;
 
-      private readonly int NumSuggestions = 10;
+      private const int NumSuggestions = 10;
 
       /// <summary>
       /// Creates a new Connections object.
@@ -49,7 +50,7 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Copy a file from PokemonImages to the location of the application.
       /// </summary>
-      /// <param name="fileName">Name of file to copy.</param>
+      /// <param name="fileName">Name of the file.</param>
       public static void CopyFile(string fileName)
       {
          System.IO.File.Copy($"{Global.PROGRAM_PATH}\\{PokemonImageFolder}\\{fileName}", $"{Global.PROGRAM_PATH}\\{fileName}", true);
@@ -58,17 +59,17 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Delete a file from the location of the application.
       /// </summary>
-      /// <param name="fileName">Name of file to delete.</param>
+      /// <param name="fileName">Name of the file.</param>
       public static void DeleteFile(string fileName)
       {
          System.IO.File.Delete($"{Global.PROGRAM_PATH}\\{fileName}");
       }
 
       /// <summary>
-      /// Converts a pokemon's name to its file name.
+      /// Converts a Pokémon's name to its file name.
       /// </summary>
-      /// <param name="pokemonName">Name of pokemon.</param>
-      /// <returns>Pokemon picture file name.</returns>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>Pokémon picture file name.</returns>
       public static string GetPokemonPicture(string pokemonName)
       {
          pokemonName = pokemonName.Replace(" ", "_");
@@ -80,17 +81,17 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets a list of current raid bosses from The Silph Road.
+      /// Gets a list of current raid bosses for a given tier.
       /// </summary>
-      /// <param name="tier">Tier of bosses to get.</param>
-      /// <returns>List of current raid bosses in the given tier.</returns>
+      /// <param name="tier">Tier of bosses.</param>
+      /// <returns>List of current raid bosses for the tier.</returns>
       public static List<string> GetBossList(int tier)
       {
          return SilphData.GetRaidBossesTier(tier);
       }
 
       /// <summary>
-      /// Updates the list of pokemon to use for the fuzzy search.
+      /// Updates the list of Pokémon to use for the fuzzy search.
       /// </summary>
       public void UpdateNameList()
       {
@@ -98,10 +99,10 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Searches for the closest pokemon names to a given name
+      /// Searches for the closest Pokémon names to a given name.
       /// </summary>
-      /// <param name="name">Name to check pokemon names against.</param>
-      /// <returns>List of the closest pokemon names.</returns>
+      /// <param name="name">User input name.</param>
+      /// <returns>List of the closest Pokémon names.</returns>
       public List<string> FuzzyNameSearch(string name)
       {
          Dictionary<string, double> fuzzy = new Dictionary<string, double>();
@@ -164,11 +165,11 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets a given pokemon.
-      /// Calculates max CP value of the pokemon.
+      /// Gets a given Pokémon.
+      /// Calculates max CP value of the Pokémon.
       /// </summary>
-      /// <param name="pokemonName">Name of the pokemon.</param>
-      /// <returns>The pokemon coresponding to the name, otherwise null.</returns>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>The Pokémon coresponding to the name, otherwise null.</returns>
       public Pokemon GetPokemon(string pokemonName)
       {
          if (pokemonName == null)
@@ -206,6 +207,12 @@ namespace PokeStar.ConnectionInterface
          return pokemon;
       }
 
+      /// <summary>
+      /// Gets all evolutions in a Pokémon's evolution family.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="namesChecked">Pokémon in the familly already checked.</param>
+      /// <returns>List of evolutions in the Pokémon's family.</returns>
       public List<Evolution> GetEvolutionFamily(string pokemonName, List<string> namesChecked = null)
       {
          if (namesChecked == null)
@@ -240,10 +247,10 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Calculates all of the relevant CP valus of a pokemon. This
+      /// Calculates all of the relevant CP valus of a Pokémon. This
       /// includes the raid, quest, hatch, and wild perfect IV values.
       /// </summary>
-      /// <param name="pokemon">Reference to pokemon to calc cp for.</param>
+      /// <param name="pokemon">Reference to the Pokemon object.</param>
       public static void CalcAllCP(ref Pokemon pokemon)
       {
          if (pokemon != null)
@@ -298,10 +305,10 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets all pokemon that have a given number.
+      /// Gets all Pokémon that have a given number.
       /// </summary>
-      /// <param name="pokemonNumber">Pokemon number to find</param>
-      /// <returns>List of pokemon with the given number.</returns>
+      /// <param name="pokemonNumber">Number of the Pokémon</param>
+      /// <returns>List of Pokémon with the given number.</returns>
       public List<string> GetPokemonByNumber(int pokemonNumber)
       {
          return POGODBConnector.GetPokemonByNumber(pokemonNumber);
@@ -312,17 +319,17 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       /// <param name="originalName">User input name.</param>
       /// <returns>Name formated for the POGO database</returns>
-      private string ReformatName(string originalName)
+      private static string ReformatName(string originalName)
       {
          int index = originalName.IndexOf('\'');
          return index == -1 ? originalName : originalName.Insert(index, "\'");
       }
 
       /// <summary>
-      /// Gets defensive type relations for a pokemon's type.
+      /// Gets defensive type relations for a Pokémon's type.
       /// Separates weaknesses and resistances.
       /// </summary>
-      /// <param name="types">List of pokemon types.</param>
+      /// <param name="types">List of Pokémon types.</param>
       /// <returns>Dictionaries of types and modifiers.</returns>
       public Tuple<Dictionary<string, int>, Dictionary<string, int>> GetTypeDefenseRelations(List<string> types)
       {
@@ -351,7 +358,7 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Gets all weather that boosts the given types.
       /// </summary>
-      /// <param name="types">List of types to get weather for.</param>
+      /// <param name="types">List of types.</param>
       /// <returns>List of weather that boosts the givent types.</returns>
       public List<string> GetWeather(List<string> types)
       {
@@ -361,7 +368,7 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Adds settings to the database for a guild.
       /// </summary>
-      /// <param name="guild">Id of guild to add settings for.</param>
+      /// <param name="guild">Id of the guild.</param>
       public void InitSettings(ulong guild)
       {
          NONADBConnector.AddSettings(guild);
@@ -370,7 +377,7 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Gets the prefix of a guild.
       /// </summary>
-      /// <param name="guild">Id of guild to get prefix of.</param>
+      /// <param name="guild">Id of the guild.</param>
       /// <returns>Prefix registerd for the guild.</returns>
       public string GetPrefix(ulong guild)
       {
@@ -380,7 +387,7 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Check if setup is completed for a guild.
       /// </summary>
-      /// <param name="guild">Id of guild to get setup status of.</param>
+      /// <param name="guild">Id of the guild.</param>
       /// <returns>True if setup is complete for the guild, otherwise false.</returns>
       public bool GetSetupComplete(ulong guild)
       {
@@ -390,7 +397,7 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Updates the prefix of the guild.
       /// </summary>
-      /// <param name="guild">Id of the guild to set the prefix for.</param>
+      /// <param name="guild">Id of the guild.</param>
       /// <param name="prefix">New prefix value.</param>
       public void UpdatePrefix(ulong guild, string prefix)
       {
@@ -400,7 +407,7 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Marks a guild setup as complete
       /// </summary>
-      /// <param name="guild">Id of the guild to complete setup for.</param>
+      /// <param name="guild">Id of the guild.</param>
       public void CompleteSetup(ulong guild)
       {
          NONADBConnector.CompleteSetup(guild);
@@ -409,7 +416,7 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Deletes the settings of a guild.
       /// </summary>
-      /// <param name="guild">Id of guild to delete settings of.</param>
+      /// <param name="guild">Id of guild.</param>
       public void DeleteSettings(ulong guild)
       {
          NONADBConnector.DeleteSettings(guild);
@@ -418,8 +425,8 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Gets the registration of a channel.
       /// </summary>
-      /// <param name="guild">Id of the guild that has the channel.</param>
-      /// <param name="channel">Id of the channel that the registration is for.</param>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="channel">Id of the channel in the guild.</param>
       /// <returns>Registration string for the channel, otherwise null.</returns>
       public string GetRegistration(ulong guild, ulong channel)
       {
@@ -429,8 +436,8 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Updates the registration of a channel.
       /// </summary>
-      /// <param name="guild">Id of the guild that has the channel.</param>
-      /// <param name="channel">Id of the channel to update the registration of.</param>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="channel">Id of the channel in the guild.</param>
       /// <param name="register">New registration value.</param>
       public void UpdateRegistration(ulong guild, ulong channel, string register)
       {
@@ -449,8 +456,8 @@ namespace PokeStar.ConnectionInterface
       /// If no channel is given then all registrations for the guild are
       /// deleted.
       /// </summary>
-      /// <param name="guild">Id of the guild that has the channel, or to remove registrations from.</param>
-      /// <param name="channel">Id of the channel to remove the registration from.</param>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="channel">Id of the channel in the guild.</param>
       public void DeleteRegistration(ulong guild, ulong? channel = null)
       {
          if (channel == null)
@@ -459,26 +466,55 @@ namespace PokeStar.ConnectionInterface
             NONADBConnector.DeleteRegistration(guild, (ulong)channel);
       }
 
+      /// <summary>
+      /// Gets a Pokémon by its guild nickname.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="nickname">Nickname of the Pokémon.</param>
+      /// <returns>Name of the Pokémon if it is assigned, otherwise null.</returns>
       public string GetPokemonWithNickname(ulong guild, string nickname)
       {
          return NONADBConnector.GetPokemon(guild, nickname);
       }
 
-      public List<string> GetNicknames(ulong guild, string pokemon)
+      /// <summary>
+      /// Gets a guild's list of nicknames for a Pokémon.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>List of nicknames assigned to the Pokémon for the guild.</returns>
+      public List<string> GetNicknames(ulong guild, string pokemonName)
       {
-         return NONADBConnector.GetNicknames(guild, pokemon);
+         return NONADBConnector.GetNicknames(guild, pokemonName);
       }
 
-      public void AddNickname(ulong guild, string nickname, string pokemon)
+      /// <summary>
+      /// Adds a nickname to a Pokémon for a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild</param>
+      /// <param name="nickname">Nickname for the Pokémon.</param>
+      /// <param name="pokemonName">Pokémon the nickname applies to.</param>
+      public void AddNickname(ulong guild, string nickname, string pokemonName)
       {
-         NONADBConnector.AddNickname(guild, pokemon, nickname);
+         NONADBConnector.AddNickname(guild, pokemonName, nickname);
       }
 
+      /// <summary>
+      /// Updates the nickname of a Pokémon for a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="oldNickname">Nickname to replace.</param>
+      /// <param name="newNickname">Nickname to replace with.</param>
       public void UpdateNickname(ulong guild, string oldNickname, string newNickname)
       {
          NONADBConnector.UpdateNickname(guild, newNickname, oldNickname);
       }
 
+      /// <summary>
+      /// Deletes a nickname from a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="nickname">Nickname to delete.</param>
       public void DeleteNickname(ulong guild, string nickname)
       {
          NONADBConnector.DeleteNickname(guild, nickname);

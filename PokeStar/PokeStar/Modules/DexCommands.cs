@@ -18,6 +18,12 @@ namespace PokeStar.Modules
    /// </summary>
    public class DexCommands : DexCommandParent
    {
+      /// <summary>
+      /// Dictionary of all Pokémon with form differences flags
+      /// Values are tuples with item1 as a the list of form flags
+      /// and item2 with the default form flag. Item1 is delimeted
+      /// by commas (,).
+      /// </summary>
       private static readonly Dictionary<string, Tuple<string, string>> pokemonForms = new Dictionary<string, Tuple<string, string>>(StringComparer.OrdinalIgnoreCase)
       {
          ["Venusaur"] = new Tuple<string, string>("-mega", ""),
@@ -245,7 +251,7 @@ namespace PokeStar.Modules
                sb.Append($"{format}{keys.ElementAt(i - 1)}{format} ");
                if (i % 4 == 0)
                {
-                  sb.Append("\n");
+                  sb.Append('\n');
                }
             }
 
@@ -312,7 +318,7 @@ namespace PokeStar.Modules
                   sb.Append(form);
                   if (form.Equals(forms.Item2))
                   {
-                     sb.Append("*");
+                     sb.Append('*');
                   }
                   sb.Append('\n');
                }
