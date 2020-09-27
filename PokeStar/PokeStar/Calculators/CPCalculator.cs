@@ -3,10 +3,13 @@
 namespace PokeStar.Calculators
 {
    /// <summary>
-   /// Calculates CP of a pokemon.
+   /// Calculates CP of a Pokémon.
    /// </summary>
    public static class CPCalculator
    {
+      /// <summary>
+      /// CPM for whole levels.
+      /// </summary>
       private static readonly double[] discrete_cp_multiplier = {
          0.094     ,  0.16639787,  0.21573247,  0.25572005,  0.29024988,
          0.3210876 ,  0.34921268,  0.37523559,  0.39956728,  0.42250001,
@@ -19,6 +22,9 @@ namespace PokeStar.Calculators
          0.79530001,  0.8003    ,  0.8053    ,  0.81029999,  0.81529999,
       };
 
+      /// <summary>
+      /// CPM step for half levels.
+      /// </summary>
       private static readonly double[][] cpm_step_list = {
           new double[] { 1, 9.5, 0.009426125469 },
           new double[] { 10, 19.5, 0.008919025675 },
@@ -65,24 +71,24 @@ namespace PokeStar.Calculators
       }
 
       /// <summary>
-      /// Calculates the attack value for a pokemon.
+      /// Calculates the attack value for a Pokémon.
       /// </summary>
-      /// <param name="attackStat">Attack stat of the pokemon.</param>
-      /// <param name="attackIv">Attack IV of the pokemon.</param>
-      /// <param name="level">Level of the Pokemon.</param>
-      /// <returns>Attack value of the pokemon.</returns>
+      /// <param name="attackStat">Attack stat of the Pokémon.</param>
+      /// <param name="attackIv">Attack IV of the Pokémon.</param>
+      /// <param name="level">Level of the Pokémon.</param>
+      /// <returns>Attack value of the Pokémon.</returns>
       private static double CalcAttack(int attackStat, int attackIv, double level)
       {
          return (attackStat + attackIv) * CalcCPM(level);
       }
 
       /// <summary>
-      /// Calculates the defense value for a pokemon.
+      /// Calculates the defense value for a Pokémon.
       /// </summary>
-      /// <param name="defenseStat">Defense stat of the pokemon.</param>
-      /// <param name="defenseIv">Defense IV of the pokemon.</param>
-      /// <param name="level">Level of the pokemon.</param>
-      /// <returns>Defense value of the pokemon.</returns>
+      /// <param name="defenseStat">Defense stat of the Pokémon.</param>
+      /// <param name="defenseIv">Defense IV of the Pokémon.</param>
+      /// <param name="level">Level of the Pokémon.</param>
+      /// <returns>Defense value of the Pokémon.</returns>
       private static double CalcDefense(int defenseStat, int defenseIv, double level)
       {
          return (defenseStat + defenseIv) * CalcCPM(level);
@@ -101,16 +107,16 @@ namespace PokeStar.Calculators
       }
 
       /// <summary>
-      /// Calculates the CP of pokemon at a given level.
+      /// Calculates the CP of Pokémon at a given level.
       /// </summary>
-      /// <param name="attackStat">Attack stat of the pokemon.</param>
-      /// <param name="defenseStat">Defense stat of the pokemon.</param>
-      /// <param name="staminaStat">Stamina stat of the pokemon.</param>
-      /// <param name="attackIv">Attack IV of the pokemon.</param>
-      /// <param name="defenseIv">Defense IV of the pokemon.</param>
-      /// <param name="staminaIv">Stamina IV of the pokemon.</param>
-      /// <param name="level">Level of the pokemon.</param>
-      /// <returns>CP of the pokemon.</returns>
+      /// <param name="attackStat">Attack stat of the Pokémon.</param>
+      /// <param name="defenseStat">Defense stat of the Pokémon.</param>
+      /// <param name="staminaStat">Stamina stat of the Pokémon.</param>
+      /// <param name="attackIv">Attack IV of the Pokémon.</param>
+      /// <param name="defenseIv">Defense IV of the Pokémon.</param>
+      /// <param name="staminaIv">Stamina IV of the Pokémon.</param>
+      /// <param name="level">Level of the Pokémon.</param>
+      /// <returns>CP of the Pokémon.</returns>
       public static int CalcCPPerLevel(int attackStat, int defenseStat, int staminaStat,
                                        int attackIv, int defenseIv, int staminaIv, double level)
       {

@@ -1,11 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Discord;
-using Discord.Commands;
 using Discord.Rest;
+using Discord.Commands;
 using PokeStar.ConnectionInterface;
 using PokeStar.DataModels;
 using PokeStar.ModuleParents;
@@ -15,10 +14,10 @@ namespace PokeStar.Modules
 {
    public class NicknameCommands : DexCommandParent
    {
-      private static readonly int ArrayLength = 2;
+      private const int NumArguments = 2;
 
-      private static readonly int IndexNickname = 0;
-      private static readonly int IndexName = 1;
+      private const int IndexNickname = 0;
+      private const int IndexName = 1;
 
       [Command("nickname")]
       [Summary("Edit Pokémon nicknames.")]
@@ -52,7 +51,7 @@ namespace PokeStar.Modules
          else
          {
             string[] arr = nicknameString.Split(Global.NICKNAME_DELIMITER);
-            if (arr.Length != ArrayLength)
+            if (arr.Length != NumArguments)
             {
                await ResponseMessage.SendErrorMessage(Context, "nickname", $"Too many delimiters found.");
             }

@@ -282,16 +282,7 @@ namespace PokeStar.Modules
 
             if (simpleEdit || editComplete)
             {
-               List<SocketGuildUser> allUsers = new List<SocketGuildUser>();
-               foreach (RaidGroup group in parent.Groups)
-               {
-                  allUsers.AddRange(group.GetNotifyList());
-               }
-               allUsers.AddRange(parent.GetReadonlyInviteList());
-               if (parent is RaidMule mule)
-               {
-                  allUsers.AddRange(mule.Mules.GetReadonlyAttending().Keys);
-               }
+               List<SocketGuildUser> allUsers = parent.GetAllUsers();
                await ReplyAsync(BuildEditPingList(allUsers.ToImmutableList(), (SocketGuildUser)Context.User, attribute, edit));
                await Context.Message.DeleteAsync();
             }
@@ -308,11 +299,11 @@ namespace PokeStar.Modules
       [RegisterChannel('R')]
       public async Task Bosses()
       {
-         List<string> exBosses = SilphData.GetRaidBossesTier(EX_RAID_TIER);
-         List<string> megaBosses = SilphData.GetRaidBossesTier(MEGA_RAID_TIER);
-         List<string> legendaryBosses = SilphData.GetRaidBossesTier(LEGENDARY_RAID_TIER);
-         List<string> rareBosses = SilphData.GetRaidBossesTier(RARE_RAID_TIER);
-         List<string> commonBosses = SilphData.GetRaidBossesTier(COMMON_RAID_TIER);
+         List<string> exBosses = Connections.GetBossList(EX_RAID_TIER);
+         List<string> megaBosses = Connections.GetBossList(MEGA_RAID_TIER);
+         List<string> legendaryBosses = Connections.GetBossList(LEGENDARY_RAID_TIER);
+         List<string> rareBosses = Connections.GetBossList(RARE_RAID_TIER);
+         List<string> commonBosses = Connections.GetBossList(COMMON_RAID_TIER);
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(RaidMessageColor);
@@ -331,7 +322,7 @@ namespace PokeStar.Modules
       /// </summary>
       /// <param name="tier"></param>
       /// <returns></returns>
-      protected short GenerateTier(string tier)
+      protected static short GenerateTier(string tier)
       {
          if (tier.Equals("m", StringComparison.OrdinalIgnoreCase) ||
              tier.Equals("mega", StringComparison.OrdinalIgnoreCase) ||

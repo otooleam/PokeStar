@@ -3,16 +3,15 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
-using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using Newtonsoft.Json.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using PokeStar.Modules;
+using PokeStar.ModuleParents;
 using PokeStar.ImageProcessors;
 using PokeStar.ConnectionInterface;
-using PokeStar.ModuleParents;
 
 namespace PokeStar
 {
@@ -21,14 +20,17 @@ namespace PokeStar
    /// </summary>
    public class Program
    {
+      /// <summary>
+      /// Services
+      /// </summary>
       private static DiscordSocketClient client;
       private static CommandService commands;
       private static IServiceProvider services;
-
-      private bool loggingInProgress = false;
-
+      
       private readonly int SizeMessageCashe = 100;
       private readonly LogSeverity DefaultLogLevel = LogSeverity.Info;
+
+      private bool loggingInProgress;
 
       /// <summary>
       /// Main function for the system.
@@ -255,7 +257,7 @@ namespace PokeStar
       /// Sets the emotes from a JSON file
       /// </summary>
       /// <param name="server">Server that the emotes are on.</param>
-      private void SetEmotes(SocketGuild server)
+      private static void SetEmotes(SocketGuild server)
       {
          foreach (string emote in Global.EMOTE_NAMES)
          {
@@ -283,22 +285,46 @@ namespace PokeStar
          }
       }
 
-      public static string GetStatus()
-      {
-         return client.Status.ToString();
-      }
-      public static string GetConnectionState()
-      {
-         return client.ConnectionState.ToString();
-      }
-      public static int GetGuildCount()
-      {
-         return client.Guilds.Count;
-      }
+      /// <summary>
+      /// Get the name of the bot.
+      /// </summary>
+      /// <returns></returns>
       public static string GetName()
       {
          return client.CurrentUser.Username;
       }
+
+      /// <summary>
+      /// Get the status of the bot.
+      /// </summary>
+      /// <returns></returns>
+      public static string GetStatus()
+      {
+         return client.Status.ToString();
+      }
+
+      /// <summary>
+      /// Get the connection status of the bot.
+      /// </summary>
+      /// <returns></returns>
+      public static string GetConnectionState()
+      {
+         return client.ConnectionState.ToString();
+      }
+
+      /// <summary>
+      /// Get the number of guilds the bot is in.
+      /// </summary>
+      /// <returns></returns>
+      public static int GetGuildCount()
+      {
+         return client.Guilds.Count;
+      }
+
+      /// <summary>
+      /// Get the latency of the bot and the server in milliseconds (ms).
+      /// </summary>
+      /// <returns></returns>
       public static int GetLatency()
       {
          return client.Latency;

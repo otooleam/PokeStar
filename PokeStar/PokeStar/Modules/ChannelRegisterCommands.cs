@@ -1,9 +1,9 @@
 ﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using Discord.Commands;
 using PokeStar.DataModels;
 using PokeStar.ConnectionInterface;
-using System.Text;
 
 namespace PokeStar.Modules
 {
@@ -137,7 +137,7 @@ namespace PokeStar.Modules
             return null;
          }
 
-         if (existing.Equals(string.Empty))
+         if (existing.Length == 0)
          {
             return new Tuple<string, bool>(add, CheckSetupComplete);
          }

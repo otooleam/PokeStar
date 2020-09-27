@@ -7,7 +7,10 @@ namespace PokeStar.Calculators
    /// </summary>
    public static class TypeCalculator
    {
-      private static readonly double TypeCoefficient = 1.6;
+      /// <summary>
+      /// Coefficient for type effectivness.
+      /// </summary>
+      private const double TypeCoefficient = 1.6;
 
       /// <summary>
       /// Calculate the type effectivness from the multipler.

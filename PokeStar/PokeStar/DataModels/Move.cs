@@ -1,10 +1,8 @@
-﻿using System;
-using Discord;
-
+﻿
 namespace PokeStar.DataModels
 {
    /// <summary>
-   /// Pokemon's move.
+   /// Pokémon's move.
    /// </summary>
    public class Move
    {
@@ -32,7 +30,7 @@ namespace PokeStar.DataModels
          string str = $@"{Name} {Global.NONA_EMOJIS[$"{Type}_emote"]}";
          if (IsLegacy)
          {
-            str += " !";
+            str += $" {Global.LEGACY_MOVE}";
          }
          return str;
       }

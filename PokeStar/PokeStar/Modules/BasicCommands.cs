@@ -14,6 +14,10 @@ namespace PokeStar.Modules
       [Summary("Pong Pong Pong")]
       public async Task Ping() => await ResponseMessage.SendInfoMessage(Context, "Pong");
 
+      [Command("marco")]
+      [Summary("Play marco polo")]
+      public async Task Marco() => await ResponseMessage.SendInfoMessage(Context, "Polo!");
+
       [Command("status")]
       [Summary("Get Nona's status")]
       public async Task Status()

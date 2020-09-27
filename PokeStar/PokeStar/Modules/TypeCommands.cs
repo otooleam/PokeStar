@@ -6,13 +6,16 @@ using Discord;
 using Discord.Commands;
 using PokeStar.DataModels;
 using PokeStar.Calculators;
-using PokeStar.ConnectionInterface;
 using PokeStar.PreConditions;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
    public class TypeCommands : ModuleBase<SocketCommandContext>
    {
+      /// <summary>
+      /// Color used for type command embeds.
+      /// </summary>
       private static readonly Color TypeMessageColor = Color.Teal;
 
       [Command("type")]
@@ -136,7 +139,7 @@ namespace PokeStar.Modules
       /// <summary>
       /// Checks if a type is vaid.
       /// </summary>
-      /// <param name="type">The type to check.</param>
+      /// <param name="type">Type to check.</param>
       /// <returns>True if the type is valid, otherwise false.</returns>
       private static bool CheckValidType(string type)
       {

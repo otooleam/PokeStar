@@ -20,11 +20,11 @@ namespace PokeStar.Modules
       }
 
       [Command("updatePokemonNames")]
-      [Summary("Updates the saved list of pokemon names from the database.")]
+      [Summary("Updates the saved list of Pokémon names from the database.")]
       public async Task UpdatePokemonNames()
       {
          Connections.Instance().UpdateNameList();
-         await ResponseMessage.SendInfoMessage(Context, $"Pokemon name list has been updated.");
+         await ResponseMessage.SendInfoMessage(Context, $"Pokémon name list has been updated.");
       }
 
       [Command("toggleUseEmptyRaid")]

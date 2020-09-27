@@ -1,15 +1,13 @@
-﻿using System.Collections.Generic;
-using System.Text;
-
+﻿
 namespace PokeStar.DataModels
 {
    /// <summary>
-   /// Counter to a pokemon.
+   /// Counter to a Pokémon.
    /// </summary>
    public class Counter
    {
       /// <summary>
-      /// Name of the pokemon.
+      /// Name of the Pokémon.
       /// </summary>
       public string Name { get; set; }
 

@@ -1,11 +1,12 @@
 ﻿using System;
+using System.Linq;
 using System.Collections.Generic;
 using HtmlAgilityPack;
 
 namespace PokeStar.ConnectionInterface
 {
    /// <summary>
-   /// Scrapes the silph road raid page to get current raid bosses.
+   /// Scrapes The Silph Road raid page to get current raid bosses.
    /// </summary>
    public static class SilphData
    {
@@ -20,15 +21,7 @@ namespace PokeStar.ConnectionInterface
       public static List<string> GetRaidBossesTier(int tier)
       {
          List<Tuple<int, string>> raidbossList = GetRaidBosses();
-         List<string> bossTier = new List<string>();
-         foreach (Tuple<int, string> boss in raidbossList)
-         {
-            if (boss.Item1 == tier)
-            {
-               bossTier.Add(boss.Item2);
-            }
-         }
-         return bossTier;
+         return (raidbossList.Where(boss => boss.Item1 == tier).Select(boss => boss.Item2)).ToList();
       }
 
       /// <summary>

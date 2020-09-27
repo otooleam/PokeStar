@@ -3,17 +3,26 @@ using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Newtonsoft.Json.Linq;
-using PokeStar.DataModels;
 
 namespace PokeStar
 {
    public static class Global
    {
-      private static readonly string POKEMON_E = "é";
+      /// <summary>
+      /// é
+      /// </summary>
+      private const string POKEMON = "Pokémon";
+      private const string POKEDEX = "PokéDex";
 
+      /// <summary>
+      /// File IO
+      /// </summary>
       public static string PROGRAM_PATH { get; set; }
       public static JObject ENV_FILE { get; set; }
 
+      /// <summary>
+      /// Values read only from env
+      /// </summary>
       public static string DEFAULT_PREFIX { get; set; }
       public static string VERSION { get; set; }
       public static string HOME_SERVER { get; set; }
@@ -21,14 +30,21 @@ namespace PokeStar
       public static string POGODB_CONNECTION_STRING { get; set; }
       public static string NONADB_CONNECTION_STRING { get; set; }
 
+      /// <summary>
+      /// Editable values from env file
+      /// </summary>
       public static bool USE_NONA_TEST { get; set; }
       public static bool USE_EMPTY_RAID { get; set; }
 
+      /// <summary>
+      /// Values for hiding help commands
+      /// </summary>
       public static List<CommandInfo> COMMAND_INFO { get; set; }
       public static readonly string ADMIN_KEY = "Hidden";
       public static readonly List<string> HIDDEN_COMMANDS = new List<string>()
       {
          "ping",
+         "marco",
          "status",
          "help",
          "rave",
@@ -40,6 +56,11 @@ namespace PokeStar
          "toggleUseNonaTest"
       };
 
+      public static readonly char LEGACY_MOVE = '!';
+
+      /// <summary>
+      /// Raid/Mule limits
+      /// </summary>
       public static readonly int LIMIT_RAID_PLAYER      = 20;
       public static readonly int LIMIT_RAID_INVITE      = 10;
       public static readonly int LIMIT_RAID_GROUP       = 3;
@@ -47,6 +68,9 @@ namespace PokeStar
       public static readonly int LIMIT_RAID_MULE_INVITE = 5;
       public static readonly int LIMIT_RAID_MULE_GROUP  = 6;
 
+      /// <summary>
+      /// Level constants
+      /// </summary>
       public static readonly int MAX_LEVEL      = 40;
       public static readonly int MIN_WILD_LEVEL = 1;
       public static readonly int MAX_WILD_LEVEL = 35;
@@ -56,27 +80,47 @@ namespace PokeStar
       public static readonly int WEATHER_BOOST  = 5;
       public static readonly int BUDDY_BOOST    = 1;
 
+      /// <summary>
+      /// IV constants
+      /// </summary>
       public static readonly int MIN_SPECIAL_IV = 10;
       public static readonly int MAX_IV         = 15;
 
+      /// <summary>
+      /// Evolution tree
+      /// </summary>
       public static readonly int BAD_EVOLUTION = -1;
 
+      /// <summary>
+      /// Pokemon numbers with many forms
+      /// </summary>
       public static readonly int UNOWN_NUMBER  = 201;
       public static readonly int ARCEUS_NUMBER = 493;
 
+      /// <summary>
+      /// Raid Group bit values
+      /// </summary>
       public static readonly int ATTEND_MASK  = 7;   // 0000 0XXX mask will clear 4th bit
       public static readonly int REMOTE_MASK  = 112; // 0YYY 0000 mask will clear 8th bit
       public static readonly int REMOTE_SHIFT = 4;   // 0YYY 0XXX where Y is the remote value and X is the attending value 
 
+      /// <summary>
+      /// Bad raid values
+      /// </summary>
       public static readonly int NO_ADD_VALUE = -1;
       public static readonly int NOT_IN_RAID  = -1;
       public static readonly string DEFAULT_RAID_BOSS_NAME = "Empty";
-
       public static readonly string EMPTY_FIELD = "-----";
 
+      /// <summary>
+      /// Nickname delimiter
+      /// </summary>
       public static readonly char NICKNAME_DELIMITER = '>';
       public static readonly int NICKNAME_DELIMITER_MISSING = -1;
 
+      /// <summary>
+      /// Channel Register values
+      /// </summary>
       public static readonly char REGISTER_STRING_DEX   = 'D';
       public static readonly char REGISTER_STRING_EX    = 'E';
       public static readonly char REGISTER_STRING_ROLE  = 'P';
@@ -92,37 +136,41 @@ namespace PokeStar
          [REGISTER_STRING_TRAIN] = "Raid Train",
       };
 
+      /// <summary>
+      /// Role names
+      /// </summary>
       public static readonly string ROLE_TRAINER  = "Trainer";
       public static readonly string ROLE_VALOR    = "Valor";
       public static readonly string ROLE_MYSTIC   = "Mystic";
       public static readonly string ROLE_INSTINCT = "Instinct";
 
+      /// <summary>
+      /// Role indices
+      /// </summary>
       public static readonly int ROLE_INDEX_NO_TEAM_FOUND = -1;
       public static readonly int ROLE_INDEX_VALOR         = 0;
       public static readonly int ROLE_INDEX_MYSTIC        = 1;
       public static readonly int ROLE_INDEX_INSTINCT      = 2;
 
+      /// <summary>
+      /// Role colors
+      /// </summary>
       public static readonly Color ROLE_COLOR_TRAINER  = new Color(185, 187, 190);
       public static readonly Color ROLE_COLOR_VALOR    = new Color(153, 45, 34);
       public static readonly Color ROLE_COLOR_MYSTIC   = new Color(39, 126, 205);
       public static readonly Color ROLE_COLOR_INSTINCT = new Color(241, 196, 15);
 
+      /// <summary>
+      /// Image processing
+      /// </summary>
+      public static readonly int SCALE_WIDTH = 495;
+      public static readonly int SCALE_HEIGHT = 880;
       public static readonly System.Drawing.Rectangle IMAGE_RECT_NICKNAME   = new System.Drawing.Rectangle(10, 120, 480, 100);
       public static readonly System.Drawing.Rectangle IMAGE_RECT_TEAM_COLOR = new System.Drawing.Rectangle(410, 60, 10, 10);
 
-      public static readonly string[] NUM_EMOJI_NAMES = {
-         "number_1_emote", "number_2_emote", 
-         "number_3_emote", "number_4_emote", 
-         "number_5_emote", "number_6_emote", 
-         "number_7_emote", "number_8_emote", 
-         "number_9_emote",  "number_10_emote", 
-         "number_11_emote"
-      };
-
-      public static readonly int NUM_SELECTIONS = 10;
-      public static readonly Emote[] SELECTION_EMOJIS = new Emote[NUM_SELECTIONS];
-      public static readonly List<Emote> NUM_EMOJIS = new List<Emote>();
-
+      /// <summary>
+      /// Nona emojis
+      /// </summary>
       public static readonly string[] EMOTE_NAMES = {
          "valor_emote", "mystic_emote", "instinct_emote",
          "raid_emote", "ex_emote", "mega_emote", 
@@ -143,5 +191,21 @@ namespace PokeStar
       };
 
       public static readonly Dictionary<string, string> NONA_EMOJIS = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+
+      /// <summary>
+      /// Number Emojis
+      /// </summary>
+      public static readonly string[] NUM_EMOJI_NAMES = {
+         "number_1_emote", "number_2_emote",
+         "number_3_emote", "number_4_emote",
+         "number_5_emote", "number_6_emote",
+         "number_7_emote", "number_8_emote",
+         "number_9_emote",  "number_10_emote",
+         "number_11_emote"
+      };
+
+      public static readonly int NUM_SELECTIONS = 10;
+      public static readonly Emote[] SELECTION_EMOJIS = new Emote[NUM_SELECTIONS];
+      public static readonly List<Emote> NUM_EMOJIS = new List<Emote>();
    }
 }

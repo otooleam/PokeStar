@@ -6,7 +6,7 @@ using Discord.WebSocket;
 namespace PokeStar.DataModels
 {
    /// <summary>
-   /// Raid to fight against a raid boss.
+   /// Invite only raid to fight against a raid boss.
    /// </summary>
    public class RaidMule : RaidParent
    {
@@ -41,20 +41,20 @@ namespace PokeStar.DataModels
       /// <param name="player">Player to add.</param>
       /// <param name="invitedBy">Who invited the user.</param>
       /// <returns>True if the user was added, otherwise false.</returns>
-      public override bool PlayerAdd(SocketGuildUser player, int partySize, SocketGuildUser invitedBy = null)
+      public override bool AddPlayer(SocketGuildUser player, int partySize, SocketGuildUser invitedBy = null)
       {
          if (invitedBy == null)
          {
             if (IsInRaid(player) == Global.NOT_IN_RAID && Mules.GetAttendingCount() < Global.LIMIT_RAID_MULE_MULE)
             {
-               Mules.Add(player, partySize, Global.NO_ADD_VALUE);
+               Mules.AddPlayer(player, partySize, Global.NO_ADD_VALUE);
                return true;
             }
          }
          else // is invite
          {
             int group = FindSmallestGroup();
-            Groups.ElementAt(group).Invite(player, invitedBy);
+            Groups.ElementAt(group).InvitePlayer(player, invitedBy);
             Invite.Remove(player);
 
             bool shouldSplit = Groups.ElementAt(group).ShouldSplit();
@@ -72,7 +72,7 @@ namespace PokeStar.DataModels
                return true;
             }
 
-            Groups.ElementAt(group).Remove(player);
+            Groups.ElementAt(group).RemovePlayer(player);
             Invite.Add(player);
          }
          return false;
@@ -94,10 +94,10 @@ namespace PokeStar.DataModels
          }
          else if (groupNum == MuleGroupNumber)
          {
-            Mules.Remove(player);
+            Mules.RemovePlayer(player);
             foreach (RaidGroup group in Groups)
             {
-               returnValue.Item2.AddRange(group.Remove(player));
+               returnValue.Item2.AddRange(group.RemovePlayer(player));
             }
             foreach (SocketGuildUser invite in returnValue.Item2)
             {
@@ -108,7 +108,7 @@ namespace PokeStar.DataModels
          else if (groupNum != Global.NOT_IN_RAID)
          {
             RaidGroup foundGroup = Groups.ElementAt(groupNum);
-            foundGroup.Remove(player);
+            foundGroup.RemovePlayer(player);
          }
          return returnValue;
       }
@@ -135,7 +135,7 @@ namespace PokeStar.DataModels
       {
          if (Invite.Contains(requester) && Mules.HasPlayer(accepter, false))
          {
-            return PlayerAdd(requester, 1, accepter);
+            return AddPlayer(requester, 1, accepter);
          }
          return false;
       }
@@ -168,9 +168,9 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// 
+      /// Check if any raid group has invited players.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>True if atleast 1 group has atleast 1 invited player, otherwise false.</returns>
       public bool HasInvites()
       {
          foreach (RaidGroup group in Groups)

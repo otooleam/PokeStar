@@ -6,62 +6,62 @@ using PokeStar.ConnectionInterface;
 namespace PokeStar.DataModels
 {
    /// <summary>
-   /// 
+   /// Response message from Nona.
    /// </summary>
    public static class ResponseMessage
    {
-      private static readonly string ERROR_IMAGE = "angrypuff.png";
+      /// <summary>
+      /// Error image file name.
+      /// </summary>
+      private const string ERROR_IMAGE = "angrypuff.png";
 
       /// <summary>
-      /// 
+      /// Send an info message.
       /// </summary>
-      /// <param name="context"></param>
-      /// <param name="message"></param>
-      /// <returns></returns>
-      public static async Task SendInfoMessage(SocketCommandContext context, string message)
+      /// <param name="context">Context to send message with.</param>
+      /// <param name="message">Message to send.</param>
+      /// <returns>Task Complete.</returns>
+      public static async Task<Task> SendInfoMessage(ICommandContext context, string message)
       {
-         await context.Channel.SendMessageAsync(embed: GenerateInfoEmbed(message));
+         await context.Channel.SendMessageAsync(embed: BuildInfoEmbed(message));
+         return Task.CompletedTask;
       }
 
       /// <summary>
-      /// 
+      /// Send a warning message.
       /// </summary>
-      /// <param name="context"></param>
-      /// <param name="command"></param>
-      /// <param name="message"></param>
-      /// <returns></returns>
-      public static async Task SendWarningMessage(SocketCommandContext context, string command, string message)
+      /// <param name="context">Context to send message with.</param>
+      /// <param name="command">Command that was executing.</param>
+      /// <param name="message">Message to send.</param>
+      /// <returns>Task Complete.</returns>
+      public static async Task<Task> SendWarningMessage(ICommandContext context, string command, string message)
       {
-         await context.Channel.SendMessageAsync(embed: GenerateWarningEmbed(command, message));
+         await context.Channel.SendMessageAsync(embed: BuildWarningEmbed(command, message));
+         return Task.CompletedTask;
       }
 
       /// <summary>
-      /// 
+      /// Send an error message.
+      /// Used for precondition errors.
       /// </summary>
-      /// <param name="context"></param>
-      /// <param name="command"></param>
-      /// <param name="message"></param>
-      /// <returns></returns>
-      public static async Task SendErrorMessage(SocketCommandContext context, string command, string message)
+      /// <param name="context">Context to send message with.</param>
+      /// <param name="command">Command that was executing.</param>
+      /// <param name="message">Message to send.</param>
+      /// <returns>Task Complete.</returns>
+      public static async Task<Task> SendErrorMessage(ICommandContext context, string command, string message)
       {
          Connections.CopyFile(ERROR_IMAGE);
-         await context.Channel.SendFileAsync(ERROR_IMAGE, embed: GenerateErrorEmbed(command, message));
+         await context.Channel.SendFileAsync(ERROR_IMAGE, embed: BuildErrorEmbed(command, message));
          Connections.DeleteFile(ERROR_IMAGE);
-      }
-
-      public static async Task SendErrorMessage(ICommandContext context, string command, string message)
-      {
-         Connections.CopyFile(ERROR_IMAGE);
-         await context.Channel.SendFileAsync(ERROR_IMAGE, embed: GenerateErrorEmbed(command, message));
-         Connections.DeleteFile(ERROR_IMAGE);
+         return Task.CompletedTask;
       }
 
       /// <summary>
-      /// 
+      /// Build an embed for an info message.
       /// </summary>
-      /// <param name="message"></param>
+      /// <param name="message">Message to send.</param>
       /// <returns></returns>
-      private static Embed GenerateInfoEmbed(string message)
+      private static Embed BuildInfoEmbed(string message)
       {
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.Purple);
@@ -70,13 +70,13 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// 
+      /// Build an embed for a warning message.
       /// </summary>
-      /// <param name="command"></param>
-      /// <param name="message"></param>
+      /// <param name="command">Command that was executing.</param>
+      /// <param name="message">Message to send.</param>
       /// <returns></returns>
 
-      private static Embed GenerateWarningEmbed(string command, string message)
+      private static Embed BuildWarningEmbed(string command, string message)
       {
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.Orange);
@@ -86,12 +86,12 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// 
+      /// Build an embed for an error message.
       /// </summary>
-      /// <param name="command"></param>
-      /// <param name="message"></param>
+      /// <param name="command">Command that was executing.</param>
+      /// <param name="message">Message to send.</param>
       /// <returns></returns>
-      private static Embed GenerateErrorEmbed(string command, string message)
+      private static Embed BuildErrorEmbed(string command, string message)
       {
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Color.Red);
