@@ -142,7 +142,6 @@ namespace PokeStar.ModuleParents
                   Connections.CalcAllCP(ref pokemon);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName));
                }
-
                else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.FORM_MESSAGE)
                {
                   List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemon.Number);
@@ -164,7 +163,6 @@ namespace PokeStar.ModuleParents
                      Connections.DeleteFile(baseFileName);
                   }
                }
-
                else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.EVO_MESSAGE)
                {
                   Dictionary<string, string> evolutions = GenerateEvoDict(pokemon.Name);
