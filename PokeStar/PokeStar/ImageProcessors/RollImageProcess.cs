@@ -28,7 +28,7 @@ namespace PokeStar.ImageProcessors
          SocketGuildUser user = (SocketGuildUser)context.Message.Author;
          if (!Connections.Instance().GetSetupComplete(context.Guild.Id))
          {
-            await ResponseMessage.SendWarningMessage(context, "Roll image proccessing", "Setup has not been completed for this server.");
+            await ResponseMessage.SendWarningMessage(context.Channel, "Roll image proccessing", "Setup has not been completed for this server.");
          }
          else
          {
@@ -65,18 +65,18 @@ namespace PokeStar.ImageProcessors
                   string nickname = plainText.Substring(0, nameEndIndex);
                   await user.ModifyAsync(x => { x.Nickname = nickname; });
 
-                  await ResponseMessage.SendInfoMessage(context, $"{user.Username} now has the nickname {nickname}");
+                  await ResponseMessage.SendInfoMessage(context.Channel, $"{user.Username} now has the nickname {nickname}");
                }
                catch (Exception e)
                {
                   Console.WriteLine(e.Message);
-                  await ResponseMessage.SendWarningMessage(context, "Roll image proccessing", $"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{context.Guild.Name}\"");
+                  await ResponseMessage.SendWarningMessage(context.Channel, "Roll image proccessing", $"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{context.Guild.Name}\"");
                }
             }
 
             if (colorIndex == Global.ROLE_INDEX_NO_TEAM_FOUND)
             {
-               await ResponseMessage.SendWarningMessage(context, "Roll image proccessing", $"An error occured while attempting to determine a team for {user.Username}.");
+               await ResponseMessage.SendWarningMessage(context.Channel, "Roll image proccessing", $"An error occured while attempting to determine a team for {user.Username}.");
             }
             else
             {
@@ -116,7 +116,7 @@ namespace PokeStar.ImageProcessors
                SocketRole role = context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(Global.ROLE_TRAINER, StringComparison.OrdinalIgnoreCase));
                await (user as Discord.IGuildUser).AddRoleAsync(role);
 
-               await ResponseMessage.SendInfoMessage(context, $"{user.Username} now has the {Global.ROLE_TRAINER} role and the {teamName} role");
+               await ResponseMessage.SendInfoMessage(context.Channel, $"{user.Username} now has the {Global.ROLE_TRAINER} role and the {teamName} role");
             }
          }
       }

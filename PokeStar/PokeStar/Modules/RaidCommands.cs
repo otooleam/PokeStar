@@ -79,7 +79,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            await ResponseMessage.SendErrorMessage(Context, "raid", $"No raid bosses found for tier {tier}");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "raid", $"No raid bosses found for tier {tier}");
          }
          RemoveOldRaids();
       }
@@ -145,7 +145,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            await ResponseMessage.SendErrorMessage(Context, "mule", $"No raid bosses found for tier {tier}");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "mule", $"No raid bosses found for tier {tier}");
          }
          RemoveOldRaids();
       }
@@ -251,12 +251,12 @@ namespace PokeStar.Modules
                }
                else
                {
-                  await ResponseMessage.SendErrorMessage(Context, "edit", $"No raid bosses found for tier {edit}.");
+                  await ResponseMessage.SendErrorMessage(Context.Channel, "edit", $"No raid bosses found for tier {edit}.");
                }
             }
             else
             {
-               await ResponseMessage.SendErrorMessage(Context, "edit", "Please enter a valid field to edit.");
+               await ResponseMessage.SendErrorMessage(Context.Channel, "edit", "Please enter a valid field to edit.");
             }
 
             if (simpleEdit)
@@ -289,7 +289,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            await ResponseMessage.SendErrorMessage(Context, "edit", "Raid message could not be found.");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "edit", "Raid message could not be found.");
          }
       }
 
