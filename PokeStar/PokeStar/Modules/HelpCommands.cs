@@ -42,7 +42,7 @@ namespace PokeStar.Modules
             await ReplyAsync(embed: embed.Build());
          }
          else if (Global.COMMAND_INFO.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase)) is CommandInfo cmdInfo
-            && ShowCommand(cmdInfo, isAdmin, isNona))
+            && CheckShowCommand(cmdInfo.Name, isAdmin, isNona))
          {
                embed.WithTitle($"**{command} command help**");
                embed.WithDescription(cmdInfo.Summary ?? "No description available");
@@ -99,6 +99,5 @@ namespace PokeStar.Modules
          return (!Global.HIDDEN_COMMANDS.Contains(command) && !Global.ADMIN_COMMANDS.Contains(command) && !Global.NONA_ADMIN_COMMANDS.Contains(command))
                   || (isAdmin && Global.ADMIN_COMMANDS.Contains(command)) || (isAdmin && isNona && Global.NONA_ADMIN_COMMANDS.Contains(command));
       }
-
    }
 }
