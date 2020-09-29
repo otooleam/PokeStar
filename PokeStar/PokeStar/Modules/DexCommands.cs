@@ -177,7 +177,7 @@ namespace PokeStar.Modules
       [Remarks("Leave blank to get all Pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
       [RegisterChannel('D')]
-      public async Task Form([Summary("(Optional) Pokémon with forms.")] string pokemon = null)
+      public async Task Form([Summary("(Optional) Get forms for this Pokémon.")][Remainder] string pokemon = null)
       {
          if (pokemon == null)
          {

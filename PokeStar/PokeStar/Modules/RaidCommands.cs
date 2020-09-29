@@ -197,7 +197,7 @@ namespace PokeStar.Modules
             }
             else if (attribute.Equals("tier", StringComparison.OrdinalIgnoreCase) || attribute.Equals("boss", StringComparison.OrdinalIgnoreCase))
             {
-               short calcTier = raidTiers.ContainsKey(tier) ? raidTiers[tier] : INVALID_TIER;
+               short calcTier = raidTiers.ContainsKey(edit) ? raidTiers[edit] : INVALID_TIER;
                List<string> potentials = Connections.GetBossList(calcTier);
 
                if (potentials.Count > 1)

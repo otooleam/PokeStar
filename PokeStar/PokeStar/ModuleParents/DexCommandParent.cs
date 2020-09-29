@@ -45,7 +45,7 @@ namespace PokeStar.ModuleParents
          ["Raichu"] = new Tuple<string, string>("-alola", ""),
          ["Sandshrew"] = new Tuple<string, string>("-alola", ""),
          ["Sandslash"] = new Tuple<string, string>("-alola", ""),
-         ["Nidoran"] = new Tuple<string, string>("-f,-m", "-f"),
+         ["Nidoran F"] = new Tuple<string, string>("-f,-m", "-f"),
          ["Vulpix"] = new Tuple<string, string>("-alola", ""),
          ["Ninetales"] = new Tuple<string, string>("-alola", ""),
          ["Diglett"] = new Tuple<string, string>("-alola", ""),
@@ -62,32 +62,32 @@ namespace PokeStar.ModuleParents
          ["Marowak"] = new Tuple<string, string>("-alola", ""),
          ["Weezing"] = new Tuple<string, string>("-galar", ""),
          ["Mewtwo"] = new Tuple<string, string>("-armor", ""),
-         ["Unown"] = new Tuple<string, string>("-a,-b,-c,-d,-e,-f,-g,-h,-i,-j,-k,-l,-m,-n,-o,-p,-q,-r,-s,-t,-u,-v,-w,-x,-y,-z,-!,-?,", "-f"),
+         ["Unown F"] = new Tuple<string, string>("-a,-b,-c,-d,-e,-f,-g,-h,-i,-j,-k,-l,-m,-n,-o,-p,-q,-r,-s,-t,-u,-v,-w,-x,-y,-z,-!,-?,", "-f"),
          ["Zigzagoon"] = new Tuple<string, string>("-galar", ""),
          ["Linoone"] = new Tuple<string, string>("-galar", ""),
          ["Castform"] = new Tuple<string, string>("-rain,-snow,-sun", ""),
          ["Deoxys"] = new Tuple<string, string>("-attack,-defense,-speed", ""),
-         ["Burmy"] = new Tuple<string, string>("-plant,-sand,-trash", "-plant"),
-         ["Wormadam"] = new Tuple<string, string>("-plant,-sand,-trash", "-plant"),
-         ["Cherrim"] = new Tuple<string, string>("-sunshine,-overcast", "-sunshine"),
+         ["Plant Cloak Burmy"] = new Tuple<string, string>("-plant,-sand,-trash", "-plant"),
+         ["Plant Cloak Wormadam"] = new Tuple<string, string>("-plant,-sand,-trash", "-plant"),
+         ["Sunshine Cherrim"] = new Tuple<string, string>("-sunshine,-overcast", "-sunshine"),
          ["Shellow"] = new Tuple<string, string>("-east,-west", "-east"),
          ["Gastrodon"] = new Tuple<string, string>("-east,-west", "-east"),
          ["Rotom"] = new Tuple<string, string>("-fan,-frost,-heat,-mow,-wash", ""),
-         ["Giratina"] = new Tuple<string, string>("-altered,-origin", "-altered"),
-         ["Shayman"] = new Tuple<string, string>("-land,-sky", "-land"),
-         ["Arceus"] = new Tuple<string, string>("-normal,-bug,-dark,-dragon,-electric,-fairy,-fighting,-fire,-flying,-ghost,-grass,-ground,-ice,-poison,-psychic,-rock,-steel,-water", "-normal"),
-         ["Basculin"] = new Tuple<string, string>("-blue,-red", "-blue"),
+         ["Altered Form Giratina"] = new Tuple<string, string>("-altered,-origin", "-altered"),
+         ["Land Form Shayman"] = new Tuple<string, string>("-land,-sky", "-land"),
+         ["Arceus Normal"] = new Tuple<string, string>("-normal,-bug,-dark,-dragon,-electric,-fairy,-fighting,-fire,-flying,-ghost,-grass,-ground,-ice,-poison,-psychic,-rock,-steel,-water", "-normal"),
+         ["Blue Striped Basculin"] = new Tuple<string, string>("-blue,-red", "-blue"),
          ["Darumaka"] = new Tuple<string, string>("-galar", ""),
          ["Darmanitan"] = new Tuple<string, string>("-galar,-zen,-galar-zen", ""),
-         ["Deerling"] = new Tuple<string, string>("-summer,-spring,-winter,-autumn", "-summer"),
-         ["Sawsbuck"] = new Tuple<string, string>("-summer,-spring,-winter,-autumn", "-summer"),
+         ["Summer Deerling"] = new Tuple<string, string>("-summer,-spring,-winter,-autumn", "-summer"),
+         ["Summer Sawsbuck"] = new Tuple<string, string>("-summer,-spring,-winter,-autumn", "-summer"),
          ["Stunfisk"] = new Tuple<string, string>("-galar", ""),
-         ["Tornadus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
-         ["Thundurus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
-         ["Landorus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
+         ["Incarnate Tornadus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
+         ["Incarnate Thundurus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
+         ["Incarnate Landorus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
          ["Kyurem"] = new Tuple<string, string>("-black,-white", ""),
          ["Keldeo"] = new Tuple<string, string>("-resolute", ""),
-         ["Meloetta"] = new Tuple<string, string>("-aria,-pirouette", "-aria"),
+         ["Aria Meloetta"] = new Tuple<string, string>("-aria,-pirouette", "-aria"),
       };
 
       /// <summary>
@@ -391,6 +391,7 @@ namespace PokeStar.ModuleParents
       /// The following Pokémon have multiple forms:
       /// Name       Default Form
       /// -----------------------
+      /// Nidoran    F
       /// Unown      F
       /// Burmy      Plant Cloak
       /// Wormadam   Plant Cloak
@@ -407,7 +408,6 @@ namespace PokeStar.ModuleParents
       /// Thundurus  Incarnate
       /// Landorus   Incarnate
       /// Meloetta   Aria
-      /// Note: Nidoran defaults to the female form.
       /// </summary>
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="form">Form of the Pokémon.</param>
