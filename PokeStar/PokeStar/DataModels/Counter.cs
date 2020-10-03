@@ -14,12 +14,12 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Recommended Fast move.
       /// </summary>
-      public Move FastAttack { get; set; }
+      public PokemonMove FastAttack { get; set; }
 
       /// <summary>
       /// Recommended charge move.
       /// </summary>
-      public Move ChargeAttack { get; set; }
+      public PokemonMove ChargeAttack { get; set; }
 
       /// <summary>
       /// Gets the counter to a string.

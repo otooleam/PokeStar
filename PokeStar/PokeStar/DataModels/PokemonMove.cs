@@ -4,7 +4,7 @@ namespace PokeStar.DataModels
    /// <summary>
    /// Pokémon's move.
    /// </summary>
-   public class Move
+   public class PokemonMove
    {
       /// <summary>
       /// Name of the move.

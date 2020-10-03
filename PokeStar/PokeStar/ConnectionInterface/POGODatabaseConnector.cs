@@ -11,15 +11,15 @@ namespace PokeStar.ConnectionInterface
    /// </summary>
    public class POGODatabaseConnector : DatabaseConnector
    {
-      private readonly List<Move> ShadowMoves = new List<Move>()
+      private readonly List<PokemonMove> ShadowMoves = new List<PokemonMove>()
       {
-         new Move
+         new PokemonMove
          {
             Name = "Frustration",
             Type = "Normal",
             IsLegacy = false
          },
-         new Move
+         new PokemonMove
          {
             Name = "Return",
             Type = "Normal",
@@ -272,9 +272,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="fast">Is the type of move a fast move, else charge move.</param>
       /// <param name="shadowable">Is the Pokémon shadowable.</param>
       /// <returns>List of moves of the Pokémon.</returns>
-      public List<Move> GetMoves(string pokemonName, bool fast = true, bool shadowable = false)
+      public List<PokemonMove> GetMoves(string pokemonName, bool fast = true, bool shadowable = false)
       {
-         List<Move> moves = new List<Move>();
+         List<PokemonMove> moves = new List<PokemonMove>();
          string moveType = fast ? "Fast" : "Charge";
          string queryString = $@"SELECT name, type, is_legacy
                                  FROM pokemon_move
@@ -290,7 +290,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  Move move = new Move
+                  PokemonMove move = new PokemonMove
                   {
                      Name = Convert.ToString(reader["name"]),
                      Type = Convert.ToString(reader["type"]),
@@ -335,8 +335,8 @@ namespace PokeStar.ConnectionInterface
                   Counter counter = new Counter
                   {
                      Name = Convert.ToString(reader["counter"]),
-                     FastAttack = new Move { Name = Convert.ToString(reader["fastAttack"]) },
-                     ChargeAttack = new Move { Name = Convert.ToString(reader["chargeAttack"]) },
+                     FastAttack = new PokemonMove { Name = Convert.ToString(reader["fastAttack"]) },
+                     ChargeAttack = new PokemonMove { Name = Convert.ToString(reader["chargeAttack"]) },
                   };
                   counters.Add(counter);
                }
@@ -352,9 +352,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="moveName">Name of the move.</param>
       /// <returns>Move that the pokemon can learn, otherwise null.</returns>
-      public Move GetPokemonMove(string pokemonName, string moveName)
+      public PokemonMove GetPokemonMove(string pokemonName, string moveName)
       {
-         Move move = null;
+         PokemonMove move = null;
          string queryString = $@"SELECT move, type, is_legacy
                                  FROM pokemon_move
                                  INNER JOIN move
@@ -369,7 +369,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  move = new Move
+                  move = new PokemonMove
                   {
                      Name = Convert.ToString(reader["move"]),
                      Type = Convert.ToString(reader["type"]),

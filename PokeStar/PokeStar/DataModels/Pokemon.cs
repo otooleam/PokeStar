@@ -102,12 +102,12 @@ namespace PokeStar.DataModels
       /// <summary>
       /// List of the Pokémon's fast moves.
       /// </summary>
-      public List<Move> FastMove { get; set; }
+      public List<PokemonMove> FastMove { get; set; }
 
       /// <summary>
       /// List of the Pokémon's charge moves.
       /// </summary>
-      public List<Move> ChargeMove { get; set; }
+      public List<PokemonMove> ChargeMove { get; set; }
 
       /// <summary>
       /// List of counters of the Pokémon.
@@ -338,7 +338,7 @@ namespace PokeStar.DataModels
          }
 
          StringBuilder sb = new StringBuilder();
-         foreach (Move fastMove in FastMove)
+         foreach (PokemonMove fastMove in FastMove)
          {
             if (Name.Equals("Mew"))
             {
@@ -369,7 +369,7 @@ namespace PokeStar.DataModels
          }
 
          StringBuilder sb = new StringBuilder();
-         foreach (Move chargeMove in ChargeMove)
+         foreach (PokemonMove chargeMove in ChargeMove)
          {
             if (Name.Equals("Mew"))
             {
