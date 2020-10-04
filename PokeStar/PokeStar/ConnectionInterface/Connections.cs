@@ -30,8 +30,9 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       private Connections()
       {
-         POGODBConnector = new POGODatabaseConnector(Global.POGODB_CONNECTION_STRING);
-         NONADBConnector = new NONADatabaseConnector(Global.NONADB_CONNECTION_STRING);
+         
+         POGODBConnector = new POGODatabaseConnector(Global.POGO_DB_CONNECTION_STRING);
+         NONADBConnector = new NONADatabaseConnector(Global.NONA_DB_CONNECTION_STRING);
          UpdatePokemonNameList();
          UpdateMoveNameList();
       }

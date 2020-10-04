@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using Discord;
 using Discord.Commands;
 using PokeStar.DataModels;
 using PokeStar.ConnectionInterface;
@@ -16,6 +17,7 @@ namespace PokeStar.Modules
       [Summary("Creates roles used by Nona.")]
       [Remarks("Roles created include Trainer, Valor, Mystic, and Instinct.\n" +
                "This needs to be run to use the role commands.")]
+      [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Setup()
       {
          if (!Connections.Instance().GetSetupComplete(Context.Guild.Id))
