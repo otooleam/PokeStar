@@ -23,7 +23,15 @@ namespace PokeStar.Modules
       [Summary("Updates the saved list of Pokémon names from the database.")]
       public async Task UpdatePokemonNames()
       {
-         Connections.Instance().UpdateNameList();
+         Connections.Instance().UpdatePokemonNameList();
+         await ResponseMessage.SendInfoMessage(Context, $"Pokémon name list has been updated.");
+      }
+
+      [Command("updatePokemonNames")]
+      [Summary("Updates the saved list of Pokémon names from the database.")]
+      public async Task UpdateMoveNames()
+      {
+         Connections.Instance().UpdateMoveNameList();
          await ResponseMessage.SendInfoMessage(Context, $"Pokémon name list has been updated.");
       }
 

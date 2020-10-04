@@ -136,7 +136,7 @@ namespace PokeStar.Modules
 
                if (pkmn == null)
                {
-                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+                  List<string> pokemonNames = Connections.Instance().SearchPokemon(name);
 
                   string fileName = POKEDEX_SELECTION_IMAGE;
                   Connections.CopyFile(fileName);

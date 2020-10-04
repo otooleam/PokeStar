@@ -20,6 +20,7 @@ namespace PokeStar.ConnectionInterface
       private readonly NONADatabaseConnector NONADBConnector;
 
       private List<string> PokemonNames;
+      private List<string> MoveNames;
 
       private const int NumSuggestions = 10;
 
@@ -31,7 +32,8 @@ namespace PokeStar.ConnectionInterface
       {
          POGODBConnector = new POGODatabaseConnector(Global.POGODB_CONNECTION_STRING);
          NONADBConnector = new NONADatabaseConnector(Global.NONADB_CONNECTION_STRING);
-         UpdateNameList();
+         UpdatePokemonNameList();
+         UpdateMoveNameList();
       }
 
       /// <summary>
@@ -92,23 +94,43 @@ namespace PokeStar.ConnectionInterface
 
       /// <summary>
       /// Updates the list of Pokémon to use for the fuzzy search.
+      /// Only needs to be ran when a Pokémon name has changed.
       /// </summary>
-      public void UpdateNameList()
+      public void UpdatePokemonNameList()
       {
-         PokemonNames = POGODBConnector.GetNameList();
+         PokemonNames = POGODBConnector.GetPokemonNameList();
       }
 
       /// <summary>
-      /// Searches for the closest Pokémon names to a given name.
+      /// Updates the list of Moves to use for the fuzzy search.
+      /// Only needs to be ran when a move name has changed.
       /// </summary>
-      /// <param name="name">User input name.</param>
+      public void UpdateMoveNameList()
+      {
+         MoveNames = POGODBConnector.GetMoveNameList();
+      }
+
+      public List<string> SearchPokemon(string name)
+      {
+         return FuzzyNameSearch(name, PokemonNames);
+      }
+
+      public List<string> SearchMove(string name)
+      {
+         return FuzzyNameSearch(name, MoveNames);
+      }
+
+      /// <summary>
+      /// Searches for the closest strings in a list of strings.
+      /// </summary>
+      /// <param name="search">User input name.</param>
       /// <returns>List of the closest Pokémon names.</returns>
-      public List<string> FuzzyNameSearch(string name)
+      private static List<string> FuzzyNameSearch(string search, List<string> dir)
       {
          Dictionary<string, double> fuzzy = new Dictionary<string, double>();
-         foreach (string pokemonName in PokemonNames)
+         foreach (string value in dir)
          {
-            fuzzy.Add(pokemonName, pokemonName.FuzzyMatch(name));
+            fuzzy.Add(value, value.FuzzyMatch(search));
          }
          List<KeyValuePair<string, double>> myList = fuzzy.ToList();
          myList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
@@ -190,8 +212,8 @@ namespace PokeStar.ConnectionInterface
          pokemon.Weakness = typeRelations.Item2.Keys.ToList();
          pokemon.Resistance = typeRelations.Item1.Keys.ToList();
          pokemon.Weather = GetWeather(pokemon.Type);
-         pokemon.FastMove = POGODBConnector.GetMoves(name, true);
-         pokemon.ChargeMove = POGODBConnector.GetMoves(name, false, pokemon.Shadow);
+         pokemon.FastMove = POGODBConnector.GetPokemonMoves(name, true);
+         pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(name, false, pokemon.Shadow);
          pokemon.Counter = POGODBConnector.GetCounters(name);
 
          foreach (Counter counter in pokemon.Counter)

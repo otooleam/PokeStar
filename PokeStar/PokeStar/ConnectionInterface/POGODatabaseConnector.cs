@@ -38,12 +38,35 @@ namespace PokeStar.ConnectionInterface
       /// Gets a list of all Pokémon names.
       /// </summary>
       /// <returns>List of Pokémon names.</returns>
-      public List<string> GetNameList()
+      public List<string> GetPokemonNameList()
       {
          List<string> names = new List<string>();
          using (SqlConnection conn = GetConnection())
          {
-            string queryString = $@"select name from pokemon order by number;";
+            string queryString = $@"select name from pokemon;";
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  names.Add(Convert.ToString(reader["name"]));
+               }
+            }
+            conn.Close();
+         }
+         return names;
+      }
+
+      /// <summary>
+      /// Gets a list of all Move names.
+      /// </summary>
+      /// <returns>List of Move names.</returns>
+      public List<string> GetMoveNameList()
+      {
+         List<string> names = new List<string>();
+         using (SqlConnection conn = GetConnection())
+         {
+            string queryString = $@"select name from move;";
             conn.Open();
             using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
@@ -272,7 +295,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="fast">Is the type of move a fast move, else charge move.</param>
       /// <param name="shadowable">Is the Pokémon shadowable.</param>
       /// <returns>List of moves of the Pokémon.</returns>
-      public List<PokemonMove> GetMoves(string pokemonName, bool fast = true, bool shadowable = false)
+      public List<PokemonMove> GetPokemonMoves(string pokemonName, bool fast = true, bool shadowable = false)
       {
          List<PokemonMove> moves = new List<PokemonMove>();
          string moveType = fast ? "Fast" : "Charge";

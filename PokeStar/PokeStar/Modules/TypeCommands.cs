@@ -6,22 +6,18 @@ using Discord;
 using Discord.Commands;
 using PokeStar.DataModels;
 using PokeStar.Calculators;
+using PokeStar.ModuleParents;
 using PokeStar.PreConditions;
 using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
-   public class TypeCommands : ModuleBase<SocketCommandContext>
+   public class TypeCommands : DexCommandParent
    {
-      /// <summary>
-      /// Color used for type command embeds.
-      /// </summary>
-      private static readonly Color TypeMessageColor = Color.Teal;
-
       [Command("type")]
       [Summary("Gets information for a given Pokémon type.")]
       [RegisterChannel('D')]
-      public async Task PokeType([Summary("(Optional) The typing you want info about.")] string type1 = null,
+      public async Task Type([Summary("(Optional) The typing you want info about.")] string type1 = null,
                            [Summary("(Optional) Secondary typing you want info about.")] string type2 = null)
       {
          if (type1 == null)
@@ -48,7 +44,7 @@ namespace PokeStar.Modules
 
             EmbedBuilder embed = new EmbedBuilder();
             embed.AddField($"Pokémon Types:", sb.ToString());
-            embed.WithColor(TypeMessageColor);
+            embed.WithColor(DexMessageColor);
             embed.WithFooter("Pokémon have 1 or 2 types. Moves always have 1 type.");
             await ReplyAsync(embed: embed.Build());
          }
@@ -93,7 +89,7 @@ namespace PokeStar.Modules
                }
                embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.Item2), false);
                embed.AddField($"Resistances:", FormatTypeList(defenseRelations.Item1), false);
-               embed.WithColor(TypeMessageColor);
+               embed.WithColor(DexMessageColor);
                await ReplyAsync(embed: embed.Build());
             }
          }
@@ -137,7 +133,7 @@ namespace PokeStar.Modules
       }
 
       /// <summary>
-      /// Checks if a type is vaid.
+      /// Checks if a type is valid.
       /// </summary>
       /// <param name="type">Type to check.</param>
       /// <returns>True if the type is valid, otherwise false.</returns>
