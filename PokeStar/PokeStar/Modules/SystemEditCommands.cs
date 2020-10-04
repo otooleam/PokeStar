@@ -16,7 +16,7 @@ namespace PokeStar.Modules
       public async Task Prefix([Summary("Prefex to set for commands.")] char prefix)
       {
          Connections.Instance().UpdatePrefix(Context.Guild.Id, prefix.ToString());
-         await ResponseMessage.SendInfoMessage(Context, $"Command prefix has been set to \'{prefix}\' for this server.");
+         await ResponseMessage.SendInfoMessage(Context.Channel, $"Command prefix has been set to \'{prefix}\' for this server.");
       }
 
       [Command("updatePokemonNames")]
@@ -27,12 +27,12 @@ namespace PokeStar.Modules
          await ResponseMessage.SendInfoMessage(Context, $"Pokémon name list has been updated.");
       }
 
-      [Command("updatePokemonNames")]
-      [Summary("Updates the saved list of Pokémon names from the database.")]
+      [Command("updateMovenNames")]
+      [Summary("Updates the saved list of Move names from the database.")]
       public async Task UpdateMoveNames()
       {
          Connections.Instance().UpdateMoveNameList();
-         await ResponseMessage.SendInfoMessage(Context, $"Pokémon name list has been updated.");
+         await ResponseMessage.SendInfoMessage(Context, $"Move name list has been updated.");
       }
 
       [Command("toggleUseEmptyRaid")]
@@ -41,7 +41,7 @@ namespace PokeStar.Modules
       {
          Global.USE_EMPTY_RAID = !Global.USE_EMPTY_RAID;
          string text = Global.USE_EMPTY_RAID ? "" : "not";
-         await ResponseMessage.SendInfoMessage(Context, $"Nona will {text} use the empty raid feature.");
+         await ResponseMessage.SendInfoMessage(Context.Channel, $"Nona will {text} use the empty raid feature.");
       }
 
       [Command("toggleUseNonaTest")]
@@ -50,7 +50,7 @@ namespace PokeStar.Modules
       {
          Global.USE_NONA_TEST = !Global.USE_NONA_TEST;
          string text = Global.USE_NONA_TEST ? "" : "not";
-         await ResponseMessage.SendInfoMessage(Context, $"Nona will {text} accept message from a Nona Test Bot.");
+         await ResponseMessage.SendInfoMessage(Context.Channel, $"Nona will {text} accept message from a Nona Test Bot.");
       }
    }
 }

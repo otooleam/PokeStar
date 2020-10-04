@@ -74,7 +74,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            await ResponseMessage.SendErrorMessage(Context, "help", $"Command \'{command}\' does not exist. Run the '.help' command to get a list of valid commands.");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "help", $"Command \'{command}\' does not exist. Run the '.help' command to get a list of valid commands.");
          }
       }
    }

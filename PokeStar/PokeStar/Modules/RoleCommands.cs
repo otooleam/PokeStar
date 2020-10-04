@@ -27,18 +27,18 @@ namespace PokeStar.Modules
       {
          if (!Connections.Instance().GetSetupComplete(Context.Guild.Id))
          {
-            await ResponseMessage.SendErrorMessage(Context, "role", "Roles not setup. Please run the setup command");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "role", "Roles not setup. Please run the setup command");
          }
          else if (((SocketGuildUser)Context.User).Roles.FirstOrDefault(x => x.Name.ToString().Equals(Global.ROLE_TRAINER, StringComparison.OrdinalIgnoreCase)) == null)
          {
-            await ResponseMessage.SendErrorMessage(Context, "role", "Error: You are not authorized to run this command.");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "role", "Error: You are not authorized to run this command.");
          }
          else
          {
             SocketRole team = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(teamName, StringComparison.OrdinalIgnoreCase));
             if (team == null)
             {
-               await ResponseMessage.SendErrorMessage(Context, "role", $"{teamName} is not a valid role");
+               await ResponseMessage.SendErrorMessage(Context.Channel, "role", $"{teamName} is not a valid role");
             }
             else
             {
@@ -49,7 +49,7 @@ namespace PokeStar.Modules
                catch (Exception e)
                {
                   Console.WriteLine(e.Message);
-                  await ResponseMessage.SendWarningMessage(Context, "role", $"Unable to set nickname for {user.Username}.\nPlease set your server nickname to match your Pokémon Go trainer name.");
+                  await ResponseMessage.SendWarningMessage(Context.Channel, "role", $"Unable to set nickname for {user.Username}.\nPlease set your server nickname to match your Pokémon Go trainer name.");
                }
 
                SocketRole valor = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(Global.ROLE_VALOR, StringComparison.OrdinalIgnoreCase));
@@ -72,7 +72,7 @@ namespace PokeStar.Modules
                SocketRole role = Context.Guild.Roles.FirstOrDefault(x => x.Name.ToString().Equals(Global.ROLE_TRAINER, StringComparison.OrdinalIgnoreCase));
                await user.AddRoleAsync(role);
 
-               await ResponseMessage.SendInfoMessage(Context, $"{user.Username} nickname set to {nickname} and now has the \'Trainer\' and \'{teamName}\' roles");
+               await ResponseMessage.SendInfoMessage(Context.Channel, $"{user.Username} nickname set to {nickname} and now has the \'Trainer\' and \'{teamName}\' roles");
             }
          }
       }
