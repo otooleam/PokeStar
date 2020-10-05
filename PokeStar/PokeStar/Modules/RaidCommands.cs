@@ -170,7 +170,6 @@ namespace PokeStar.Modules
          RemoveOldRaids();
       }
 
-
       [Command("edit")]
       [Alias("editRaid", "raidEdit")]
       [Summary("Edit the time or location of a raid.")]
@@ -316,8 +315,8 @@ namespace PokeStar.Modules
       [Command("bosslist")]
       [Alias("boss", "bossess", "raidboss", "raidbosses")]
       [Summary("Get the current list of raid bosses.")]
-      [RegisterChannel('R')]
-      public async Task Bosses()
+      [RegisterChannel('D')]
+      public async Task BossList()
       {
          List<string> exBosses = Connections.GetBossList(EX_RAID_TIER);
          List<string> megaBosses = Connections.GetBossList(MEGA_RAID_TIER);
