@@ -343,8 +343,8 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Gets a given move.
       /// </summary>
-      /// <param name="moveName"></param>
-      /// <returns></returns>
+      /// <param name="moveName">Name of the move.</param>
+      /// <returns>The Move coresponding to the name, otherwise null.</returns>
       public Move GetMove(string moveName)
       {
          if (moveName == null)

@@ -11,6 +11,9 @@ namespace PokeStar.ConnectionInterface
    /// </summary>
    public class POGODatabaseConnector : DatabaseConnector
    {
+      /// <summary>
+      /// List of moves added for shadow Pokémon.
+      /// </summary>
       private readonly List<PokemonMove> ShadowMoves = new List<PokemonMove>()
       {
          new PokemonMove
@@ -416,6 +419,11 @@ namespace PokeStar.ConnectionInterface
          return move;
       }
 
+      /// <summary>
+      /// Gets a Move by name.
+      /// </summary>
+      /// <param name="moveName">Name of the Move.</param>
+      /// <returns>A Move if the name is in the database, otherwise null.</returns>
       public Move GetMove(string moveName)
       {
          Move move = null;
@@ -451,6 +459,12 @@ namespace PokeStar.ConnectionInterface
          return move;
       }
 
+      /// <summary>
+      /// Gets all Pokémon with a given move.
+      /// PokemonMove is used to track legacy moves.
+      /// </summary>
+      /// <param name="moveName">Name of the move.</param>
+      /// <returns>List of Pokémon that learn the move.</returns>
       public List<PokemonMove> GetPokemonWithMove(string moveName)
       {
          List<PokemonMove> pokemon = new List<PokemonMove>();
