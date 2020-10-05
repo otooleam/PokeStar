@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Discord;
+using Discord.Rest;
 using Discord.Commands;
 using PokeStar.DataModels;
-using PokeStar.Calculators;
 using PokeStar.ModuleParents;
 using PokeStar.PreConditions;
 using PokeStar.ConnectionInterface;
-using Discord.Rest;
 
 namespace PokeStar.Modules
 {
@@ -29,6 +27,7 @@ namespace PokeStar.Modules
             Connections.CopyFile(fileName);
             RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(moveNames, fileName));
             await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
+            Connections.DeleteFile(fileName);
 
             dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.MOVE_MESSAGE, moveNames));
          }

@@ -114,6 +114,7 @@ namespace PokeStar.Modules
                {
                   await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
                }
+               Connections.DeleteFile(fileName);
                dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, pokemonWithNumber));
             }
             else
@@ -142,6 +143,7 @@ namespace PokeStar.Modules
                   Connections.CopyFile(fileName);
                   RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
                   await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
+                  Connections.DeleteFile(fileName);
 
                   dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, pokemonNames));
                }
