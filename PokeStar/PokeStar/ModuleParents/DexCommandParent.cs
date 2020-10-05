@@ -6,8 +6,9 @@ using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using PokeStar.ConnectionInterface;
 using PokeStar.DataModels;
+using PokeStar.Calculators;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.ModuleParents
 {
@@ -19,9 +20,14 @@ namespace PokeStar.ModuleParents
       protected static readonly Color DexMessageColor = Color.Green;
 
       /// <summary>
-      /// Empty raid image file name.
+      /// Empty Pokémon image file name.
       /// </summary>
-      protected static readonly string POKEDEX_SELECTION_IMAGE = "pokeball.png";
+      protected static readonly string POKEDEX_SELECTION_IMAGE = "quest_pokemon.png";
+
+      /// <summary>
+      /// Image file for embeds without images.
+      /// </summary>
+      protected static readonly string BLANK_IMAGE = "battle.png";
 
       /// <summary>
       /// Saved dex messages.
@@ -103,6 +109,7 @@ namespace PokeStar.ModuleParents
          FORM_MESSAGE,
          EVO_MESSAGE,
          NICKNAME_MESSAGE,
+         MOVE_MESSAGE
       }
 
       /// Message checkers ****************************************************
@@ -133,20 +140,26 @@ namespace PokeStar.ModuleParents
             if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[i]))
             {
                await message.DeleteAsync();
-               Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
-               string fileName = Connections.GetPokemonPicture(pokemon.Name);
-               Connections.CopyFile(fileName);
                if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.DEX_MESSAGE)
                {
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
+                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CopyFile(fileName);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pokemon, fileName));
+                  Connections.DeleteFile(fileName);
                }
                else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.CP_MESSAGE)
                {
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
                   Connections.CalcAllCP(ref pokemon);
+                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CopyFile(fileName);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName));
+                  Connections.DeleteFile(fileName);
                }
                else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.FORM_MESSAGE)
                {
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
                   List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemon.Number);
 
                   if (pokemonWithNumber.Count == 1)
@@ -161,6 +174,7 @@ namespace PokeStar.ModuleParents
                      List<string> formsList = forms.Item1.Split(',').ToList();
 
                      string baseFileName = Connections.GetPokemonPicture(baseName);
+                     string fileName = Connections.GetPokemonPicture(pokemon.Name);
                      Connections.CopyFile(fileName);
                      await reaction.Channel.SendFileAsync(baseFileName, embed: BuildFormEmbed(baseName, formsList, forms.Item2, fileName));
                      Connections.DeleteFile(baseFileName);
@@ -168,6 +182,7 @@ namespace PokeStar.ModuleParents
                }
                else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.EVO_MESSAGE)
                {
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
                   Dictionary<string, string> evolutions = GenerateEvoDict(pokemon.Name);
                   string firstFileName = Connections.GetPokemonPicture(pokemon.Name);
                   Connections.CopyFile(firstFileName);
@@ -176,10 +191,22 @@ namespace PokeStar.ModuleParents
                }
                else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE)
                {
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
                   List<string> nicknames = Connections.Instance().GetNicknames(guildId, pokemon.Name);
+                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CopyFile(fileName);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildNicknameEmbed(nicknames, pokemon.Name, fileName));
+                  Connections.DeleteFile(fileName);
                }
-               Connections.DeleteFile(fileName);
+               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.MOVE_MESSAGE)
+               {
+                  Move pkmnMove = Connections.Instance().GetMove(dexMessage.Item2[i]);
+                  string fileName = BLANK_IMAGE;
+                  Connections.CopyFile(fileName);
+                  await reaction.Channel.SendFileAsync(fileName, embed: BuildMoveEmbed(pkmnMove, fileName));
+                  Connections.DeleteFile(fileName);
+               }
+               dexMessages.Remove(message.Id);
                return;
             }
          }
@@ -337,6 +364,31 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
+      /// Builds a move embed.
+      /// </summary>
+      /// <param name="move">Move to display.</param>
+      /// <returns>Embed for viewing a move.</returns>
+      protected static Embed BuildMoveEmbed(Move move, string fileName)
+      {
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithTitle(move.Name);
+         embed.WithThumbnailUrl($"attachment://{fileName}");
+         embed.AddField("Type", move.TypeToString(), true);
+         embed.AddField("Weather Boosts", move.WeatherToString(), true);
+         embed.AddField("Category", move.Category, true);
+         embed.AddField("PvP Power", move.PvPPower, true);
+         embed.AddField("PvP Energy", move.EnergyToString(move.PvPEnergy), true);
+         embed.AddField("PvP Turns", move.PvPTurns, true);
+         embed.AddField("PvE Power", move.PvEPower, true);
+         embed.AddField("PvE Energy", move.EnergyToString(move.PvEEnergy), true);
+         embed.AddField("PvE Cooldown", $"{move.Cooldown} ms", true);
+         embed.AddField("PvE Damage Window", move.DamageWindowString(), true);
+         embed.AddField("Number of Pokémon that can learn this move", move.PokemonWithMove.Count, false);
+         embed.WithColor(DexMessageColor);
+         return embed.Build();
+      }
+
+      /// <summary>
       /// Builds the PokéDex select embed.
       /// </summary>
       /// <param name="potentials">List of potential Pokémon.</param>
@@ -352,9 +404,9 @@ namespace PokeStar.ModuleParents
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(DexMessageColor);
-         embed.WithTitle($"Pokemon Selection");
+         embed.WithTitle("Do you mean...?");
+         embed.WithDescription(sb.ToString());
          embed.WithThumbnailUrl($"attachment://{fileName}");
-         embed.AddField("Do you mean...?", sb.ToString());
          return embed.Build();
       }
 
@@ -676,6 +728,55 @@ namespace PokeStar.ModuleParents
             evolutions = evolutions.Union(EvolutionTreeToString(evo, node.Name)).ToDictionary(x => x.Key, x => x.Value);
          }
          return evolutions;
+      }
+
+      /// Type processors ************************************************
+
+      /// <summary>
+      /// Formats weather boosts as a string.
+      /// </summary>
+      /// <param name="weatherList">List of weather that boosts the type(s).</param>
+      /// <returns>Weather for type(s) as a string.</returns>
+      protected static string FormatWeatherList(List<string> weatherList)
+      {
+         StringBuilder sb = new StringBuilder();
+         foreach (string weather in weatherList)
+         {
+            sb.Append($"{Global.NONA_EMOJIS[$"{weather.Replace(' ', '_')}_emote"]} ");
+         }
+         return sb.ToString();
+      }
+
+      /// <summary>
+      /// Formats type relations as a string.
+      /// </summary>
+      /// <param name="relations">Dictionary of type relations for the type(s).</param>
+      /// <returns>Type relations for type(s) as a string.</returns>
+      protected static string FormatTypeList(Dictionary<string, int> relations)
+      {
+         if (relations.Count == 0)
+         {
+            return Global.EMPTY_FIELD;
+         }
+
+         string relationString = "";
+         foreach (KeyValuePair<string, int> relation in relations)
+         {
+            double multiplier = TypeCalculator.CalcTypeEffectivness(relation.Value) * 100.0;
+            string typeEmote = Global.NONA_EMOJIS[$"{relation.Key.ToUpper()}_EMOTE"];
+            relationString += $"{typeEmote} {relation.Key}: {multiplier}%\n";
+         }
+         return relationString;
+      }
+
+      /// <summary>
+      /// Checks if a type is valid.
+      /// </summary>
+      /// <param name="type">Type to check.</param>
+      /// <returns>True if the type is valid, otherwise false.</returns>
+      protected static bool CheckValidType(string type)
+      {
+         return Global.NONA_EMOJIS.ContainsKey($"{type}_emote");
       }
    }
 }

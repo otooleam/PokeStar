@@ -26,7 +26,7 @@ namespace PokeStar.PreConditions
          else
          {
             string message = $"You are not authorized to run the {command.Name} command.";
-            await ResponseMessage.SendErrorMessage(context, command.Name, message);
+            await ResponseMessage.SendErrorMessage(context.Channel, command.Name, message);
             return await Task.FromResult(PreconditionResult.FromError(""));
          }
       }

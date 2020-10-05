@@ -292,20 +292,20 @@ namespace PokeStar.ConnectionInterface
       /// Gets moves of a Pokémon.
       /// </summary>
       /// <param name="pokemonName">Name of the Pokémon.</param>
-      /// <param name="fast">Is the type of move a fast move, else charge move.</param>
+      /// <param name="isFastMove">Is the type of move a fast move, else charge move.</param>
       /// <param name="shadowable">Is the Pokémon shadowable.</param>
       /// <returns>List of moves of the Pokémon.</returns>
-      public List<PokemonMove> GetPokemonMoves(string pokemonName, bool fast = true, bool shadowable = false)
+      public List<PokemonMove> GetPokemonMoves(string pokemonName, bool isFastMove = true, bool shadowable = false)
       {
          List<PokemonMove> moves = new List<PokemonMove>();
-         string moveType = fast ? "Fast" : "Charge";
+         string moveType = isFastMove ? Global.FAST_MOVE_CATEGORY : Global.CHARGE_MOVE_CATEGORY;
 
          var index = pokemonName.IndexOf(' ');
          var name = pokemonName;
-         if (index != -1 && pokemonName.Substring(0, index).Equals("mega", StringComparison.OrdinalIgnoreCase))
+         if (index != -1 && pokemonName.Substring(0, index).Equals(Global.MEGA_TAG, StringComparison.OrdinalIgnoreCase))
          {
             name = pokemonName.Substring(index);
-            if (pokemonName.Split(' ').Length == 3)
+            if (pokemonName.Split(' ').Length == Global.MAX_LEN_MEGA)
             {
                name = name.TrimEnd(name[name.Length - 1]);
             }
@@ -325,18 +325,17 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  PokemonMove move = new PokemonMove
+                  moves.Add(new PokemonMove
                   {
                      Name = Convert.ToString(reader["name"]),
                      Type = Convert.ToString(reader["type"]),
                      IsLegacy = Convert.ToInt32(reader["is_legacy"]) == TRUE
-                  };
-                  moves.Add(move);
+                  });
                }
             }
             conn.Close();
          }
-         if (!fast && shadowable)
+         if (!isFastMove && shadowable)
          {
             moves.AddRange(ShadowMoves);
          }
@@ -415,6 +414,67 @@ namespace PokeStar.ConnectionInterface
             conn.Close();
          }
          return move;
+      }
+
+      public Move GetMove(string moveName)
+      {
+         Move move = null;
+         string queryString = $@"SELECT *
+                                 FROM move 
+                                 WHERE name='{moveName}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  move = new Move
+                  {
+                     Name = Convert.ToString(reader["name"]),
+                     Type = Convert.ToString(reader["type"]),
+                     Category = Convert.ToString(reader["category"]),
+                     PvEPower = Convert.ToInt32(reader["power"]),
+                     PvEEnergy = Convert.ToInt32(reader["energy"]),
+                     PvPPower = Convert.ToInt32(reader["pvp_power"]),
+                     PvPEnergy = Convert.ToInt32(reader["pvp_energy"]),
+                     PvPTurns = Convert.ToInt32(reader["pvp_turns"]),
+                     Cooldown = Convert.ToInt32(reader["pvp_turns"]),
+                     DamageWindowStart = Convert.ToInt32(reader["damage_window_start"]),
+                     DamageWindowEnd = Convert.ToInt32(reader["damage_window_end"])
+                  };
+               }
+            }
+            conn.Close();
+         }
+         return move;
+      }
+
+      public List<PokemonMove> GetPokemonWithMove(string moveName)
+      {
+         List<PokemonMove> pokemon = new List<PokemonMove>();
+         string queryString = $@"SELECT * 
+                                 FROM pokemon_move 
+                                 WHERE move = '{moveName}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  pokemon.Add(new PokemonMove
+                  {
+                     Name = Convert.ToString(reader["pokemon"]),
+                     IsLegacy = Convert.ToInt32(reader["is_legacy"]) == TRUE
+                  });
+               }
+            }
+            conn.Close();
+         }
+         return pokemon;
       }
 
       /// <summary>

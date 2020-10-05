@@ -5,7 +5,6 @@ using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using PokeStar.DataModels;
-using PokeStar.Calculators;
 using PokeStar.ModuleParents;
 using PokeStar.PreConditions;
 using PokeStar.ConnectionInterface;
@@ -79,8 +78,10 @@ namespace PokeStar.Modules
                List<string> weather = Connections.Instance().GetWeather(types);
 
                EmbedBuilder embed = new EmbedBuilder();
+               string fileName = BLANK_IMAGE;
                embed.WithTitle($"Type {title.ToUpper()}");
                embed.WithDescription(description);
+               embed.WithThumbnailUrl($"attachment://{fileName}");
                embed.AddField("Weather Boosts:", FormatWeatherList(weather), false);
                if (type1AttackRelations != null)
                {
@@ -90,56 +91,12 @@ namespace PokeStar.Modules
                embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.Item2), false);
                embed.AddField($"Resistances:", FormatTypeList(defenseRelations.Item1), false);
                embed.WithColor(DexMessageColor);
-               await ReplyAsync(embed: embed.Build());
+
+               Connections.CopyFile(fileName);
+               await Context.Channel.SendFileAsync(fileName, embed: embed.Build());
+               Connections.DeleteFile(fileName);
             }
          }
-      }
-
-      /// <summary>
-      /// Formats weather boosts as a string.
-      /// </summary>
-      /// <param name="weatherList">List of weather that boosts the type(s).</param>
-      /// <returns>Weather for type(s) as a string.</returns>
-      private static string FormatWeatherList(List<string> weatherList)
-      {
-         StringBuilder sb = new StringBuilder();
-         foreach (string weather in weatherList)
-         {
-            sb.Append($"{Global.NONA_EMOJIS[$"{weather.Replace(' ', '_')}_emote"]} ");
-         }
-         return sb.ToString();
-      }
-
-      /// <summary>
-      /// Formats type relations as a string.
-      /// </summary>
-      /// <param name="relations">Dictionary of type relations for the type(s).</param>
-      /// <returns>Type relations for type(s) as a string.</returns>
-      private static string FormatTypeList(Dictionary<string, int> relations)
-      {
-         if (relations.Count == 0)
-         {
-            return Global.EMPTY_FIELD;
-         }
-
-         string relationString = "";
-         foreach (KeyValuePair<string, int> relation in relations)
-         {
-            double multiplier = TypeCalculator.CalcTypeEffectivness(relation.Value) * 100.0;
-            string typeEmote = Global.NONA_EMOJIS[$"{relation.Key.ToUpper()}_EMOTE"];
-            relationString += $"{typeEmote} {relation.Key}: {multiplier}%\n";
-         }
-         return relationString;
-      }
-
-      /// <summary>
-      /// Checks if a type is valid.
-      /// </summary>
-      /// <param name="type">Type to check.</param>
-      /// <returns>True if the type is valid, otherwise false.</returns>
-      private static bool CheckValidType(string type)
-      {
-         return Global.NONA_EMOJIS.ContainsKey($"{type}_emote");
       }
    }
 }

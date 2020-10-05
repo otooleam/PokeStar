@@ -111,21 +111,32 @@ namespace PokeStar.ConnectionInterface
          MoveNames = POGODBConnector.GetMoveNameList();
       }
 
-      public List<string> SearchPokemon(string name)
+      /// <summary>
+      /// Searches for the closest Pokémon by name.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>List of closest Pokémon names.</returns>
+      public List<string> SearchPokemon(string pokemonName)
       {
-         return FuzzyNameSearch(name, PokemonNames);
+         return FuzzyNameSearch(pokemonName, PokemonNames);
       }
 
-      public List<string> SearchMove(string name)
+      /// <summary>
+      /// Searches for the closests moves by name.
+      /// </summary>
+      /// <param name="moveName">Name of the move.</param>
+      /// <returns>List of closest move names.</returns>
+      public List<string> SearchMove(string moveName)
       {
-         return FuzzyNameSearch(name, MoveNames);
+         return FuzzyNameSearch(moveName, MoveNames);
       }
 
       /// <summary>
       /// Searches for the closest strings in a list of strings.
       /// </summary>
-      /// <param name="search">User input name.</param>
-      /// <returns>List of the closest Pokémon names.</returns>
+      /// <param name="search">Value to search for.</param>
+      /// <param name="dir">List of strings to search in.</param>
+      /// <returns>List of the closest strings from the list.</returns>
       private static List<string> FuzzyNameSearch(string search, List<string> dir)
       {
          Dictionary<string, double> fuzzy = new Dictionary<string, double>();
@@ -273,7 +284,7 @@ namespace PokeStar.ConnectionInterface
       /// Calculates all of the relevant CP valus of a Pokémon. This
       /// includes the raid, quest, hatch, and wild perfect IV values.
       /// </summary>
-      /// <param name="pokemon">Reference to the Pokemon object.</param>
+      /// <param name="pokemon">Reference to a Pokémon.</param>
       public static void CalcAllCP(ref Pokemon pokemon)
       {
          if (pokemon != null)
@@ -321,10 +332,38 @@ namespace PokeStar.ConnectionInterface
                Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.HATCH_LEVEL);
 
             for (int level = Global.MIN_WILD_LEVEL; level <= Global.MAX_WILD_LEVEL; level++)
+            {
                pokemon.CPWild.Add(CPCalculator.CalcCPPerLevel(
                   pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                   Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, level));
+            }
          }
+      }
+
+      /// <summary>
+      /// Gets a given move.
+      /// </summary>
+      /// <param name="moveName"></param>
+      /// <returns></returns>
+      public Move GetMove(string moveName)
+      {
+         if (moveName == null)
+         {
+            return null;
+         }
+
+         string name = ReformatName(moveName);
+         Move move = POGODBConnector.GetMove(name);
+
+         if (move == null)
+         {
+            return null;
+         }
+
+         move.Weather = GetWeather(new List<string>() { move.Type });
+         move.PokemonWithMove = POGODBConnector.GetPokemonWithMove(name);
+
+         return move;
       }
 
       /// <summary>

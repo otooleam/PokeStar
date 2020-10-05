@@ -29,7 +29,7 @@ namespace PokeStar.Modules
       public async Task UpdatePokemonNames()
       {
          Connections.Instance().UpdatePokemonNameList();
-         await ResponseMessage.SendInfoMessage(Context, $"Pokémon name list has been updated.");
+         await ResponseMessage.SendInfoMessage(Context.Channel, $"Pokémon name list has been updated.");
       }
 
       [Command("updateMovenNames")]
@@ -37,7 +37,7 @@ namespace PokeStar.Modules
       public async Task UpdateMoveNames()
       {
          Connections.Instance().UpdateMoveNameList();
-         await ResponseMessage.SendInfoMessage(Context, $"Move name list has been updated.");
+         await ResponseMessage.SendInfoMessage(Context.Channel, $"Move name list has been updated.");
       }
 
       [Command("toggleUseEmptyRaid")]

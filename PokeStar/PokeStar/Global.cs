@@ -57,6 +57,7 @@ namespace PokeStar
       public static readonly List<string> NONA_ADMIN_COMMANDS = new List<string>()
       {
          "updatePokemonNames",
+         "updateMovenNames",
          "toggleUseEmptyRaid",
          "toggleUseNonaTest"
       };
@@ -69,6 +70,18 @@ namespace PokeStar
       public static readonly char WEATHER_BOOST_SYMBOL = '*';
       public static readonly char LEGACY_MOVE_SYMBOL = '!';
       public static readonly int WILD_CP_COLUMN_LENGTH = 12;
+
+      /// <summary>
+      /// 
+      /// </summary>
+      public static readonly string FAST_MOVE_CATEGORY = "Fast";
+      public static readonly string CHARGE_MOVE_CATEGORY = "Charge";
+
+      /// <summary>
+      /// 
+      /// </summary>
+      public static readonly string MEGA_TAG = "mega";
+      public static readonly int MAX_LEN_MEGA = 3;
 
       /// <summary>
       /// Raid/Mule limits

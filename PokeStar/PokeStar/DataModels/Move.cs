@@ -12,24 +12,68 @@ namespace PokeStar.DataModels
 
       public string Type { get; set; }
 
+      public List<string> Weather { get; set; }
+
       public string Category { get; set; }
 
-      public string PvEPower { get; set; }
+      public int PvEPower { get; set; }
 
-      public string PvEEnergy { get; set; }
+      public int PvEEnergy { get; set; }
 
-      public string PvPPower { get; set; }
+      public int PvPPower { get; set; }
 
-      public string PvPEnergy { get; set; }
+      public int PvPEnergy { get; set; }
 
-      public string PvPTurns { get; set; }
+      public int PvPTurns { get; set; }
 
-      public string Cooldown { get; set; }
+      public int Cooldown { get; set; }
 
-      public string DamageWindowStart { get; set; }
+      public int DamageWindowStart { get; set; }
 
-      public string DamageWindowEnd { get; set; }
+      public int DamageWindowEnd { get; set; }
 
-      public List<string> PokemonWithMove { get; set; }
+      public List<PokemonMove> PokemonWithMove { get; set; }
+
+      /// <summary>
+      /// Gets the type of the Move as a string.
+      /// </summary>
+      /// <returns>Move type string.</returns>
+      public string TypeToString()
+      {
+         return Global.NONA_EMOJIS[$"{Type}_emote"];
+      }
+
+      /// <summary>
+      /// Gets the weather that boosts the Move as a string.
+      /// </summary>
+      /// <returns>Move weather string.</returns>
+      public string WeatherToString()
+      {
+         StringBuilder sb = new StringBuilder();
+         foreach (string weather in Weather)
+         {
+            sb.Append($"{Global.NONA_EMOJIS[$"{weather.Replace(' ', '_')}_emote"]} ");
+         }
+         return sb.ToString();
+      }
+
+      /// <summary>
+      /// Formats energy values to a string.
+      /// </summary>
+      /// <param name="energy">Value for energy.</param>
+      /// <returns>Energy as a string.</returns>
+      public string EnergyToString(int energy)
+      {
+         return $"{(Category.Equals(Global.FAST_MOVE_CATEGORY, StringComparison.OrdinalIgnoreCase) ? "+" : "-")}{energy}";
+      }
+
+      /// <summary>
+      /// Formats the damage window as a string.
+      /// </summary>
+      /// <returns>Damage window as a string.</returns>
+      public string DamageWindowString()
+      {
+         return $"{DamageWindowStart} ms - {DamageWindowEnd} ms ({DamageWindowEnd - DamageWindowStart} ms)";
+      }
    }
 }
