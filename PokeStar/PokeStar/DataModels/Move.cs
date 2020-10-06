@@ -6,32 +6,74 @@ using System.Threading.Tasks;
 
 namespace PokeStar.DataModels
 {
+   /// <summary>
+   /// A Move for a Pokémon.
+   /// </summary>
    public class Move
    {
+      /// <summary>
+      /// Name of the move.
+      /// </summary>
       public string Name { get; set; }
 
+      /// <summary>
+      /// Type of the move.
+      /// </summary>
       public string Type { get; set; }
 
+      /// <summary>
+      /// List of weather that boosts the move.
+      /// </summary>
       public List<string> Weather { get; set; }
 
+      /// <summary>
+      /// Category of the move.
+      /// </summary>
       public string Category { get; set; }
 
+      /// <summary>
+      /// Power of the move used for PvE.
+      /// </summary>
       public int PvEPower { get; set; }
 
+      /// <summary>
+      /// Energy of the move used for PvE.
+      /// </summary>
       public int PvEEnergy { get; set; }
 
+      /// <summary>
+      /// Power of the move used for PvP.
+      /// </summary>
       public int PvPPower { get; set; }
 
+      /// <summary>
+      /// Energy of the move used for PvP.
+      /// </summary>
       public int PvPEnergy { get; set; }
 
+      /// <summary>
+      /// Number of turns used for PvP.
+      /// </summary>
       public int PvPTurns { get; set; }
 
+      /// <summary>
+      /// Cooldown for the move used for PvE.
+      /// </summary>
       public int Cooldown { get; set; }
 
+      /// <summary>
+      /// Start of the damage window for PvE.
+      /// </summary>
       public int DamageWindowStart { get; set; }
 
+      /// <summary>
+      /// End of the damage window for PvE.
+      /// </summary>
       public int DamageWindowEnd { get; set; }
 
+      /// <summary>
+      /// List of Pokémon that can learn this move. 
+      /// </summary>
       public List<PokemonMove> PokemonWithMove { get; set; }
 
       /// <summary>
