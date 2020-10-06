@@ -30,7 +30,6 @@ namespace PokeStar.ConnectionInterface
          }
       };
 
-
       /// <summary>
       /// Creates a new POGO database connector.
       /// </summary>
@@ -298,10 +297,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="isFastMove">Is the type of move a fast move, else charge move.</param>
       /// <param name="shadowable">Is the Pokémon shadowable.</param>
       /// <returns>List of moves of the Pokémon.</returns>
-      public List<PokemonMove> GetPokemonMoves(string pokemonName, bool isFastMove = true, bool shadowable = false)
+      public List<PokemonMove> GetPokemonMoves(string pokemonName, string category, bool shadowable = false)
       {
          List<PokemonMove> moves = new List<PokemonMove>();
-         string moveType = isFastMove ? Global.FAST_MOVE_CATEGORY : Global.CHARGE_MOVE_CATEGORY;
 
          var index = pokemonName.IndexOf(' ');
          var name = pokemonName;
@@ -319,7 +317,7 @@ namespace PokeStar.ConnectionInterface
                                  INNER JOIN move 
                                  ON pokemon_move.move=move.name
                                  WHERE pokemon='{name.Trim()}'
-                                 AND category='{moveType}';";
+                                 AND category='{category}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -338,7 +336,7 @@ namespace PokeStar.ConnectionInterface
             }
             conn.Close();
          }
-         if (!isFastMove && shadowable)
+         if (shadowable && category.Equals(Global.CHARGE_MOVE_CATEGORY, StringComparison.OrdinalIgnoreCase))
          {
             moves.AddRange(ShadowMoves);
          }
@@ -489,6 +487,36 @@ namespace PokeStar.ConnectionInterface
             conn.Close();
          }
          return pokemon;
+      }
+
+      /// <summary>
+      /// Gets all moves of a given type.
+      /// </summary>
+      /// <param name="type">Type of the move.</param>
+      /// <param name="category">Category of the move.</param>
+      /// <returns>List of moves.</returns>
+      public List<string> GetMoveByType(string type, string category)
+      {
+         List<string> moves = new List<string>();
+         string queryString = $@"SELECT name
+                                 FROM move 
+                                 WHERE type = '{type}'
+                                 AND category = '{category}'
+                                 ORDER BY category DESC, name;";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  moves.Add(Convert.ToString(reader["name"]));
+               }
+            }
+            conn.Close();
+         }
+         return moves;
       }
 
       /// <summary>

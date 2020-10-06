@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Discord;
@@ -44,17 +45,60 @@ namespace PokeStar.Modules
       [Summary("Gets information for a given type of move.")]
       [RegisterChannel('D')]
       public async Task MoveType([Summary("The type of move you want info about.")] string type,
-                                 [Summary("The category of move you want info about (fast / charge).")] string category)
+                                 [Summary("(Optional) The category of move you want info about (fast / charge).")] string category = null)
       {
          if (CheckValidType(type))
          {
-            if (category.Equals(Global.FAST_MOVE_CATEGORY, StringComparison.OrdinalIgnoreCase))
+            if (category == null)
             {
+               List<string> fastMoves = Connections.Instance().GetMoveByType(type, Global.FAST_MOVE_CATEGORY);
+               List<string> chargeMoves = Connections.Instance().GetMoveByType(type, Global.CHARGE_MOVE_CATEGORY);
+
+               StringBuilder sbFast = new StringBuilder();
+               foreach (string move in fastMoves)
+               {
+                  sbFast.AppendLine(move);
+               }
+
+               StringBuilder sbCharge = new StringBuilder();
+               foreach (string move in chargeMoves)
+               {
+                  sbCharge.AppendLine(move);
+               }
+
+               string fileName = BLANK_IMAGE;
+               EmbedBuilder embed = new EmbedBuilder();
+               embed.WithTitle($"{type.ToUpper()} moves");
+               embed.WithDescription(Global.NONA_EMOJIS[$"{type}_emote"]);
+               embed.AddField("Fast Moves", sbFast.ToString());
+               embed.AddField("Charge Moves", sbCharge.ToString());
+               embed.WithThumbnailUrl($"attachment://{fileName}");
+
+               Connections.CopyFile(fileName);
+               await Context.Channel.SendFileAsync(fileName, embed: embed.Build());
+               Connections.DeleteFile(fileName);
 
             }
-            else if (category.Equals(Global.CHARGE_MOVE_CATEGORY, StringComparison.OrdinalIgnoreCase))
+            else if (category.Equals(Global.FAST_MOVE_CATEGORY, StringComparison.OrdinalIgnoreCase) || 
+                     category.Equals(Global.CHARGE_MOVE_CATEGORY, StringComparison.OrdinalIgnoreCase))
             {
+               List<string> moves = Connections.Instance().GetMoveByType(type, category);
 
+               StringBuilder sb = new StringBuilder();
+               foreach (string move in moves)
+               {
+                  sb.AppendLine(move);
+               }
+
+               string fileName = BLANK_IMAGE;
+               EmbedBuilder embed = new EmbedBuilder();
+               embed.AddField($"{type.ToUpper()} {category.ToUpper()} Moves", sb.ToString());
+               embed.WithDescription(Global.NONA_EMOJIS[$"{type}_emote"]);
+               embed.WithThumbnailUrl($"attachment://{fileName}");
+
+               Connections.CopyFile(fileName);
+               await Context.Channel.SendFileAsync(fileName, embed: embed.Build());
+               Connections.DeleteFile(fileName);
             }
             else
             {
@@ -63,7 +107,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "movetype", $"{type} is not a valid type.");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "movetype", $"{type} is not a valid move type.");
          }
       }
    }

@@ -224,8 +224,8 @@ namespace PokeStar.ConnectionInterface
          pokemon.Weakness = typeRelations.Item2.Keys.ToList();
          pokemon.Resistance = typeRelations.Item1.Keys.ToList();
          pokemon.Weather = GetWeather(pokemon.Type);
-         pokemon.FastMove = POGODBConnector.GetPokemonMoves(name, true);
-         pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(name, false, pokemon.Shadow);
+         pokemon.FastMove = POGODBConnector.GetPokemonMoves(name, Global.FAST_MOVE_CATEGORY);
+         pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
          pokemon.Counter = POGODBConnector.GetCounters(name);
 
          foreach (Counter counter in pokemon.Counter)
@@ -364,6 +364,17 @@ namespace PokeStar.ConnectionInterface
          move.PokemonWithMove = POGODBConnector.GetPokemonWithMove(name);
 
          return move;
+      }
+
+      /// <summary>
+      /// Gets all moves of a given type.
+      /// </summary>
+      /// <param name="type">Type of the move.</param>
+      /// <param name="category">Category of the move.</param>
+      /// <returns>List of moves.</returns>
+      public List<string> GetMoveByType(string type, string category)
+      {
+         return POGODBConnector.GetMoveByType(type, category);
       }
 
       /// <summary>
