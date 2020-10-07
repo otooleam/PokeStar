@@ -154,6 +154,7 @@ namespace PokeStar
       /// <summary>
       /// Channel Register values
       /// </summary>
+      public static readonly char REGISTER_STRING_BOSS  = 'B';
       public static readonly char REGISTER_STRING_DEX   = 'D';
       public static readonly char REGISTER_STRING_EX    = 'E';
       public static readonly char REGISTER_STRING_ROLE  = 'P';
@@ -162,6 +163,7 @@ namespace PokeStar
 
       public static readonly Dictionary<char, string> REGISTER_STRING_TYPE = new Dictionary<char, string>(StringComparer.OrdinalIgnoreCase)
       {
+         [REGISTER_STRING_BOSS]  = "Raid Boss List",
          [REGISTER_STRING_DEX]   = "PokéDex",
          [REGISTER_STRING_EX]    = "EX Raid",
          [REGISTER_STRING_ROLE]  = "Player Roles",
@@ -171,12 +173,15 @@ namespace PokeStar
 
       public static string REGISTER_ALL_STRING = "ALL_REGISTER";
       public static string UNREGISTER_ALL_STRING = "ALL_UNREGISTER";
-      public static string FULL_REGISTER_STRING = "DEPRT";
+      public static string FULL_REGISTER_STRING = "BDEPRT";
 
       public static readonly Dictionary<string, string> REGISTER_VALIE_STRING = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
          ["ALL_REGISTER"]   = FULL_REGISTER_STRING,
          ["ALL_UNREGISTER"] = string.Empty,
+         ["BOSSlIST"]       = REGISTER_STRING_BOSS.ToString(),
+         ["BOSS"]           = REGISTER_STRING_BOSS.ToString(),
+         ["B"]              = REGISTER_STRING_BOSS.ToString(),
          ["POKEDEX"]        = REGISTER_STRING_DEX.ToString(),
          ["DEX"]            = REGISTER_STRING_DEX.ToString(),
          ["P"]              = REGISTER_STRING_DEX.ToString(),
