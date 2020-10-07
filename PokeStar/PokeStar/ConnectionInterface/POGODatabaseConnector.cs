@@ -554,6 +554,56 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Updates an attribute of a Pokémon.
+      /// Only updates true false values.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="attribute">Attribute to change.</param>
+      /// <param name="value">New value of the attribute.</param>
+      public void SetPokemonAttribute(string pokemonName, string attribute, int value)
+      {
+         if (value != TRUE && value != FALSE)
+         {
+            return;
+         }
+
+         string queryString = $@"UPDATE pokemon 
+                                 SET {attribute} = {value}
+                                 WHERE name={pokemonName};";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+      /// <summary>
+      /// Sets a move for a Pokémon.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="moveName">Name of the move.</param>
+      /// <param name="isLegacy">Is the move a legacy move.</param>
+      public void SetPokemonMove(string pokemonName, string moveName, int isLegacy)
+      {
+         if (isLegacy != TRUE && isLegacy != FALSE)
+         {
+            return;
+         }
+         string queryString = $@"INSERT INTO pokemon_move (pokemon, move, is_legacy)
+                                 VALUES ('{pokemonName}', '{moveName}', {isLegacy})";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+
+      /// <summary>
       /// Generates the where string for types.
       /// </summary>
       /// <param name="types">List of pokemon types.</param>

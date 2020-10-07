@@ -59,7 +59,9 @@ namespace PokeStar
          "updatePokemonNames",
          "updateMovenNames",
          "toggleUseEmptyRaid",
-         "toggleUseNonaTest"
+         "toggleUseNonaTest",
+         "updatePokemon",
+         "updatePokemonMove"
       };
 
       /// <summary>
@@ -142,6 +144,12 @@ namespace PokeStar
       /// </summary>
       public static readonly char NICKNAME_DELIMITER = '>';
       public static readonly int NICKNAME_DELIMITER_MISSING = -1;
+
+      /// <summary>
+      /// Pokémon Move delimiter
+      /// </summary>
+      public static readonly char POKE_MOVE_DELIMITER = '>';
+      public static readonly int POKE_MOVE_DELIMITER_MISSING = -1;
 
       /// <summary>
       /// Channel Register values
