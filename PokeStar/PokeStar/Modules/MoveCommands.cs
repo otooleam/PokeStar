@@ -17,7 +17,7 @@ namespace PokeStar.Modules
       [Command("move")]
       [Summary("Gets information for a given move.")]
       [RegisterChannel('D')]
-      public async Task Move([Summary("The move you want info about.")][Remainder] string move)
+      public async Task Move([Summary("Get information about this move.")][Remainder] string move)
       {
          Move pkmnMove = Connections.Instance().GetMove(move);
          if (pkmnMove == null)
@@ -44,8 +44,8 @@ namespace PokeStar.Modules
       [Command("movetype")]
       [Summary("Gets information for a given type of move.")]
       [RegisterChannel('D')]
-      public async Task MoveType([Summary("The type of move you want info about.")] string type,
-                                 [Summary("(Optional) The category of move you want info about (fast / charge).")] string category = null)
+      public async Task MoveType([Summary("Get moves for this type.")] string type,
+                                 [Summary("(Optional) Get moves of this category (fast / charge).")] string category = null)
       {
          if (CheckValidType(type))
          {

@@ -16,11 +16,11 @@ namespace PokeStar.Modules
       public async Task Ping() => await ResponseMessage.SendInfoMessage(Context.Channel, "Pong");
 
       [Command("marco")]
-      [Summary("Play marco polo")]
+      [Summary("Play marco polo.")]
       public async Task Marco() => await ResponseMessage.SendInfoMessage(Context.Channel, "Polo!");
 
       [Command("status")]
-      [Summary("Get Nona's status")]
+      [Summary("Get Nona's status.")]
       [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Status()
       {

@@ -172,7 +172,7 @@ namespace PokeStar.Modules
 
       [Command("edit")]
       [Alias("editRaid", "raidEdit")]
-      [Summary("Edit the time or location of a raid.")]
+      [Summary("Edit the time, location, or tier/boss of a raid.")]
       [RegisterChannel('R')]
       public async Task Edit([Summary("Raid code given by the raid help message. (copy and paste this)")] ulong code,
                              [Summary("Portion of the raid message you want to change.")] string attribute,

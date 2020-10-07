@@ -19,7 +19,7 @@ namespace PokeStar.Modules
       [Summary("Sets a player\'s nickname and team.")]
       [Remarks("The user will get their team role and the trainer role.\n" +
                "An error will show if the setup command has not yet been run, the user does not have the trainer role, or the user has a role higher than Nona\'s role.\n" +
-               "It is recommended that the user\'s nick name is their Pokémon Go trainer name.")]
+               "It is recommended that the user\'s nickname is their Pokémon Go trainer name.")]
       [RegisterChannel('P')]
       [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Role([Summary("Set nickname and role for this user.")] IGuildUser user,

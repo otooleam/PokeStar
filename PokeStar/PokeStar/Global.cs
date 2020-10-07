@@ -74,13 +74,13 @@ namespace PokeStar
       public static readonly int WILD_CP_COLUMN_LENGTH = 12;
 
       /// <summary>
-      /// 
+      /// Move Category names
       /// </summary>
       public static readonly string FAST_MOVE_CATEGORY = "Fast";
       public static readonly string CHARGE_MOVE_CATEGORY = "Charge";
 
       /// <summary>
-      /// 
+      /// Mega Pokémon delimeters
       /// </summary>
       public static readonly string MEGA_TAG = "mega";
       public static readonly int MAX_LEN_MEGA = 3;

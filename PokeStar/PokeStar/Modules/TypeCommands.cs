@@ -16,8 +16,8 @@ namespace PokeStar.Modules
       [Command("type")]
       [Summary("Gets information for a given Pokémon type.")]
       [RegisterChannel('D')]
-      public async Task Type([Summary("(Optional) The typing you want info about.")] string type1 = null,
-                           [Summary("(Optional) Secondary typing you want info about.")] string type2 = null)
+      public async Task Type([Summary("(Optional) Get information about this type.")] string type1 = null,
+                           [Summary("(Optional) Get information about this secondary type.")] string type2 = null)
       {
          if (type1 == null)
          {

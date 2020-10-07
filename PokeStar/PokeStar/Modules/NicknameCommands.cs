@@ -15,7 +15,6 @@ namespace PokeStar.Modules
    public class NicknameCommands : DexCommandParent
    {
       private const int NumArguments = 2;
-
       private const int IndexNickname = 0;
       private const int IndexName = 1;
 
@@ -29,12 +28,12 @@ namespace PokeStar.Modules
                "Delete Nickname.........nickname\n" +
                "\nNote: Spaces are allowed for nicknames")]
       [RegisterChannel('D')]
-      public async Task Nickname([Summary("Get CPs for this pokémon.")][Remainder] string nicknameString)
+      public async Task Nickname([Summary("Update the nickname of a Pokémon using this string.")][Remainder] string nicknameString)
       {
          ulong guild = Context.Guild.Id;
          int delimeterIndex = nicknameString.IndexOf(Global.NICKNAME_DELIMITER);
 
-         if (delimeterIndex == -1)
+         if (delimeterIndex == Global.NICKNAME_DELIMITER_MISSING)
          {
             string trim = nicknameString.Trim();
             string name = Connections.Instance().GetPokemonWithNickname(guild, trim);
@@ -51,11 +50,7 @@ namespace PokeStar.Modules
          else
          {
             string[] arr = nicknameString.Split(Global.NICKNAME_DELIMITER);
-            if (arr.Length != NumArguments)
-            {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"Too many delimiters found.");
-            }
-            else
+            if (arr.Length == NumArguments)
             {
                string newNickname = arr[IndexNickname].Trim();
                string other = arr[IndexName].Trim();
@@ -65,7 +60,7 @@ namespace PokeStar.Modules
                {
                   if (Connections.Instance().GetPokemonWithNickname(guild, other) == null)
                   {
-                     await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"{other} is not a registered nickname,");
+                     await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"{other} is not a registered nickname.");
                   }
                   else
                   {
@@ -80,6 +75,10 @@ namespace PokeStar.Modules
                   await ResponseMessage.SendInfoMessage(Context.Channel, $"{newNickname} is now a valid nickname for {pokemon.Name}.");
                }
             }
+            else
+            {
+               await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"Too many delimiters found.");
+            }
          }
       }
 
@@ -89,7 +88,7 @@ namespace PokeStar.Modules
       [Summary("Gets nicknames for a given Pokémon.")]
       [Remarks("Can search by Pokémon name, nickname, or number.")]
       [RegisterChannel('D')]
-      public async Task GetNickname([Summary("Get information for this pokémon.")][Remainder] string pokemon)
+      public async Task GetNickname([Summary("Get the nicknames for this Pokémon.")][Remainder] string pokemon)
       {
          ulong guild = Context.Guild.Id;
          bool isNumber = int.TryParse(pokemon, out int pokemonNum);

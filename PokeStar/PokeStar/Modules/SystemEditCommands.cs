@@ -76,9 +76,13 @@ namespace PokeStar.Modules
 
       [Command("updatePokemon")]
       [Summary("Edit an attribute of a Pokémon.")]
+      [Remarks("Valid attributes to edit are shiny, shadow, and obtainable." +
+               "Value can only be set to either 1(true) or 0(false)")]
       [RequireUserPermission(GuildPermission.Administrator)]
       [NonaAdmin()]
-      public async Task UpdatePokemon(string attribute, int value, [Remainder]string pokemon)
+      public async Task UpdatePokemon([Summary("Update this attribute.")] string attribute,
+                                      [Summary("Update the attribute with this value.")] int value,
+                                      [Summary("Update attribute of this Pokémon.")][Remainder]string pokemon)
       {
          if(EditableAttributes.Contains(attribute.ToUpper()))
          {
@@ -100,10 +104,15 @@ namespace PokeStar.Modules
       }
 
       [Command("updatePokemonMove")]
-      [Summary("Toggle accepting messages from Nona Test Bot")]
+      [Summary("Add a move to a Pokémon.")]
+      [Remarks("IsLegacy can only be set to either 1(true) or 0(false)" +
+               "To add a move a special character (>) is used.\n" +
+               "\nFormat pokemonMove as following:\n" +
+               "Pokémon name > Move name")]
       [RequireUserPermission(GuildPermission.Administrator)]
       [NonaAdmin()]
-      public async Task UpdatePokemonMove(int isLegacy, [Remainder] string pokemonMove)
+      public async Task UpdatePokemonMove([Summary("Is the move a legacy move.")] int isLegacy,
+                                          [Summary("Add a move to a Pokémon using this string.")][Remainder] string pokemonMove)
       {
          int delimeterIndex = pokemonMove.IndexOf(Global.POKE_MOVE_DELIMITER);
 
