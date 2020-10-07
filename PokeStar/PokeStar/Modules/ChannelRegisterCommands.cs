@@ -24,12 +24,12 @@ namespace PokeStar.Modules
                "Pokedex........................pokedex / dex / d" +
                "Leave blank to register for all command types.")]
       [RequireUserPermission(GuildPermission.Administrator)]
-      public async Task Register([Summary("(Optional) Register the channel for these commands.")] string register = "ALL")
+      public async Task Register([Summary("(Optional) Register the channel for these commands.")] string register = null)
       {
          ulong guild = Context.Guild.Id;
          ulong channel = Context.Channel.Id;
          string registration = Connections.Instance().GetRegistration(guild, channel);
-         Tuple<string, bool> result = GenerateRegistrationString(register, registration ?? "");
+         Tuple<string, bool> result = GenerateRegistrationString(register ?? Global.REGISTER_ALL_STRING, registration ?? "");
          registration = result.Item1;
 
          if (registration == null)
@@ -59,7 +59,7 @@ namespace PokeStar.Modules
                "Pokedex........................pokedex / dex / d" +
                "Leave blank to unregister from all command types.")]
       [RequireUserPermission(GuildPermission.Administrator)]
-      public async Task Unregister([Summary("(Optional) Unregister the channel from these commands.")] string unregister = "ALL")
+      public async Task Unregister([Summary("(Optional) Unregister the channel from these commands.")] string unregister = null)
       {
          ulong guild = Context.Guild.Id;
          ulong channel = Context.Channel.Id;
@@ -69,7 +69,7 @@ namespace PokeStar.Modules
 
          if (registration != null)
          {
-            reg = GenerateUnregistrationString(unregister, registration);
+            reg = GenerateUnregistrationString(unregister ?? Global.UNREGISTER_ALL_STRING, registration);
             if (reg == null)
             {
                await ResponseMessage.SendErrorMessage(Context.Channel, "unregister", "Please enter a valid registration value.");
@@ -104,38 +104,15 @@ namespace PokeStar.Modules
          string add;
          bool CheckSetupComplete = false;
 
-         if (register.ToUpper().Equals("ALL"))
+         if (Global.REGISTER_VALIE_STRING.ContainsKey(register) &&
+             !register.Equals(Global.UNREGISTER_ALL_STRING, StringComparison.OrdinalIgnoreCase))
          {
-            add = "DEPRT";
-            CheckSetupComplete = true;
-         }
-         else if (register.ToUpper().Equals("PLAYER") || 
-                  register.ToUpper().Equals("ROLE") || 
-                  register.ToUpper().Equals("P"))
-         {
-            add = "P";
-            CheckSetupComplete = true;
-         }
-         else if (register.ToUpper().Equals("RAID") || 
-                  register.ToUpper().Equals("R"))
-         {
-            add = "R";
-         }
-         else if (register.ToUpper().Equals("EX") || 
-                  register.ToUpper().Equals("E"))
-         {
-            add = "E";
-         }
-         else if (register.ToUpper().Equals("TRAIN") || 
-                  register.ToUpper().Equals("T"))
-         {
-            add = "T";
-         }
-         else if (register.ToUpper().Equals("POKEDEX") || 
-                  register.ToUpper().Equals("DEX") || 
-                  register.ToUpper().Equals("D"))
-         {
-            add = "D";
+            add = Global.REGISTER_VALIE_STRING[register];
+            if (add.Equals(Global.FULL_REGISTER_STRING) ||
+                add.Equals(Global.REGISTER_STRING_ROLE.ToString()))
+            {
+               CheckSetupComplete = true;
+            }
          }
          else
          {
@@ -146,8 +123,7 @@ namespace PokeStar.Modules
          {
             return new Tuple<string, bool>(add, CheckSetupComplete);
          }
-
-         if (existing.Contains(add))
+         else if (existing.Contains(add))
          {
             return new Tuple<string, bool>(existing, CheckSetupComplete);
          }
@@ -169,36 +145,10 @@ namespace PokeStar.Modules
       private static string GenerateUnregistrationString(string unregister, string existing)
       {
          string remove;
-         if (unregister.ToUpper().Equals("ALL"))
+         if (Global.REGISTER_VALIE_STRING.ContainsKey(unregister) &&
+             !unregister.Equals(Global.REGISTER_ALL_STRING, StringComparison.OrdinalIgnoreCase))
          {
-            return "";
-         }
-         else if (unregister.ToUpper().Equals("PLAYER") || 
-                  unregister.ToUpper().Equals("ROLE") || 
-                  unregister.ToUpper().Equals("P"))
-         {
-            remove = Global.REGISTER_STRING_ROLE.ToString();
-         }
-         else if (unregister.ToUpper().Equals("RAID") || 
-                  unregister.ToUpper().Equals("R"))
-         {
-            remove = Global.REGISTER_STRING_RAID.ToString();
-         }
-         else if (unregister.ToUpper().Equals("EX") || 
-                  unregister.ToUpper().Equals("E"))
-         {
-            remove = Global.REGISTER_STRING_EX.ToString();
-         }
-         else if (unregister.ToUpper().Equals("TRAIN") || 
-                  unregister.ToUpper().Equals("T"))
-         {
-            remove = Global.REGISTER_STRING_TRAIN.ToString();
-         }
-         else if (unregister.ToUpper().Equals("POKEDEX") || 
-                  unregister.ToUpper().Equals("DEX") || 
-                  unregister.ToUpper().Equals("D"))
-         {
-            remove = Global.REGISTER_STRING_DEX.ToString();
+            remove = Global.REGISTER_VALIE_STRING[unregister];
          }
          else
          {

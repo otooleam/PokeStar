@@ -160,13 +160,36 @@ namespace PokeStar
       public static readonly char REGISTER_STRING_RAID  = 'R';
       public static readonly char REGISTER_STRING_TRAIN = 'T';
 
-      public static readonly Dictionary<char, string> REGISTER_STRING_TYPE = new Dictionary<char, string>()
+      public static readonly Dictionary<char, string> REGISTER_STRING_TYPE = new Dictionary<char, string>(StringComparer.OrdinalIgnoreCase)
       {
          [REGISTER_STRING_DEX]   = "PokéDex",
          [REGISTER_STRING_EX]    = "EX Raid",
          [REGISTER_STRING_ROLE]  = "Player Roles",
          [REGISTER_STRING_RAID]  = "Raid",
          [REGISTER_STRING_TRAIN] = "Raid Train",
+      };
+
+      public static string REGISTER_ALL_STRING = "ALL_REGISTER";
+      public static string UNREGISTER_ALL_STRING = "ALL_UNREGISTER";
+      public static string FULL_REGISTER_STRING = "DEPRT";
+
+      public static readonly Dictionary<string, string> REGISTER_VALIE_STRING = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+      {
+         ["ALL_REGISTER"]   = FULL_REGISTER_STRING,
+         ["ALL_UNREGISTER"] = string.Empty,
+         ["POKEDEX"]        = REGISTER_STRING_DEX.ToString(),
+         ["DEX"]            = REGISTER_STRING_DEX.ToString(),
+         ["P"]              = REGISTER_STRING_DEX.ToString(),
+         ["EX"]             = REGISTER_STRING_EX.ToString(),
+         ["E"]              = REGISTER_STRING_EX.ToString(),
+         ["PLAYER"]         = REGISTER_STRING_ROLE.ToString(),
+         ["ROLE"]           = REGISTER_STRING_ROLE.ToString(),
+         ["P"]              = REGISTER_STRING_ROLE.ToString(),
+         ["RAID"]           = REGISTER_STRING_RAID.ToString(),
+         ["R"]              = REGISTER_STRING_RAID.ToString(),
+         ["TRAIN"]          = REGISTER_STRING_TRAIN.ToString(),
+         ["T"]              = REGISTER_STRING_TRAIN.ToString()
+
       };
 
       /// <summary>
