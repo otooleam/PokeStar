@@ -33,16 +33,16 @@ namespace PokeStar.Modules
 
          if (registration == null)
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "register", "Please enter a valid registration value.");
+            await ResponseMessage.SendErrorMessage(Context, "register", "Please enter a valid registration value.");
          }
          else
          {
             Connections.Instance().UpdateRegistration(guild, channel, registration);
-            await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
+            await ResponseMessage.SendInfoMessage(Context, $"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
 
             if (result.Item2 && !Connections.Instance().GetSetupComplete(guild))
             {
-               await ResponseMessage.SendWarningMessage(Context.Channel, "register", "Please run the .setup command to ensure required roles have been setup.");
+               await ResponseMessage.SendWarningMessage(Context, "register", "Please run the .setup command to ensure required roles have been setup.");
             }
          }
       }
@@ -70,22 +70,22 @@ namespace PokeStar.Modules
             reg = GenerateUnregistrationString(unregister, registration);
             if (reg == null)
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "unregister", "Please enter a valid registration value.");
+               await ResponseMessage.SendErrorMessage(Context, "unregister", "Please enter a valid registration value.");
             }
             else if (string.IsNullOrEmpty(reg))
             {
                Connections.Instance().DeleteRegistration(guild, channel);
-               await ResponseMessage.SendInfoMessage(Context.Channel, $"Removed all registrations from this channel.");
+               await ResponseMessage.SendInfoMessage(Context, $"Removed all registrations from this channel.");
             }
             else
             {
                Connections.Instance().UpdateRegistration(guild, channel, reg);
-               await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(reg)}");
+               await ResponseMessage.SendInfoMessage(Context, $"Channel is now registered for the following command types {GenerateSummaryString(reg)}");
             }
          }
          else
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "unregister", "This channel does not have any commands registered to it");
+            await ResponseMessage.SendErrorMessage(Context, "unregister", "This channel does not have any commands registered to it");
          }
       }
 
