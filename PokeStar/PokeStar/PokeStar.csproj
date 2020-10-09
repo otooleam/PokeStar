@@ -189,6 +189,7 @@
     <Compile Include="DataModels\Counter.cs" />
     <Compile Include="Modules\SystemEditCommands.cs" />
     <Compile Include="Modules\TypeCommands.cs" />
+    <Compile Include="PreConditions\NonaAdminAttribute.cs" />
     <Compile Include="PreConditions\RegisterChannelAttribute.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="DataModels\Raid.cs" />

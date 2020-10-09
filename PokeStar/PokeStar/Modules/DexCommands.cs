@@ -321,13 +321,13 @@ namespace PokeStar.Modules
                   sb.Append(form);
                   if (form.Equals(forms.Item2))
                   {
-                     sb.Append('*');
+                     sb.Append(Global.DEFAULT_FORM_SYMBOL);
                   }
                   sb.Append('\n');
                }
                embed.AddField($"Forms for {pokemon}", sb.ToString(), true);
                embed.WithColor(DexMessageColor);
-               embed.WithFooter("* Form is default form");
+               embed.WithFooter($"{Global.DEFAULT_FORM_SYMBOL} Form is default form");
                await ReplyAsync(embed: embed.Build());
             }
             else
