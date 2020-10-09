@@ -171,7 +171,7 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// 
+      /// Raid tiers
       /// </summary>
       protected static readonly short EX_RAID_TIER        = 9;
       protected static readonly short MEGA_RAID_TIER      = 7;
