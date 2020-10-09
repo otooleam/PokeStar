@@ -27,8 +27,8 @@ namespace PokeStar
       public static string VERSION { get; set; }
       public static string HOME_SERVER { get; set; }
       public static LogSeverity LOG_LEVEL { get; set; }
-      public static string POGO_DB_CONNECTION_STRING { get; set; }
-      public static string NONA_DB_CONNECTION_STRING { get; set; }
+      public static string POGODB_CONNECTION_STRING { get; set; }
+      public static string NONADB_CONNECTION_STRING { get; set; }
 
       /// <summary>
       /// Editable values from env file
@@ -40,35 +40,23 @@ namespace PokeStar
       /// Values for hiding help commands
       /// </summary>
       public static List<CommandInfo> COMMAND_INFO { get; set; }
+      public static readonly string ADMIN_KEY = "Hidden";
       public static readonly List<string> HIDDEN_COMMANDS = new List<string>()
       {
          "ping",
          "marco",
+         "status",
          "help",
          "rave",
          "screm",
-      };
-
-      public static readonly List<string> ADMIN_COMMANDS = new List<string>()
-      {
-         "status"
-      };
-
-      public static readonly List<string> NONA_ADMIN_COMMANDS = new List<string>()
-      {
          "updatePokemonNames",
+         "useEmptyRaid",
+         "useNonaTest",
          "toggleUseEmptyRaid",
          "toggleUseNonaTest"
       };
 
-      /// <summary>
-      /// Text formatting
-      /// </summary>
-      public static readonly char STAB_SYMBOL = '*';
-      public static readonly char DEFAULT_FORM_SYMBOL = '*';
-      public static readonly char WEATHER_BOOST_SYMBOL = '*';
-      public static readonly char LEGACY_MOVE_SYMBOL = '!';
-      public static readonly int WILD_CP_COLUMN_LENGTH = 12;
+      public static readonly char LEGACY_MOVE = '!';
 
       /// <summary>
       /// Raid/Mule limits

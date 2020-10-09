@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
-using Discord;
 using Discord.Commands;
 using PokeStar.DataModels;
 using PokeStar.ConnectionInterface;
@@ -22,7 +21,6 @@ namespace PokeStar.Modules
                //"EX Raids.......................ex / e\n" +
                //"Raid Trains..................train / t\n" +
                "Pokedex........................pokedex / dex / d")]
-      [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Register([Summary("(Optional) Register the channel for these commands. Use one of the above values, or no value to register for all command types.")] string register = "ALL")
       {
          ulong guild = Context.Guild.Id;
@@ -56,7 +54,6 @@ namespace PokeStar.Modules
                //"EX Raids.......................ex / e\n" +
                //"Raid Trains..................train / t\n" +
                "Pokedex........................pokedex / dex / d")]
-      [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Unregister([Summary("(Optional) Unregister the channel from these commands. Use one of the above values, or no value to unregister from all command types.")] string unregister = "ALL")
       {
          ulong guild = Context.Guild.Id;

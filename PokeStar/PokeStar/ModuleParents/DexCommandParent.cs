@@ -39,7 +39,7 @@ namespace PokeStar.ModuleParents
          NICKNAME_MESSAGE,
       }
 
-      /// Message checkers ****************************************************
+      /// Message checkers
 
       /// <summary>
       /// Checks if a message is a dex message.
@@ -51,7 +51,7 @@ namespace PokeStar.ModuleParents
          return dexMessages.ContainsKey(id);
       }
 
-      /// Message reaction handlers *******************************************
+      /// Message reaction handlers
 
       /// <summary>
       /// Handles a reaction on a dex message.
@@ -99,7 +99,7 @@ namespace PokeStar.ModuleParents
          await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
       }
 
-      /// Embed builders ******************************************************
+      /// Embed builders
 
       /// <summary>
       /// Builds a dex embed.
@@ -131,7 +131,7 @@ namespace PokeStar.ModuleParents
             embed.AddField("Regions", pokemon.RegionalToString(), true);
          }
          embed.WithColor(DexMessageColor);
-         embed.WithFooter($"{Global.STAB_SYMBOL} denotes STAB move {Global.LEGACY_MOVE_SYMBOL} denotes Legacy move");
+         embed.WithFooter("* denotes STAB move ! denotes Legacy move");
          return embed.Build();
       }
 
@@ -154,7 +154,7 @@ namespace PokeStar.ModuleParents
          embed.AddField($"Quest CP (Level 15)", pokemon.QuestCPToString(), false);
          embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
          embed.WithColor(DexMessageColor);
-         embed.WithFooter($"{Global.WEATHER_BOOST_SYMBOL} denotes Weather Boosted CP");
+         embed.WithFooter("* denotes Weather Boosted CP");
          return embed.Build();
       }
 
@@ -242,7 +242,7 @@ namespace PokeStar.ModuleParents
          return embed.Build();
       }
 
-      /// Name processors *****************************************************
+      /// Name processors
 
       /// <summary>
       /// Processes the Pokémon name given from a command.
@@ -462,7 +462,7 @@ namespace PokeStar.ModuleParents
          return pokemonName;
       }
 
-      /// Evolution processors ************************************************
+      /// Evolution processors
 
       /// <summary>
       /// Generage an ordered dictionary of evolutions.
