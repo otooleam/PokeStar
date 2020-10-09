@@ -242,6 +242,20 @@ namespace PokeStar.Modules
                   await Context.Channel.SendFileAsync(fileName, embed: BuildFormEmbed(baseName, formsList, forms.Item2, fileName));
                   Connections.DeleteFile(fileName);
                }
+
+               foreach (string form in formsList)
+               {
+                  sb.Append(form);
+                  if (form.Equals(forms.Item2))
+                  {
+                     sb.Append(Global.DEFAULT_FORM_SYMBOL);
+                  }
+                  sb.Append('\n');
+               }
+               embed.AddField($"Forms for {pokemon}", sb.ToString(), true);
+               embed.WithColor(DexMessageColor);
+               embed.WithFooter($"{Global.DEFAULT_FORM_SYMBOL} Form is default form");
+               await ReplyAsync(embed: embed.Build());
             }
             else
             {
