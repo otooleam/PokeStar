@@ -62,7 +62,7 @@ namespace PokeStar.Modules
 
             if (!CheckValidType(type1) || (types.Count == 2 && !CheckValidType(type2)))
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
+               await ResponseMessage.SendErrorMessage(Context, "type", $"{(!CheckValidType(type1) ? type1 : type2)} is not a valid type.");
             }
             else
             {

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text;
 using System.Threading.Tasks;
-using Discord;
 using Discord.Commands;
 using PokeStar.DataModels;
 using PokeStar.ConnectionInterface;
@@ -22,7 +21,6 @@ namespace PokeStar.Modules
                //"EX Raids.......................ex / e\n" +
                //"Raid Trains..................train / t\n" +
                "Pokedex........................pokedex / dex / d")]
-      [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Register([Summary("(Optional) Register the channel for these commands. Use one of the above values, or no value to register for all command types.")] string register = "ALL")
       {
          ulong guild = Context.Guild.Id;
@@ -33,16 +31,16 @@ namespace PokeStar.Modules
 
          if (registration == null)
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "register", "Please enter a valid registration value.");
+            await ResponseMessage.SendErrorMessage(Context, "register", "Please enter a valid registration value.");
          }
          else
          {
             Connections.Instance().UpdateRegistration(guild, channel, registration);
-            await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
+            await ResponseMessage.SendInfoMessage(Context, $"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
 
             if (result.Item2 && !Connections.Instance().GetSetupComplete(guild))
             {
-               await ResponseMessage.SendWarningMessage(Context.Channel, "register", "Please run the .setup command to ensure required roles have been setup.");
+               await ResponseMessage.SendWarningMessage(Context, "register", "Please run the .setup command to ensure required roles have been setup.");
             }
          }
       }
@@ -56,7 +54,6 @@ namespace PokeStar.Modules
                //"EX Raids.......................ex / e\n" +
                //"Raid Trains..................train / t\n" +
                "Pokedex........................pokedex / dex / d")]
-      [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Unregister([Summary("(Optional) Unregister the channel from these commands. Use one of the above values, or no value to unregister from all command types.")] string unregister = "ALL")
       {
          ulong guild = Context.Guild.Id;
@@ -70,22 +67,22 @@ namespace PokeStar.Modules
             reg = GenerateUnregistrationString(unregister, registration);
             if (reg == null)
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "unregister", "Please enter a valid registration value.");
+               await ResponseMessage.SendErrorMessage(Context, "unregister", "Please enter a valid registration value.");
             }
             else if (string.IsNullOrEmpty(reg))
             {
                Connections.Instance().DeleteRegistration(guild, channel);
-               await ResponseMessage.SendInfoMessage(Context.Channel, $"Removed all registrations from this channel.");
+               await ResponseMessage.SendInfoMessage(Context, $"Removed all registrations from this channel.");
             }
             else
             {
                Connections.Instance().UpdateRegistration(guild, channel, reg);
-               await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(reg)}");
+               await ResponseMessage.SendInfoMessage(Context, $"Channel is now registered for the following command types {GenerateSummaryString(reg)}");
             }
          }
          else
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "unregister", "This channel does not have any commands registered to it");
+            await ResponseMessage.SendErrorMessage(Context, "unregister", "This channel does not have any commands registered to it");
          }
       }
 

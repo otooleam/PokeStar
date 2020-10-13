@@ -171,7 +171,7 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// Raid tiers
+      /// 
       /// </summary>
       protected static readonly short EX_RAID_TIER        = 9;
       protected static readonly short MEGA_RAID_TIER      = 7;
@@ -180,7 +180,7 @@ namespace PokeStar.ModuleParents
       protected static readonly short COMMON_RAID_TIER    = 1;
       protected static readonly short INVALID_TIER        = 0;
 
-      /// Message checkers ****************************************************
+      /// Message checkers
 
       /// <summary>
       /// Checks if a message is a raid message.
@@ -202,7 +202,7 @@ namespace PokeStar.ModuleParents
          return subMessages.ContainsKey(id);
       }
 
-      /// Message reaction handlers *******************************************
+      /// Message reaction handlers
 
       /// <summary>
       /// Handles a reaction on a general raid message.
@@ -279,7 +279,7 @@ namespace PokeStar.ModuleParents
          }
       }
 
-      /// Reaction handlers ***************************************************
+      /// Reaction handlers
 
       /// <summary>
       /// Handles a reaction on a raid message.
@@ -706,7 +706,7 @@ namespace PokeStar.ModuleParents
          }
       }
 
-      /// Embed builders ******************************************************
+      /// Embed builders
 
       /// <summary>
       /// Builds a raid embed.
@@ -869,7 +869,7 @@ namespace PokeStar.ModuleParents
          return embed.Build();
       }
 
-      /// String builders *****************************************************
+      /// String builders
 
       /// <summary>
       /// Builds the title of the raid.
@@ -1117,7 +1117,7 @@ namespace PokeStar.ModuleParents
          return "";
       }
 
-      /// Miscellaneous *******************************************************
+      /// Miscellaneous 
 
       /// <summary>
       /// Set emotes on a raid message.

@@ -29,83 +29,17 @@ namespace PokeStar.ModuleParents
       protected static readonly Dictionary<ulong, Tuple<int, List<string>>> dexMessages = new Dictionary<ulong, Tuple<int, List<string>>>();
 
       /// <summary>
-      /// Dictionary of all Pokémon with form differences flags
-      /// Values are tuples with item1 as a the list of form flags
-      /// and item2 with the default form flag. Item1 is delimeted
-      /// by commas (,).
-      /// </summary>
-      protected static readonly Dictionary<string, Tuple<string, string>> pokemonForms = new Dictionary<string, Tuple<string, string>>(StringComparer.OrdinalIgnoreCase)
-      {
-         ["Venusaur"] = new Tuple<string, string>("-mega", ""),
-         ["Charizard"] = new Tuple<string, string>("-mega,-megax,-megay,-x,-y", ""),
-         ["Blastoise"] = new Tuple<string, string>("-mega", ""),
-         ["Beedrill"] = new Tuple<string, string>("-mega", ""),
-         ["Pigeot"] = new Tuple<string, string>("-mega", ""),
-         ["Rattata"] = new Tuple<string, string>("-alola", ""),
-         ["Raticate"] = new Tuple<string, string>("-alola", ""),
-         ["Raichu"] = new Tuple<string, string>("-alola", ""),
-         ["Sandshrew"] = new Tuple<string, string>("-alola", ""),
-         ["Sandslash"] = new Tuple<string, string>("-alola", ""),
-         ["Nidoran F"] = new Tuple<string, string>("-f,-m", "-f"),
-         ["Vulpix"] = new Tuple<string, string>("-alola", ""),
-         ["Ninetales"] = new Tuple<string, string>("-alola", ""),
-         ["Diglett"] = new Tuple<string, string>("-alola", ""),
-         ["Dugtrio"] = new Tuple<string, string>("-alola", ""),
-         ["Meowth"] = new Tuple<string, string>("-alola,-galar", ""),
-         ["Persian"] = new Tuple<string, string>("-alola", ""),
-         ["Geodude"] = new Tuple<string, string>("-alola", ""),
-         ["Graveler"] = new Tuple<string, string>("-alola", ""),
-         ["Golem"] = new Tuple<string, string>("-alola", ""),
-         ["Farfetch'd"] = new Tuple<string, string>("-galar", ""),
-         ["Grimer"] = new Tuple<string, string>("-alola", ""),
-         ["Muk"] = new Tuple<string, string>("-alola", ""),
-         ["Gengar"] = new Tuple<string, string>("-mega", ""),
-         ["Exeggutor"] = new Tuple<string, string>("-alola", ""),
-         ["Marowak"] = new Tuple<string, string>("-alola", ""),
-         ["Weezing"] = new Tuple<string, string>("-galar", ""),
-         ["Mewtwo"] = new Tuple<string, string>("-armor", ""),
-         ["Unown F"] = new Tuple<string, string>("-a,-b,-c,-d,-e,-f,-g,-h,-i,-j,-k,-l,-m,-n,-o,-p,-q,-r,-s,-t,-u,-v,-w,-x,-y,-z,-!,-?,", "-f"),
-         ["Zigzagoon"] = new Tuple<string, string>("-galar", ""),
-         ["Linoone"] = new Tuple<string, string>("-galar", ""),
-         ["Houndoom"] = new Tuple<string, string>("-mega", ""),
-         ["Castform"] = new Tuple<string, string>("-rain,-snow,-sun", ""),
-         ["Deoxys"] = new Tuple<string, string>("-attack,-defense,-speed", ""),
-         ["Plant Cloak Burmy"] = new Tuple<string, string>("-plant,-sand,-trash", "-plant"),
-         ["Plant Cloak Wormadam"] = new Tuple<string, string>("-plant,-sand,-trash", "-plant"),
-         ["Sunshine Cherrim"] = new Tuple<string, string>("-sunshine,-overcast", "-sunshine"),
-         ["Shellow"] = new Tuple<string, string>("-east,-west", "-east"),
-         ["Gastrodon"] = new Tuple<string, string>("-east,-west", "-east"),
-         ["Rotom"] = new Tuple<string, string>("-fan,-frost,-heat,-mow,-wash", ""),
-         ["Altered Form Giratina"] = new Tuple<string, string>("-altered,-origin", "-altered"),
-         ["Land Form Shayman"] = new Tuple<string, string>("-land,-sky", "-land"),
-         ["Arceus Normal"] = new Tuple<string, string>("-normal,-bug,-dark,-dragon,-electric,-fairy,-fighting,-fire,-flying,-ghost,-grass,-ground,-ice,-poison,-psychic,-rock,-steel,-water", "-normal"),
-         ["Blue Striped Basculin"] = new Tuple<string, string>("-blue,-red", "-blue"),
-         ["Darumaka"] = new Tuple<string, string>("-galar", ""),
-         ["Darmanitan"] = new Tuple<string, string>("-galar,-zen,-galar-zen", ""),
-         ["Summer Deerling"] = new Tuple<string, string>("-summer,-spring,-winter,-autumn", "-summer"),
-         ["Summer Sawsbuck"] = new Tuple<string, string>("-summer,-spring,-winter,-autumn", "-summer"),
-         ["Stunfisk"] = new Tuple<string, string>("-galar", ""),
-         ["Incarnate Tornadus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
-         ["Incarnate Thundurus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
-         ["Incarnate Landorus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
-         ["Kyurem"] = new Tuple<string, string>("-black,-white", ""),
-         ["Keldeo"] = new Tuple<string, string>("-resolute", ""),
-         ["Aria Meloetta"] = new Tuple<string, string>("-aria,-pirouette", "-aria"),
-      };
-
-      /// <summary>
       /// Types of dex sub messages.
       /// </summary>
       protected enum DEX_MESSAGE_TYPES
       {
          DEX_MESSAGE,
          CP_MESSAGE,
-         FORM_MESSAGE,
          EVO_MESSAGE,
          NICKNAME_MESSAGE,
       }
 
-      /// Message checkers ****************************************************
+      /// Message checkers
 
       /// <summary>
       /// Checks if a message is a dex message.
@@ -117,7 +51,7 @@ namespace PokeStar.ModuleParents
          return dexMessages.ContainsKey(id);
       }
 
-      /// Message reaction handlers *******************************************
+      /// Message reaction handlers
 
       /// <summary>
       /// Handles a reaction on a dex message.
@@ -145,27 +79,6 @@ namespace PokeStar.ModuleParents
                   Connections.CalcAllCP(ref pokemon);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName));
                }
-               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.FORM_MESSAGE)
-               {
-                  List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemon.Number);
-
-                  if (pokemonWithNumber.Count == 1)
-                  {
-                     await ResponseMessage.SendErrorMessage(reaction.Channel, "form", $"{pokemonWithNumber.First()} does not have different forms.");
-                  }
-                  else if (pokemonWithNumber.Count > 1)
-                  {
-                     string baseName = pokemonWithNumber.Where(form => pokemonForms.ContainsKey(form)).ToList().First();
-
-                     Tuple<string, string> forms = pokemonForms[baseName];
-                     List<string> formsList = forms.Item1.Split(',').ToList();
-
-                     string baseFileName = Connections.GetPokemonPicture(baseName);
-                     Connections.CopyFile(fileName);
-                     await reaction.Channel.SendFileAsync(baseFileName, embed: BuildFormEmbed(baseName, formsList, forms.Item2, fileName));
-                     Connections.DeleteFile(baseFileName);
-                  }
-               }
                else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.EVO_MESSAGE)
                {
                   Dictionary<string, string> evolutions = GenerateEvoDict(pokemon.Name);
@@ -186,7 +99,7 @@ namespace PokeStar.ModuleParents
          await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
       }
 
-      /// Embed builders ******************************************************
+      /// Embed builders
 
       /// <summary>
       /// Builds a dex embed.
@@ -218,12 +131,12 @@ namespace PokeStar.ModuleParents
             embed.AddField("Regions", pokemon.RegionalToString(), true);
          }
          embed.WithColor(DexMessageColor);
-         embed.WithFooter($"{Global.STAB_SYMBOL} denotes STAB move {Global.LEGACY_MOVE_SYMBOL} denotes Legacy move");
+         embed.WithFooter("* denotes STAB move ! denotes Legacy move");
          return embed.Build();
       }
 
       /// <summary>
-      /// Builds a cp embed.
+      /// Builds a cp embed
       /// </summary>
       /// <param name="pokemon">Pokémon to display.</param>
       /// <param name="fileName">Name of image file.</param>
@@ -241,36 +154,7 @@ namespace PokeStar.ModuleParents
          embed.AddField($"Quest CP (Level 15)", pokemon.QuestCPToString(), false);
          embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
          embed.WithColor(DexMessageColor);
-         embed.WithFooter($"{Global.WEATHER_BOOST_SYMBOL} denotes Weather Boosted CP");
-         return embed.Build();
-      }
-
-      /// <summary>
-      /// Builds a form embed.
-      /// </summary>
-      /// <param name="pokemonName">Name of the Pokémon.</param>
-      /// <param name="forms">List of form tags.</param>
-      /// <param name="defaultForm">Default form tag.</param>
-      /// <param name="fileName">Name of image file.</param>
-      /// <returns>Embed for viewing a Pokémon's form tags.</returns>
-      protected static Embed BuildFormEmbed(string pokemonName, List<string> forms, string defaultForm, string fileName)
-      {
-         StringBuilder sb = new StringBuilder();
-         foreach (string form in forms)
-         {
-            sb.Append(form);
-            if (form.Equals(defaultForm, StringComparison.OrdinalIgnoreCase))
-            {
-               sb.Append('*');
-            }
-            sb.Append('\n');
-         }
-
-         EmbedBuilder embed = new EmbedBuilder();
-         embed.WithThumbnailUrl($"attachment://{fileName}");
-         embed.AddField($"Forms for {pokemonName}", sb.ToString(), true);
-         embed.WithColor(DexMessageColor);
-         embed.WithFooter("* Form is default form");
+         embed.WithFooter("* denotes Weather Boosted CP");
          return embed.Build();
       }
 
@@ -358,7 +242,7 @@ namespace PokeStar.ModuleParents
          return embed.Build();
       }
 
-      /// Name processors *****************************************************
+      /// Name processors
 
       /// <summary>
       /// Processes the Pokémon name given from a command.
@@ -394,7 +278,6 @@ namespace PokeStar.ModuleParents
       /// The following Pokémon have multiple forms:
       /// Name       Default Form
       /// -----------------------
-      /// Nidoran    F
       /// Unown      F
       /// Burmy      Plant Cloak
       /// Wormadam   Plant Cloak
@@ -411,6 +294,7 @@ namespace PokeStar.ModuleParents
       /// Thundurus  Incarnate
       /// Landorus   Incarnate
       /// Meloetta   Aria
+      /// Note: Nidoran defaults to the female form.
       /// </summary>
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="form">Form of the Pokémon.</param>
@@ -578,7 +462,7 @@ namespace PokeStar.ModuleParents
          return pokemonName;
       }
 
-      /// Evolution processors ************************************************
+      /// Evolution processors
 
       /// <summary>
       /// Generage an ordered dictionary of evolutions.
