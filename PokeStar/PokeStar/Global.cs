@@ -161,7 +161,7 @@ namespace PokeStar
       public static readonly char REGISTER_STRING_RAID  = 'R';
       public static readonly char REGISTER_STRING_TRAIN = 'T';
 
-      public static readonly Dictionary<char, string> REGISTER_STRING_TYPE = new Dictionary<char, string>(StringComparer.OrdinalIgnoreCase)
+      public static readonly Dictionary<char, string> REGISTER_STRING_TYPE = new Dictionary<char, string>()
       {
          [REGISTER_STRING_BOSS]  = "Raid Boss List",
          [REGISTER_STRING_DEX]   = "PokéDex",

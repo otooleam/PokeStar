@@ -40,7 +40,7 @@ namespace PokeStar.Modules
             }
             Connections.Instance().CompleteSetup(Context.Guild.Id);
          }
-         await ResponseMessage.SendInfoMessage(Context, "Setup for Nona has been complete.");
+         await ResponseMessage.SendInfoMessage(Context.Channel, "Setup for Nona has been complete.");
       }
    }
 }

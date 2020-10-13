@@ -18,25 +18,25 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Send an info message.
       /// </summary>
-      /// <param name="context">Context to send message with.</param>
+      /// <param name="channel">Channel to send message to.</param>
       /// <param name="message">Message to send.</param>
       /// <returns>Task Complete.</returns>
-      public static async Task<Task> SendInfoMessage(ICommandContext context, string message)
+      public static async Task<Task> SendInfoMessage(IMessageChannel channel, string message)
       {
-         await context.Channel.SendMessageAsync(embed: BuildInfoEmbed(message));
+         await channel.SendMessageAsync(embed: BuildInfoEmbed(message));
          return Task.CompletedTask;
       }
 
       /// <summary>
       /// Send a warning message.
       /// </summary>
-      /// <param name="context">Context to send message with.</param>
+      /// <param name="channel">Channel to send message to.</param>
       /// <param name="command">Command that was executing.</param>
       /// <param name="message">Message to send.</param>
       /// <returns>Task Complete.</returns>
-      public static async Task<Task> SendWarningMessage(ICommandContext context, string command, string message)
+      public static async Task<Task> SendWarningMessage(IMessageChannel channel, string command, string message)
       {
-         await context.Channel.SendMessageAsync(embed: BuildWarningEmbed(command, message));
+         await channel.SendMessageAsync(embed: BuildWarningEmbed(command, message));
          return Task.CompletedTask;
       }
 
@@ -44,14 +44,14 @@ namespace PokeStar.DataModels
       /// Send an error message.
       /// Used for precondition errors.
       /// </summary>
-      /// <param name="context">Context to send message with.</param>
+      /// <param name="channel">Channel to send message to.</param>
       /// <param name="command">Command that was executing.</param>
       /// <param name="message">Message to send.</param>
       /// <returns>Task Complete.</returns>
-      public static async Task<Task> SendErrorMessage(ICommandContext context, string command, string message)
+      public static async Task<Task> SendErrorMessage(IMessageChannel channel, string command, string message)
       {
          Connections.CopyFile(ERROR_IMAGE);
-         await context.Channel.SendFileAsync(ERROR_IMAGE, embed: BuildErrorEmbed(command, message));
+         await channel.SendFileAsync(ERROR_IMAGE, embed: BuildErrorEmbed(command, message));
          Connections.DeleteFile(ERROR_IMAGE);
          return Task.CompletedTask;
       }

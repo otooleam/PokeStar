@@ -13,7 +13,7 @@ namespace PokeStar.Modules
    {
       [Command("ping")]
       [Summary("Pong Pong Pong")]
-      public async Task Ping() => await ResponseMessage.SendInfoMessage(Context, "Pong");
+      public async Task Ping() => await ResponseMessage.SendInfoMessage(Context.Channel, "Pong");
 
       [Command("marco")]
       [Summary("Play marco polo.")]
