@@ -5,23 +5,18 @@ using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using PokeStar.DataModels;
-using PokeStar.Calculators;
+using PokeStar.ModuleParents;
 using PokeStar.PreConditions;
 using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
-   public class TypeCommands : ModuleBase<SocketCommandContext>
+   public class TypeCommands : DexCommandParent
    {
-      /// <summary>
-      /// Color used for type command embeds.
-      /// </summary>
-      private static readonly Color TypeMessageColor = Color.Teal;
-
       [Command("type")]
       [Summary("Gets information for a given Pokémon type.")]
       [RegisterChannel('D')]
-      public async Task PokeType([Summary("(Optional) The typing you want info about.")] string type1 = null,
+      public async Task Type([Summary("(Optional) The typing you want info about.")] string type1 = null,
                            [Summary("(Optional) Secondary typing you want info about.")] string type2 = null)
       {
          if (type1 == null)
@@ -48,7 +43,7 @@ namespace PokeStar.Modules
 
             EmbedBuilder embed = new EmbedBuilder();
             embed.AddField($"Pokémon Types:", sb.ToString());
-            embed.WithColor(TypeMessageColor);
+            embed.WithColor(DexMessageColor);
             embed.WithFooter("Pokémon have 1 or 2 types. Moves always have 1 type.");
             await ReplyAsync(embed: embed.Build());
          }
@@ -83,8 +78,10 @@ namespace PokeStar.Modules
                List<string> weather = Connections.Instance().GetWeather(types);
 
                EmbedBuilder embed = new EmbedBuilder();
+               string fileName = BLANK_IMAGE;
                embed.WithTitle($"Type {title.ToUpper()}");
                embed.WithDescription(description);
+               embed.WithThumbnailUrl($"attachment://{fileName}");
                embed.AddField("Weather Boosts:", FormatWeatherList(weather), false);
                if (type1AttackRelations != null)
                {
@@ -93,57 +90,13 @@ namespace PokeStar.Modules
                }
                embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.Item2), false);
                embed.AddField($"Resistances:", FormatTypeList(defenseRelations.Item1), false);
-               embed.WithColor(TypeMessageColor);
-               await ReplyAsync(embed: embed.Build());
+               embed.WithColor(DexMessageColor);
+
+               Connections.CopyFile(fileName);
+               await Context.Channel.SendFileAsync(fileName, embed: embed.Build());
+               Connections.DeleteFile(fileName);
             }
          }
-      }
-
-      /// <summary>
-      /// Formats weather boosts as a string.
-      /// </summary>
-      /// <param name="weatherList">List of weather that boosts the type(s).</param>
-      /// <returns>Weather for type(s) as a string.</returns>
-      private static string FormatWeatherList(List<string> weatherList)
-      {
-         StringBuilder sb = new StringBuilder();
-         foreach (string weather in weatherList)
-         {
-            sb.Append($"{Global.NONA_EMOJIS[$"{weather.Replace(' ', '_')}_emote"]} ");
-         }
-         return sb.ToString();
-      }
-
-      /// <summary>
-      /// Formats type relations as a string.
-      /// </summary>
-      /// <param name="relations">Dictionary of type relations for the type(s).</param>
-      /// <returns>Type relations for type(s) as a string.</returns>
-      private static string FormatTypeList(Dictionary<string, int> relations)
-      {
-         if (relations.Count == 0)
-         {
-            return Global.EMPTY_FIELD;
-         }
-
-         string relationString = "";
-         foreach (KeyValuePair<string, int> relation in relations)
-         {
-            double multiplier = TypeCalculator.CalcTypeEffectivness(relation.Value) * 100.0;
-            string typeEmote = Global.NONA_EMOJIS[$"{relation.Key.ToUpper()}_EMOTE"];
-            relationString += $"{typeEmote} {relation.Key}: {multiplier}%\n";
-         }
-         return relationString;
-      }
-
-      /// <summary>
-      /// Checks if a type is vaid.
-      /// </summary>
-      /// <param name="type">Type to check.</param>
-      /// <returns>True if the type is valid, otherwise false.</returns>
-      private static bool CheckValidType(string type)
-      {
-         return Global.NONA_EMOJIS.ContainsKey($"{type}_emote");
       }
    }
 }

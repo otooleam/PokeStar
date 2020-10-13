@@ -20,6 +20,7 @@ namespace PokeStar.ConnectionInterface
       private readonly NONADatabaseConnector NONADBConnector;
 
       private List<string> PokemonNames;
+      private List<string> MoveNames;
 
       private const int NumSuggestions = 10;
 
@@ -29,9 +30,11 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       private Connections()
       {
-         POGODBConnector = new POGODatabaseConnector(Global.POGODB_CONNECTION_STRING);
-         NONADBConnector = new NONADatabaseConnector(Global.NONADB_CONNECTION_STRING);
-         UpdateNameList();
+         
+         POGODBConnector = new POGODatabaseConnector(Global.POGO_DB_CONNECTION_STRING);
+         NONADBConnector = new NONADatabaseConnector(Global.NONA_DB_CONNECTION_STRING);
+         UpdatePokemonNameList();
+         UpdateMoveNameList();
       }
 
       /// <summary>
@@ -92,23 +95,54 @@ namespace PokeStar.ConnectionInterface
 
       /// <summary>
       /// Updates the list of Pokémon to use for the fuzzy search.
+      /// Only needs to be ran when a Pokémon name has changed.
       /// </summary>
-      public void UpdateNameList()
+      public void UpdatePokemonNameList()
       {
-         PokemonNames = POGODBConnector.GetNameList();
+         PokemonNames = POGODBConnector.GetPokemonNameList();
       }
 
       /// <summary>
-      /// Searches for the closest Pokémon names to a given name.
+      /// Updates the list of Moves to use for the fuzzy search.
+      /// Only needs to be ran when a move name has changed.
       /// </summary>
-      /// <param name="name">User input name.</param>
-      /// <returns>List of the closest Pokémon names.</returns>
-      public List<string> FuzzyNameSearch(string name)
+      public void UpdateMoveNameList()
+      {
+         MoveNames = POGODBConnector.GetMoveNameList();
+      }
+
+      /// <summary>
+      /// Searches for the closest Pokémon by name.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>List of closest Pokémon names.</returns>
+      public List<string> SearchPokemon(string pokemonName)
+      {
+         return FuzzyNameSearch(pokemonName, PokemonNames);
+      }
+
+      /// <summary>
+      /// Searches for the closests moves by name.
+      /// </summary>
+      /// <param name="moveName">Name of the move.</param>
+      /// <returns>List of closest move names.</returns>
+      public List<string> SearchMove(string moveName)
+      {
+         return FuzzyNameSearch(moveName, MoveNames);
+      }
+
+      /// <summary>
+      /// Searches for the closest strings in a list of strings.
+      /// </summary>
+      /// <param name="search">Value to search for.</param>
+      /// <param name="dir">List of strings to search in.</param>
+      /// <returns>List of the closest strings from the list.</returns>
+      private static List<string> FuzzyNameSearch(string search, List<string> dir)
       {
          Dictionary<string, double> fuzzy = new Dictionary<string, double>();
-         foreach (string pokemonName in PokemonNames)
+         foreach (string value in dir)
          {
-            fuzzy.Add(pokemonName, pokemonName.FuzzyMatch(name));
+            fuzzy.Add(value, value.FuzzyMatch(search));
          }
          List<KeyValuePair<string, double>> myList = fuzzy.ToList();
          myList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
@@ -190,8 +224,8 @@ namespace PokeStar.ConnectionInterface
          pokemon.Weakness = typeRelations.Item2.Keys.ToList();
          pokemon.Resistance = typeRelations.Item1.Keys.ToList();
          pokemon.Weather = GetWeather(pokemon.Type);
-         pokemon.FastMove = POGODBConnector.GetMoves(name, true);
-         pokemon.ChargeMove = POGODBConnector.GetMoves(name, false, pokemon.Shadow);
+         pokemon.FastMove = POGODBConnector.GetPokemonMoves(name, Global.FAST_MOVE_CATEGORY);
+         pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
          pokemon.Counter = POGODBConnector.GetCounters(name);
 
          foreach (Counter counter in pokemon.Counter)
@@ -250,7 +284,7 @@ namespace PokeStar.ConnectionInterface
       /// Calculates all of the relevant CP valus of a Pokémon. This
       /// includes the raid, quest, hatch, and wild perfect IV values.
       /// </summary>
-      /// <param name="pokemon">Reference to the Pokemon object.</param>
+      /// <param name="pokemon">Reference to a Pokémon.</param>
       public static void CalcAllCP(ref Pokemon pokemon)
       {
          if (pokemon != null)
@@ -298,10 +332,49 @@ namespace PokeStar.ConnectionInterface
                Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.HATCH_LEVEL);
 
             for (int level = Global.MIN_WILD_LEVEL; level <= Global.MAX_WILD_LEVEL; level++)
+            {
                pokemon.CPWild.Add(CPCalculator.CalcCPPerLevel(
                   pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                   Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, level));
+            }
          }
+      }
+
+      /// <summary>
+      /// Gets a given move.
+      /// </summary>
+      /// <param name="moveName">Name of the move.</param>
+      /// <returns>The Move coresponding to the name, otherwise null.</returns>
+      public Move GetMove(string moveName)
+      {
+         if (moveName == null)
+         {
+            return null;
+         }
+
+         string name = ReformatName(moveName);
+         Move move = POGODBConnector.GetMove(name);
+
+         if (move == null)
+         {
+            return null;
+         }
+
+         move.Weather = GetWeather(new List<string>() { move.Type });
+         move.PokemonWithMove = POGODBConnector.GetPokemonWithMove(name);
+
+         return move;
+      }
+
+      /// <summary>
+      /// Gets all moves of a given type.
+      /// </summary>
+      /// <param name="type">Type of the move.</param>
+      /// <param name="category">Category of the move.</param>
+      /// <returns>List of moves.</returns>
+      public List<string> GetMoveByType(string type, string category)
+      {
+         return POGODBConnector.GetMoveByType(type, category);
       }
 
       /// <summary>

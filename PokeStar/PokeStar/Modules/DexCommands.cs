@@ -7,9 +7,9 @@ using Discord;
 using Discord.Rest;
 using Discord.Commands;
 using PokeStar.DataModels;
-using PokeStar.ConnectionInterface;
 using PokeStar.PreConditions;
 using PokeStar.ModuleParents;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
@@ -112,6 +112,7 @@ namespace PokeStar.Modules
                {
                   await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
                }
+               Connections.DeleteFile(fileName);
                dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, pokemonWithNumber));
             }
             else
@@ -133,12 +134,13 @@ namespace PokeStar.Modules
 
                if (pkmn == null)
                {
-                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+                  List<string> pokemonNames = Connections.Instance().SearchPokemon(name);
 
                   string fileName = POKEDEX_SELECTION_IMAGE;
                   Connections.CopyFile(fileName);
                   RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
                   await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
+                  Connections.DeleteFile(fileName);
 
                   dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, pokemonNames));
                }
@@ -207,7 +209,7 @@ namespace PokeStar.Modules
 
                if (pkmn == null)
                {
-                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+                  List<string> pokemonNames = Connections.Instance().SearchPokemon(name);
 
                   string fileName = POKEDEX_SELECTION_IMAGE;
                   Connections.CopyFile(fileName);
@@ -335,7 +337,41 @@ namespace PokeStar.Modules
                Pokemon pkmn = Connections.Instance().GetPokemon(GetPokemonName(pokemon));
                if (pkmn == null)
                {
-                  await ResponseMessage.SendErrorMessage(Context, "form", $"Pokémon with name {pokemon} cannot be found.");
+                  pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
+
+                  if (pkmn == null)
+                  {
+                     List<string> pokemonNames = Connections.Instance().SearchPokemon(name);
+
+                     string fileName = POKEDEX_SELECTION_IMAGE;
+                     Connections.CopyFile(fileName);
+                     RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
+                     await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
+                     Connections.DeleteFile(fileName);
+
+                     dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.FORM_MESSAGE, pokemonNames));
+                  }
+                  else
+                  {
+                     List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pkmn.Number);
+
+                     if (pokemonWithNumber.Count == 1)
+                     {
+                        await ResponseMessage.SendErrorMessage(Context.Channel, "form", $"{pokemonWithNumber.First()} does not have different forms.");
+                     }
+                     else if (pokemonWithNumber.Count > 1)
+                     {
+                        string baseName = pokemonWithNumber.Where(form => pokemonForms.ContainsKey(form)).ToList().First();
+
+                        Tuple<string, string> forms = pokemonForms[baseName];
+                        List<string> formsList = forms.Item1.Split(',').ToList();
+
+                        string fileName = Connections.GetPokemonPicture(baseName);
+                        Connections.CopyFile(fileName);
+                        await Context.Channel.SendFileAsync(fileName,embed: BuildFormEmbed(baseName, formsList, forms.Item2, fileName));
+                        Connections.DeleteFile(fileName);
+                     }
+                  }
                }
                else
                {
@@ -393,7 +429,7 @@ namespace PokeStar.Modules
 
                if (pkmn == null)
                {
-                  List<string> pokemonNames = Connections.Instance().FuzzyNameSearch(name);
+                  List<string> pokemonNames = Connections.Instance().SearchPokemon(name);
 
                   string fileName = POKEDEX_SELECTION_IMAGE;
                   Connections.CopyFile(fileName);

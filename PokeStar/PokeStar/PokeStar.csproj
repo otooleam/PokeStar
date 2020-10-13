@@ -164,8 +164,9 @@
     <Compile Include="ConnectionInterface\POGODatabaseConnector.cs" />
     <Compile Include="DataModels\Evolution.cs" />
     <Compile Include="DataModels\EvolutionNode.cs" />
-    <Compile Include="DataModels\ResponseMessage.cs" />
     <Compile Include="DataModels\Move.cs" />
+    <Compile Include="DataModels\ResponseMessage.cs" />
+    <Compile Include="DataModels\PokemonMove.cs" />
     <Compile Include="DataModels\Pokemon.cs" />
     <Compile Include="DataModels\RaidGroup.cs" />
     <Compile Include="DataModels\RaidMule.cs" />
@@ -181,6 +182,7 @@
     <Compile Include="Modules\DexCommands.cs" />
     <Compile Include="Modules\HelpCommands.cs" />
     <Compile Include="Modules\JokeCommands.cs" />
+    <Compile Include="Modules\MoveCommands.cs" />
     <Compile Include="Modules\NicknameCommands.cs" />
     <Compile Include="Modules\RaidCommands.cs" />
     <Compile Include="Modules\RoleCommands.cs" />
@@ -189,6 +191,7 @@
     <Compile Include="DataModels\Counter.cs" />
     <Compile Include="Modules\SystemEditCommands.cs" />
     <Compile Include="Modules\TypeCommands.cs" />
+    <Compile Include="PreConditions\NonaAdminAttribute.cs" />
     <Compile Include="PreConditions\RegisterChannelAttribute.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="DataModels\Raid.cs" />
