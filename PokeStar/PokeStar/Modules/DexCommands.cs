@@ -86,7 +86,8 @@ namespace PokeStar.Modules
       [Command("dex")]
       [Alias("pokedex")]
       [Summary("Gets the PokéDex entry for a given Pokémon.")]
-      [Remarks("Can search by Pokémon name or by number.")]
+      [Remarks("Can search by Pokémon name or by number." +
+               "Tags can be used to search for specific forms.")]
       [RegisterChannel('D')]
       public async Task Dex([Summary("Get information for this Pokémon.")][Remainder] string pokemon)
       {
@@ -164,7 +165,8 @@ namespace PokeStar.Modules
 
       [Command("cp")]
       [Summary("Gets max CP values for a given Pokémon.")]
-      [Remarks("Can search by Pokémon name or by number.")]
+      [Remarks("Can search by Pokémon name or by number." +
+               "Tags can be used to search for specific forms.")]
       [RegisterChannel('D')]
       public async Task CP([Summary("Get CPs for this Pokémon.")][Remainder] string pokemon)
       {
@@ -241,7 +243,7 @@ namespace PokeStar.Modules
 
       [Command("form")]
       [Summary("Gets all forms for a given Pokémon.")]
-      [Remarks("Leave blank to get all Pokémon with forms.\n" +
+      [Remarks("Leave blank to get a list of all Pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
       [RegisterChannel('D')]
       public async Task Form([Summary("(Optional) Pokémon with forms.")] string pokemon = null)
@@ -382,8 +384,8 @@ namespace PokeStar.Modules
       }
 
       [Command("evo")]
-      [Alias("evolution")]
-      [Summary("Gets evolution family for a given Pokémon.")]
+      [Alias("evolution", "evolve")]
+      [Summary("Gets the evolution family for a given Pokémon.")]
       [RegisterChannel('D')]
       public async Task Evolution([Summary("Get evolution family for this Pokémon.")][Remainder] string pokemon)
       {

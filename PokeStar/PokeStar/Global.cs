@@ -59,7 +59,9 @@ namespace PokeStar
          "updatePokemonNames",
          "updateMovenNames",
          "toggleUseEmptyRaid",
-         "toggleUseNonaTest"
+         "toggleUseNonaTest",
+         "updatePokemon",
+         "updatePokemonMove"
       };
 
       /// <summary>
@@ -72,13 +74,13 @@ namespace PokeStar
       public static readonly int WILD_CP_COLUMN_LENGTH = 12;
 
       /// <summary>
-      /// 
+      /// Move Category names
       /// </summary>
       public static readonly string FAST_MOVE_CATEGORY = "Fast";
       public static readonly string CHARGE_MOVE_CATEGORY = "Charge";
 
       /// <summary>
-      /// 
+      /// Mega Pokémon delimeters
       /// </summary>
       public static readonly string MEGA_TAG = "mega";
       public static readonly int MAX_LEN_MEGA = 3;
@@ -144,21 +146,55 @@ namespace PokeStar
       public static readonly int NICKNAME_DELIMITER_MISSING = -1;
 
       /// <summary>
+      /// Pokémon Move delimiter
+      /// </summary>
+      public static readonly char POKE_MOVE_DELIMITER = '>';
+      public static readonly int POKE_MOVE_DELIMITER_MISSING = -1;
+
+      /// <summary>
       /// Channel Register values
       /// </summary>
+      public static readonly char REGISTER_STRING_BOSS  = 'B';
       public static readonly char REGISTER_STRING_DEX   = 'D';
       public static readonly char REGISTER_STRING_EX    = 'E';
       public static readonly char REGISTER_STRING_ROLE  = 'P';
       public static readonly char REGISTER_STRING_RAID  = 'R';
       public static readonly char REGISTER_STRING_TRAIN = 'T';
 
-      public static readonly Dictionary<char, string> REGISTER_STRING_TYPE = new Dictionary<char, string>()
+      public static readonly Dictionary<char, string> REGISTER_STRING_TYPE = new Dictionary<char, string>(StringComparer.OrdinalIgnoreCase)
       {
+         [REGISTER_STRING_BOSS]  = "Raid Boss List",
          [REGISTER_STRING_DEX]   = "PokéDex",
          [REGISTER_STRING_EX]    = "EX Raid",
          [REGISTER_STRING_ROLE]  = "Player Roles",
          [REGISTER_STRING_RAID]  = "Raid",
          [REGISTER_STRING_TRAIN] = "Raid Train",
+      };
+
+      public static string REGISTER_ALL_STRING = "ALL_REGISTER";
+      public static string UNREGISTER_ALL_STRING = "ALL_UNREGISTER";
+      public static string FULL_REGISTER_STRING = "BDEPRT";
+
+      public static readonly Dictionary<string, string> REGISTER_VALIE_STRING = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+      {
+         ["ALL_REGISTER"]   = FULL_REGISTER_STRING,
+         ["ALL_UNREGISTER"] = string.Empty,
+         ["BOSSlIST"]       = REGISTER_STRING_BOSS.ToString(),
+         ["BOSS"]           = REGISTER_STRING_BOSS.ToString(),
+         ["B"]              = REGISTER_STRING_BOSS.ToString(),
+         ["POKEDEX"]        = REGISTER_STRING_DEX.ToString(),
+         ["DEX"]            = REGISTER_STRING_DEX.ToString(),
+         ["P"]              = REGISTER_STRING_DEX.ToString(),
+         ["EX"]             = REGISTER_STRING_EX.ToString(),
+         ["E"]              = REGISTER_STRING_EX.ToString(),
+         ["PLAYER"]         = REGISTER_STRING_ROLE.ToString(),
+         ["ROLE"]           = REGISTER_STRING_ROLE.ToString(),
+         ["P"]              = REGISTER_STRING_ROLE.ToString(),
+         ["RAID"]           = REGISTER_STRING_RAID.ToString(),
+         ["R"]              = REGISTER_STRING_RAID.ToString(),
+         ["TRAIN"]          = REGISTER_STRING_TRAIN.ToString(),
+         ["T"]              = REGISTER_STRING_TRAIN.ToString()
+
       };
 
       /// <summary>

@@ -439,6 +439,29 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Updates an attribute of a Pokémon.
+      /// Only updates true false values.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="attribute">Attribute to change.</param>
+      /// <param name="value">New value of the attribute.</param>
+      public void UpdatePokemon(string pokemonName, string attrbute, int value)
+      {
+         POGODBConnector.SetPokemonAttribute(pokemonName, attrbute, value);
+      }
+
+      /// <summary>
+      /// Sets a move for a Pokémon.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="moveName">Name of the move.</param>
+      /// <param name="isLegacy">Is the move a legacy move.</param>
+      public void UpdatePokemonMove(string pokemonName, string move, int isLegacy)
+      {
+         POGODBConnector.SetPokemonMove(pokemonName, move, isLegacy);
+      }
+
+      /// <summary>
       /// Adds settings to the database for a guild.
       /// </summary>
       /// <param name="guild">Id of the guild.</param>

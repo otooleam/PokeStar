@@ -16,7 +16,8 @@ namespace PokeStar.Modules
    public class HelpCommands : ModuleBase<SocketCommandContext>
    {
       [Command("help")]
-      [Summary("Displays info about commands.")]
+      [Summary("Displays info about commands." +
+               "Leave blank to get a list of all commands.")]
       public async Task Help([Summary("(Optional) Get help with this command.")] string command = null)
       {
          EmbedBuilder embed = new EmbedBuilder();
