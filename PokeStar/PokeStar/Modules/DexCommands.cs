@@ -30,6 +30,7 @@ namespace PokeStar.Modules
          ["Charizard"] = new Tuple<string, string>("-mega,-megax,-megay,-x,-y", ""),
          ["Blastoise"] = new Tuple<string, string>("-mega", ""),
          ["Beedrill"] = new Tuple<string, string>("-mega", ""),
+         ["Pidgeot"] = new Tuple<string, string>("-mega", ""),
          ["Rattata"] = new Tuple<string, string>("-alola", ""),
          ["Raticate"] = new Tuple<string, string>("-alola", ""),
          ["Raichu"] = new Tuple<string, string>("-alola", ""),
@@ -48,6 +49,7 @@ namespace PokeStar.Modules
          ["Farfetch'd"] = new Tuple<string, string>("-galar", ""),
          ["Grimer"] = new Tuple<string, string>("-alola", ""),
          ["Muk"] = new Tuple<string, string>("-alola", ""),
+         ["Gengar"] = new Tuple<string, string>("-mega", ""),
          ["Exeggutor"] = new Tuple<string, string>("-alola", ""),
          ["Marowak"] = new Tuple<string, string>("-alola", ""),
          ["Weezing"] = new Tuple<string, string>("-galar", ""),
@@ -55,6 +57,7 @@ namespace PokeStar.Modules
          ["Unown"] = new Tuple<string, string>("-a,-b,-c,-d,-e,-f,-g,-h,-i,-j,-k,-l,-m,-n,-o,-p,-q,-r,-s,-t,-u,-v,-w,-x,-y,-z,-!,-?,", "-f"),
          ["Zigzagoon"] = new Tuple<string, string>("-galar", ""),
          ["Linoone"] = new Tuple<string, string>("-galar", ""),
+         ["Houndoom"] = new Tuple<string, string>("-mega", ""),
          ["Castform"] = new Tuple<string, string>("-rain,-snow,-sun", ""),
          ["Deoxys"] = new Tuple<string, string>("-attack,-defense,-speed", ""),
          ["Burmy"] = new Tuple<string, string>("-plant,-sand,-trash", "-plant"),
@@ -318,13 +321,13 @@ namespace PokeStar.Modules
                   sb.Append(form);
                   if (form.Equals(forms.Item2))
                   {
-                     sb.Append(Global.DEFAULT_FORM_SYMBOL);
+                     sb.Append('*');
                   }
                   sb.Append('\n');
                }
                embed.AddField($"Forms for {pokemon}", sb.ToString(), true);
                embed.WithColor(DexMessageColor);
-               embed.WithFooter($"{Global.DEFAULT_FORM_SYMBOL} Form is default form");
+               embed.WithFooter("* Form is default form");
                await ReplyAsync(embed: embed.Build());
             }
             else

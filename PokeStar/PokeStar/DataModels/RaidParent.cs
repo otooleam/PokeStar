@@ -146,7 +146,8 @@ namespace PokeStar.DataModels
       /// <returns>A list of all users.</returns>
       public List<SocketGuildUser> GetAllUsers()
       {
-         List<SocketGuildUser> allUsers = Invite;
+         List<SocketGuildUser> allUsers = new List<SocketGuildUser>();
+         allUsers.AddRange(Invite);
          foreach (RaidGroup group in Groups)
          {
             allUsers.AddRange(group.GetNotifyList());

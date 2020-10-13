@@ -276,11 +276,23 @@ namespace PokeStar.ConnectionInterface
       {
          List<Move> moves = new List<Move>();
          string moveType = fast ? "Fast" : "Charge";
+
+         var index = pokemonName.IndexOf(' ');
+         var name = pokemonName;
+         if (index != -1 && pokemonName.Substring(0, index).Equals("mega", StringComparison.OrdinalIgnoreCase))
+         {
+            name = pokemonName.Substring(index);
+            if (pokemonName.Split(' ').Length == 3)
+            {
+               name = name.TrimEnd(name[name.Length - 1]);
+            }
+         }
+
          string queryString = $@"SELECT name, type, is_legacy
                                  FROM pokemon_move
                                  INNER JOIN move 
                                  ON pokemon_move.move=move.name
-                                 WHERE pokemon='{pokemonName}'
+                                 WHERE pokemon='{name.Trim()}'
                                  AND category='{moveType}';";
 
          using (SqlConnection conn = GetConnection())

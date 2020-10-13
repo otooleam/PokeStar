@@ -350,7 +350,7 @@ namespace PokeStar.DataModels
             }
             if (Type.Contains(fastMove.Type))
             {
-               sb.Append($" {Global.STAB_SYMBOL}");
+               sb.Append(" *");
             }
             sb.AppendLine();
          }
@@ -381,7 +381,7 @@ namespace PokeStar.DataModels
             }
             if (Type.Contains(chargeMove.Type))
             {
-               sb.Append($" {Global.STAB_SYMBOL}");
+               sb.Append(" *");
             }
             sb.AppendLine();
          }
@@ -415,7 +415,7 @@ namespace PokeStar.DataModels
       /// <returns>Pokémon raid CP string.</returns>
       public string RaidCPToString()
       {
-         return $"{CPRaidMin} - {CPRaidMax}\n{CPRaidBoostedMin}{Global.WEATHER_BOOST_SYMBOL} - {CPRaidBoostedMax}{Global.WEATHER_BOOST_SYMBOL}";
+         return $"{CPRaidMin} - {CPRaidMax}\n{CPRaidBoostedMin}* - {CPRaidBoostedMax}*";
       }
 
       /// <summary>
@@ -445,17 +445,18 @@ namespace PokeStar.DataModels
       public string WildCPToString()
       {
          StringBuilder sb = new StringBuilder();
-         int maxNonBoostedLevel = Global.MAX_WILD_LEVEL - Global.WEATHER_BOOST;
+         string dash = "-";
+         int columnLength = 12;
 
-         for (int i = 0; i < Global.WILD_CP_COLUMN_LENGTH; i++)
+         for (int i = 0; i < columnLength; i++)
          {
             int column1level = i + 1;
-            int column2level = i + 1 + Global.WILD_CP_COLUMN_LENGTH;
-            int column3level = i + 1 + Global.WILD_CP_COLUMN_LENGTH  + Global.WILD_CP_COLUMN_LENGTH;
+            int column2level = i + 1 + columnLength;
+            int column3level = i + 1 + columnLength * 2;
 
-            sb.Append($"**{column1level}** {(i < 10 ? "--" : "-")} {CPWild[column1level - 1]} . ");
-            sb.Append($"**{column2level}** - {CPWild[column2level - 1]}");
-            sb.AppendLine($"{(column3level <= Global.MAX_WILD_LEVEL ? $" . **{column3level}** - {CPWild[column3level - 1]}{(column3level > maxNonBoostedLevel ? Global.WEATHER_BOOST_SYMBOL.ToString() : "")}" : "")}");
+            sb.Append($"**{column1level}** {(i >= 10 ? dash : dash)} {CPWild[column1level - 1]} . ");
+            sb.Append($"**{column2level}** {dash} {CPWild[column2level - 1]}");
+            sb.AppendLine($"{(column3level <= 35 ? $" . **{column3level}** {dash} {CPWild[column3level - 1]}{(column3level > 30 ? "\\*" : "")}" : "")}");
          }
          return sb.ToString();
       }

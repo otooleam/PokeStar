@@ -52,8 +52,8 @@ namespace PokeStar
          string token = Global.ENV_FILE.GetValue("token").ToString();
          Global.VERSION = Global.ENV_FILE.GetValue("version").ToString();
          Global.HOME_SERVER = Global.ENV_FILE.GetValue("home_server").ToString();
-         Global.POGO_DB_CONNECTION_STRING = Global.ENV_FILE.GetValue("pogo_db_sql").ToString();
-         Global.NONA_DB_CONNECTION_STRING = Global.ENV_FILE.GetValue("nona_db_sql").ToString();
+         Global.POGODB_CONNECTION_STRING = Global.ENV_FILE.GetValue("pogo_db_sql").ToString();
+         Global.NONADB_CONNECTION_STRING = Global.ENV_FILE.GetValue("nona_db_sql").ToString();
          Global.DEFAULT_PREFIX = Global.ENV_FILE.GetValue("default_prefix").ToString();
 
          Global.USE_NONA_TEST = Global.ENV_FILE.GetValue("accept_nona_test").ToString().Equals("TRUE", StringComparison.OrdinalIgnoreCase);

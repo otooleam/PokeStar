@@ -30,7 +30,7 @@ namespace PokeStar.DataModels
          string str = $@"{Name} {Global.NONA_EMOJIS[$"{Type}_emote"]}";
          if (IsLegacy)
          {
-            str += $" {Global.LEGACY_MOVE_SYMBOL}";
+            str += $" {Global.LEGACY_MOVE}";
          }
          return str;
       }
