@@ -8,9 +8,9 @@ using Discord.Rest;
 using Discord.Commands;
 using Discord.WebSocket;
 using PokeStar.DataModels;
+using PokeStar.ConnectionInterface;
 using PokeStar.PreConditions;
 using PokeStar.ModuleParents;
-using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
@@ -19,26 +19,6 @@ namespace PokeStar.Modules
    /// </summary>
    public class RaidCommands : RaidCommandParent
    {
-      /// <summary>
-      /// Tags for raid tiers.
-      /// </summary>
-      protected static readonly Dictionary<string, short> raidTiers = new Dictionary<string, short>(StringComparer.OrdinalIgnoreCase)
-      {
-         ["MEGA"] = MEGA_RAID_TIER,
-         ["M"] = MEGA_RAID_TIER,
-         ["7"] = MEGA_RAID_TIER,
-         ["LEGENDARY"] = LEGENDARY_RAID_TIER,
-         ["L"] = LEGENDARY_RAID_TIER,
-         ["5"] = LEGENDARY_RAID_TIER,
-         ["RARE"] = RARE_RAID_TIER,
-         ["R"] = RARE_RAID_TIER,
-         ["3"] = RARE_RAID_TIER,
-         ["COMMON"] = COMMON_RAID_TIER,
-         ["C"] = COMMON_RAID_TIER,
-         ["1"] = COMMON_RAID_TIER
-      };
-
-
       [Command("raid")]
       [Summary("Creates a new interactive raid coordination message.")]
       [Remarks("Valid Tier values:\n" +
@@ -52,7 +32,7 @@ namespace PokeStar.Modules
                              [Summary("Time the raid will start.")] string time,
                              [Summary("Where the raid will be.")][Remainder] string location)
       {
-         short calcTier = raidTiers.ContainsKey(tier) ? raidTiers[tier] : INVALID_TIER;
+         short calcTier = GenerateTier(tier);
          List<string> potentials = Connections.GetBossList(calcTier);
          Raid raid;
          string fileName;
@@ -99,7 +79,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "raid", $"No raid bosses found for tier {tier}");
+            await ResponseMessage.SendErrorMessage(Context, "raid", $"No raid bosses found for tier {tier}");
          }
          RemoveOldRaids();
       }
@@ -118,7 +98,7 @@ namespace PokeStar.Modules
                                  [Summary("Time the raid will start.")] string time,
                                  [Summary("Where the raid will be.")][Remainder] string location)
       {
-         short calcTier = raidTiers.ContainsKey(tier) ? raidTiers[tier] : INVALID_TIER;
+         short calcTier = GenerateTier(tier);
          List<string> potentials = Connections.GetBossList(calcTier);
          RaidMule raid;
          string fileName;
@@ -165,7 +145,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "mule", $"No raid bosses found for tier {tier}");
+            await ResponseMessage.SendErrorMessage(Context, "mule", $"No raid bosses found for tier {tier}");
          }
          RemoveOldRaids();
       }
@@ -196,7 +176,7 @@ namespace PokeStar.Modules
             }
             else if (attribute.Equals("tier", StringComparison.OrdinalIgnoreCase) || attribute.Equals("boss", StringComparison.OrdinalIgnoreCase))
             {
-               short calcTier = raidTiers.ContainsKey(edit) ? raidTiers[edit] : INVALID_TIER;
+               short calcTier = GenerateTier(edit);
                List<string> potentials = Connections.GetBossList(calcTier);
 
                if (potentials.Count > 1)
@@ -270,12 +250,12 @@ namespace PokeStar.Modules
                }
                else
                {
-                  await ResponseMessage.SendErrorMessage(Context.Channel, "edit", $"No raid bosses found for tier {edit}.");
+                  await ResponseMessage.SendErrorMessage(Context, "edit", $"No raid bosses found for tier {edit}.");
                }
             }
             else
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "edit", "Please enter a valid field to edit.");
+               await ResponseMessage.SendErrorMessage(Context, "edit", "Please enter a valid field to edit.");
             }
 
             if (simpleEdit)
@@ -308,7 +288,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "edit", "Raid message could not be found.");
+            await ResponseMessage.SendErrorMessage(Context, "edit", "Raid message could not be found.");
          }
       }
 
@@ -334,6 +314,40 @@ namespace PokeStar.Modules
          embed.AddField($"Tier 1 Raids {BuildRaidTitle(COMMON_RAID_TIER)}", BuildRaidBossListString(commonBosses), true);
 
          await Context.Channel.SendMessageAsync(embed: embed.Build());
+      }
+
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="tier"></param>
+      /// <returns></returns>
+      protected static short GenerateTier(string tier)
+      {
+         if (tier.Equals("m", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("mega", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("7", StringComparison.OrdinalIgnoreCase))
+         {
+            return MEGA_RAID_TIER;
+         }
+         if (tier.Equals("l", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("legendary", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("5", StringComparison.OrdinalIgnoreCase))
+         {
+            return LEGENDARY_RAID_TIER;
+         }
+         if (tier.Equals("r", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("rare", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("3", StringComparison.OrdinalIgnoreCase))
+         {
+            return RARE_RAID_TIER;
+         }
+         if (tier.Equals("c", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("common", StringComparison.OrdinalIgnoreCase) ||
+             tier.Equals("1", StringComparison.OrdinalIgnoreCase))
+         {
+            return COMMON_RAID_TIER;
+         }
+         return INVALID_TIER;
       }
    }
 }

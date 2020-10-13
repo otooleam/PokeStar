@@ -18,6 +18,71 @@ namespace PokeStar.Modules
    /// </summary>
    public class DexCommands : DexCommandParent
    {
+      /// <summary>
+      /// Dictionary of all Pokémon with form differences flags
+      /// Values are tuples with item1 as a the list of form flags
+      /// and item2 with the default form flag. Item1 is delimeted
+      /// by commas (,).
+      /// </summary>
+      private static readonly Dictionary<string, Tuple<string, string>> pokemonForms = new Dictionary<string, Tuple<string, string>>(StringComparer.OrdinalIgnoreCase)
+      {
+         ["Venusaur"] = new Tuple<string, string>("-mega", ""),
+         ["Charizard"] = new Tuple<string, string>("-mega,-megax,-megay,-x,-y", ""),
+         ["Blastoise"] = new Tuple<string, string>("-mega", ""),
+         ["Beedrill"] = new Tuple<string, string>("-mega", ""),
+         ["Pidgeot"] = new Tuple<string, string>("-mega", ""),
+         ["Rattata"] = new Tuple<string, string>("-alola", ""),
+         ["Raticate"] = new Tuple<string, string>("-alola", ""),
+         ["Raichu"] = new Tuple<string, string>("-alola", ""),
+         ["Sandshrew"] = new Tuple<string, string>("-alola", ""),
+         ["Sandslash"] = new Tuple<string, string>("-alola", ""),
+         ["Nidoran"] = new Tuple<string, string>("-f,-m", "-f"),
+         ["Vulpix"] = new Tuple<string, string>("-alola", ""),
+         ["Ninetales"] = new Tuple<string, string>("-alola", ""),
+         ["Diglett"] = new Tuple<string, string>("-alola", ""),
+         ["Dugtrio"] = new Tuple<string, string>("-alola", ""),
+         ["Meowth"] = new Tuple<string, string>("-alola,-galar", ""),
+         ["Persian"] = new Tuple<string, string>("-alola", ""),
+         ["Geodude"] = new Tuple<string, string>("-alola", ""),
+         ["Graveler"] = new Tuple<string, string>("-alola", ""),
+         ["Golem"] = new Tuple<string, string>("-alola", ""),
+         ["Farfetch'd"] = new Tuple<string, string>("-galar", ""),
+         ["Grimer"] = new Tuple<string, string>("-alola", ""),
+         ["Muk"] = new Tuple<string, string>("-alola", ""),
+         ["Gengar"] = new Tuple<string, string>("-mega", ""),
+         ["Exeggutor"] = new Tuple<string, string>("-alola", ""),
+         ["Marowak"] = new Tuple<string, string>("-alola", ""),
+         ["Weezing"] = new Tuple<string, string>("-galar", ""),
+         ["Mewtwo"] = new Tuple<string, string>("-armor", ""),
+         ["Unown"] = new Tuple<string, string>("-a,-b,-c,-d,-e,-f,-g,-h,-i,-j,-k,-l,-m,-n,-o,-p,-q,-r,-s,-t,-u,-v,-w,-x,-y,-z,-!,-?,", "-f"),
+         ["Zigzagoon"] = new Tuple<string, string>("-galar", ""),
+         ["Linoone"] = new Tuple<string, string>("-galar", ""),
+         ["Houndoom"] = new Tuple<string, string>("-mega", ""),
+         ["Castform"] = new Tuple<string, string>("-rain,-snow,-sun", ""),
+         ["Deoxys"] = new Tuple<string, string>("-attack,-defense,-speed", ""),
+         ["Burmy"] = new Tuple<string, string>("-plant,-sand,-trash", "-plant"),
+         ["Wormadam"] = new Tuple<string, string>("-plant,-sand,-trash", "-plant"),
+         ["Cherrim"] = new Tuple<string, string>("-sunshine,-overcast", "-sunshine"),
+         ["Shellow"] = new Tuple<string, string>("-east,-west", "-east"),
+         ["Gastrodon"] = new Tuple<string, string>("-east,-west", "-east"),
+         ["Rotom"] = new Tuple<string, string>("-fan,-frost,-heat,-mow,-wash", ""),
+         ["Giratina"] = new Tuple<string, string>("-altered,-origin", "-altered"),
+         ["Shayman"] = new Tuple<string, string>("-land,-sky", "-land"),
+         ["Arceus"] = new Tuple<string, string>("-normal,-bug,-dark,-dragon,-electric,-fairy,-fighting,-fire,-flying,-ghost,-grass,-ground,-ice,-poison,-psychic,-rock,-steel,-water", "-normal"),
+         ["Basculin"] = new Tuple<string, string>("-blue,-red", "-blue"),
+         ["Darumaka"] = new Tuple<string, string>("-galar", ""),
+         ["Darmanitan"] = new Tuple<string, string>("-galar,-zen,-galar-zen", ""),
+         ["Deerling"] = new Tuple<string, string>("-summer,-spring,-winter,-autumn", "-summer"),
+         ["Sawsbuck"] = new Tuple<string, string>("-summer,-spring,-winter,-autumn", "-summer"),
+         ["Stunfisk"] = new Tuple<string, string>("-galar", ""),
+         ["Tornadus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
+         ["Thundurus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
+         ["Landorus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
+         ["Kyurem"] = new Tuple<string, string>("-black,-white", ""),
+         ["Keldeo"] = new Tuple<string, string>("-resolute", ""),
+         ["Meloetta"] = new Tuple<string, string>("-aria,-pirouette", "-aria"),
+      };
+
       [Command("dex")]
       [Alias("pokedex")]
       [Summary("Gets the PokéDex entry for a given Pokémon.")]
@@ -33,11 +98,11 @@ namespace PokeStar.Modules
 
             if (pokemonWithNumber.Count == 0)
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "dex", $"Pokémon with number {pokemonNum} cannot be found.");
+               await ResponseMessage.SendErrorMessage(Context, "dex", $"Pokémon with number {pokemonNum} cannot be found.");
             }
             else if (pokemonNum == Global.ARCEUS_NUMBER)
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "dex", $"Arceus #{pokemonNum} has too many forms to display, please search by name.");
+               await ResponseMessage.SendErrorMessage(Context, "dex", $"Arceus #{pokemonNum} has too many forms to display, please search by name.");
             }
             else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER)
             {
@@ -112,7 +177,7 @@ namespace PokeStar.Modules
 
             if (pokemonWithNumber.Count == 0)
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "cp", $"Pokémon with number {pokemonNum} cannot be found.");
+               await ResponseMessage.SendErrorMessage(Context, "cp", $"Pokémon with number {pokemonNum} cannot be found.");
             }
             else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER && pokemonNum != Global.ARCEUS_NUMBER)
             {
@@ -181,7 +246,7 @@ namespace PokeStar.Modules
       [Remarks("Leave blank to get a list of all Pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
       [RegisterChannel('D')]
-      public async Task Form([Summary("(Optional) Get forms for this Pokémon.")][Remainder] string pokemon = null)
+      public async Task Form([Summary("(Optional) Pokémon with forms.")] string pokemon = null)
       {
          if (pokemon == null)
          {
@@ -228,29 +293,50 @@ namespace PokeStar.Modules
 
                if (pokemonWithNumber.Count == 0)
                {
-                  await ResponseMessage.SendErrorMessage(Context.Channel, "form", $"Pokémon with number {pokemonNum} cannot be found.");
+                  await ResponseMessage.SendErrorMessage(Context, "form", $"Pokémon with number {pokemonNum} cannot be found.");
                }
                if (pokemonWithNumber.Count == 1)
                {
-                  await ResponseMessage.SendErrorMessage(Context.Channel, "form", $"{pokemonWithNumber.First()} does not have different forms.");
+                  await ResponseMessage.SendErrorMessage(Context, "form", $"{pokemonWithNumber.First()} does not have different forms.");
                }
                else if (pokemonWithNumber.Count > 1)
                {
-                  string baseName = pokemonWithNumber.Where(form => pokemonForms.ContainsKey(form)).ToList().First();
+                  EmbedBuilder embed = new EmbedBuilder();
+                  StringBuilder sb = new StringBuilder();
 
-                  Tuple<string, string> forms = pokemonForms[baseName];
-                  List<string> formsList = forms.Item1.Split(',').ToList();
-
-                  string fileName = Connections.GetPokemonPicture(baseName);
-                  Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildFormEmbed(baseName, formsList, forms.Item2, fileName));
-                  Connections.DeleteFile(fileName);
+                  foreach (string form in pokemonWithNumber)
+                  {
+                     sb.Append($"{form}\n");
+                  }
+                  embed.AddField($"Forms for pokemon with #{pokemon}", sb.ToString(), true);
+                  embed.WithColor(DexMessageColor);
+                  await ReplyAsync(embed: embed.Build());
                }
+            }
+            else if (pokemonForms.ContainsKey(pokemon))
+            {
+               EmbedBuilder embed = new EmbedBuilder();
+               StringBuilder sb = new StringBuilder();
+               Tuple<string, string> forms = pokemonForms[pokemon];
+               string[] formsList = forms.Item1.Split(',');
+
+               foreach (string form in formsList)
+               {
+                  sb.Append(form);
+                  if (form.Equals(forms.Item2))
+                  {
+                     sb.Append('*');
+                  }
+                  sb.Append('\n');
+               }
+               embed.AddField($"Forms for {pokemon}", sb.ToString(), true);
+               embed.WithColor(DexMessageColor);
+               embed.WithFooter("* Form is default form");
+               await ReplyAsync(embed: embed.Build());
             }
             else
             {
-               string name = GetPokemonName(pokemon);
-               Pokemon pkmn = Connections.Instance().GetPokemon(name);
+               Pokemon pkmn = Connections.Instance().GetPokemon(GetPokemonName(pokemon));
                if (pkmn == null)
                {
                   pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
@@ -291,24 +377,7 @@ namespace PokeStar.Modules
                }
                else
                {
-                  List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pkmn.Number);
-
-                  if (pokemonWithNumber.Count == 1)
-                  {
-                     await ResponseMessage.SendErrorMessage(Context.Channel, "form", $"{pokemonWithNumber.First()} does not have different forms.");
-                  }
-                  else if (pokemonWithNumber.Count > 1)
-                  {
-                     string baseName = pokemonWithNumber.Where(form => pokemonForms.ContainsKey(form)).ToList().First();
-
-                     Tuple<string, string> forms = pokemonForms[baseName];
-                     List<string> formsList = forms.Item1.Split(',').ToList();
-
-                     string fileName = Connections.GetPokemonPicture(baseName);
-                     Connections.CopyFile(fileName);
-                     await Context.Channel.SendFileAsync(fileName, embed: BuildFormEmbed(baseName, formsList, forms.Item2, fileName));
-                     Connections.DeleteFile(fileName);
-                  }
+                  await ResponseMessage.SendErrorMessage(Context, "form", $"{pkmn.Name} does not have different forms.");
                }
             }
          }
@@ -327,7 +396,7 @@ namespace PokeStar.Modules
 
             if (pokemonWithNumber.Count == 0)
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "evo", $"Pokémon with number {pokemonNum} cannot be found.");
+               await ResponseMessage.SendErrorMessage(Context, "evo", $"Pokémon with number {pokemonNum} cannot be found.");
             }
             else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER && pokemonNum != Global.ARCEUS_NUMBER)
             {
