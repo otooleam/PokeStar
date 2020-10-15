@@ -63,10 +63,10 @@ namespace PokeStar.Modules
                StringBuilder sb = new StringBuilder();
                foreach (string name in eggList)
                {
-                  string boldText = bold ? "**" : "";
-                  sb.Append($"{boldText} {name} {boldText}");
-                  bold = !bold;
                   count++;
+                  string dash = count == 1 ? "" : "-";
+                  sb.Append($"{dash} {name} ");
+                  bold = !bold;
                   if (count == Global.EGG_ROW_LENGTH)
                   {
                      count -= Global.EGG_ROW_LENGTH;
