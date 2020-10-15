@@ -32,7 +32,7 @@ namespace PokeStar.Modules
                              [Summary("Time the raid will start.")] string time,
                              [Summary("Where the raid will be.")][Remainder] string location)
       {
-         short calcTier = GenerateTier(tier);
+         short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
          List<string> potentials = Connections.GetBossList(calcTier);
          Raid raid;
          string fileName;
@@ -98,7 +98,7 @@ namespace PokeStar.Modules
                                  [Summary("Time the raid will start.")] string time,
                                  [Summary("Where the raid will be.")][Remainder] string location)
       {
-         short calcTier = GenerateTier(tier);
+         short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
          List<string> potentials = Connections.GetBossList(calcTier);
          RaidMule raid;
          string fileName;
@@ -176,7 +176,7 @@ namespace PokeStar.Modules
             }
             else if (attribute.Equals("tier", StringComparison.OrdinalIgnoreCase) || attribute.Equals("boss", StringComparison.OrdinalIgnoreCase))
             {
-               short calcTier = GenerateTier(edit);
+               short calcTier = Global.RAID_TIER_STRING.ContainsKey(edit) ? Global.RAID_TIER_STRING[edit] : Global.INVALID_RAID_TIER;
                List<string> potentials = Connections.GetBossList(calcTier);
 
                if (potentials.Count > 1)
@@ -298,56 +298,22 @@ namespace PokeStar.Modules
       [RegisterChannel('B')]
       public async Task BossList()
       {
-         List<string> exBosses = Connections.GetBossList(EX_RAID_TIER);
-         List<string> megaBosses = Connections.GetBossList(MEGA_RAID_TIER);
-         List<string> legendaryBosses = Connections.GetBossList(LEGENDARY_RAID_TIER);
-         List<string> rareBosses = Connections.GetBossList(RARE_RAID_TIER);
-         List<string> commonBosses = Connections.GetBossList(COMMON_RAID_TIER);
+         List<string> exBosses = Connections.GetBossList(Global.EX_RAID_TIER);
+         List<string> megaBosses = Connections.GetBossList(Global.MEGA_RAID_TIER);
+         List<string> legendaryBosses = Connections.GetBossList(Global.LEGENDARY_RAID_TIER);
+         List<string> rareBosses = Connections.GetBossList(Global.RARE_RAID_TIER);
+         List<string> commonBosses = Connections.GetBossList(Global.COMMON_RAID_TIER);
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(RaidMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
          embed.WithTitle("Current Raid Bosses:");
-         embed.AddField($"EX Raids {BuildRaidTitle(EX_RAID_TIER)}", BuildRaidBossListString(exBosses), true);
-         embed.AddField($"Mega Raids {BuildRaidTitle(MEGA_RAID_TIER)}", BuildRaidBossListString(megaBosses), true);
-         embed.AddField($"Tier 5 Raids {BuildRaidTitle(LEGENDARY_RAID_TIER)}", BuildRaidBossListString(legendaryBosses), true);
-         embed.AddField($"Tier 3 Raids {BuildRaidTitle(RARE_RAID_TIER)}", BuildRaidBossListString(rareBosses), true);
-         embed.AddField($"Tier 1 Raids {BuildRaidTitle(COMMON_RAID_TIER)}", BuildRaidBossListString(commonBosses), true);
+         embed.AddField($"EX Raids {BuildRaidTitle(Global.EX_RAID_TIER)}", BuildRaidBossListString(exBosses), true);
+         embed.AddField($"Mega Raids {BuildRaidTitle(Global.MEGA_RAID_TIER)}", BuildRaidBossListString(megaBosses), true);
+         embed.AddField($"Tier 5 Raids {BuildRaidTitle(Global.LEGENDARY_RAID_TIER)}", BuildRaidBossListString(legendaryBosses), true);
+         embed.AddField($"Tier 3 Raids {BuildRaidTitle(Global.RARE_RAID_TIER)}", BuildRaidBossListString(rareBosses), true);
+         embed.AddField($"Tier 1 Raids {BuildRaidTitle(Global.COMMON_RAID_TIER)}", BuildRaidBossListString(commonBosses), true);
 
          await Context.Channel.SendMessageAsync(embed: embed.Build());
-      }
-
-      /// <summary>
-      /// 
-      /// </summary>
-      /// <param name="tier"></param>
-      /// <returns></returns>
-      protected static short GenerateTier(string tier)
-      {
-         if (tier.Equals("m", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("mega", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("7", StringComparison.OrdinalIgnoreCase))
-         {
-            return MEGA_RAID_TIER;
-         }
-         if (tier.Equals("l", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("legendary", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("5", StringComparison.OrdinalIgnoreCase))
-         {
-            return LEGENDARY_RAID_TIER;
-         }
-         if (tier.Equals("r", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("rare", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("3", StringComparison.OrdinalIgnoreCase))
-         {
-            return RARE_RAID_TIER;
-         }
-         if (tier.Equals("c", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("common", StringComparison.OrdinalIgnoreCase) ||
-             tier.Equals("1", StringComparison.OrdinalIgnoreCase))
-         {
-            return COMMON_RAID_TIER;
-         }
-         return INVALID_TIER;
       }
    }
 }

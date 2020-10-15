@@ -64,7 +64,7 @@ namespace PokeStar.DataModels
       private static Embed BuildInfoEmbed(string message)
       {
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(Color.Purple);
+         embed.WithColor(Global.EMBED_COLOR_INFO_RESPONSE);
          embed.WithDescription(message);
          return embed.Build();
       }
@@ -79,7 +79,7 @@ namespace PokeStar.DataModels
       private static Embed BuildWarningEmbed(string command, string message)
       {
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(Color.Orange);
+         embed.WithColor(Global.EMBED_COLOR_WARNING_RESPONSE);
          embed.WithTitle($"Warning while executing {command}:");
          embed.WithDescription(message);
          return embed.Build();
@@ -94,7 +94,7 @@ namespace PokeStar.DataModels
       private static Embed BuildErrorEmbed(string command, string message)
       {
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(Color.Red);
+         embed.WithColor(Global.EMBED_COLOR_ERROR_RESPONSE);
          embed.WithThumbnailUrl($"attachment://{ERROR_IMAGE}");
          embed.WithTitle($"Error while executing {command}:");
          embed.WithDescription(message);

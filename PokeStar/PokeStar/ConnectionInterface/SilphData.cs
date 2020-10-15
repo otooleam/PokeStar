@@ -13,6 +13,9 @@ namespace PokeStar.ConnectionInterface
       private static Uri RaidBossUrl { get; } = new Uri("https://thesilphroad.com/raid-bosses");
       private const string RaidBossHTMLPattern = "//*[@class = 'col-md-4']";
 
+      private static Uri EggUrl { get; } = new Uri("https://thesilphroad.com/egg-distances");
+      private const string EggHTMLPattern = "//*[@class='tab-content']";
+
       /// <summary>
       /// Gets a list of current raid bosses for a given tier.
       /// </summary>
@@ -20,8 +23,8 @@ namespace PokeStar.ConnectionInterface
       /// <returns>List of current raid bosses for the tier.</returns>
       public static List<string> GetRaidBossesTier(int tier)
       {
-         List<Tuple<int, string>> raidbossList = GetRaidBosses();
-         return (raidbossList.Where(boss => boss.Item1 == tier).Select(boss => boss.Item2)).ToList();
+         Dictionary<int, List<string>> bossList = GetRaidBosses();
+         return bossList.ContainsKey(tier) ? bossList[tier] : new List<string>();
       }
 
       /// <summary>
@@ -31,66 +34,100 @@ namespace PokeStar.ConnectionInterface
       /// would constitute a change to this method.
       /// </summary>
       /// <returns>List of current raid bosses.</returns>
-      private static List<Tuple<int, string>> GetRaidBosses()
+      private static Dictionary<int, List<string>> GetRaidBosses()
       {
          int tier = -1;
          bool tierStart = false;
          bool nextInTier = false;
-         bool exTierStarted = true; // Change to false when ex raids are back
          bool megaTierStarted = false;
          HtmlWeb web = new HtmlWeb();
          HtmlDocument doc = web.Load(RaidBossUrl);
          HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(RaidBossHTMLPattern);
 
-         List<Tuple<int, string>> raidBossList = new List<Tuple<int, string>>();
-
+         Dictionary<int, List<string>> raidBossList = new Dictionary<int, List<string>>();
          foreach (HtmlNode col in bosses)
          {
-            string[] words = col.InnerText.Split('\n');
+            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
             foreach (string word in words)
             {
-               if (!string.IsNullOrEmpty(word.Replace(" ", string.Empty)))
+               string line = word.Trim();
+               int firstSpace = line.IndexOf(' ');
+               string checkTier = firstSpace != -1 ? line.Substring(0, firstSpace) : "";
+
+               if (checkTier.Equals(Global.RAID_STRING_MEGA, StringComparison.OrdinalIgnoreCase) && !megaTierStarted)
                {
-                  string temp = word.Trim();
-                  temp = temp.Substring(0, Math.Min(temp.Length, 4));
-                  if (temp.Equals("Tier", StringComparison.OrdinalIgnoreCase))
-                  {
-                     tier = Convert.ToInt32(word.Trim().Substring(4));
-                     tierStart = true;
-                     nextInTier = false;
-                  }
-                  else if (temp.Equals("ex", StringComparison.OrdinalIgnoreCase) && !exTierStarted)
-                  {
-                     tier = 9;
-                     tierStart = true;
-                     nextInTier = false;
-                     exTierStarted = true;
-                  }
-                  else if (temp.Equals("Mega", StringComparison.OrdinalIgnoreCase) && !megaTierStarted)
-                  {
-                     tier = 7;
-                     tierStart = true;
-                     nextInTier = false;
-                     megaTierStarted = true;
-                  }
-                  else if (temp.Equals("8+", StringComparison.OrdinalIgnoreCase))
-                  {
-                     nextInTier = true;
-                  }
-                  else if (tierStart)
-                  {
-                     raidBossList.Add(new Tuple<int, string>(tier, ReformatName(word.Trim())));
-                     tierStart = false;
-                  }
-                  else if (nextInTier)
-                  {
-                     raidBossList.Add(new Tuple<int, string>(tier, ReformatName(word.Trim())));
-                     nextInTier = false;
-                  }
+                  tier = Global.MEGA_RAID_TIER;
+                  raidBossList.Add(tier, new List<string>());
+                  tierStart = true;
+                  nextInTier = false;
+                  megaTierStarted = true;
+               }
+               else if (checkTier.Equals(Global.RAID_STRING_EX, StringComparison.OrdinalIgnoreCase))
+               {
+                  tier = Global.EX_RAID_TIER;
+                  raidBossList.Add(tier, new List<string>());
+                  tierStart = true;
+                  nextInTier = false;
+               }
+               else if (checkTier.Equals(Global.RAID_STRING_TIER, StringComparison.OrdinalIgnoreCase))
+               {
+                  tier = Convert.ToInt32(line.Trim().Substring(Global.RAID_STRING_TIER.Length));
+                  raidBossList.Add(tier, new List<string>());
+                  tierStart = true;
+                  nextInTier = false;
+               } 
+               else if (line.Equals("8+", StringComparison.OrdinalIgnoreCase))
+               {
+                  nextInTier = true;
+               }
+               else if (tierStart)
+               {
+                  raidBossList[tier].Add(ReformatName(line));
+                  tierStart = false;
+               }
+               else if (nextInTier)
+               {
+                  raidBossList[tier].Add(ReformatName(line));
+                  nextInTier = false;
                }
             }
          }
          return raidBossList;
+      }
+
+      public static Dictionary<int, List<string>> GetEggs()
+      {
+         int eggCategory = 0;
+         int pokemonNameOffset = 0;
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(EggUrl);
+         HtmlNodeCollection eggs = doc.DocumentNode.SelectNodes(EggHTMLPattern);
+
+         Dictionary<int, List<string>> eggList = new Dictionary<int, List<string>>();
+
+         foreach (HtmlNode col in eggs)
+         {
+            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            foreach (string word in words)
+            {
+               pokemonNameOffset--;
+               string line = word.Trim();
+               if (line.Contains("KM"))
+               {
+                  eggCategory = Global.EGG_TIER_TITLE[line];
+                  eggList.Add(eggCategory, new List<string>());
+               }
+               else if (line.IndexOf('#') != -1)
+               {
+                  pokemonNameOffset = 2;
+               }
+               else if (pokemonNameOffset == 0)
+               {
+                  eggList[eggCategory].Add(ReformatName(line));
+               }
+            }
+         }
+         return eggList;
       }
 
       /// <summary>
@@ -104,9 +141,21 @@ namespace PokeStar.ConnectionInterface
          {
             return "Origin Form Giratina";
          }
-         if (name.Equals("GIRATINA (ALTERED FORME)", StringComparison.OrdinalIgnoreCase))
+         else if (name.Equals("GIRATINA (ALTERED FORME)", StringComparison.OrdinalIgnoreCase))
          {
             return "Altered Form Giratina";
+         }
+         else if (name.Equals("BURMY (PLANT CLOAK)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Plant Cloak Burmy";
+         }
+         else if (name.Equals("BURMY (TRASH CLOAK)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Trash Cloak Burmy";
+         }
+         else if (name.Equals("BURMY (SANDY CLOAK)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Sand Cloak Burmy";
          }
          return name;
       }

@@ -16,11 +16,6 @@ namespace PokeStar.ModuleParents
    public class RaidCommandParent : ModuleBase<SocketCommandContext>
    {
       /// <summary>
-      /// Color used for raid command embeds.
-      /// </summary>
-      protected static readonly Color RaidMessageColor = Color.Blue;
-
-      /// <summary>
       /// Saved raid messages.
       /// </summary>
       protected static readonly Dictionary<ulong, RaidParent> raidMessages = new Dictionary<ulong, RaidParent>();
@@ -169,16 +164,6 @@ namespace PokeStar.ModuleParents
          RAID_REMOTE_SUB_MESSAGE,
          MULE_READY_SUB_MESSAGE
       }
-
-      /// <summary>
-      /// 
-      /// </summary>
-      protected static readonly short EX_RAID_TIER        = 9;
-      protected static readonly short MEGA_RAID_TIER      = 7;
-      protected static readonly short LEGENDARY_RAID_TIER = 5;
-      protected static readonly short RARE_RAID_TIER      = 3;
-      protected static readonly short COMMON_RAID_TIER    = 1;
-      protected static readonly short INVALID_TIER        = 0;
 
       /// Message checkers ****************************************************
 
@@ -717,7 +702,7 @@ namespace PokeStar.ModuleParents
       protected static Embed BuildRaidEmbed(Raid raid, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(RaidMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
          embed.WithTitle(raid.Boss.Name.Equals(Global.DEFAULT_RAID_BOSS_NAME) ? "**Empty Raid**" : $"**{raid.Boss.Name} Raid {BuildRaidTitle(raid.Tier)}**");
          embed.WithDescription("Press ? for help.");
          embed.WithThumbnailUrl($"attachment://{fileName}");
@@ -753,7 +738,7 @@ namespace PokeStar.ModuleParents
       protected static Embed BuildRaidMuleEmbed(RaidMule raid, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(RaidMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
          embed.WithTitle(raid.Boss.Name.Equals(Global.DEFAULT_RAID_BOSS_NAME) ? "**Empty Raid**" : $"**{raid.Boss.Name} Raid {BuildRaidTitle(raid.Tier)}**");
          embed.WithDescription("Press ? for help.");
          embed.WithThumbnailUrl($"attachment://{fileName}");
@@ -784,7 +769,7 @@ namespace PokeStar.ModuleParents
          }
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(RaidMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
          embed.WithTitle($"Boss Selection");
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Please Select Boss", sb.ToString());
@@ -814,7 +799,7 @@ namespace PokeStar.ModuleParents
          sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]} Cancel");
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(RaidMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
          embed.WithTitle($"{player} - Invite");
          embed.AddField("Please Select Player to Invite.", sb.ToString());
 
@@ -840,7 +825,7 @@ namespace PokeStar.ModuleParents
          sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]} Cancel");
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(RaidMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
          embed.WithTitle($"**{player} - Remote**");
          embed.AddField("Please Select How You Will Remote to the Raid.", sb.ToString());
 
@@ -863,7 +848,7 @@ namespace PokeStar.ModuleParents
          sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]} Cancel");
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(RaidMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
          embed.WithTitle($"{player} - Raid Mule Ready");
          embed.AddField("Please Select Which Group is Ready.", sb.ToString());
          return embed.Build();
@@ -878,11 +863,11 @@ namespace PokeStar.ModuleParents
       /// <returns>Raid title as a string.</returns>
       protected static string BuildRaidTitle(short tier)
       {
-         if (tier == MEGA_RAID_TIER)
+         if (tier == Global.MEGA_RAID_TIER)
          {
             return Global.NONA_EMOJIS["mega_emote"];
          }
-         if (tier == EX_RAID_TIER)
+         if (tier == Global.EX_RAID_TIER)
          {
             return Global.NONA_EMOJIS["ex_emote"];
          }

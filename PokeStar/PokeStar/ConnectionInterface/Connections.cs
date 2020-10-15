@@ -21,6 +21,7 @@ namespace PokeStar.ConnectionInterface
 
       private List<string> PokemonNames;
       private List<string> MoveNames;
+      private Dictionary<int, List<string>> Eggs;
 
       private const int NumSuggestions = 10;
 
@@ -30,11 +31,12 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       private Connections()
       {
-         
+
          POGODBConnector = new POGODatabaseConnector(Global.POGO_DB_CONNECTION_STRING);
          NONADBConnector = new NONADatabaseConnector(Global.NONA_DB_CONNECTION_STRING);
          UpdatePokemonNameList();
          UpdateMoveNameList();
+         UpdateEggList();
       }
 
       /// <summary>
@@ -94,6 +96,16 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Gets a list of current eggs for a given tier.
+      /// </summary>
+      /// <param name="tier">Tier of eggs.</param>
+      /// <returns>List of current eggs for the tier.</returns>
+      public List<string> GetEggList(int tier)
+      {
+         return Eggs[tier];
+      }
+
+      /// <summary>
       /// Updates the list of Pokémon to use for the fuzzy search.
       /// Only needs to be ran when a Pokémon name has changed.
       /// </summary>
@@ -109,6 +121,15 @@ namespace PokeStar.ConnectionInterface
       public void UpdateMoveNameList()
       {
          MoveNames = POGODBConnector.GetMoveNameList();
+      }
+
+      /// <summary>
+      /// Updates the list of eggs.
+      /// Only needs to be ran when egg pool has changed.
+      /// </summary>
+      public void UpdateEggList()
+      {
+         Eggs = SilphData.GetEggs();
       }
 
       /// <summary>
@@ -178,7 +199,7 @@ namespace PokeStar.ConnectionInterface
 
          raidBoss.CPLow = CPCalculator.CalcCPPerLevel(
             raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV, 
+            Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV,
             Global.MIN_SPECIAL_IV, Global.RAID_LEVEL);
 
          raidBoss.CPHigh = CPCalculator.CalcCPPerLevel(
@@ -187,12 +208,12 @@ namespace PokeStar.ConnectionInterface
 
          raidBoss.CPLowBoosted = CPCalculator.CalcCPPerLevel(
             raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV, 
+            Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV,
             Global.RAID_LEVEL + Global.WEATHER_BOOST);
 
          raidBoss.CPHighBoosted = CPCalculator.CalcCPPerLevel(
             raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, 
+            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV,
             Global.RAID_LEVEL + Global.WEATHER_BOOST);
 
          return raidBoss;
@@ -291,12 +312,12 @@ namespace PokeStar.ConnectionInterface
          {
             pokemon.CPBestBuddy = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, 
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV,
                Global.MAX_LEVEL + Global.BUDDY_BOOST);
 
             pokemon.CPRaidMin = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV, 
+               Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV,
                Global.MIN_SPECIAL_IV, Global.RAID_LEVEL);
 
             pokemon.CPRaidMax = CPCalculator.CalcCPPerLevel(
@@ -422,7 +443,7 @@ namespace PokeStar.ConnectionInterface
       public Tuple<Dictionary<string, int>, Dictionary<string, int>> GetTypeAttackRelations(string type)
       {
          Dictionary<string, int> allRelations = POGODBConnector.GetTypeAttackRelations(type);
-         return new Tuple<Dictionary<string, int>, Dictionary<string, int>> (
+         return new Tuple<Dictionary<string, int>, Dictionary<string, int>>(
             allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value),
             allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value)
          );

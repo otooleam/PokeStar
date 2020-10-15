@@ -15,11 +15,6 @@ namespace PokeStar.ModuleParents
    public class DexCommandParent : ModuleBase<SocketCommandContext>
    {
       /// <summary>
-      /// Color used for dex command embeds.
-      /// </summary>
-      protected static readonly Color DexMessageColor = Color.Green;
-
-      /// <summary>
       /// Empty Pokémon image file name.
       /// </summary>
       protected static readonly string POKEDEX_SELECTION_IMAGE = "quest_pokemon.png";
@@ -244,7 +239,7 @@ namespace PokeStar.ModuleParents
          {
             embed.AddField("Regions", pokemon.RegionalToString(), true);
          }
-         embed.WithColor(DexMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          embed.WithFooter($"{Global.STAB_SYMBOL} denotes STAB move {Global.LEGACY_MOVE_SYMBOL} denotes Legacy move");
          return embed.Build();
       }
@@ -267,7 +262,7 @@ namespace PokeStar.ModuleParents
          embed.AddField($"Hatch CP (Level 20)", pokemon.HatchCPToString(), false);
          embed.AddField($"Quest CP (Level 15)", pokemon.QuestCPToString(), false);
          embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
-         embed.WithColor(DexMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          embed.WithFooter($"{Global.WEATHER_BOOST_SYMBOL} denotes Weather Boosted CP");
          return embed.Build();
       }
@@ -290,7 +285,7 @@ namespace PokeStar.ModuleParents
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField($"Forms for {baseName}", sb.ToString(), false);
-         embed.WithColor(DexMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          embed.WithFooter($"{Global.DEFAULT_FORM_SYMBOL} denotes default form.");
          return embed.Build();
       }
@@ -311,7 +306,7 @@ namespace PokeStar.ModuleParents
             embed.WithTitle($"Evolution Family for {evolutions.First().Key}");
             embed.WithThumbnailUrl($"attachment://{fileName}");
             embed.WithDescription("This Pokémon does not evolve or evolve from any other Pokémon");
-            embed.WithColor(DexMessageColor);
+            embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          }
          else
          {
@@ -323,7 +318,7 @@ namespace PokeStar.ModuleParents
 
                embed.AddField($"{markdown}{key}{markdown}", evolutions[key]);
             }
-            embed.WithColor(DexMessageColor);
+            embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          }
          return embed.Build();
       }
@@ -339,7 +334,7 @@ namespace PokeStar.ModuleParents
       {
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithThumbnailUrl($"attachment://{fileName}");
-         embed.WithColor(DexMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
 
          if (nicknames.Count == 0)
          {
@@ -378,7 +373,7 @@ namespace PokeStar.ModuleParents
          embed.AddField("PvE Cooldown", $"{move.Cooldown} ms", true);
          embed.AddField("PvE Damage Window", move.DamageWindowString(), true);
          embed.AddField("Number of Pokémon that can learn this move", move.PokemonWithMove.Count, false);
-         embed.WithColor(DexMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          return embed.Build();
       }
 
@@ -397,7 +392,7 @@ namespace PokeStar.ModuleParents
          }
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(DexMessageColor);
+         embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          embed.WithTitle("Do you mean...?");
          embed.WithDescription(sb.ToString());
          embed.WithThumbnailUrl($"attachment://{fileName}");

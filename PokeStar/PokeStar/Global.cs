@@ -61,8 +61,19 @@ namespace PokeStar
          "toggleUseEmptyRaid",
          "toggleUseNonaTest",
          "updatePokemon",
-         "updatePokemonMove"
+         "updatePokemonMove",
+         "updateEggList"
       };
+
+      /// <summary>
+      /// Embed Colors
+      /// </summary>
+      public static readonly Color EMBED_COLOR_INFO_RESPONSE = Color.Purple;
+      public static readonly Color EMBED_COLOR_WARNING_RESPONSE = Color.Orange;
+      public static readonly Color EMBED_COLOR_ERROR_RESPONSE = Color.Red;
+      public static readonly Color EMBED_COLOR_HELP_RESPONSE = Color.Gold;
+      public static readonly Color EMBED_COLOR_RAID_RESPONSE = Color.Blue;
+      public static readonly Color EMBED_COLOR_DEX_RESPONSE = Color.Green;
 
       /// <summary>
       /// Text formatting
@@ -72,6 +83,7 @@ namespace PokeStar
       public static readonly char WEATHER_BOOST_SYMBOL = '*';
       public static readonly char LEGACY_MOVE_SYMBOL = '!';
       public static readonly int WILD_CP_COLUMN_LENGTH = 12;
+      public static readonly int EGG_ROW_LENGTH = 3;
 
       /// <summary>
       /// Move Category names
@@ -84,6 +96,88 @@ namespace PokeStar
       /// </summary>
       public static readonly string MEGA_TAG = "mega";
       public static readonly int MAX_LEN_MEGA = 3;
+
+      /// <summary>
+      /// Raid Tiers
+      /// </summary>
+      public static readonly short EX_RAID_TIER        = 9;
+      public static readonly short MEGA_RAID_TIER      = 7;
+      public static readonly short LEGENDARY_RAID_TIER = 5;
+      public static readonly short RARE_RAID_TIER      = 3;
+      public static readonly short COMMON_RAID_TIER    = 1;
+      public static readonly short INVALID_RAID_TIER   = 0;
+
+      public static readonly string RAID_STRING_MEGA = "Mega";
+      public static readonly string RAID_STRING_EX   = "EX";
+      public static readonly string RAID_STRING_TIER = "Tier";
+
+      public static readonly Dictionary<string, short> RAID_TIER_STRING = new Dictionary<string, short>(StringComparer.OrdinalIgnoreCase)
+      {
+         ["EX"]        = EX_RAID_TIER,
+         ["E"]         = EX_RAID_TIER,
+         ["9"]         = EX_RAID_TIER,
+         ["MEGA"]      = MEGA_RAID_TIER,
+         ["M"]         = MEGA_RAID_TIER,
+         ["7"]         = MEGA_RAID_TIER,
+         ["LEGENDARY"] = LEGENDARY_RAID_TIER,
+         ["L"]         = LEGENDARY_RAID_TIER,
+         ["5"]         = LEGENDARY_RAID_TIER,
+         ["RARE"]      = RARE_RAID_TIER,
+         ["R"]         = RARE_RAID_TIER,
+         ["3"]         = RARE_RAID_TIER,
+         ["COMMON"]    = COMMON_RAID_TIER,
+         ["C"]         = COMMON_RAID_TIER,
+         ["1"]         = COMMON_RAID_TIER,
+      };
+
+      /// <summary>
+      /// Egg Tiers
+      /// </summary>
+      public static readonly short EGG_TIER_2KM     = 2;
+      public static readonly short EGG_TIER_5KM     = 5;
+      public static readonly short EGG_TIER_10KM    = 10;
+      public static readonly short EGG_TIER_5AS     = 25;
+      public static readonly short EGG_TIER_10AS    = 50;
+      public static readonly short EGG_TIER_7KM     = 7;
+      public static readonly short EGG_TIER_12KM    = 12;
+      public static readonly short EGG_TIER_INVALID = 0;
+
+      public static readonly string EGG_STRING_2KM  = "2KM Eggs";
+      public static readonly string EGG_STRING_5KM  = "5KM Eggs";
+      public static readonly string EGG_STRING_10KM = "10KM Eggs";
+      public static readonly string EGG_STRING_5AS  = "5KM Eggs (25KM)";
+      public static readonly string EGG_STRING_10AS = "10KM Eggs (50KM)";
+      public static readonly string EGG_STRING_7KM  = "7KM Gift Eggs";
+      public static readonly string EGG_STRING_12KM = "12KM Strange Eggs";
+
+      public static readonly Dictionary<string, int> EGG_TIER_TITLE = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+      {
+         [EGG_STRING_2KM]  = EGG_TIER_2KM,
+         [EGG_STRING_5KM]  = EGG_TIER_5KM,
+         [EGG_STRING_10KM] = EGG_TIER_10KM,
+         [EGG_STRING_5AS]  = EGG_TIER_5AS,
+         [EGG_STRING_10AS] = EGG_TIER_10AS,
+         [EGG_STRING_7KM]  = EGG_TIER_7KM,
+         [EGG_STRING_12KM] = EGG_TIER_12KM,
+      };
+
+      public static readonly Dictionary<string, short> EGG_TIER_STRING = new Dictionary<string, short>(StringComparer.OrdinalIgnoreCase)
+      {
+         ["2"]     = EGG_TIER_2KM,
+         ["2 KM"]  = EGG_TIER_2KM,
+         ["5"]     = EGG_TIER_5KM,
+         ["5 KM"]  = EGG_TIER_5KM,
+         ["10"]    = EGG_TIER_10KM,
+         ["10 KM"] = EGG_TIER_10KM,
+         ["25"]    = EGG_TIER_5AS,
+         ["5 AS"]  = EGG_TIER_5AS,
+         ["50"]    = EGG_TIER_10AS,
+         ["10 AS"] = EGG_TIER_10AS,
+         ["7"]     = EGG_TIER_7KM,
+         ["7 KM"]  = EGG_TIER_7KM,
+         ["12"]    = EGG_TIER_12KM,
+         ["12 KM"] = EGG_TIER_12KM,
+      };
 
       /// <summary>
       /// Raid/Mule limits
