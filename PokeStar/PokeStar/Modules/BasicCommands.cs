@@ -25,6 +25,7 @@ namespace PokeStar.Modules
       public async Task Status()
       {
          EmbedBuilder embed = new EmbedBuilder();
+         embed.WithColor(Global.EMBED_COLOR_INFO_RESPONSE);
          embed.WithTitle(Program.GetName());
          embed.WithDescription($"Currently running version v{Global.VERSION}");
          embed.AddField("Latency", $"{Program.GetLatency()}ms");

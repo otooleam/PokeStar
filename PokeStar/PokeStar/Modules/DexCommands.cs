@@ -199,7 +199,7 @@ namespace PokeStar.Modules
 
             EmbedBuilder embed = new EmbedBuilder();
             embed.AddField($"Pokémon with form differences:", sb.ToString());
-            embed.WithColor(DexMessageColor);
+            embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
             await ReplyAsync(embed: embed.Build());
          }
          else if (pokemon.Equals("Alias", StringComparison.OrdinalIgnoreCase))
@@ -216,7 +216,7 @@ namespace PokeStar.Modules
             embed.AddField($"-autumn", "-fall", true);
             embed.AddField($"-megax", "-megay-x, -x", true);
             embed.AddField($"-megay", "-megay-y, -y", true);
-            embed.WithColor(DexMessageColor);
+            embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
             await ReplyAsync(embed: embed.Build());
          }
          else
@@ -244,7 +244,7 @@ namespace PokeStar.Modules
                      sb.Append($"{form}\n");
                   }
                   embed.AddField($"Forms for pokemon with #{pokemon}", sb.ToString(), true);
-                  embed.WithColor(DexMessageColor);
+                  embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
                   await ReplyAsync(embed: embed.Build());
                }
             }

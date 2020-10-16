@@ -21,7 +21,7 @@ namespace PokeStar.Modules
       public async Task Help([Summary("(Optional) Get help with this command.")] string command = null)
       {
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(Color.Gold);
+         embed.WithColor(Global.EMBED_COLOR_HELP_RESPONSE);
 
          SocketGuildUser user = Context.Guild.Users.FirstOrDefault(x => x.Id == Context.User.Id);
          bool isAdmin = (user.Roles.Where(role => role.Permissions.Administrator).ToList().Count != 0 || Context.Guild.OwnerId == user.Id) ;

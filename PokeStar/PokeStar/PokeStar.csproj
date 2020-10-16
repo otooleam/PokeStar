@@ -180,6 +180,7 @@
     <Compile Include="Modules\BasicCommands.cs" />
     <Compile Include="Modules\ChannelRegisterCommands.cs" />
     <Compile Include="Modules\DexCommands.cs" />
+    <Compile Include="Modules\EggCommands.cs" />
     <Compile Include="Modules\HelpCommands.cs" />
     <Compile Include="Modules\JokeCommands.cs" />
     <Compile Include="Modules\MoveCommands.cs" />

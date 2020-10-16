@@ -43,7 +43,7 @@ namespace PokeStar.Modules
 
             EmbedBuilder embed = new EmbedBuilder();
             embed.AddField($"Pokémon Types:", sb.ToString());
-            embed.WithColor(DexMessageColor);
+            embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
             embed.WithFooter("Pokémon have 1 or 2 types. Moves always have 1 type.");
             await ReplyAsync(embed: embed.Build());
          }
@@ -90,7 +90,7 @@ namespace PokeStar.Modules
                }
                embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.Item2), false);
                embed.AddField($"Resistances:", FormatTypeList(defenseRelations.Item1), false);
-               embed.WithColor(DexMessageColor);
+               embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
 
                Connections.CopyFile(fileName);
                await Context.Channel.SendFileAsync(fileName, embed: embed.Build());
