@@ -154,46 +154,43 @@ namespace PokeStar
       /// <summary>
       /// Channel Register values
       /// </summary>
-      public static readonly char REGISTER_STRING_BOSS  = 'B';
       public static readonly char REGISTER_STRING_DEX   = 'D';
       public static readonly char REGISTER_STRING_EX    = 'E';
+      public static readonly char REGISTER_STRING_INFO  = 'I';
       public static readonly char REGISTER_STRING_ROLE  = 'P';
       public static readonly char REGISTER_STRING_RAID  = 'R';
       public static readonly char REGISTER_STRING_TRAIN = 'T';
 
-      public static readonly Dictionary<char, string> REGISTER_STRING_TYPE = new Dictionary<char, string>()
+      public static readonly Dictionary<string, string> REGISTER_STRING_TYPE = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
-         [REGISTER_STRING_BOSS]  = "Raid Boss List",
-         [REGISTER_STRING_DEX]   = "PokéDex",
-         [REGISTER_STRING_EX]    = "EX Raid",
-         [REGISTER_STRING_ROLE]  = "Player Roles",
-         [REGISTER_STRING_RAID]  = "Raid",
-         [REGISTER_STRING_TRAIN] = "Raid Train",
+         [REGISTER_STRING_DEX.ToString()]   = "PokéDex",
+         [REGISTER_STRING_EX.ToString()]    = "EX Raid",
+         [REGISTER_STRING_INFO.ToString()]  = "Information",
+         [REGISTER_STRING_ROLE.ToString()]  = "Player Roles",
+         [REGISTER_STRING_RAID.ToString()]  = "Raid",
+         [REGISTER_STRING_TRAIN.ToString()] = "Raid Train",
       };
 
-      public static string REGISTER_ALL_STRING = "ALL_REGISTER";
-      public static string UNREGISTER_ALL_STRING = "ALL_UNREGISTER";
-      public static string FULL_REGISTER_STRING = "BDEPRT";
+      public static string FULL_REGISTER_STRING = "DEIPRT";
 
       public static readonly Dictionary<string, string> REGISTER_VALIE_STRING = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
-         ["ALL_REGISTER"]   = FULL_REGISTER_STRING,
-         ["ALL_UNREGISTER"] = string.Empty,
-         ["BOSSlIST"]       = REGISTER_STRING_BOSS.ToString(),
-         ["BOSS"]           = REGISTER_STRING_BOSS.ToString(),
-         ["B"]              = REGISTER_STRING_BOSS.ToString(),
-         ["POKEDEX"]        = REGISTER_STRING_DEX.ToString(),
-         ["DEX"]            = REGISTER_STRING_DEX.ToString(),
-         ["P"]              = REGISTER_STRING_DEX.ToString(),
-         ["EX"]             = REGISTER_STRING_EX.ToString(),
-         ["E"]              = REGISTER_STRING_EX.ToString(),
-         ["PLAYER"]         = REGISTER_STRING_ROLE.ToString(),
-         ["ROLE"]           = REGISTER_STRING_ROLE.ToString(),
-         ["P"]              = REGISTER_STRING_ROLE.ToString(),
-         ["RAID"]           = REGISTER_STRING_RAID.ToString(),
-         ["R"]              = REGISTER_STRING_RAID.ToString(),
-         ["TRAIN"]          = REGISTER_STRING_TRAIN.ToString(),
-         ["T"]              = REGISTER_STRING_TRAIN.ToString()
+         [FULL_REGISTER_STRING] = FULL_REGISTER_STRING,
+         ["POKEDEX"]            = REGISTER_STRING_DEX.ToString(),
+         ["DEX"]                = REGISTER_STRING_DEX.ToString(),
+         ["D"]                  = REGISTER_STRING_DEX.ToString(),
+         ["EX"]                 = REGISTER_STRING_EX.ToString(),
+         ["E"]                  = REGISTER_STRING_EX.ToString(),
+         ["INFORMATION"]        = REGISTER_STRING_INFO.ToString(),
+         ["INFO"]               = REGISTER_STRING_INFO.ToString(),
+         ["I"]                  = REGISTER_STRING_INFO.ToString(),
+         ["PLAYER"]             = REGISTER_STRING_ROLE.ToString(),
+         ["ROLE"]               = REGISTER_STRING_ROLE.ToString(),
+         ["P"]                  = REGISTER_STRING_ROLE.ToString(),
+         ["RAID"]               = REGISTER_STRING_RAID.ToString(),
+         ["R"]                  = REGISTER_STRING_RAID.ToString(),
+         ["TRAIN"]              = REGISTER_STRING_TRAIN.ToString(),
+         ["T"]                  = REGISTER_STRING_TRAIN.ToString()
 
       };
 

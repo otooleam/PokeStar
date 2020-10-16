@@ -34,7 +34,7 @@ namespace PokeStar.PreConditions
          }
          else
          {
-            string message = $"This channel is not registered to process {Global.REGISTER_STRING_TYPE[register]} commands.";
+            string message = $"This channel is not registered to process {Global.REGISTER_STRING_TYPE[register.ToString()]} commands.";
             await ResponseMessage.SendErrorMessage(context.Channel, command.Name, message);
             return await Task.FromResult(PreconditionResult.FromError(""));
          }
