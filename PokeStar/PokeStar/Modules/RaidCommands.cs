@@ -295,7 +295,7 @@ namespace PokeStar.Modules
       [Command("bosslist")]
       [Alias("boss", "bossess", "raidboss", "raidbosses", "raidbosslist")]
       [Summary("Get the current list of raid bosses.")]
-      [RegisterChannel('B')]
+      [RegisterChannel('I')]
       public async Task BossList()
       {
          List<string> exBosses = Connections.GetBossList(Global.EX_RAID_TIER);

@@ -17,11 +17,12 @@ namespace PokeStar.Modules
       [Summary("Registers a channel to run a given type of command.")]
       [Remarks("To register a channel\n" +
                "for this..........................use one of these:\n" +
+               "Pokedex........................pokedex / dex / d\n" +
+               //"EX Raids.......................ex / e\n" +
+               "Information..................info / i\n" +
                "Player Registration....player / role / p\n" +
                "Raids.............................raid / r\n" +
-               //"EX Raids.......................ex / e\n" +
                //"Raid Trains..................train / t\n" +
-               "Pokedex........................pokedex / dex / d" +
                "Leave blank to register for all command types.")]
       [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Register([Summary("(Optional) Register the channel for these commands.")] string register = null)
@@ -29,15 +30,15 @@ namespace PokeStar.Modules
          ulong guild = Context.Guild.Id;
          ulong channel = Context.Channel.Id;
          string registration = Connections.Instance().GetRegistration(guild, channel);
-         Tuple<string, bool> result = GenerateRegistrationString(register ?? Global.REGISTER_ALL_STRING, registration ?? "");
-         registration = result.Item1;
+         Tuple<string, bool> result = GenerateRegistrationString(register ?? Global.FULL_REGISTER_STRING, registration ?? "");
 
-         if (registration == null)
+         if (result == null)
          {
             await ResponseMessage.SendErrorMessage(Context.Channel, "register", "Please enter a valid registration value.");
          }
          else
          {
+            registration = result.Item1;
             Connections.Instance().UpdateRegistration(guild, channel, registration);
             await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
 
@@ -51,38 +52,38 @@ namespace PokeStar.Modules
       [Command("unregister")]
       [Summary("Unregisters a channel from a given type of command.")]
       [Remarks("To unregister a channel\n" +
-               "from this.......................use one of these:\n" +
-               "Player Registration.....player / role / p\n" +
-               "Raids..............................raid / r\n" +
+               "for this..........................use one of these:\n" +
+               "Pokedex........................pokedex / dex / d\n" +
                //"EX Raids.......................ex / e\n" +
+               "Information..................info / i\n" +
+               "Player Registration....player / role / p\n" +
+               "Raids.............................raid / r\n" +
                //"Raid Trains..................train / t\n" +
-               "Pokedex........................pokedex / dex / d" +
-               "Leave blank to unregister from all command types.")]
+               "Leave blank to register for all command types.")]
       [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Unregister([Summary("(Optional) Unregister the channel from these commands.")] string unregister = null)
       {
          ulong guild = Context.Guild.Id;
          ulong channel = Context.Channel.Id;
-         string reg;
 
          string registration = Connections.Instance().GetRegistration(guild, channel);
 
          if (registration != null)
          {
-            reg = GenerateUnregistrationString(unregister ?? Global.UNREGISTER_ALL_STRING, registration);
-            if (reg == null)
+            registration = GenerateUnregistrationString(unregister ?? Global.FULL_REGISTER_STRING, registration);
+            if (registration == null)
             {
                await ResponseMessage.SendErrorMessage(Context.Channel, "unregister", "Please enter a valid registration value.");
             }
-            else if (string.IsNullOrEmpty(reg))
+            else if (string.IsNullOrEmpty(registration))
             {
                Connections.Instance().DeleteRegistration(guild, channel);
                await ResponseMessage.SendInfoMessage(Context.Channel, $"Removed all registrations from this channel.");
             }
             else
             {
-               Connections.Instance().UpdateRegistration(guild, channel, reg);
-               await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(reg)}");
+               Connections.Instance().UpdateRegistration(guild, channel, registration);
+               await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
             }
          }
          else
@@ -104,22 +105,22 @@ namespace PokeStar.Modules
          string add;
          bool CheckSetupComplete = false;
 
-         if (Global.REGISTER_VALIE_STRING.ContainsKey(register) &&
-             !register.Equals(Global.UNREGISTER_ALL_STRING, StringComparison.OrdinalIgnoreCase))
+         if (Global.REGISTER_VALIE_STRING.ContainsKey(register))
          {
             add = Global.REGISTER_VALIE_STRING[register];
-            if (add.Equals(Global.FULL_REGISTER_STRING) ||
-                add.Equals(Global.REGISTER_STRING_ROLE.ToString()))
-            {
-               CheckSetupComplete = true;
-            }
          }
          else
          {
             return null;
          }
 
-         if (existing.Length == 0)
+         if (add.Equals(Global.FULL_REGISTER_STRING) ||
+             add.Equals(Global.REGISTER_STRING_ROLE.ToString()))
+         {
+            CheckSetupComplete = true;
+         }
+
+         if (existing.Length == 0 || add.Equals(Global.FULL_REGISTER_STRING))
          {
             return new Tuple<string, bool>(add, CheckSetupComplete);
          }
@@ -145,14 +146,18 @@ namespace PokeStar.Modules
       private static string GenerateUnregistrationString(string unregister, string existing)
       {
          string remove;
-         if (Global.REGISTER_VALIE_STRING.ContainsKey(unregister) &&
-             !unregister.Equals(Global.REGISTER_ALL_STRING, StringComparison.OrdinalIgnoreCase))
+         if (Global.REGISTER_VALIE_STRING.ContainsKey(unregister))
          {
             remove = Global.REGISTER_VALIE_STRING[unregister];
          }
          else
          {
             return null;
+         }
+
+         if (remove.Equals(Global.FULL_REGISTER_STRING))
+         {
+            return string.Empty;
          }
 
          int index = existing.IndexOf(remove);
@@ -167,25 +172,10 @@ namespace PokeStar.Modules
       private static string GenerateSummaryString(string reg)
       {
          StringBuilder sb = new StringBuilder();
-         if (reg.ToUpper().Contains(Global.REGISTER_STRING_ROLE.ToString()))
+
+         foreach(char ch in reg.ToCharArray())
          {
-            sb.Append("Player Roles, ");
-         }
-         if (reg.ToUpper().Contains(Global.REGISTER_STRING_RAID.ToString()))
-         {
-            sb.Append("Raids, ");
-         }
-         if (reg.ToUpper().Contains(Global.REGISTER_STRING_EX.ToString()))
-         {
-            sb.Append("EX-Raids, ");
-         }
-         if (reg.ToUpper().Contains(Global.REGISTER_STRING_TRAIN.ToString()))
-         {
-            sb.Append("Raid Trains, ");
-         }
-         if (reg.ToUpper().Contains(Global.REGISTER_STRING_DEX.ToString()))
-         {
-            sb.Append("PokeDex, ");
+            sb.Append($"{Global.REGISTER_STRING_TYPE[ch.ToString()]}, ");
          }
          return sb.ToString().TrimEnd().TrimEnd(',');
       }
