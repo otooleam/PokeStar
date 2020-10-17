@@ -75,7 +75,7 @@ namespace PokeStar.Modules
                }
 
                EmbedBuilder embed = new EmbedBuilder();
-               embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
+               embed.WithColor(Global.EMBED_COLOR_GAME_INFO_RESPONSE);
                embed.AddField(title, sb.ToString());
 
                await ReplyAsync(embed: embed.Build());
