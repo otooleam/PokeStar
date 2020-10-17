@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Collections.Generic;
 using HtmlAgilityPack;
+using PokeStar.DataModels;
 
 namespace PokeStar.ConnectionInterface
 {
@@ -15,6 +16,10 @@ namespace PokeStar.ConnectionInterface
 
       private static Uri EggUrl { get; } = new Uri("https://thesilphroad.com/egg-distances");
       private const string EggHTMLPattern = "//*[@class='tab-content']";
+
+      private static Uri RocketUrl { get; } = new Uri("https://thesilphroad.com/rocket-invasions");
+      private const string RocketHTMLPattern = "//*[@class='lineupGroup normalGroup']";
+      private const string RocketLeaderHTMLPattern = "//*[@class='lineupGroup specialGroup']";
 
       /// <summary>
       /// Gets a list of current raid bosses for a given tier.
@@ -75,7 +80,7 @@ namespace PokeStar.ConnectionInterface
                   raidBossList.Add(tier, new List<string>());
                   tierStart = true;
                   nextInTier = false;
-               } 
+               }
                else if (line.Equals("8+", StringComparison.OrdinalIgnoreCase))
                {
                   nextInTier = true;
@@ -128,6 +133,79 @@ namespace PokeStar.ConnectionInterface
             }
          }
          return eggList;
+      }
+
+      public static Dictionary<string, Rocket> GetRockets()
+      {
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(RocketUrl);
+         HtmlNodeCollection rockets = doc.DocumentNode.SelectNodes(RocketHTMLPattern);
+
+         Dictionary<string, Rocket> rocketList = new Dictionary<string, Rocket>();
+
+         foreach (HtmlNode col in rockets)
+         {
+            int slot = 0;
+            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            Rocket rocket = new Rocket();
+            string type = words[1].Trim();
+            rocket.SetGrunt(words[0].Trim(), type);
+
+            foreach (string word in words)
+            {
+               string line = word.Trim();
+               int numIndex = line.IndexOf('#');
+               if (numIndex != -1)
+               {
+                  slot = Convert.ToInt32(line.Substring(numIndex + 1));
+               }
+               else if (slot != 0)
+               {
+                  if (line.Length != 1)
+                  {
+                     rocket.Slots[slot - 1].Add(line);
+                  }
+               }
+            }
+            rocketList.Add(type, rocket);
+         }
+         return rocketList;
+      }
+
+      public static Dictionary<string, Rocket> GetRocketLeaders()
+      {
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(RocketUrl);
+         HtmlNodeCollection leaders = doc.DocumentNode.SelectNodes(RocketLeaderHTMLPattern);
+
+         Dictionary<string, Rocket> leaderList = new Dictionary<string, Rocket>();
+
+         foreach (HtmlNode col in leaders)
+         {
+            int slot = 0;
+            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            Rocket rocket = new Rocket();
+            rocket.SetLeader(words[0].Trim());
+
+            foreach (string word in words)
+            {
+               string line = word.Trim();
+               int numIndex = line.IndexOf('#');
+               if (numIndex != -1)
+               {
+                  slot = Convert.ToInt32(line.Substring(numIndex + 1));
+               }
+               else if (slot != 0)
+               {
+                  if (line.Length != 1)
+                  {
+                     rocket.Slots[slot - 1].Add(line);
+                  }
+               }
+            }
+            leaderList.Add(rocket.Name, rocket);
+         }
+         return leaderList;
       }
 
       /// <summary>

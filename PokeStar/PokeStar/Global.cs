@@ -68,12 +68,13 @@ namespace PokeStar
       /// <summary>
       /// Embed Colors
       /// </summary>
-      public static readonly Color EMBED_COLOR_INFO_RESPONSE = Color.Purple;
-      public static readonly Color EMBED_COLOR_WARNING_RESPONSE = Color.Orange;
-      public static readonly Color EMBED_COLOR_ERROR_RESPONSE = Color.Red;
-      public static readonly Color EMBED_COLOR_HELP_RESPONSE = Color.Gold;
-      public static readonly Color EMBED_COLOR_RAID_RESPONSE = Color.Blue;
-      public static readonly Color EMBED_COLOR_DEX_RESPONSE = Color.Green;
+      public static readonly Color EMBED_COLOR_INFO_RESPONSE      = Color.Purple;
+      public static readonly Color EMBED_COLOR_WARNING_RESPONSE   = Color.Orange;
+      public static readonly Color EMBED_COLOR_ERROR_RESPONSE     = Color.Red;
+      public static readonly Color EMBED_COLOR_HELP_RESPONSE      = Color.Gold;
+      public static readonly Color EMBED_COLOR_RAID_RESPONSE      = Color.Blue;
+      public static readonly Color EMBED_COLOR_DEX_RESPONSE       = Color.Green;
+      public static readonly Color EMBED_COLOR_GAME_INFO_RESPONSE = Color.Teal;
 
       /// <summary>
       /// Text formatting
