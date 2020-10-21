@@ -22,6 +22,7 @@ namespace PokeStar.ConnectionInterface
       private List<string> PokemonNames;
       private List<string> MoveNames;
       private Dictionary<int, List<string>> Eggs;
+      private Dictionary<string, Rocket> Rockets;
 
       private const int NumSuggestions = 10;
 
@@ -37,6 +38,7 @@ namespace PokeStar.ConnectionInterface
          UpdatePokemonNameList();
          UpdateMoveNameList();
          UpdateEggList();
+         UpdateRocketList();
       }
 
       /// <summary>
@@ -106,6 +108,25 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Gets the rocket of a specific type.
+      /// </summary>
+      /// <param name="type">Type of rocket.</param>
+      /// <returns>Rocket of the given type.</returns>
+      public Rocket GetRocket(string type)
+      {
+         return Rockets.ContainsKey(type) ? Rockets[type] : null;
+      }
+
+      /// <summary>
+      /// Gets all valid types of Rockets.
+      /// </summary>
+      /// <returns>List of Rocket types.</returns>
+      public List<string> GetRocketTypes()
+      {
+         return Rockets.Keys.ToList();
+      }
+
+      /// <summary>
       /// Updates the list of Pokémon to use for the fuzzy search.
       /// Only needs to be ran when a Pokémon name has changed.
       /// </summary>
@@ -130,6 +151,15 @@ namespace PokeStar.ConnectionInterface
       public void UpdateEggList()
       {
          Eggs = SilphData.GetEggs();
+      }
+
+      /// <summary>
+      /// Updates the list of current Team Rockets.
+      /// Only needs to be ran when rocket line ups has changed.
+      /// </summary>
+      public void UpdateRocketList()
+      {
+         Rockets = SilphData.GetRockets().Union(SilphData.GetRocketLeaders()).ToDictionary(k => k.Key, v => v.Value, StringComparer.OrdinalIgnoreCase);
       }
 
       /// <summary>

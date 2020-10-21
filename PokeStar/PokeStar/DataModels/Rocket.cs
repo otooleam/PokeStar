@@ -2,13 +2,32 @@
 
 namespace PokeStar.DataModels
 {
+   /// <summary>
+   /// Rocket boss.
+   /// </summary>
    public class Rocket
    {
-      private string LEADER_TITLE = "Leader";
-      private string GRUNT_TITLE = "Grunt";
+      /// <summary>
+      /// 
+      /// </summary>
+      private readonly string LEADER_TITLE = "Leader";
+      private readonly string GRUNT_TITLE = "Grunt";
 
+      /// <summary>
+      /// Name of the rocket.
+      /// </summary>
       public string Name { get; private set; }
 
+      /// <summary>
+      /// Phrase said by the rocket.
+      /// Only set for grunts.
+      /// </summary>
+      public string Phrase { get; private set; } = null;
+
+      /// <summary>
+      /// Pokémon used by rockets.
+      /// Length is always 3.
+      /// </summary>
       public List<string>[] Slots { get; private set; } =
       {
          new List<string>(),
@@ -16,14 +35,24 @@ namespace PokeStar.DataModels
          new List<string>()
       };
 
+      /// <summary>
+      /// Sets the name for a rocket leader.
+      /// </summary>
+      /// <param name="name">Name of the rocket leader.</param>
       public void SetLeader(string name)
       {
          Name = name.Replace(LEADER_TITLE, string.Empty).Replace(GRUNT_TITLE, string.Empty).Trim();
       }
 
-      public void SetGrunt(string phrase, string type)
+      /// <summary>
+      /// Sets the name and phrase for a rocket grunt.
+      /// </summary>
+      /// <param name="type">Type of rocket grunt.</param>
+      /// <param name="phrase">Phrase said by the rocket grunt.</param>
+      public void SetGrunt(string type, string phrase)
       {
-         Name = $"{phrase} ({type} Grunt)";
+         Name = $"{type} {GRUNT_TITLE}";
+         Phrase = phrase;
       }
    }
 }

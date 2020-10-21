@@ -13,9 +13,9 @@ namespace PokeStar.Modules
    public class EggCommands : ModuleBase<SocketCommandContext>
    {
       [Command("egg")]
-      [Summary("Gets a list of eggs for a given tier." +
+      [Summary("Gets lists of Pokémon currently in eggs.\n" +
                "Leave blank for a list of valid egg tiers.")]
-      [RegisterChannel('D')]
+      [RegisterChannel('I')]
       public async Task Egg([Summary("Get information for this Egg tier.")][Remainder]string tier = null)
       {
          if (tier == null)
@@ -23,7 +23,7 @@ namespace PokeStar.Modules
             StringBuilder sb = new StringBuilder();
 
             int currentTier = 0;
-            foreach (var eggTier in Global.EGG_TIER_STRING)
+            foreach (KeyValuePair<string, short> eggTier in Global.EGG_TIER_STRING)
             {
                if (currentTier != eggTier.Value)
                {
@@ -41,7 +41,7 @@ namespace PokeStar.Modules
             }
 
             EmbedBuilder embed = new EmbedBuilder();
-            embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
+            embed.WithColor(Global.EMBED_COLOR_GAME_INFO_RESPONSE);
             embed.AddField("Valid Egg Tiers:", sb.ToString());
 
             await ReplyAsync(embed: embed.Build());

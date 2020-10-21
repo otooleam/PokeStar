@@ -62,7 +62,8 @@ namespace PokeStar
          "toggleUseNonaTest",
          "updatePokemon",
          "updatePokemonMove",
-         "updateEggList"
+         "updateEggList",
+         "updateRocketList"
       };
 
       /// <summary>
@@ -161,7 +162,6 @@ namespace PokeStar
          [EGG_STRING_7KM]  = EGG_TIER_7KM,
          [EGG_STRING_12KM] = EGG_TIER_12KM,
       };
-
       public static readonly Dictionary<string, short> EGG_TIER_STRING = new Dictionary<string, short>(StringComparer.OrdinalIgnoreCase)
       {
          ["2"]     = EGG_TIER_2KM,
@@ -255,7 +255,7 @@ namespace PokeStar
       public static readonly char REGISTER_STRING_ROLE  = 'P';
       public static readonly char REGISTER_STRING_RAID  = 'R';
       public static readonly char REGISTER_STRING_TRAIN = 'T';
-
+      public static readonly string FULL_REGISTER_STRING = "DEIPRT";
       public static readonly Dictionary<string, string> REGISTER_STRING_TYPE = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
          [REGISTER_STRING_DEX.ToString()]   = "PokéDex",
@@ -265,9 +265,6 @@ namespace PokeStar
          [REGISTER_STRING_RAID.ToString()]  = "Raid",
          [REGISTER_STRING_TRAIN.ToString()] = "Raid Train",
       };
-
-      public static string FULL_REGISTER_STRING = "DEIPRT";
-
       public static readonly Dictionary<string, string> REGISTER_VALIE_STRING = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
          [FULL_REGISTER_STRING] = FULL_REGISTER_STRING,
@@ -342,7 +339,6 @@ namespace PokeStar
 
          "rave_emote", "scream_emote"
       };
-
       public static readonly Dictionary<string, string> NONA_EMOJIS = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
       /// <summary>
@@ -356,7 +352,6 @@ namespace PokeStar
          "number_9_emote",  "number_10_emote",
          "number_11_emote"
       };
-
       public static readonly int NUM_SELECTIONS = 10;
       public static readonly Emote[] SELECTION_EMOJIS = new Emote[NUM_SELECTIONS];
       public static readonly List<Emote> NUM_EMOJIS = new List<Emote>();
