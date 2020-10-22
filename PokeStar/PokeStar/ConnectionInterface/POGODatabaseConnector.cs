@@ -569,7 +569,7 @@ namespace PokeStar.ConnectionInterface
 
          string queryString = $@"UPDATE pokemon 
                                  SET {attribute} = {value}
-                                 WHERE name={pokemonName};";
+                                 WHERE name = '{pokemonName}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -601,7 +601,6 @@ namespace PokeStar.ConnectionInterface
             conn.Close();
          }
       }
-
 
       /// <summary>
       /// Generates the where string for types.
