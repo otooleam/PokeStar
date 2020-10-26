@@ -54,13 +54,14 @@ namespace PokeStar.Modules
             else
             {
                Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber.First());
+               Connections.Instance().GetPokemonStats(ref pkmn);
                string fileName = Connections.GetPokemonPicture(pkmn.Name);
                Connections.CopyFile(fileName);
                await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pkmn, fileName));
                Connections.DeleteFile(fileName);
             }
          }
-         else // Is string
+         else
          {
             string name = GetPokemonName(pokemon);
             Pokemon pkmn = Connections.Instance().GetPokemon(name);
@@ -82,6 +83,7 @@ namespace PokeStar.Modules
                }
                else
                {
+                  Connections.Instance().GetPokemonStats(ref pkmn);
                   string fileName = Connections.GetPokemonPicture(pkmn.Name);
                   Connections.CopyFile(fileName);
                   await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pkmn, fileName));
@@ -90,6 +92,7 @@ namespace PokeStar.Modules
             }
             else
             {
+               Connections.Instance().GetPokemonStats(ref pkmn);
                string fileName = Connections.GetPokemonPicture(pkmn.Name);
                Connections.CopyFile(fileName);
                await Context.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pkmn, fileName));
@@ -129,7 +132,7 @@ namespace PokeStar.Modules
             else
             {
                Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber.First());
-               Connections.CalcAllCP(ref pkmn);
+               Connections.GetPokemonCP(ref pkmn);
                string fileName = Connections.GetPokemonPicture(pkmn.Name);
                Connections.CopyFile(fileName);
                await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pkmn, fileName));
@@ -158,7 +161,7 @@ namespace PokeStar.Modules
                }
                else
                {
-                  Connections.CalcAllCP(ref pkmn);
+                  Connections.GetPokemonCP(ref pkmn);
                   string fileName = Connections.GetPokemonPicture(pkmn.Name);
                   Connections.CopyFile(fileName);
                   await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pkmn, fileName));
@@ -167,7 +170,7 @@ namespace PokeStar.Modules
             }
             else
             {
-               Connections.CalcAllCP(ref pkmn);
+               Connections.GetPokemonCP(ref pkmn);
                string fileName = Connections.GetPokemonPicture(pkmn.Name);
                Connections.CopyFile(fileName);
                await Context.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pkmn, fileName));
