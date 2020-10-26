@@ -172,54 +172,6 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets a given raid boss.
-      /// Calculates CP values relevant to a raid boss. This includes
-      /// min and max cps and weather boosted min and max cps.
-      /// </summary>
-      /// <param name="raidBossName">Name of the raid boss.</param>
-      /// <returns>The raid boss coresponding to the name, otherwise null.</returns>
-      public RaidBoss GetRaidBoss(string raidBossName)
-      {
-         if (raidBossName == null)
-         {
-            return null;
-         }
-
-         string name = ReformatName(raidBossName);
-         RaidBoss raidBoss = POGODBConnector.GetRaidBoss(name);
-         if (raidBoss == null)
-         {
-            return null;
-         }
-
-         Tuple<Dictionary<string, int>, Dictionary<string, int>> typeRelations = GetTypeDefenseRelations(raidBoss.Type);
-         raidBoss.Weakness = typeRelations.Item2.Keys.ToList();
-         raidBoss.Resistance = typeRelations.Item1.Keys.ToList();
-         raidBoss.Weather = GetWeather(raidBoss.Type);
-
-         raidBoss.CPLow = CPCalculator.CalcCPPerLevel(
-            raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV,
-            Global.MIN_SPECIAL_IV, Global.RAID_LEVEL);
-
-         raidBoss.CPHigh = CPCalculator.CalcCPPerLevel(
-            raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.RAID_LEVEL);
-
-         raidBoss.CPLowBoosted = CPCalculator.CalcCPPerLevel(
-            raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV,
-            Global.RAID_LEVEL + Global.WEATHER_BOOST);
-
-         raidBoss.CPHighBoosted = CPCalculator.CalcCPPerLevel(
-            raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV,
-            Global.RAID_LEVEL + Global.WEATHER_BOOST);
-
-         return raidBoss;
-      }
-
-      /// <summary>
       /// Gets a given Pokémon.
       /// </summary>
       /// <param name="pokemonName">Name of the Pokémon.</param>

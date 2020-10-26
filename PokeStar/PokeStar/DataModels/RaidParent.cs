@@ -50,7 +50,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Raid boss that the raid is for.
       /// </summary>
-      public RaidBoss Boss { get; protected set; }
+      public Pokemon Boss { get; protected set; }
 
       /// <summary>
       /// List of possible raid bosses.
@@ -118,7 +118,7 @@ namespace PokeStar.DataModels
       /// <param name="bossName">Name of the raid boss.</param>
       public void SetBoss(string bossName)
       {
-         Boss = string.IsNullOrEmpty(bossName) ? null : bossName.Equals(Global.DEFAULT_RAID_BOSS_NAME, StringComparison.OrdinalIgnoreCase) ? new RaidBoss() :  Connections.Instance().GetRaidBoss(bossName);
+         Boss = string.IsNullOrEmpty(bossName) ? null : bossName.Equals(Global.DEFAULT_RAID_BOSS_NAME, StringComparison.OrdinalIgnoreCase) ? new Pokemon() :  Connections.Instance().GetPokemon(bossName);
       }
 
       /// <summary>

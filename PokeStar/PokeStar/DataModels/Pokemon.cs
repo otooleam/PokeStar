@@ -17,7 +17,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Name of the Pokémon.
       /// </summary>
-      public string Name { get; set; }
+      public string Name { get; set; } = Global.DEFAULT_RAID_BOSS_NAME;
 
       /// <summary>
       /// List of alternate forms.

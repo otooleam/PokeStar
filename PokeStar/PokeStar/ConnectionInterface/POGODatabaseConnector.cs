@@ -83,45 +83,6 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets a raid boss by name.
-      /// </summary>
-      /// <param name="raidBossName">Name of the raid boss.</param>
-      /// <returns>A raid boss if the name is in the database, otherwise null.</returns>
-      public RaidBoss GetRaidBoss(string raidBossName)
-      {
-         RaidBoss raidBoss = null;
-         string queryString = $@"SELECT name, attack, defense, stamina, type_1, type_2
-                                 FROM pokemon 
-                                 WHERE name='{raidBossName}';";
-
-         using (SqlConnection conn = GetConnection())
-         {
-            conn.Open();
-            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
-            {
-               while (reader.Read())
-               {
-                  raidBoss = new RaidBoss
-                  {
-                     Name = Convert.ToString(reader["name"]),
-                     Attack = Convert.ToInt32(reader["attack"]),
-                     Defense = Convert.ToInt32(reader["defense"]),
-                     Stamina = Convert.ToInt32(reader["stamina"]),
-                  };
-
-                  raidBoss.Type.Add(Convert.ToString(reader["type_1"]));
-                  if (reader["type_2"].GetType() != typeof(DBNull))
-                  {
-                     raidBoss.Type.Add(Convert.ToString(reader["type_2"]));
-                  }
-               }
-            }
-            conn.Close();
-         }
-         return raidBoss;
-      }
-
-      /// <summary>
       /// Gets a Pokémon by name.
       /// </summary>
       /// <param name="pokemonName">Name of the Pokémon.</param>

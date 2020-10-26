@@ -189,7 +189,6 @@
     <Compile Include="Modules\RaidCommands.cs" />
     <Compile Include="Modules\RoleCommands.cs" />
     <Compile Include="Modules\SetupCommands.cs" />
-    <Compile Include="DataModels\RaidBoss.cs" />
     <Compile Include="DataModels\Counter.cs" />
     <Compile Include="Modules\SystemEditCommands.cs" />
     <Compile Include="Modules\TypeCommands.cs" />
