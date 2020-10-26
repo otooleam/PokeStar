@@ -259,6 +259,11 @@ namespace PokeStar.ConnectionInterface
             pokemon.Attack, pokemon.Defense, pokemon.Stamina,
             Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_LEVEL);
 
+         pokemon.GreatIVs = CPCalculator.CalcPvPIVsPerLeague(
+            pokemon.Attack, pokemon.Defense, pokemon.Stamina, Global.MAX_GREAT_CP);
+         pokemon.UltraIVs = CPCalculator.CalcPvPIVsPerLeague(
+            pokemon.Attack, pokemon.Defense, pokemon.Stamina, Global.MAX_ULTRA_CP);
+
          return pokemon;
       }
 

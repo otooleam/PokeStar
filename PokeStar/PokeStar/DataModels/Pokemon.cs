@@ -5,7 +5,7 @@ using System.Collections.Generic;
 namespace PokeStar.DataModels
 {
    /// <summary>
-   /// Pokemon data.
+   /// Pokémon data.
    /// </summary>
    public class Pokemon
    {
@@ -168,6 +168,16 @@ namespace PokeStar.DataModels
       /// List of maximum wild CP of the Pokémon.
       /// </summary>
       public List<int> CPWild { get; } = new List<int>();
+
+      /// <summary>
+      /// Best IVs for Great League.
+      /// </summary>
+      public LeagueIV GreatIVs { get; set; }
+
+      /// <summary>
+      /// Best IVs for Ultra League.
+      /// </summary>
+      public LeagueIV UltraIVs { get; set; }
 
       /// <summary>
       /// Checks if the Pokémon is region locked.
@@ -457,6 +467,18 @@ namespace PokeStar.DataModels
             sb.Append($"**{column2level}** - {CPWild[column2level - 1]}");
             sb.AppendLine($"{(column3level <= Global.MAX_WILD_LEVEL ? $" . **{column3level}** - {CPWild[column3level - 1]}{(column3level > maxNonBoostedLevel ? Global.WEATHER_BOOST_SYMBOL.ToString() : "")}" : "")}");
          }
+         return sb.ToString();
+      }
+
+      /// <summary>
+      /// Gets league IVs as a string.
+      /// </summary>
+      /// <returns></returns>
+      public string LeagueIVToString()
+      {
+         StringBuilder sb = new StringBuilder();
+         sb.AppendLine($"*Great League:*\n {GreatIVs}");
+         sb.AppendLine($"*Ultra League:*\n {UltraIVs}");
          return sb.ToString();
       }
    }

@@ -230,6 +230,7 @@ namespace PokeStar.ModuleParents
          embed.AddField("Weaknesses", pokemon.WeaknessToString(), true);
          embed.AddField("Fast Moves", pokemon.FastMoveToString(), true);
          embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
+         embed.AddField("Rank 1 IVs", pokemon.LeagueIVToString(), true);
          embed.AddField("Counters", pokemon.CounterToString(), false);
          if (pokemon.HasForms())
          {

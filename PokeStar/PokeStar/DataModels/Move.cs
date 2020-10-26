@@ -100,7 +100,7 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Formats energy values to a string.
+      /// Formats energy values as a string.
       /// </summary>
       /// <param name="energy">Value for energy.</param>
       /// <returns>Energy as a string.</returns>

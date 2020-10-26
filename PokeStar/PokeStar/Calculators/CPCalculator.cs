@@ -1,4 +1,6 @@
-﻿using System;
+﻿using PokeStar.DataModels;
+using System;
+using System.Collections.Generic;
 
 namespace PokeStar.Calculators
 {
@@ -124,6 +126,57 @@ namespace PokeStar.Calculators
          double defense = CalcDefense(defenseStat, defenseIv, level);
          double stamina = CalcStamina(staminaStat, staminaIv, level);
          return (int)(attack * Math.Sqrt(defense) * Math.Sqrt(stamina) / 10.0);
+      }
+
+      /// <summary>
+      /// Calculates the rank 1 PvP IVs for a Pokémon in a given league.
+      /// </summary>
+      /// <param name="attackStat">Attack stat of the Pokémon.</param>
+      /// <param name="defenseStat">Defense stat of the Pokémon.</param>
+      /// <param name="staminaStat">Stamina stat of the Pokémon.</param>
+      /// <param name="leagueCap">Max CP of the league.</param>
+      /// <returns>LeagueIV object with the best IVs for the league.</returns>
+      public static LeagueIV CalcPvPIVsPerLeague(int attackStat, int defenseStat, int staminaStat, int leagueCap)
+      {
+         int bestA = -1;
+         int bestD = -1;
+         int bestS = -1;
+         int bestCP = -1;
+         int bestTotal = -1;
+         double bestProduct = -1;
+
+         for (double l = 1; l <= Global.MAX_LEVEL; l += Global.LEVEL_STEP)
+         {
+            for (int a = 0; a <= Global.MAX_IV; a++)
+            {
+               for (int d = 0; d <= Global.MAX_IV; d++)
+               {
+                  for (int s = 0; s <= Global.MAX_IV; s++)
+                  {
+                     int cpLevel = CalcCPPerLevel(attackStat, defenseStat, staminaStat, a, d, s, l);
+                     int total = a + d + s;
+                     double product = CalcAttack(attackStat, a, l) * CalcDefense(defenseStat, d, l) * Math.Floor(CalcStamina(staminaStat, s, l));
+                     if (cpLevel <= leagueCap && (product > bestProduct || (product == bestProduct && total > bestTotal)))
+                     {
+                        bestA = a;
+                        bestD = d;
+                        bestS = s;
+                        bestTotal = total;
+                        bestCP = cpLevel;
+                        bestProduct = product;
+                     }
+                  }
+               }
+            }
+         }
+         return new LeagueIV
+         {
+            Attack = bestA,
+            Defense = bestD,
+            Stamina = bestS,
+            CP = bestCP,
+            StatProduct = bestProduct
+         };
       }
    }
 }

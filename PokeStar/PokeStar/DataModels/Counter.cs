@@ -22,7 +22,7 @@ namespace PokeStar.DataModels
       public PokemonMove ChargeAttack { get; set; }
 
       /// <summary>
-      /// Gets the counter to a string.
+      /// Gets the counter as a string.
       /// </summary>
       /// <returns>Counter string.</returns>
       public override string ToString()
