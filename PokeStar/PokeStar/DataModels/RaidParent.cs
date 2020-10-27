@@ -43,7 +43,7 @@ namespace PokeStar.DataModels
       public string Location { get; set; }
 
       /// <summary>
-      /// Tier of the raid (1, 3, 5, 7).
+      /// Tier of the raid.
       /// </summary>
       public short Tier { get; set; }
 
