@@ -114,7 +114,7 @@ namespace PokeStar.Modules
                   await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
                }
                Connections.DeleteFile(fileName);
-               dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, pokemonWithNumber));
+               dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, pokemonWithNumber));
             }
             else
             {
@@ -144,7 +144,7 @@ namespace PokeStar.Modules
                   await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
                   Connections.DeleteFile(fileName);
 
-                  dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, pokemonNames));
+                  dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, pokemonNames));
                }
                else
                {

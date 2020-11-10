@@ -192,9 +192,9 @@ namespace PokeStar.ConnectionInterface
             return null;
          }
 
-         Tuple<Dictionary<string, int>, Dictionary<string, int>> typeRelations = GetTypeDefenseRelations(raidBoss.Type);
-         raidBoss.Weakness = typeRelations.Item2.Keys.ToList();
-         raidBoss.Resistance = typeRelations.Item1.Keys.ToList();
+         TypeRelation typeRelations = GetTypeDefenseRelations(raidBoss.Type);
+         raidBoss.Weakness = typeRelations.Weak.Keys.ToList();
+         raidBoss.Resistance = typeRelations.Strong.Keys.ToList();
          raidBoss.Weather = GetWeather(raidBoss.Type);
 
          raidBoss.CPLow = CPCalculator.CalcCPPerLevel(
@@ -241,9 +241,9 @@ namespace PokeStar.ConnectionInterface
 
          pokemon.Forms = POGODBConnector.GetPokemonByNumber(pokemon.Number);
 
-         Tuple<Dictionary<string, int>, Dictionary<string, int>> typeRelations = GetTypeDefenseRelations(pokemon.Type);
-         pokemon.Weakness = typeRelations.Item2.Keys.ToList();
-         pokemon.Resistance = typeRelations.Item1.Keys.ToList();
+         TypeRelation typeRelations = GetTypeDefenseRelations(pokemon.Type);
+         pokemon.Weakness = typeRelations.Weak.Keys.ToList();
+         pokemon.Resistance = typeRelations.Strong.Keys.ToList();
          pokemon.Weather = GetWeather(pokemon.Type);
          pokemon.FastMove = POGODBConnector.GetPokemonMoves(name, Global.FAST_MOVE_CATEGORY);
          pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
@@ -424,11 +424,11 @@ namespace PokeStar.ConnectionInterface
       /// Separates weaknesses and resistances.
       /// </summary>
       /// <param name="types">List of Pokémon types.</param>
-      /// <returns>Dictionaries of types and modifiers.</returns>
-      public Tuple<Dictionary<string, int>, Dictionary<string, int>> GetTypeDefenseRelations(List<string> types)
+      /// <returns>Relations when the types are defending.</returns>
+      public TypeRelation GetTypeDefenseRelations(List<string> types)
       {
          Dictionary<string, int> allRelations = POGODBConnector.GetTypeDefenseRelations(types);
-         return new Tuple<Dictionary<string, int>, Dictionary<string, int>>(
+         return new TypeRelation(
             allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value),
             allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value)
          );
@@ -439,11 +439,11 @@ namespace PokeStar.ConnectionInterface
       /// Separates super and not very effective moves.
       /// </summary>
       /// <param name="type">Move type.</param>
-      /// <returns>Dictionaries of types and modifiers.</returns>
-      public Tuple<Dictionary<string, int>, Dictionary<string, int>> GetTypeAttackRelations(string type)
+      /// <returns>Relations when the type is attacking.</returns>
+      public TypeRelation GetTypeAttackRelations(string type)
       {
          Dictionary<string, int> allRelations = POGODBConnector.GetTypeAttackRelations(type);
-         return new Tuple<Dictionary<string, int>, Dictionary<string, int>>(
+         return new TypeRelation(
             allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value),
             allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value)
          );

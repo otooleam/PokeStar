@@ -210,8 +210,8 @@ namespace PokeStar.DataModels
       /// Removes a player from the raid.
       /// </summary>
       /// <param name="player">Player to remove.</param>
-      /// <returns>Tuple with raid group and list of invited users.</returns>
-      public abstract Tuple<int, List<SocketGuildUser>> RemovePlayer(SocketGuildUser player);
+      /// <returns>RaidRemove with raid group and list of invited users.</returns>
+      public abstract RaidRemoveResult RemovePlayer(SocketGuildUser player);
 
       /// <summary>
       /// Requests an invite to a raid for a player.

@@ -49,7 +49,7 @@ namespace PokeStar.Modules
                   await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
                }
                Connections.DeleteFile(fileName);
-               dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, pokemonWithNumber));
+               dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, pokemonWithNumber));
             }
             else
             {
@@ -78,7 +78,7 @@ namespace PokeStar.Modules
                   await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
                   Connections.DeleteFile(fileName);
 
-                  dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, pokemonNames));
+                  dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, pokemonNames));
                }
                else
                {
@@ -124,7 +124,7 @@ namespace PokeStar.Modules
                {
                   await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
                }
-               dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.CP_MESSAGE, pokemonWithNumber));
+               dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.CP_MESSAGE, pokemonWithNumber));
             }
             else
             {
@@ -154,7 +154,7 @@ namespace PokeStar.Modules
                   await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
                   Connections.DeleteFile(fileName);
 
-                  dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.CP_MESSAGE, pokemonNames));
+                  dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.CP_MESSAGE, pokemonNames));
                }
                else
                {
@@ -266,7 +266,7 @@ namespace PokeStar.Modules
                      await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
                      Connections.DeleteFile(fileName);
 
-                     dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.FORM_MESSAGE, pokemonNames));
+                     dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.FORM_MESSAGE, pokemonNames));
                   }
                   else
                   {
@@ -280,12 +280,10 @@ namespace PokeStar.Modules
                      {
                         string baseName = pokemonWithNumber.Where(form => pokemonForms.ContainsKey(form)).ToList().First();
 
-                        Tuple<string, string> forms = pokemonForms[baseName];
-                        List<string> formsList = forms.Item1.Split(',').ToList();
-
+                        Form forms = pokemonForms[baseName];
                         string fileName = Connections.GetPokemonPicture(baseName);
                         Connections.CopyFile(fileName);
-                        await Context.Channel.SendFileAsync(fileName,embed: BuildFormEmbed(baseName, formsList, forms.Item2, fileName));
+                        await Context.Channel.SendFileAsync(fileName,embed: BuildFormEmbed(baseName, forms.FromList, forms.DefaultForm, fileName));
                         Connections.DeleteFile(fileName);
                      }
                   }
@@ -323,7 +321,7 @@ namespace PokeStar.Modules
                {
                   await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
                }
-               dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.EVO_MESSAGE, pokemonWithNumber));
+               dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.EVO_MESSAGE, pokemonWithNumber));
             }
             else
             {
@@ -354,7 +352,7 @@ namespace PokeStar.Modules
                   await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
                   Connections.DeleteFile(fileName);
 
-                  dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.EVO_MESSAGE, pokemonNames));
+                  dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.EVO_MESSAGE, pokemonNames));
                }
                else
                {

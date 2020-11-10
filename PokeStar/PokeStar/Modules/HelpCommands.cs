@@ -16,7 +16,7 @@ namespace PokeStar.Modules
    /// </summary>
    public class HelpCommands : ModuleBase<SocketCommandContext>
    {
-      private static readonly Dictionary<ulong, Tuple<int, List<CommandInfo>>> helpMessages = new Dictionary<ulong, Tuple<int, List<CommandInfo>>>();
+      private static readonly Dictionary<ulong, HelpMessage> helpMessages = new Dictionary<ulong, HelpMessage>();
 
       private const int MAX_COMMANDS = 10;
       private const int BACK_ARROW = 0;
@@ -41,12 +41,12 @@ namespace PokeStar.Modules
          {
             List<CommandInfo> validCommands = Global.COMMAND_INFO.Where(cmdInfo => CheckShowCommand(cmdInfo.Name, isAdmin, isNona)).ToList();
             string prefix = Connections.Instance().GetPrefix(Context.Guild.Id);
-            
+
 
             IUserMessage msg = await ReplyAsync(embed: BuildGeneralHelpEmbed(validCommands.Take(MAX_COMMANDS).ToList(), prefix));
             if (validCommands.Count > MAX_COMMANDS)
             {
-               helpMessages.Add(msg.Id, new Tuple<int, List<CommandInfo>>(0, validCommands));
+               helpMessages.Add(msg.Id, new HelpMessage(validCommands));
                await msg.AddReactionsAsync(extraEmojis);
             }
          }
@@ -129,8 +129,8 @@ namespace PokeStar.Modules
       /// <returns>Completed Task.</returns>
       public static async Task HelpMessageReactionHandle(IMessage message, SocketReaction reaction, ulong guildId)
       {
-         Tuple<int, List<CommandInfo>> helpMessage = helpMessages[message.Id];
-         int offset = helpMessage.Item1;
+         HelpMessage helpMessage = helpMessages[message.Id];
+         int offset = helpMessage.Page;
          string prefix = Connections.Instance().GetPrefix(guildId);
 
          if (reaction.Emote.Equals(extraEmojis[BACK_ARROW]))
@@ -141,23 +141,23 @@ namespace PokeStar.Modules
                SocketUserMessage msg = (SocketUserMessage)message;
                await msg.ModifyAsync(x =>
                {
-                  x.Embed = BuildGeneralHelpEmbed(helpMessage.Item2.Skip(offset * MAX_COMMANDS).Take(MAX_COMMANDS).ToList(), prefix);
+                  x.Embed = BuildGeneralHelpEmbed(helpMessage.Commands.Skip(offset * MAX_COMMANDS).Take(MAX_COMMANDS).ToList(), prefix);
                });
             }
          }
          else if (reaction.Emote.Equals(extraEmojis[FORWARD_ARROR]))
          {
-            if (helpMessage.Item2.Count > ((offset + 1) * MAX_COMMANDS))
+            if (helpMessage.Commands.Count > ((offset + 1) * MAX_COMMANDS))
             {
                offset++;
                SocketUserMessage msg = (SocketUserMessage)message;
                await msg.ModifyAsync(x =>
                {
-                  x.Embed = BuildGeneralHelpEmbed(helpMessage.Item2.Skip(offset * MAX_COMMANDS).Take(MAX_COMMANDS).ToList(), prefix);
+                  x.Embed = BuildGeneralHelpEmbed(helpMessage.Commands.Skip(offset * MAX_COMMANDS).Take(MAX_COMMANDS).ToList(), prefix);
                });
             }
          }
-         helpMessages[message.Id] = new Tuple<int, List<CommandInfo>>(offset, helpMessage.Item2);
+         helpMessage.Page = offset;
          await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
       }
 

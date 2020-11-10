@@ -73,8 +73,8 @@ namespace PokeStar.Modules
                   description += Global.NONA_EMOJIS[$"{type2}_emote"];
                }
 
-               Tuple<Dictionary<string, int>, Dictionary<string, int>> type1AttackRelations = (types.Count == 2) ? null : Connections.Instance().GetTypeAttackRelations(type1);
-               Tuple<Dictionary<string, int>, Dictionary<string, int>> defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
+               TypeRelation? type1AttackRelations = (types.Count == 2) ? null : (TypeRelation?)Connections.Instance().GetTypeAttackRelations(type1);
+               TypeRelation defenseRelations = Connections.Instance().GetTypeDefenseRelations(types);
                List<string> weather = Connections.Instance().GetWeather(types);
 
                EmbedBuilder embed = new EmbedBuilder();
@@ -83,13 +83,13 @@ namespace PokeStar.Modules
                embed.WithDescription(description);
                embed.WithThumbnailUrl($"attachment://{fileName}");
                embed.AddField("Weather Boosts:", FormatWeatherList(weather), false);
-               if (type1AttackRelations != null)
+               if (type1AttackRelations.HasValue)
                {
-                  embed.AddField($"Super Effective against:", FormatTypeList(type1AttackRelations.Item1), false);
-                  embed.AddField($"Not Very Effective against:", FormatTypeList(type1AttackRelations.Item2), false);
+                  embed.AddField($"Super Effective against:", FormatTypeList(type1AttackRelations.Value.Strong), false);
+                  embed.AddField($"Not Very Effective against:", FormatTypeList(type1AttackRelations.Value.Weak), false);
                }
-               embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.Item2), false);
-               embed.AddField($"Resistances:", FormatTypeList(defenseRelations.Item1), false);
+               embed.AddField($"Weaknesses:", FormatTypeList(defenseRelations.Weak), false);
+               embed.AddField($"Resistances:", FormatTypeList(defenseRelations.Strong), false);
                embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
 
                Connections.CopyFile(fileName);

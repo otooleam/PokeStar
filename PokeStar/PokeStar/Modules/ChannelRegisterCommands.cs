@@ -30,22 +30,22 @@ namespace PokeStar.Modules
          ulong guild = Context.Guild.Id;
          ulong channel = Context.Channel.Id;
          string registration = Connections.Instance().GetRegistration(guild, channel);
-         Tuple<string, bool> result = GenerateRegistrationString(register ?? Global.FULL_REGISTER_STRING, registration ?? "");
+         RegisterResult? result = GenerateRegistrationString(register ?? Global.FULL_REGISTER_STRING, registration ?? "");
 
-         if (result == null)
+         if (result.HasValue)
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "register", "Please enter a valid registration value.");
-         }
-         else
-         {
-            registration = result.Item1;
+            registration = result.Value.RegistrationString;
             Connections.Instance().UpdateRegistration(guild, channel, registration);
             await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
 
-            if (result.Item2 && !Connections.Instance().GetSetupComplete(guild))
+            if (result.Value.CheckSetupComplete && !Connections.Instance().GetSetupComplete(guild))
             {
                await ResponseMessage.SendWarningMessage(Context.Channel, "register", "Please run the .setup command to ensure required roles have been setup.");
             }
+         }
+         else
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "register", "Please enter a valid registration value.");
          }
       }
 
@@ -100,7 +100,7 @@ namespace PokeStar.Modules
       /// <param name="register">Command type to register for a channel.</param>
       /// <param name="existing">Channel's existing register string.</param>
       /// <returns>Updated register string.</returns>
-      private static Tuple<string, bool> GenerateRegistrationString(string register, string existing = "")
+      private static RegisterResult? GenerateRegistrationString(string register, string existing = "")
       {
          string add;
          bool CheckSetupComplete = false;
@@ -122,17 +122,17 @@ namespace PokeStar.Modules
 
          if (existing.Length == 0 || add.Equals(Global.FULL_REGISTER_STRING))
          {
-            return new Tuple<string, bool>(add, CheckSetupComplete);
+            return new RegisterResult(add, CheckSetupComplete);
          }
          else if (existing.Contains(add))
          {
-            return new Tuple<string, bool>(existing, CheckSetupComplete);
+            return new RegisterResult(existing, CheckSetupComplete);
          }
 
          string s = existing + add;
          char[] a = s.ToCharArray();
          Array.Sort(a);
-         return new Tuple<string, bool>(new string(a).ToUpper(), CheckSetupComplete);
+         return new RegisterResult(new string(a).ToUpper(), CheckSetupComplete);
       }
 
       /// <summary>
