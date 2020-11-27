@@ -257,7 +257,6 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemon">Reference to a Pokémon.</param>
       public void GetPokemonStats(ref Pokemon pokemon)
       {
-
          pokemon.Forms = POGODBConnector.GetPokemonByNumber(pokemon.Number);
 
          Tuple<Dictionary<string, int>, Dictionary<string, int>> typeRelations = GetTypeDefenseRelations(pokemon.Type);
@@ -407,11 +406,11 @@ namespace PokeStar.ConnectionInterface
       /// Separates weaknesses and resistances.
       /// </summary>
       /// <param name="types">List of Pokémon types.</param>
-      /// <returns>Dictionaries of types and modifiers.</returns>
-      public Tuple<Dictionary<string, int>, Dictionary<string, int>> GetTypeDefenseRelations(List<string> types)
+      /// <returns>Relations when the types are defending.</returns>
+      public TypeRelation GetTypeDefenseRelations(List<string> types)
       {
          Dictionary<string, int> allRelations = POGODBConnector.GetTypeDefenseRelations(types);
-         return new Tuple<Dictionary<string, int>, Dictionary<string, int>>(
+         return new TypeRelation(
             allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value),
             allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value)
          );
@@ -422,11 +421,11 @@ namespace PokeStar.ConnectionInterface
       /// Separates super and not very effective moves.
       /// </summary>
       /// <param name="type">Move type.</param>
-      /// <returns>Dictionaries of types and modifiers.</returns>
-      public Tuple<Dictionary<string, int>, Dictionary<string, int>> GetTypeAttackRelations(string type)
+      /// <returns>Relations when the type is attacking.</returns>
+      public TypeRelation GetTypeAttackRelations(string type)
       {
          Dictionary<string, int> allRelations = POGODBConnector.GetTypeAttackRelations(type);
-         return new Tuple<Dictionary<string, int>, Dictionary<string, int>>(
+         return new TypeRelation(
             allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value),
             allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value)
          );

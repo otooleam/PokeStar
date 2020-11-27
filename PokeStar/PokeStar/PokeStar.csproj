@@ -191,6 +191,7 @@
     <Compile Include="DataModels\RaidMule.cs" />
     <Compile Include="DataModels\RaidParent.cs" />
     <Compile Include="DataModels\Rocket.cs" />
+    <Compile Include="DataModels\Structs.cs" />
     <Compile Include="Global.cs" />
     <Compile Include="GlobalSuppressions.cs" />
     <Compile Include="ImageProcessors\ImageProcess.cs" />

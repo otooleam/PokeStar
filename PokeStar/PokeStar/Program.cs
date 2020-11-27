@@ -205,6 +205,10 @@ namespace PokeStar
             {
                await DexCommandParent.DexMessageReactionHandle(message, reaction, guild);
             }
+            else if (HelpCommands.IsHelpMessage(message.Id))
+            {
+               await HelpCommands.HelpMessageReactionHandle(message, reaction, guild);
+            }
          }
          return Task.CompletedTask;
       }

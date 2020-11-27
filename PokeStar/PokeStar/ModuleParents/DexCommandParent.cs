@@ -27,71 +27,69 @@ namespace PokeStar.ModuleParents
       /// <summary>
       /// Saved dex messages.
       /// </summary>
-      protected static readonly Dictionary<ulong, Tuple<int, List<string>>> dexMessages = new Dictionary<ulong, Tuple<int, List<string>>>();
+      protected static readonly Dictionary<ulong, DexSelectionMessage> dexMessages = new Dictionary<ulong, DexSelectionMessage>();
 
       /// <summary>
       /// Dictionary of all Pokémon with form differences flags
-      /// Values are tuples with item1 as a the list of form flags
-      /// and item2 with the default form flag. Item1 is delimeted
-      /// by commas (,).
+      /// Initial forms list is delimeted by commas (,).
       /// </summary>
-      protected static readonly Dictionary<string, Tuple<string, string>> pokemonForms = new Dictionary<string, Tuple<string, string>>(StringComparer.OrdinalIgnoreCase)
+      protected static readonly Dictionary<string, Form> pokemonForms = new Dictionary<string, Form>(StringComparer.OrdinalIgnoreCase)
       {
-         ["Venusaur"] = new Tuple<string, string>("-mega", ""),
-         ["Charizard"] = new Tuple<string, string>("-mega,-megax,-megay,-x,-y", ""),
-         ["Blastoise"] = new Tuple<string, string>("-mega", ""),
-         ["Beedrill"] = new Tuple<string, string>("-mega", ""),
-         ["Pidgeot"] = new Tuple<string, string>("-mega", ""),
-         ["Rattata"] = new Tuple<string, string>("-alola", ""),
-         ["Raticate"] = new Tuple<string, string>("-alola", ""),
-         ["Raichu"] = new Tuple<string, string>("-alola", ""),
-         ["Sandshrew"] = new Tuple<string, string>("-alola", ""),
-         ["Sandslash"] = new Tuple<string, string>("-alola", ""),
-         ["Nidoran"] = new Tuple<string, string>("-f,-m", "-f"),
-         ["Vulpix"] = new Tuple<string, string>("-alola", ""),
-         ["Ninetales"] = new Tuple<string, string>("-alola", ""),
-         ["Diglett"] = new Tuple<string, string>("-alola", ""),
-         ["Dugtrio"] = new Tuple<string, string>("-alola", ""),
-         ["Meowth"] = new Tuple<string, string>("-alola,-galar", ""),
-         ["Persian"] = new Tuple<string, string>("-alola", ""),
-         ["Geodude"] = new Tuple<string, string>("-alola", ""),
-         ["Graveler"] = new Tuple<string, string>("-alola", ""),
-         ["Golem"] = new Tuple<string, string>("-alola", ""),
-         ["Farfetch'd"] = new Tuple<string, string>("-galar", ""),
-         ["Grimer"] = new Tuple<string, string>("-alola", ""),
-         ["Muk"] = new Tuple<string, string>("-alola", ""),
-         ["Gengar"] = new Tuple<string, string>("-mega", ""),
-         ["Exeggutor"] = new Tuple<string, string>("-alola", ""),
-         ["Marowak"] = new Tuple<string, string>("-alola", ""),
-         ["Weezing"] = new Tuple<string, string>("-galar", ""),
-         ["Mewtwo"] = new Tuple<string, string>("-armor", ""),
-         ["Unown"] = new Tuple<string, string>("-a,-b,-c,-d,-e,-f,-g,-h,-i,-j,-k,-l,-m,-n,-o,-p,-q,-r,-s,-t,-u,-v,-w,-x,-y,-z,-!,-?,", "-f"),
-         ["Zigzagoon"] = new Tuple<string, string>("-galar", ""),
-         ["Linoone"] = new Tuple<string, string>("-galar", ""),
-         ["Houndoom"] = new Tuple<string, string>("-mega", ""),
-         ["Castform"] = new Tuple<string, string>("-rain,-snow,-sun", ""),
-         ["Deoxys"] = new Tuple<string, string>("-attack,-defense,-speed", ""),
-         ["Burmy"] = new Tuple<string, string>("-plant,-sand,-trash", "-plant"),
-         ["Wormadam"] = new Tuple<string, string>("-plant,-sand,-trash", "-plant"),
-         ["Cherrim"] = new Tuple<string, string>("-sunshine,-overcast", "-sunshine"),
-         ["Shellow"] = new Tuple<string, string>("-east,-west", "-east"),
-         ["Gastrodon"] = new Tuple<string, string>("-east,-west", "-east"),
-         ["Rotom"] = new Tuple<string, string>("-fan,-frost,-heat,-mow,-wash", ""),
-         ["Giratina"] = new Tuple<string, string>("-altered,-origin", "-altered"),
-         ["Shayman"] = new Tuple<string, string>("-land,-sky", "-land"),
-         ["Arceus"] = new Tuple<string, string>("-normal,-bug,-dark,-dragon,-electric,-fairy,-fighting,-fire,-flying,-ghost,-grass,-ground,-ice,-poison,-psychic,-rock,-steel,-water", "-normal"),
-         ["Basculin"] = new Tuple<string, string>("-blue,-red", "-blue"),
-         ["Darumaka"] = new Tuple<string, string>("-galar", ""),
-         ["Darmanitan"] = new Tuple<string, string>("-galar,-zen,-galar-zen", ""),
-         ["Deerling"] = new Tuple<string, string>("-summer,-spring,-winter,-autumn", "-summer"),
-         ["Sawsbuck"] = new Tuple<string, string>("-summer,-spring,-winter,-autumn", "-summer"),
-         ["Stunfisk"] = new Tuple<string, string>("-galar", ""),
-         ["Tornadus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
-         ["Thundurus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
-         ["Landorus"] = new Tuple<string, string>("-incarnate,-therian", "-incarnate"),
-         ["Kyurem"] = new Tuple<string, string>("-black,-white", ""),
-         ["Keldeo"] = new Tuple<string, string>("-resolute", ""),
-         ["Meloetta"] = new Tuple<string, string>("-aria,-pirouette", "-aria"),
+         ["Venusaur"] = new Form("-mega", ""),
+         ["Charizard"] = new Form("-mega,-megax,-megay,-x,-y", ""),
+         ["Blastoise"] = new Form("-mega", ""),
+         ["Beedrill"] = new Form("-mega", ""),
+         ["Pidgeot"] = new Form("-mega", ""),
+         ["Rattata"] = new Form("-alola", ""),
+         ["Raticate"] = new Form("-alola", ""),
+         ["Raichu"] = new Form("-alola", ""),
+         ["Sandshrew"] = new Form("-alola", ""),
+         ["Sandslash"] = new Form("-alola", ""),
+         ["Nidoran"] = new Form("-f,-m", "-f"),
+         ["Vulpix"] = new Form("-alola", ""),
+         ["Ninetales"] = new Form("-alola", ""),
+         ["Diglett"] = new Form("-alola", ""),
+         ["Dugtrio"] = new Form("-alola", ""),
+         ["Meowth"] = new Form("-alola,-galar", ""),
+         ["Persian"] = new Form("-alola", ""),
+         ["Geodude"] = new Form("-alola", ""),
+         ["Graveler"] = new Form("-alola", ""),
+         ["Golem"] = new Form("-alola", ""),
+         ["Farfetch'd"] = new Form("-galar", ""),
+         ["Grimer"] = new Form("-alola", ""),
+         ["Muk"] = new Form("-alola", ""),
+         ["Gengar"] = new Form("-mega", ""),
+         ["Exeggutor"] = new Form("-alola", ""),
+         ["Marowak"] = new Form("-alola", ""),
+         ["Weezing"] = new Form("-galar", ""),
+         ["Mewtwo"] = new Form("-armor", ""),
+         ["Unown"] = new Form("-a,-b,-c,-d,-e,-f,-g,-h,-i,-j,-k,-l,-m,-n,-o,-p,-q,-r,-s,-t,-u,-v,-w,-x,-y,-z,-!,-?,", "-f"),
+         ["Zigzagoon"] = new Form("-galar", ""),
+         ["Linoone"] = new Form("-galar", ""),
+         ["Houndoom"] = new Form("-mega", ""),
+         ["Castform"] = new Form("-rain,-snow,-sun", ""),
+         ["Deoxys"] = new Form("-attack,-defense,-speed", ""),
+         ["Burmy"] = new Form("-plant,-sand,-trash", "-plant"),
+         ["Wormadam"] = new Form("-plant,-sand,-trash", "-plant"),
+         ["Cherrim"] = new Form("-sunshine,-overcast", "-sunshine"),
+         ["Shellow"] = new Form("-east,-west", "-east"),
+         ["Gastrodon"] = new Form("-east,-west", "-east"),
+         ["Rotom"] = new Form("-fan,-frost,-heat,-mow,-wash", ""),
+         ["Giratina"] = new Form("-altered,-origin", "-altered"),
+         ["Shayman"] = new Form("-land,-sky", "-land"),
+         ["Arceus"] = new Form("-normal,-bug,-dark,-dragon,-electric,-fairy,-fighting,-fire,-flying,-ghost,-grass,-ground,-ice,-poison,-psychic,-rock,-steel,-water", "-normal"),
+         ["Basculin"] = new Form("-blue,-red", "-blue"),
+         ["Darumaka"] = new Form("-galar", ""),
+         ["Darmanitan"] = new Form("-galar,-zen,-galar-zen", ""),
+         ["Deerling"] = new Form("-summer,-spring,-winter,-autumn", "-summer"),
+         ["Sawsbuck"] = new Form("-summer,-spring,-winter,-autumn", "-summer"),
+         ["Stunfisk"] = new Form("-galar", ""),
+         ["Tornadus"] = new Form("-incarnate,-therian", "-incarnate"),
+         ["Thundurus"] = new Form("-incarnate,-therian", "-incarnate"),
+         ["Landorus"] = new Form("-incarnate,-therian", "-incarnate"),
+         ["Kyurem"] = new Form("-black,-white", ""),
+         ["Keldeo"] = new Form("-resolute", ""),
+         ["Meloetta"] = new Form("-aria,-pirouette", "-aria"),
       };
 
       /// <summary>
@@ -129,33 +127,33 @@ namespace PokeStar.ModuleParents
       /// <returns>Completed Task.</returns>
       public static async Task DexMessageReactionHandle(IMessage message, SocketReaction reaction, ulong guildId)
       {
-         Tuple<int, List<string>> dexMessage = dexMessages[message.Id];
-         for (int i = 0; i < dexMessage.Item2.Count; i++)
+         DexSelectionMessage dexMessage = dexMessages[message.Id];
+         for (int i = 0; i < dexMessage.Selections.Count; i++)
          {
             if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[i]))
             {
                await message.DeleteAsync();
-               if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.DEX_MESSAGE)
+               if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.DEX_MESSAGE)
                {
-                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Selections[i]);
                   Connections.Instance().GetPokemonStats(ref pokemon);
                   string fileName = Connections.GetPokemonPicture(pokemon.Name);
                   Connections.CopyFile(fileName);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pokemon, fileName));
                   Connections.DeleteFile(fileName);
                }
-               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.CP_MESSAGE)
+               else if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.CP_MESSAGE)
                {
-                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Selections[i]);
                   Connections.GetPokemonCP(ref pokemon);
                   string fileName = Connections.GetPokemonPicture(pokemon.Name);
                   Connections.CopyFile(fileName);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName));
                   Connections.DeleteFile(fileName);
                }
-               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.FORM_MESSAGE)
+               else if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.FORM_MESSAGE)
                {
-                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Selections[i]);
                   List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemon.Number);
 
                   if (pokemonWithNumber.Count == 1)
@@ -166,37 +164,35 @@ namespace PokeStar.ModuleParents
                   {
                      string baseName = pokemonWithNumber.Where(form => pokemonForms.ContainsKey(form)).ToList().First();
 
-                     Tuple<string, string> forms = pokemonForms[baseName];
-                     List<string> formsList = forms.Item1.Split(',').ToList();
-
+                     Form forms = pokemonForms[baseName];
                      string baseFileName = Connections.GetPokemonPicture(baseName);
                      string fileName = Connections.GetPokemonPicture(pokemon.Name);
                      Connections.CopyFile(fileName);
-                     await reaction.Channel.SendFileAsync(baseFileName, embed: BuildFormEmbed(baseName, formsList, forms.Item2, fileName));
+                     await reaction.Channel.SendFileAsync(baseFileName, embed: BuildFormEmbed(baseName, forms.FromList, forms.DefaultForm, fileName));
                      Connections.DeleteFile(baseFileName);
                   }
                }
-               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.EVO_MESSAGE)
+               else if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.EVO_MESSAGE)
                {
-                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Selections[i]);
                   Dictionary<string, string> evolutions = GenerateEvoDict(pokemon.Name);
                   string firstFileName = Connections.GetPokemonPicture(pokemon.Name);
                   Connections.CopyFile(firstFileName);
                   await reaction.Channel.SendFileAsync(firstFileName, embed: BuildEvoEmbed(evolutions, pokemon.Name, firstFileName));
                   Connections.DeleteFile(firstFileName);
                }
-               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE)
+               else if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE)
                {
-                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Selections[i]);
                   List<string> nicknames = Connections.Instance().GetNicknames(guildId, pokemon.Name);
                   string fileName = Connections.GetPokemonPicture(pokemon.Name);
                   Connections.CopyFile(fileName);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildNicknameEmbed(nicknames, pokemon.Name, fileName));
                   Connections.DeleteFile(fileName);
                }
-               else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.MOVE_MESSAGE)
+               else if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.MOVE_MESSAGE)
                {
-                  Move pkmnMove = Connections.Instance().GetMove(dexMessage.Item2[i]);
+                  Move pkmnMove = Connections.Instance().GetMove(dexMessage.Selections[i]);
                   string fileName = BLANK_IMAGE;
                   Connections.CopyFile(fileName);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildMoveEmbed(pkmnMove, fileName));

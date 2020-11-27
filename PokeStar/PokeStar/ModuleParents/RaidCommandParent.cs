@@ -23,7 +23,7 @@ namespace PokeStar.ModuleParents
       /// <summary>
       /// Saved raid sub messages.
       /// </summary>
-      protected static readonly Dictionary<ulong, Tuple<int, ulong>> subMessages = new Dictionary<ulong, Tuple<int, ulong>>();
+      protected static readonly Dictionary<ulong, RaidSubMessage> subMessages = new Dictionary<ulong, RaidSubMessage>();
 
       /// <summary>
       /// Emotes for a raid message.
@@ -249,7 +249,7 @@ namespace PokeStar.ModuleParents
       /// <returns>Completed Task.</returns>
       public static async Task RaidSubMessageReactionHandle(IMessage message, SocketReaction reaction)
       {
-         int subMessageType = subMessages[message.Id].Item1;
+         int subMessageType = subMessages[message.Id].Type;
          if (subMessageType == (int)SUB_MESSAGE_TYPES.INVITE_SUB_MESSAGE)
          {
             await RaidInviteReactionHandle(message, reaction);
@@ -314,7 +314,7 @@ namespace PokeStar.ModuleParents
                   embed: BuildPlayerRemoteEmbed(reactingPlayer.Nickname ?? reactingPlayer.Username));
                await remoteMsg.AddReactionsAsync(remoteEmojis);
                await remoteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
-               subMessages.Add(remoteMsg.Id, new Tuple<int, ulong>((int)SUB_MESSAGE_TYPES.RAID_REMOTE_SUB_MESSAGE, message.Id));
+               subMessages.Add(remoteMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.RAID_REMOTE_SUB_MESSAGE, message.Id));
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]))
             {
@@ -343,23 +343,23 @@ namespace PokeStar.ModuleParents
                         }
 
                         await inviteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
-                        subMessages.Add(inviteMsg.Id, new Tuple<int, ulong>((int)SUB_MESSAGE_TYPES.INVITE_SUB_MESSAGE, message.Id));
+                        subMessages.Add(inviteMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.INVITE_SUB_MESSAGE, message.Id));
                      }
                   }
                }
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.REMOVE_PLAYER]))
             {
-               Tuple<int, List<SocketGuildUser>> returnValue = raid.RemovePlayer(reactingPlayer);
+               RaidRemoveResult returnValue = raid.RemovePlayer(reactingPlayer);
 
-               foreach (SocketGuildUser invite in returnValue.Item2)
+               foreach (SocketGuildUser invite in returnValue.Users)
                {
                   await invite.SendMessageAsync(BuildUnInvitedMessage(reactingPlayer));
                }
 
-               if (returnValue.Item1 != Global.NOT_IN_RAID)
+               if (returnValue.Group != Global.NOT_IN_RAID)
                {
-                  await reaction.Channel.SendMessageAsync(BuildRaidPingList(raid.GetGroup(returnValue.Item1).GetPingList(), raid.Location, returnValue.Item1 + 1, true));
+                  await reaction.Channel.SendMessageAsync(BuildRaidPingList(raid.GetGroup(returnValue.Group).GetPingList(), raid.Location, returnValue.Group + 1, true));
                }
             }
             else if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.HELP]))
@@ -421,7 +421,7 @@ namespace PokeStar.ModuleParents
                      await readyMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
                   }
                   await readyMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
-                  subMessages.Add(readyMsg.Id, new Tuple<int, ulong>((int)SUB_MESSAGE_TYPES.MULE_READY_SUB_MESSAGE, message.Id));
+                  subMessages.Add(readyMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.MULE_READY_SUB_MESSAGE, message.Id));
                }
             }
             else if (reaction.Emote.Equals(muleEmojis[(int)MULE_EMOJI_INDEX.REQUEST_INVITE]))
@@ -453,14 +453,14 @@ namespace PokeStar.ModuleParents
                         }
 
                         await inviteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
-                        subMessages.Add(inviteMsg.Id, new Tuple<int, ulong>((int)SUB_MESSAGE_TYPES.INVITE_SUB_MESSAGE, message.Id));
+                        subMessages.Add(inviteMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.INVITE_SUB_MESSAGE, message.Id));
                      }
                   }
                }
             }
             else if (reaction.Emote.Equals(muleEmojis[(int)MULE_EMOJI_INDEX.REMOVE_PLAYER]))
             {
-               List<SocketGuildUser> returnValue = raid.RemovePlayer(reactingPlayer).Item2;
+               List<SocketGuildUser> returnValue = raid.RemovePlayer(reactingPlayer).Users;
 
                foreach (SocketGuildUser invite in returnValue)
                   await invite.SendMessageAsync($"{reactingPlayer.Nickname ?? reactingPlayer.Username} has left the raid. You have been moved back to \"Need Invite\".");
@@ -499,7 +499,7 @@ namespace PokeStar.ModuleParents
       private static async Task RaidInviteReactionHandle(IMessage message, SocketReaction reaction)
       {
          await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value);
-         ulong raidMessageId = subMessages[message.Id].Item2;
+         ulong raidMessageId = subMessages[message.Id].MainMessageId;
          RaidParent parent = raidMessages[raidMessageId];
          SocketGuildUser reactingPlayer = (SocketGuildUser)reaction.User;
 
@@ -581,7 +581,7 @@ namespace PokeStar.ModuleParents
       private static async Task RaidRemoteReactionHandle(IMessage message, SocketReaction reaction)
       {
          await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value);
-         ulong raidMessageId = subMessages[message.Id].Item2;
+         ulong raidMessageId = subMessages[message.Id].MainMessageId;
          bool needEdit = false;
          Raid raid = (Raid)raidMessages[raidMessageId];
          SocketGuildUser reactingPlayer = (SocketGuildUser)reaction.User;
@@ -668,7 +668,7 @@ namespace PokeStar.ModuleParents
       private static async Task RaidMuleReadyReactionHandle(IMessage message, SocketReaction reaction)
       {
          await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value);
-         ulong raidMuleMessageId = subMessages[message.Id].Item2;
+         ulong raidMuleMessageId = subMessages[message.Id].MainMessageId;
          RaidMule raid = (RaidMule)raidMessages[raidMuleMessageId];
 
          if (message.MentionedUserIds.Contains(reaction.User.Value.Id))

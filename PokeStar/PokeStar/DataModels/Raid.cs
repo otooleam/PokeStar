@@ -110,10 +110,10 @@ namespace PokeStar.DataModels
       /// Removes a player from the raid.
       /// </summary>
       /// <param name="player">Player to remove.</param>
-      /// <returns>Tuple with raid group and list of invited users.</returns>
-      public override Tuple<int, List<SocketGuildUser>> RemovePlayer(SocketGuildUser player)
+      /// <returns>RaidRemove with raid group and list of invited users.</returns>
+      public override RaidRemoveResult RemovePlayer(SocketGuildUser player)
       {
-         Tuple<int, List<SocketGuildUser>> returnValue = new Tuple<int, List<SocketGuildUser>>(Global.NOT_IN_RAID, new List<SocketGuildUser>());
+         RaidRemoveResult returnValue = new RaidRemoveResult(Global.NOT_IN_RAID, new List<SocketGuildUser>());
 
          int group = IsInRaid(player);
          if (group == InviteListNumber)
@@ -128,7 +128,7 @@ namespace PokeStar.DataModels
                List<SocketGuildUser> tempList = foundGroup.RemovePlayer(player);
                foreach (SocketGuildUser invite in tempList)
                {
-                  returnValue.Item2.Add(invite);
+                  returnValue.Users.Add(invite);
                   Invite.Add(invite);
                }
             }

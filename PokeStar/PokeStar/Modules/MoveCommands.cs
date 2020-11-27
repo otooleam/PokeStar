@@ -30,7 +30,7 @@ namespace PokeStar.Modules
             await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
             Connections.DeleteFile(fileName);
 
-            dexMessages.Add(dexMessage.Id, new Tuple<int, List<string>>((int)DEX_MESSAGE_TYPES.MOVE_MESSAGE, moveNames));
+            dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.MOVE_MESSAGE, moveNames));
          }
          else
          {
