@@ -305,7 +305,7 @@ namespace PokeStar.Modules
          List<string> commonBosses = Connections.GetBossList(Global.COMMON_RAID_TIER);
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
+         embed.WithColor(Global.EMBED_COLOR_GAME_INFO_RESPONSE);
          embed.WithTitle("Current Raid Bosses:");
          embed.AddField($"EX Raids {BuildRaidTitle(Global.EX_RAID_TIER)}", BuildRaidBossListString(exBosses), true);
          embed.AddField($"Mega Raids {BuildRaidTitle(Global.MEGA_RAID_TIER)}", BuildRaidBossListString(megaBosses), true);

@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Text;
 using System.Collections.Generic;
 using HtmlAgilityPack;
+using PokeStar.DataModels;
 
 namespace PokeStar.ConnectionInterface
 {
@@ -10,11 +12,24 @@ namespace PokeStar.ConnectionInterface
    /// </summary>
    public static class SilphData
    {
+      /// <summary>
+      /// Values used to scrape raid bosses.
+      /// </summary>
       private static Uri RaidBossUrl { get; } = new Uri("https://thesilphroad.com/raid-bosses");
       private const string RaidBossHTMLPattern = "//*[@class = 'col-md-4']";
 
+      /// <summary>
+      /// Values used to scrape egg pools.
+      /// </summary>
       private static Uri EggUrl { get; } = new Uri("https://thesilphroad.com/egg-distances");
       private const string EggHTMLPattern = "//*[@class='tab-content']";
+
+      /// <summary>
+      /// Values used to scrape rocket line ups.
+      /// </summary>
+      private static Uri RocketUrl { get; } = new Uri("https://thesilphroad.com/rocket-invasions");
+      private const string RocketHTMLPattern = "//*[@class='lineupGroup normalGroup']";
+      private const string RocketLeaderHTMLPattern = "//*[@class='lineupGroup specialGroup']";
 
       /// <summary>
       /// Gets a list of current raid bosses for a given tier.
@@ -33,7 +48,7 @@ namespace PokeStar.ConnectionInterface
       /// The Silph Road website. A change in the website's format
       /// would constitute a change to this method.
       /// </summary>
-      /// <returns>List of current raid bosses.</returns>
+      /// <returns>Dictionary of current raid bosses.</returns>
       private static Dictionary<int, List<string>> GetRaidBosses()
       {
          int tier = -1;
@@ -75,7 +90,7 @@ namespace PokeStar.ConnectionInterface
                   raidBossList.Add(tier, new List<string>());
                   tierStart = true;
                   nextInTier = false;
-               } 
+               }
                else if (line.Equals("8+", StringComparison.OrdinalIgnoreCase))
                {
                   nextInTier = true;
@@ -95,6 +110,13 @@ namespace PokeStar.ConnectionInterface
          return raidBossList;
       }
 
+      /// <summary>
+      /// Gets a list of all current egg pools.
+      /// Thie list is dependent on the current egg pools on
+      /// The Silph Road website. A change in the website's format
+      /// would constitute a change to this method.
+      /// </summary>
+      /// <returns>Dictionary of Pokémon currently in eggs.</returns>
       public static Dictionary<int, List<string>> GetEggs()
       {
          int eggCategory = 0;
@@ -128,6 +150,103 @@ namespace PokeStar.ConnectionInterface
             }
          }
          return eggList;
+      }
+
+      /// <summary>
+      /// Gets a list of all current Rocket Grunts.
+      /// Thie list is dependent on the current rocket grunts on
+      /// The Silph Road website. A change in the website's format
+      /// would constitute a change to this method.
+      /// </summary>
+      /// <returns>Dictionary of line ups used by rocket grunts.</returns>
+      public static Dictionary<string, Rocket> GetRockets()
+      {
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(RocketUrl);
+         HtmlNodeCollection rockets = doc.DocumentNode.SelectNodes(RocketHTMLPattern);
+
+         Dictionary<string, Rocket> rocketList = new Dictionary<string, Rocket>();
+
+         foreach (HtmlNode col in rockets)
+         {
+            int slot = 0;
+            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            Rocket rocket = new Rocket();
+            string type = "";
+
+            for (int i = 0; i < words.Length; i++)
+            {
+               string line = words[i].Trim();
+               int numIndex = line.IndexOf('#');
+               if (numIndex != -1)
+               {
+                  if (slot == 0)
+                  {
+                     StringBuilder sb = new StringBuilder();
+                     for (int j = 0; j < i - 1; j++)
+                     {
+                        sb.AppendLine(words[j].Trim());
+                     }
+                     type = words[i - 1].Trim();
+                     rocket.SetGrunt(type, sb.ToString());
+                  }
+
+                  slot = Convert.ToInt32(line.Substring(numIndex + 1));
+               }
+               else if (slot != 0)
+               {
+                  if (line.Length != 1)
+                  {
+                     rocket.Slots[slot - 1].Add(line);
+                  }
+               }
+            }
+            rocketList.Add(type, rocket);
+         }
+         return rocketList;
+      }
+
+      /// <summary>
+      /// Gets a list of all current Rocket Grunts.
+      /// Thie list is dependent on the current rocket leaders on
+      /// The Silph Road website. A change in the website's format
+      /// would constitute a change to this method.
+      /// </summary>
+      /// <returns>Dictionary of line ups used by rocket leaders.</returns>
+      public static Dictionary<string, Rocket> GetRocketLeaders()
+      {
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(RocketUrl);
+         HtmlNodeCollection leaders = doc.DocumentNode.SelectNodes(RocketLeaderHTMLPattern);
+
+         Dictionary<string, Rocket> leaderList = new Dictionary<string, Rocket>();
+
+         foreach (HtmlNode col in leaders)
+         {
+            int slot = 0;
+            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            Rocket rocket = new Rocket();
+            rocket.SetLeader(words[0].Trim());
+
+            foreach (string word in words)
+            {
+               string line = word.Trim();
+               int numIndex = line.IndexOf('#');
+               if (numIndex != -1)
+               {
+                  slot = Convert.ToInt32(line.Substring(numIndex + 1));
+               }
+               else if (slot != 0)
+               {
+                  if (line.Length != 1)
+                  {
+                     rocket.Slots[slot - 1].Add(line);
+                  }
+               }
+            }
+            leaderList.Add(rocket.Name, rocket);
+         }
+         return leaderList;
       }
 
       /// <summary>

@@ -960,7 +960,7 @@ namespace PokeStar.ModuleParents
          StringBuilder sb = new StringBuilder();
          foreach (KeyValuePair<SocketGuildUser, SocketGuildUser> player in players)
          {
-            sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE_RAID]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} invited by {player.Value.Nickname ?? player.Value.Username} {GetPlayerTeam(player.Value)}");
+            sb.AppendLine($"{raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE_RAID]} {player.Key.Nickname ?? player.Key.Username} {GetPlayerTeam(player.Key)} invited by {player.Value.Nickname ?? player.Value.Username}");
          }
          return sb.ToString();
       }
