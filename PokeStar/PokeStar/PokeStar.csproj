@@ -182,6 +182,7 @@
     <Compile Include="ConnectionInterface\POGODatabaseConnector.cs" />
     <Compile Include="DataModels\Evolution.cs" />
     <Compile Include="DataModels\EvolutionNode.cs" />
+    <Compile Include="DataModels\LeagueIV.cs" />
     <Compile Include="DataModels\Move.cs" />
     <Compile Include="DataModels\ResponseMessage.cs" />
     <Compile Include="DataModels\PokemonMove.cs" />
@@ -208,7 +209,6 @@
     <Compile Include="Modules\RocketCommands.cs" />
     <Compile Include="Modules\RoleCommands.cs" />
     <Compile Include="Modules\SetupCommands.cs" />
-    <Compile Include="DataModels\RaidBoss.cs" />
     <Compile Include="DataModels\Counter.cs" />
     <Compile Include="Modules\SystemEditCommands.cs" />
     <Compile Include="Modules\TypeCommands.cs" />

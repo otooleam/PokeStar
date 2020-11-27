@@ -69,6 +69,7 @@ namespace PokeStar
       /// <summary>
       /// Embed Colors
       /// </summary>
+
       public static readonly Color EMBED_COLOR_INFO_RESPONSE      = Color.Purple;
       public static readonly Color EMBED_COLOR_WARNING_RESPONSE   = Color.Orange;
       public static readonly Color EMBED_COLOR_ERROR_RESPONSE     = Color.Red;
@@ -193,6 +194,7 @@ namespace PokeStar
       /// <summary>
       /// Level constants
       /// </summary>
+      public static readonly double LEVEL_STEP  = 0.5;
       public static readonly int MAX_LEVEL      = 40;
       public static readonly int MIN_WILD_LEVEL = 1;
       public static readonly int MAX_WILD_LEVEL = 35;
@@ -207,6 +209,12 @@ namespace PokeStar
       /// </summary>
       public static readonly int MIN_SPECIAL_IV = 10;
       public static readonly int MAX_IV         = 15;
+
+      /// <summary>
+      /// League constants
+      /// </summary>
+      public static readonly int MAX_GREAT_CP = 1500;
+      public static readonly int MAX_ULTRA_CP = 2500;
 
       /// <summary>
       /// Evolution tree

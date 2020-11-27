@@ -138,6 +138,7 @@ namespace PokeStar.ModuleParents
                if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.DEX_MESSAGE)
                {
                   Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
+                  Connections.Instance().GetPokemonStats(ref pokemon);
                   string fileName = Connections.GetPokemonPicture(pokemon.Name);
                   Connections.CopyFile(fileName);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildDexEmbed(pokemon, fileName));
@@ -146,7 +147,7 @@ namespace PokeStar.ModuleParents
                else if (dexMessage.Item1 == (int)DEX_MESSAGE_TYPES.CP_MESSAGE)
                {
                   Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Item2[i]);
-                  Connections.CalcAllCP(ref pokemon);
+                  Connections.GetPokemonCP(ref pokemon);
                   string fileName = Connections.GetPokemonPicture(pokemon.Name);
                   Connections.CopyFile(fileName);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildCPEmbed(pokemon, fileName));
@@ -230,6 +231,7 @@ namespace PokeStar.ModuleParents
          embed.AddField("Weaknesses", pokemon.WeaknessToString(), true);
          embed.AddField("Fast Moves", pokemon.FastMoveToString(), true);
          embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
+         embed.AddField("Rank 1 IVs", pokemon.LeagueIVToString(), true);
          embed.AddField("Counters", pokemon.CounterToString(), false);
          if (pokemon.HasForms())
          {
