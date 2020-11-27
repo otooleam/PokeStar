@@ -305,7 +305,7 @@ namespace PokeStar.ConnectionInterface
             namesChecked = new List<string>();
          }
 
-         List<Evolution> evolutions = POGODBConnector.GetEvolutions(pokemonName);
+         List<Evolution> evolutions = POGODBConnector.GetEvolutions(ReformatName(pokemonName));
 
          if (evolutions.Count == 0)
          {
@@ -498,7 +498,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="value">New value of the attribute.</param>
       public void UpdatePokemon(string pokemonName, string attrbute, int value)
       {
-         POGODBConnector.SetPokemonAttribute(pokemonName, attrbute, value);
+         POGODBConnector.SetPokemonAttribute(ReformatName(pokemonName), attrbute, value);
       }
 
       /// <summary>
@@ -509,7 +509,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="isLegacy">Is the move a legacy move.</param>
       public void UpdatePokemonMove(string pokemonName, string move, int isLegacy)
       {
-         POGODBConnector.SetPokemonMove(pokemonName, move, isLegacy);
+         POGODBConnector.SetPokemonMove(ReformatName(pokemonName), move, isLegacy);
       }
 
       /// <summary>
