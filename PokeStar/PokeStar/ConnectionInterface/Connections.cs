@@ -22,6 +22,7 @@ namespace PokeStar.ConnectionInterface
       private List<string> PokemonNames;
       private List<string> MoveNames;
       private Dictionary<int, List<string>> Eggs;
+      private Dictionary<string, Rocket> Rockets;
 
       private const int NumSuggestions = 10;
 
@@ -37,6 +38,7 @@ namespace PokeStar.ConnectionInterface
          UpdatePokemonNameList();
          UpdateMoveNameList();
          UpdateEggList();
+         UpdateRocketList();
       }
 
       /// <summary>
@@ -106,6 +108,25 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Gets the rocket of a specific type.
+      /// </summary>
+      /// <param name="type">Type of rocket.</param>
+      /// <returns>Rocket of the given type.</returns>
+      public Rocket GetRocket(string type)
+      {
+         return Rockets.ContainsKey(type) ? Rockets[type] : null;
+      }
+
+      /// <summary>
+      /// Gets all valid types of Rockets.
+      /// </summary>
+      /// <returns>List of Rocket types.</returns>
+      public List<string> GetRocketTypes()
+      {
+         return Rockets.Keys.ToList();
+      }
+
+      /// <summary>
       /// Updates the list of Pokémon to use for the fuzzy search.
       /// Only needs to be ran when a Pokémon name has changed.
       /// </summary>
@@ -130,6 +151,15 @@ namespace PokeStar.ConnectionInterface
       public void UpdateEggList()
       {
          Eggs = SilphData.GetEggs();
+      }
+
+      /// <summary>
+      /// Updates the list of current Team Rockets.
+      /// Only needs to be ran when rocket line ups has changed.
+      /// </summary>
+      public void UpdateRocketList()
+      {
+         Rockets = SilphData.GetRockets().Union(SilphData.GetRocketLeaders()).ToDictionary(k => k.Key, v => v.Value, StringComparer.OrdinalIgnoreCase);
       }
 
       /// <summary>
@@ -172,94 +202,13 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets a given raid boss.
-      /// Calculates CP values relevant to a raid boss. This includes
-      /// min and max cps and weather boosted min and max cps.
-      /// </summary>
-      /// <param name="raidBossName">Name of the raid boss.</param>
-      /// <returns>The raid boss coresponding to the name, otherwise null.</returns>
-      public RaidBoss GetRaidBoss(string raidBossName)
-      {
-         if (raidBossName == null)
-         {
-            return null;
-         }
-
-         string name = ReformatName(raidBossName);
-         RaidBoss raidBoss = POGODBConnector.GetRaidBoss(name);
-         if (raidBoss == null)
-         {
-            return null;
-         }
-
-         TypeRelation typeRelations = GetTypeDefenseRelations(raidBoss.Type);
-         raidBoss.Weakness = typeRelations.Weak.Keys.ToList();
-         raidBoss.Resistance = typeRelations.Strong.Keys.ToList();
-         raidBoss.Weather = GetWeather(raidBoss.Type);
-
-         raidBoss.CPLow = CPCalculator.CalcCPPerLevel(
-            raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV,
-            Global.MIN_SPECIAL_IV, Global.RAID_LEVEL);
-
-         raidBoss.CPHigh = CPCalculator.CalcCPPerLevel(
-            raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.RAID_LEVEL);
-
-         raidBoss.CPLowBoosted = CPCalculator.CalcCPPerLevel(
-            raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV, Global.MIN_SPECIAL_IV,
-            Global.RAID_LEVEL + Global.WEATHER_BOOST);
-
-         raidBoss.CPHighBoosted = CPCalculator.CalcCPPerLevel(
-            raidBoss.Attack, raidBoss.Defense, raidBoss.Stamina,
-            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV,
-            Global.RAID_LEVEL + Global.WEATHER_BOOST);
-
-         return raidBoss;
-      }
-
-      /// <summary>
       /// Gets a given Pokémon.
-      /// Calculates max CP value of the Pokémon.
       /// </summary>
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <returns>The Pokémon coresponding to the name, otherwise null.</returns>
       public Pokemon GetPokemon(string pokemonName)
       {
-         if (pokemonName == null)
-         {
-            return null;
-         }
-
-         string name = ReformatName(pokemonName);
-         Pokemon pokemon = POGODBConnector.GetPokemon(name);
-         if (pokemon == null)
-         {
-            return null;
-         }
-
-         pokemon.Forms = POGODBConnector.GetPokemonByNumber(pokemon.Number);
-
-         TypeRelation typeRelations = GetTypeDefenseRelations(pokemon.Type);
-         pokemon.Weakness = typeRelations.Weak.Keys.ToList();
-         pokemon.Resistance = typeRelations.Strong.Keys.ToList();
-         pokemon.Weather = GetWeather(pokemon.Type);
-         pokemon.FastMove = POGODBConnector.GetPokemonMoves(name, Global.FAST_MOVE_CATEGORY);
-         pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
-         pokemon.Counter = POGODBConnector.GetCounters(name);
-
-         foreach (Counter counter in pokemon.Counter)
-         {
-            counter.FastAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.FastAttack.Name);
-            counter.ChargeAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.ChargeAttack.Name);
-         }
-
-         pokemon.CPMax = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_LEVEL);
-
-         return pokemon;
+         return pokemonName == null ? null : POGODBConnector.GetPokemon(ReformatName(pokemonName));
       }
 
       /// <summary>
@@ -275,7 +224,7 @@ namespace PokeStar.ConnectionInterface
             namesChecked = new List<string>();
          }
 
-         List<Evolution> evolutions = POGODBConnector.GetEvolutions(pokemonName);
+         List<Evolution> evolutions = POGODBConnector.GetEvolutions(ReformatName(pokemonName));
 
          if (evolutions.Count == 0)
          {
@@ -302,11 +251,44 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Calculates all of the relevant Stats of a Pokémon. This
+      /// includes the Forms, Moves, League IVs, Type interactions, and weather boosts.
+      /// </summary>
+      /// <param name="pokemon">Reference to a Pokémon.</param>
+      public void GetPokemonStats(ref Pokemon pokemon)
+      {
+         pokemon.Forms = POGODBConnector.GetPokemonByNumber(pokemon.Number);
+
+         Tuple<Dictionary<string, int>, Dictionary<string, int>> typeRelations = GetTypeDefenseRelations(pokemon.Type);
+         pokemon.Weakness = typeRelations.Item2.Keys.ToList();
+         pokemon.Resistance = typeRelations.Item1.Keys.ToList();
+         pokemon.Weather = GetWeather(pokemon.Type);
+         pokemon.FastMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.FAST_MOVE_CATEGORY);
+         pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
+         pokemon.Counter = POGODBConnector.GetCounters(pokemon.Name);
+
+         foreach (Counter counter in pokemon.Counter)
+         {
+            counter.FastAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.FastAttack.Name);
+            counter.ChargeAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.ChargeAttack.Name);
+         }
+
+         pokemon.CPMax = CPCalculator.CalcCPPerLevel(
+            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_LEVEL);
+
+         pokemon.GreatIVs = CPCalculator.CalcPvPIVsPerLeague(
+            pokemon.Attack, pokemon.Defense, pokemon.Stamina, Global.MAX_GREAT_CP);
+         pokemon.UltraIVs = CPCalculator.CalcPvPIVsPerLeague(
+            pokemon.Attack, pokemon.Defense, pokemon.Stamina, Global.MAX_ULTRA_CP);
+      }
+
+      /// <summary>
       /// Calculates all of the relevant CP valus of a Pokémon. This
       /// includes the raid, quest, hatch, and wild perfect IV values.
       /// </summary>
       /// <param name="pokemon">Reference to a Pokémon.</param>
-      public static void CalcAllCP(ref Pokemon pokemon)
+      public static void GetPokemonCP(ref Pokemon pokemon)
       {
          if (pokemon != null)
          {
@@ -468,7 +450,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="value">New value of the attribute.</param>
       public void UpdatePokemon(string pokemonName, string attrbute, int value)
       {
-         POGODBConnector.SetPokemonAttribute(pokemonName, attrbute, value);
+         POGODBConnector.SetPokemonAttribute(ReformatName(pokemonName), attrbute, value);
       }
 
       /// <summary>
@@ -479,7 +461,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="isLegacy">Is the move a legacy move.</param>
       public void UpdatePokemonMove(string pokemonName, string move, int isLegacy)
       {
-         POGODBConnector.SetPokemonMove(pokemonName, move, isLegacy);
+         POGODBConnector.SetPokemonMove(ReformatName(pokemonName), move, isLegacy);
       }
 
       /// <summary>

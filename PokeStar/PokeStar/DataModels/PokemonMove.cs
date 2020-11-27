@@ -22,7 +22,7 @@ namespace PokeStar.DataModels
       public bool IsLegacy { get; set; }
 
       /// <summary>
-      /// Gets the move to a string.
+      /// Gets the move as a string.
       /// </summary>
       /// <returns>Move string.</returns>
       public override string ToString()
