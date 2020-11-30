@@ -81,6 +81,7 @@ namespace PokeStar.ConnectionInterface
       {
          pokemonName = pokemonName.Replace(" ", "_");
          pokemonName = pokemonName.Replace(".", "");
+         pokemonName = pokemonName.Replace("%", "");
          pokemonName = pokemonName.Replace("\'", "");
          pokemonName = pokemonName.Replace("?", "QU");
          pokemonName = pokemonName.Replace("!", "EX");
@@ -212,45 +213,6 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets all evolutions in a Pokémon's evolution family.
-      /// </summary>
-      /// <param name="pokemonName">Name of the Pokémon.</param>
-      /// <param name="namesChecked">Pokémon in the familly already checked.</param>
-      /// <returns>List of evolutions in the Pokémon's family.</returns>
-      public List<Evolution> GetEvolutionFamily(string pokemonName, List<string> namesChecked = null)
-      {
-         if (namesChecked == null)
-         {
-            namesChecked = new List<string>();
-         }
-
-         List<Evolution> evolutions = POGODBConnector.GetEvolutions(ReformatName(pokemonName));
-
-         if (evolutions.Count == 0)
-         {
-            return new List<Evolution>();
-         }
-         namesChecked.Add(pokemonName);
-
-         List<Evolution> evoList = new List<Evolution>();
-         foreach (Evolution evo in evolutions)
-         {
-            if (!evo.Start.Equals(pokemonName, StringComparison.OrdinalIgnoreCase) && !namesChecked.Contains(evo.Start))
-            {
-               evoList.AddRange(GetEvolutionFamily(evo.Start, namesChecked));
-            }
-            else if (!evo.End.Equals(pokemonName, StringComparison.OrdinalIgnoreCase) && !namesChecked.Contains(evo.End))
-            {
-               evoList.AddRange(GetEvolutionFamily(evo.End, namesChecked));
-            }
-         }
-         evoList.AddRange(evolutions);
-         evolutions.Clear();
-         evolutions.AddRange(evoList.Where(x => !evolutions.Contains(x)));
-         return evolutions;
-      }
-
-      /// <summary>
       /// Calculates all of the relevant Stats of a Pokémon. This
       /// includes the Forms, Moves, League IVs, Type interactions, and weather boosts.
       /// </summary>
@@ -350,6 +312,65 @@ namespace PokeStar.ConnectionInterface
             }
          }
       }
+
+      /// <summary>
+      /// Gets all evolutions in a Pokémon's evolution family.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="namesChecked">Pokémon in the familly already checked.</param>
+      /// <returns>List of evolutions in the Pokémon's family.</returns>
+      public List<Evolution> GetEvolutionFamily(string pokemonName, List<string> namesChecked = null)
+      {
+         if (namesChecked == null)
+         {
+            namesChecked = new List<string>();
+         }
+
+         List<Evolution> evolutions = POGODBConnector.GetEvolutions(ReformatName(pokemonName));
+
+         if (evolutions.Count == 0)
+         {
+            return new List<Evolution>();
+         }
+         namesChecked.Add(pokemonName);
+
+         List<Evolution> evoList = new List<Evolution>();
+         foreach (Evolution evo in evolutions)
+         {
+            if (!evo.Start.Equals(pokemonName, StringComparison.OrdinalIgnoreCase) && !namesChecked.Contains(evo.Start))
+            {
+               evoList.AddRange(GetEvolutionFamily(evo.Start, namesChecked));
+            }
+            else if (!evo.End.Equals(pokemonName, StringComparison.OrdinalIgnoreCase) && !namesChecked.Contains(evo.End))
+            {
+               evoList.AddRange(GetEvolutionFamily(evo.End, namesChecked));
+            }
+         }
+         evoList.AddRange(evolutions);
+         evolutions.Clear();
+         evolutions.AddRange(evoList.Where(x => !evolutions.Contains(x)));
+         return evolutions;
+      }
+
+      /// <summary>
+      /// Get form tags for a Pokémon.
+      /// </summary>
+      /// <param name="pokemonName">name of the Pokémon.</param>
+      /// <returns>Struct containing tag information.</returns>
+      public Form GetFormTags(string pokemonName)
+      {
+         return POGODBConnector.GetFormTags(ReformatName(pokemonName));
+      }
+
+      /// <summary>
+      /// Gets the base forms of Pokémon with multiple forms.
+      /// </summary>
+      /// <returns>List of Pokémon names.</returns>
+      public List<string> GetBaseForms()
+      {
+         return POGODBConnector.GetPokemonWithTags();
+      }
+
 
       /// <summary>
       /// Gets a given move.

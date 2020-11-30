@@ -515,6 +515,64 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Get form tags for a Pokémon.
+      /// </summary>
+      /// <param name="pokemonName">name of the Pokémon.</param>
+      /// <returns>Struct containing tag information.</returns>
+      public Form GetFormTags(string pokemonName)
+      {
+         List<string> formList = new List<string>();
+         string default_form = null;
+         string queryString = $@"SELECT form_tag, is_default
+                                 FROM form 
+                                 WHERE pokemon = '{pokemonName}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  formList.Add(Convert.ToString(reader["form_tag"]));
+                  if (Convert.ToInt32(reader["is_default"]) == TRUE)
+                  {
+                     default_form = Convert.ToString(reader["form_tag"]);
+                  }
+               }
+            }
+            conn.Close();
+         }
+         return new Form(formList, default_form);
+      }
+
+      /// <summary>
+      /// Gets the base forms of all Pokémon with form differences.
+      /// </summary>
+      /// <returns>List of Pokémon names.</returns>
+      public List<string> GetPokemonWithTags()
+      {
+         List<string> pokemon = new List<string>();
+         string queryString = $@"SELECT pokemon 
+                                 FROM form 
+                                 GROUP BY pokemon;";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  pokemon.Add(Convert.ToString(reader["pokemon"]));
+               }
+            }
+            conn.Close();
+         }
+         return pokemon;
+      }
+
+      /// <summary>
       /// Updates an attribute of a Pokémon.
       /// Only updates true false values.
       /// </summary>

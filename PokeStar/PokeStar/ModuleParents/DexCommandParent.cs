@@ -30,69 +30,6 @@ namespace PokeStar.ModuleParents
       protected static readonly Dictionary<ulong, DexSelectionMessage> dexMessages = new Dictionary<ulong, DexSelectionMessage>();
 
       /// <summary>
-      /// Dictionary of all Pokémon with form differences flags
-      /// Initial forms list is delimeted by commas (,).
-      /// </summary>
-      protected static readonly Dictionary<string, Form> pokemonForms = new Dictionary<string, Form>(StringComparer.OrdinalIgnoreCase)
-      {
-         ["Venusaur"] = new Form("-mega", ""),
-         ["Charizard"] = new Form("-mega,-megax,-megay,-x,-y", ""),
-         ["Blastoise"] = new Form("-mega", ""),
-         ["Beedrill"] = new Form("-mega", ""),
-         ["Pidgeot"] = new Form("-mega", ""),
-         ["Rattata"] = new Form("-alola", ""),
-         ["Raticate"] = new Form("-alola", ""),
-         ["Raichu"] = new Form("-alola", ""),
-         ["Sandshrew"] = new Form("-alola", ""),
-         ["Sandslash"] = new Form("-alola", ""),
-         ["Nidoran"] = new Form("-f,-m", "-f"),
-         ["Vulpix"] = new Form("-alola", ""),
-         ["Ninetales"] = new Form("-alola", ""),
-         ["Diglett"] = new Form("-alola", ""),
-         ["Dugtrio"] = new Form("-alola", ""),
-         ["Meowth"] = new Form("-alola,-galar", ""),
-         ["Persian"] = new Form("-alola", ""),
-         ["Geodude"] = new Form("-alola", ""),
-         ["Graveler"] = new Form("-alola", ""),
-         ["Golem"] = new Form("-alola", ""),
-         ["Farfetch'd"] = new Form("-galar", ""),
-         ["Grimer"] = new Form("-alola", ""),
-         ["Muk"] = new Form("-alola", ""),
-         ["Gengar"] = new Form("-mega", ""),
-         ["Exeggutor"] = new Form("-alola", ""),
-         ["Marowak"] = new Form("-alola", ""),
-         ["Weezing"] = new Form("-galar", ""),
-         ["Mewtwo"] = new Form("-armor", ""),
-         ["Unown"] = new Form("-a,-b,-c,-d,-e,-f,-g,-h,-i,-j,-k,-l,-m,-n,-o,-p,-q,-r,-s,-t,-u,-v,-w,-x,-y,-z,-!,-?,", "-f"),
-         ["Zigzagoon"] = new Form("-galar", ""),
-         ["Linoone"] = new Form("-galar", ""),
-         ["Houndoom"] = new Form("-mega", ""),
-         ["Castform"] = new Form("-rain,-snow,-sun", ""),
-         ["Deoxys"] = new Form("-attack,-defense,-speed", ""),
-         ["Burmy"] = new Form("-plant,-sand,-trash", "-plant"),
-         ["Wormadam"] = new Form("-plant,-sand,-trash", "-plant"),
-         ["Cherrim"] = new Form("-sunshine,-overcast", "-sunshine"),
-         ["Shellow"] = new Form("-east,-west", "-east"),
-         ["Gastrodon"] = new Form("-east,-west", "-east"),
-         ["Rotom"] = new Form("-fan,-frost,-heat,-mow,-wash", ""),
-         ["Giratina"] = new Form("-altered,-origin", "-altered"),
-         ["Shayman"] = new Form("-land,-sky", "-land"),
-         ["Arceus"] = new Form("-normal,-bug,-dark,-dragon,-electric,-fairy,-fighting,-fire,-flying,-ghost,-grass,-ground,-ice,-poison,-psychic,-rock,-steel,-water", "-normal"),
-         ["Basculin"] = new Form("-blue,-red", "-blue"),
-         ["Darumaka"] = new Form("-galar", ""),
-         ["Darmanitan"] = new Form("-galar,-zen,-galar-zen", ""),
-         ["Deerling"] = new Form("-summer,-spring,-winter,-autumn", "-summer"),
-         ["Sawsbuck"] = new Form("-summer,-spring,-winter,-autumn", "-summer"),
-         ["Stunfisk"] = new Form("-galar", ""),
-         ["Tornadus"] = new Form("-incarnate,-therian", "-incarnate"),
-         ["Thundurus"] = new Form("-incarnate,-therian", "-incarnate"),
-         ["Landorus"] = new Form("-incarnate,-therian", "-incarnate"),
-         ["Kyurem"] = new Form("-black,-white", ""),
-         ["Keldeo"] = new Form("-resolute", ""),
-         ["Meloetta"] = new Form("-aria,-pirouette", "-aria"),
-      };
-
-      /// <summary>
       /// Types of dex sub messages.
       /// </summary>
       protected enum DEX_MESSAGE_TYPES
@@ -162,9 +99,9 @@ namespace PokeStar.ModuleParents
                   }
                   else if (pokemonWithNumber.Count > 1)
                   {
-                     string baseName = pokemonWithNumber.Where(form => pokemonForms.ContainsKey(form)).ToList().First();
+                     string baseName = Connections.Instance().GetBaseForms().Intersect(pokemonWithNumber).First();
 
-                     Form forms = pokemonForms[baseName];
+                     Form forms = Connections.Instance().GetFormTags(baseName);
                      string baseFileName = Connections.GetPokemonPicture(baseName);
                      string fileName = Connections.GetPokemonPicture(pokemon.Name);
                      Connections.CopyFile(fileName);
@@ -478,17 +415,15 @@ namespace PokeStar.ModuleParents
             return $"Mega {pokemonName} X";
          else if (form.Equals("-mega", StringComparison.OrdinalIgnoreCase))
             return $"Mega {pokemonName}";
-         // Nidoran
-         else if (form.Equals("-female", StringComparison.OrdinalIgnoreCase))
-            return $"{pokemonName} F";
-         else if (form.Equals("-male", StringComparison.OrdinalIgnoreCase))
+         // Gender
+         else if (form.Equals("-male", StringComparison.OrdinalIgnoreCase) || (string.IsNullOrWhiteSpace(form) && (pokemonName.Equals("nidoran", StringComparison.OrdinalIgnoreCase) || pokemonName.Equals("pyroar", StringComparison.OrdinalIgnoreCase) || pokemonName.Equals("meowstic", StringComparison.OrdinalIgnoreCase))))
             return $"{pokemonName} M";
+         // Unown and Gender
+         else if ((string.IsNullOrWhiteSpace(form) && pokemonName.Equals("unown", StringComparison.OrdinalIgnoreCase)) || form.Equals("-female", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} F";
          // Mewtwo
          else if (form.Equals("-armor", StringComparison.OrdinalIgnoreCase) || form.Equals("-armored", StringComparison.OrdinalIgnoreCase))
             return $"Armored {pokemonName}";
-         /// Unown and Nidoran
-         else if (string.IsNullOrWhiteSpace(form) && (pokemonName.Equals("unown", StringComparison.OrdinalIgnoreCase) || pokemonName.Equals("nidoran", StringComparison.OrdinalIgnoreCase)))
-            return $"{pokemonName} F";
          // Castform
          else if (form.Equals("-rain", StringComparison.OrdinalIgnoreCase))
             return $"Rainy {pokemonName}";
@@ -615,6 +550,33 @@ namespace PokeStar.ModuleParents
             return $"Aria {pokemonName}";
          else if (form.Equals("-pirouette", StringComparison.OrdinalIgnoreCase))
             return $"Pirouette {pokemonName}";
+         // Genesect
+         else if (form.Equals("-burn", StringComparison.OrdinalIgnoreCase))
+            return $"Burn Drive {pokemonName}";
+         else if (form.Equals("-chill", StringComparison.OrdinalIgnoreCase))
+            return $"Chill Drive {pokemonName}";
+         else if (form.Equals("-douse", StringComparison.OrdinalIgnoreCase))
+            return $"Douse Drive {pokemonName}";
+         else if (form.Equals("-shock", StringComparison.OrdinalIgnoreCase))
+            return $"Shock Drive {pokemonName}";
+         // Aegislash
+         else if (form.Equals("-blade", StringComparison.OrdinalIgnoreCase) || (string.IsNullOrWhiteSpace(form) && pokemonName.Equals("aegislash", StringComparison.OrdinalIgnoreCase)))
+            return $"{pokemonName} Blade Form";
+         else if (form.Equals("-shield", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Shield Form";
+         // Hoopa
+         else if (form.Equals("-confined", StringComparison.OrdinalIgnoreCase) || (string.IsNullOrWhiteSpace(form) && pokemonName.Equals("hoopa", StringComparison.OrdinalIgnoreCase)))
+            return $"{pokemonName} Confined";
+         else if (form.Equals("-unbound", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Unbound";
+         // Zygarde
+         else if (form.Equals("-50", StringComparison.OrdinalIgnoreCase) || (string.IsNullOrWhiteSpace(form) && pokemonName.Equals("zygarde", StringComparison.OrdinalIgnoreCase)))
+            return $"{pokemonName} 50% Form";
+         else if (form.Equals("-10", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} 10% Form";
+         else if (form.Equals("-complete", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Complete Form";
+
          return pokemonName;
       }
 

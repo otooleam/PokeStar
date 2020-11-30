@@ -93,7 +93,6 @@ namespace PokeStar.DataModels
    {
       /// <summary>
       /// List of all form tags.
-      /// Comma delimiated list.
       /// </summary>
       public List<string> FromList { get; }
 
@@ -108,9 +107,9 @@ namespace PokeStar.DataModels
       /// </summary>
       /// <param name="fromList"></param>
       /// <param name="defaultForm"></param>
-      public Form(string fromList, string defaultForm)
+      public Form(List<string> fromList, string defaultForm)
       {
-         FromList = fromList.Split(',').ToList();
+         FromList = fromList;
          DefaultForm = defaultForm;
       }
    }
