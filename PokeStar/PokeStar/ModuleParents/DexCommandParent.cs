@@ -254,11 +254,12 @@ namespace PokeStar.ModuleParents
          embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
          embed.WithDescription($"Max CP values for {pokemon.Name}");
          embed.WithThumbnailUrl($"attachment://{fileName}");
-         embed.AddField($"Max CP (Level 40)", pokemon.CPMax, true);
-         embed.AddField($"Max Buddy CP (Level 41)", pokemon.CPBestBuddy, true);
-         embed.AddField($"Raid CP (Level 20)", pokemon.RaidCPToString(), false);
-         embed.AddField($"Hatch CP (Level 20)", pokemon.HatchCPToString(), false);
-         embed.AddField($"Quest CP (Level 15)", pokemon.QuestCPToString(), false);
+         embed.AddField($"Max Half Level CP (Level 40)", pokemon.CPMaxHalf, true);
+         embed.AddField($"Max CP (Level 50)", pokemon.CPMax, true);
+         embed.AddField($"Max Buddy CP (Level 51)", pokemon.CPBestBuddy, true);
+         embed.AddField($"Raid CP (Level 20)", pokemon.RaidCPToString(), true);
+         embed.AddField($"Hatch CP (Level 20)", pokemon.HatchCPToString(), true);
+         embed.AddField($"Quest CP (Level 15)", pokemon.QuestCPToString(), true);
          embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
          embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          embed.WithFooter($"{Global.WEATHER_BOOST_SYMBOL} denotes Weather Boosted CP");

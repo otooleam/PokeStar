@@ -259,9 +259,9 @@ namespace PokeStar.ConnectionInterface
       {
          pokemon.Forms = POGODBConnector.GetPokemonByNumber(pokemon.Number);
 
-         Tuple<Dictionary<string, int>, Dictionary<string, int>> typeRelations = GetTypeDefenseRelations(pokemon.Type);
-         pokemon.Weakness = typeRelations.Item2.Keys.ToList();
-         pokemon.Resistance = typeRelations.Item1.Keys.ToList();
+         TypeRelation typeRelations = GetTypeDefenseRelations(pokemon.Type);
+         pokemon.Weakness = typeRelations.Weak.Keys.ToList();
+         pokemon.Resistance = typeRelations.Strong.Keys.ToList();
          pokemon.Weather = GetWeather(pokemon.Type);
          pokemon.FastMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.FAST_MOVE_CATEGORY);
          pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
@@ -292,6 +292,14 @@ namespace PokeStar.ConnectionInterface
       {
          if (pokemon != null)
          {
+            pokemon.CPMaxHalf = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_HALF_LEVEL);
+
+            pokemon.CPMax = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_LEVEL);
+
             pokemon.CPBestBuddy = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                Global.MAX_IV, Global.MAX_IV, Global.MAX_IV,
