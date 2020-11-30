@@ -183,11 +183,11 @@ namespace PokeStar.ConnectionInterface
                   if (slot == 0)
                   {
                      StringBuilder sb = new StringBuilder();
-                     for (int j = 0; j < i - 1; j++)
+                     for (int j = 0; j < i - 7; j++)
                      {
                         sb.AppendLine(words[j].Trim());
                      }
-                     type = words[i - 1].Trim();
+                     type = words[i - 7].Trim();
                      rocket.SetGrunt(type, sb.ToString());
                   }
 
@@ -195,7 +195,7 @@ namespace PokeStar.ConnectionInterface
                }
                else if (slot != 0)
                {
-                  if (line.Length != 1)
+                  if (line.Length != 1 && line.IndexOf('%') == -1 && line.IndexOf('/') == -1)
                   {
                      rocket.Slots[slot - 1].Add(line);
                   }
@@ -238,7 +238,7 @@ namespace PokeStar.ConnectionInterface
                }
                else if (slot != 0)
                {
-                  if (line.Length != 1)
+                  if (line.Length != 1 && line.IndexOf('%') == -1 && line.IndexOf('/') == -1)
                   {
                      rocket.Slots[slot - 1].Add(line);
                   }
