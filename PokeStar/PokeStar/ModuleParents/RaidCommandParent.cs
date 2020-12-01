@@ -266,7 +266,13 @@ namespace PokeStar.ModuleParents
 
       ///  Message reaction handlers ******************************************
 
-      
+      /// <summary>
+      /// Handles a reply to a raid message.
+      /// </summary>
+      /// <param name="message">Rely message.</param>
+      /// <param name="prefix">Command prefix used for the guild.</param>
+      /// <param name="argPos">Posision of the first argument.</param>
+      /// <returns></returns>
       public static async Task RaidMessageReplyHandle(SocketUserMessage message, string prefix, int argPos)
       {
          ISocketMessageChannel channel = message.Channel;
@@ -1265,7 +1271,7 @@ namespace PokeStar.ModuleParents
       /// <param name="raidMessage">Message the raid is in.</param>
       /// <param name="parent">Raid parent object.</param>
       /// <param name="attribute">Attribute to edit.</param>
-      /// <param name="value"></param>
+      /// <param name="value">New value of the attribute.</param>
       /// <returns></returns>
       protected static async Task<bool> EditRaid(SocketUserMessage raidMessage, RaidParent parent, string attribute, string value)
       {
