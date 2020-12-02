@@ -184,16 +184,16 @@ namespace PokeStar.Modules
       [Remarks("Leave blank to get a list of all Pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
       [RegisterChannel('D')]
-      public async Task Form([Summary("(Optional) Pokémon with forms.")] string pokemon = null)
+      public async Task Form([Summary("(Optional) Pokémon with forms.")][Remainder] string pokemon = null)
       {
          if (pokemon == null)
          {
-            List<string> keys = pokemonForms.Keys.ToList();
+            List<string> baseForms = Connections.Instance().GetBaseForms();
             StringBuilder sb = new StringBuilder();
-            for (int i = 1; i <= keys.Count; i++)
+            for (int i = 1; i <= baseForms.Count; i++)
             {
                string format = (i % 2 == 0) ? "" : "**";
-               sb.Append($"{format}{keys.ElementAt(i - 1)}{format} ");
+               sb.Append($"{format}{baseForms.ElementAt(i - 1)}{format} ");
                if (i % 4 == 0)
                {
                   sb.Append('\n');
@@ -217,8 +217,10 @@ namespace PokeStar.Modules
             embed.AddField($"-psychic", "-psy", true);
             embed.AddField($"-galar-zen", "-garlarian-zen", true);
             embed.AddField($"-autumn", "-fall", true);
-            embed.AddField($"-megax", "-megay-x, -x", true);
-            embed.AddField($"-megay", "-megay-y, -y", true);
+            embed.AddField($"-megax", "-mega-x, -x", true);
+            embed.AddField($"-megay", "-mega-y, -y", true);
+            embed.AddField($"-male", "-m", true);
+            embed.AddField($"-female", "-f", true);
             embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
             await ReplyAsync(embed: embed.Build());
          }
@@ -281,9 +283,9 @@ namespace PokeStar.Modules
                      }
                      else if (pokemonWithNumber.Count > 1)
                      {
-                        string baseName = pokemonWithNumber.Where(form => pokemonForms.ContainsKey(form)).ToList().First();
+                        string baseName = Connections.Instance().GetBaseForms().Intersect(pokemonWithNumber).First();
 
-                        Form forms = pokemonForms[baseName];
+                        Form forms = Connections.Instance().GetFormTags(baseName);
                         string fileName = Connections.GetPokemonPicture(baseName);
                         Connections.CopyFile(fileName);
                         await Context.Channel.SendFileAsync(fileName,embed: BuildFormEmbed(baseName, forms.FromList, forms.DefaultForm, fileName));
@@ -293,7 +295,22 @@ namespace PokeStar.Modules
                }
                else
                {
-                  await ResponseMessage.SendErrorMessage(Context.Channel, "form", $"{pkmn.Name} does not have different forms.");
+                  List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pkmn.Number);
+
+                  if (pokemonWithNumber.Count == 1)
+                  {
+                     await ResponseMessage.SendErrorMessage(Context.Channel, "form", $"{pokemonWithNumber.First()} does not have different forms.");
+                  }
+                  else if (pokemonWithNumber.Count > 1)
+                  {
+                     string baseName = Connections.Instance().GetBaseForms().Intersect(pokemonWithNumber).First();
+
+                     Form forms = Connections.Instance().GetFormTags(baseName);
+                     string fileName = Connections.GetPokemonPicture(baseName);
+                     Connections.CopyFile(fileName);
+                     await Context.Channel.SendFileAsync(fileName, embed: BuildFormEmbed(baseName, forms.FromList, forms.DefaultForm, fileName));
+                     Connections.DeleteFile(fileName);
+                  }
                }
             }
          }

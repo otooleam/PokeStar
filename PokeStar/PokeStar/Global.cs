@@ -195,7 +195,8 @@ namespace PokeStar
       /// Level constants
       /// </summary>
       public static readonly double LEVEL_STEP  = 0.5;
-      public static readonly int MAX_LEVEL      = 40;
+      public static readonly int MAX_LEVEL      = 50;
+      public static readonly int MAX_HALF_LEVEL = 40;
       public static readonly int MIN_WILD_LEVEL = 1;
       public static readonly int MAX_WILD_LEVEL = 35;
       public static readonly int RAID_LEVEL     = 20;
@@ -230,9 +231,9 @@ namespace PokeStar
       /// <summary>
       /// Raid Group bit values
       /// </summary>
-      public static readonly int ATTEND_MASK  = 7;   // 0000 0XXX mask will clear 4th bit
-      public static readonly int REMOTE_MASK  = 112; // 0YYY 0000 mask will clear 8th bit
-      public static readonly int REMOTE_SHIFT = 4;   // 0YYY 0XXX where Y is the remote value and X is the attending value 
+      public static readonly int ATTEND_MASK  = 0b00000111; // 0000 0XXX mask will clear 4th bit
+      public static readonly int REMOTE_MASK  = 0b01110000; // 0YYY 0000 mask will clear 8th bit
+      public static readonly int REMOTE_SHIFT = 4;          // 0YYY 0XXX where Y is the remote value and X is the attending value 
 
       /// <summary>
       /// Bad raid values

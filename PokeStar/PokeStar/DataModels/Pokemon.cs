@@ -115,6 +115,11 @@ namespace PokeStar.DataModels
       public List<Counter> Counter { get; set; }
 
       /// <summary>
+      /// Maximum half level CP of the Pokémon.
+      /// </summary>
+      public int CPMaxHalf { get; set; }
+
+      /// <summary>
       /// Maximum CP of the Pokémon.
       /// </summary>
       public int CPMax { get; set; }
