@@ -32,6 +32,23 @@ namespace PokeStar.DataModels
       }
    }
 
+   public struct RaidReplyInfo
+   {
+      public string Command { get; }
+
+      public string Description { get; }
+
+      public List<string> Param { get; }
+
+      public RaidReplyInfo (string cmd, string desc, List<string>param)
+      {
+         Command = cmd;
+         Description = desc;
+         Param = param;
+      }
+   }
+
+
    /// <summary>
    /// Relation between types.
    /// </summary>

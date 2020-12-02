@@ -57,8 +57,8 @@ namespace PokeStar.ModuleParents
       private static readonly string[] raidEmojisDesc = {
          "are the number of Trainers in your group that are raiding in person.",
          "means you are ready for the raid to begin. Nona will tag everyone in a post when all trainers are ready for the raid to begin.",
-         "means you will be either doing the raid remotely yourself or need another trainer to send you an invite to raid remotely.",
-         "means you are willing to invite one of the trainers who are asking for a remote invite. Nona will ask you which trainer you are inviting, and they will be automatically counted as part of the raid. Nona will send them a message so they know you will invite them.",
+         "means you will be either doing the raid remotely yourself or need another trainer to send you an invite to raid remotely. See raid reply help for more options.",
+         "means you are willing to invite one of the trainers who are asking for a remote invite. Nona will ask you which trainer you are inviting, and they will be automatically counted as part of the raid. Nona will send them a message so they know you will invite them. See raid reply help for more options.",
          "means you want to remove yourself from the raid. Nona will send a message to anyone you were planning to invite."
       };
 
@@ -67,11 +67,49 @@ namespace PokeStar.ModuleParents
       /// </summary>
       private static readonly string[] muleEmojisDesc = {
          "means you are able to invite others to the raid.",
-         "means that a raid group is ready to go. Nona will tag you in a post when the raid mule is ready to start the raid.",
+         "means that a raid group is ready to go. Nona will tag you in a post when the raid mule is ready to start the raid. See raid reply help for more options.",
          "means you need a raid mule to send you an invite to the raid.",
-         "means you are willing to invite one of the trainers who are asking for a remote invite. Nona will ask you who you want to invite, and that trainer will be sent a message so they know you plan to invite them.",
+         "means you are willing to invite one of the trainers who are asking for a remote invite. Nona will ask you who you want to invite, and that trainer will be sent a message so they know you plan to invite them. See raid reply help for more options.",
          "means you want to remove yourself from the raid. Nona will send a message to anyone you were planning to invite."
       };
+
+
+      private static readonly RaidReplyInfo[] raidReplies = {
+         new RaidReplyInfo("edit", "Edit the time, location (loc), or tier/boss of a raid.", 
+            new List<string> { 
+               "<attribute>: Portion of the raid message to edit.", 
+               "<value>: New value of the edited attribute."
+            }),
+         new RaidReplyInfo("invite", "Invite user(s) to the raid. Users must be mentioned with \'@\' to be added.",
+            new List<string> {
+               "<invites>: Tagged list of users to invite, separated by spaces.",
+            }),
+         new RaidReplyInfo("request", "Request an invite to the raid.",
+            new List<string> ()),
+         new RaidReplyInfo("remote", "Participate in the raid remotly without an invite.",
+            new List<string> {
+               "<amount>: Amount of users raiding remotly 0 - 6.",
+            }),
+      };
+
+      private static readonly RaidReplyInfo[] muleReplies = {
+         new RaidReplyInfo("edit", "Edit the time, location (loc), or tier/boss of a raid.",
+            new List<string> {
+               "<attribute>\nPortion of the raid message to edit.",
+               "<value>\nNew value of the edited attribute."
+            }),
+         new RaidReplyInfo("invite", "Invite user(s) to the raid. Users must be mentioned with \'@\' to be added.",
+            new List<string> {
+               "<invites>\nTagged list of users to invite, separated by spaces.",
+            }),
+         new RaidReplyInfo("ready", "Participate in the raid remotly without an invite.",
+            new List<string> {
+               "<groupNum>\nNumber of the group that is ready to start.",
+            }),
+      };
+
+
+      /// Enumerations ********************************************************
 
       /// <summary>
       /// Emotes for remote sub message.
@@ -163,6 +201,21 @@ namespace PokeStar.ModuleParents
          INVITE_SUB_MESSAGE,
          RAID_REMOTE_SUB_MESSAGE,
          MULE_READY_SUB_MESSAGE
+      }
+
+      private enum RAID_REPLY_INDEX
+      {
+         EDIT,
+         INVITE,
+         REQUEST,
+         REMOTE
+      }
+
+      private enum MULE_REPLY_INDEX
+      {
+         EDIT,
+         INVITE,
+         READY,
       }
 
       /// Message checkers ****************************************************
@@ -282,7 +335,9 @@ namespace PokeStar.ModuleParents
          RaidParent parent = raidMessages[code];
          string[] msgContent = message.Content.Split(' ');
          bool needEdit = false;
-         if (msgContent[0].Equals($"{prefix}edit", StringComparison.OrdinalIgnoreCase))
+
+         if (msgContent[0].Equals($"{prefix}{raidReplies[(int)RAID_REPLY_INDEX.EDIT].Command}", StringComparison.OrdinalIgnoreCase)
+            || msgContent[0].Equals($"{prefix}{muleReplies[(int)MULE_REPLY_INDEX.EDIT].Command}", StringComparison.OrdinalIgnoreCase))
          {
             string attribute = msgContent[argPos];
             string edit = string.Join(" ", msgContent, argPos + 1, msgContent.Length - (argPos + 1));
@@ -294,7 +349,8 @@ namespace PokeStar.ModuleParents
                await channel.SendMessageAsync(BuildEditPingList(allUsers.ToImmutableList(), author, attribute, edit));
             }
          }
-         else if (msgContent[0].Equals($"{prefix}invite", StringComparison.OrdinalIgnoreCase))
+         else if (msgContent[0].Equals($"{prefix}{raidReplies[(int)RAID_REPLY_INDEX.INVITE].Command}", StringComparison.OrdinalIgnoreCase) 
+            || msgContent[0].Equals($"{prefix}{muleReplies[(int)MULE_REPLY_INDEX.INVITE].Command}", StringComparison.OrdinalIgnoreCase))
          {
             if (!parent.HasActiveInvite())
             {
@@ -313,12 +369,12 @@ namespace PokeStar.ModuleParents
          }
          else if (parent is Raid raid)
          {
-            if (msgContent[0].Equals($"{prefix}request", StringComparison.OrdinalIgnoreCase))
+            if (msgContent[0].Equals($"{prefix}{raidReplies[(int)RAID_REPLY_INDEX.REQUEST].Command}", StringComparison.OrdinalIgnoreCase))
             {
                raid.RequestInvite(author);
                needEdit = true;
             }
-            else if (msgContent[0].Equals($"{prefix}remote", StringComparison.OrdinalIgnoreCase))
+            else if (msgContent[0].Equals($"{prefix}{raidReplies[(int)RAID_REPLY_INDEX.REMOTE].Command}", StringComparison.OrdinalIgnoreCase))
             {
                bool isNumber = int.TryParse(msgContent[argPos], out int groupSize);
                if (isNumber && groupSize >= 0 && groupSize <= 6)
@@ -334,7 +390,7 @@ namespace PokeStar.ModuleParents
          }
          else if (parent is RaidMule mule)
          {
-            if (msgContent[0].Equals($"{prefix}ready", StringComparison.OrdinalIgnoreCase))
+            if (msgContent[0].Equals($"{prefix}{muleReplies[(int)MULE_REPLY_INDEX.READY].Command}", StringComparison.OrdinalIgnoreCase))
             {
                bool isNumber = int.TryParse(msgContent[argPos], out int groupNum);
                if(isNumber && mule.GetTotalGroups() <= groupNum  && groupNum > 0)
@@ -469,7 +525,7 @@ namespace PokeStar.ModuleParents
             else if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.HELP]))
             {
                string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
-               await reactingPlayer.SendMessageAsync(BuildHelpMessage(raidEmojis, raidEmojisDesc));
+               await reactingPlayer.SendMessageAsync(BuildHelpMessage(raidEmojis, raidEmojisDesc, raidReplies, prefix));
                await reactingPlayer.SendMessageAsync($"{prefix}edit {message.Id}");
                needsUpdate = false;
             }
@@ -572,7 +628,7 @@ namespace PokeStar.ModuleParents
             else if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.HELP]))
             {
                string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
-               await reactingPlayer.SendMessageAsync(BuildHelpMessage(muleEmojis, muleEmojisDesc));
+               await reactingPlayer.SendMessageAsync(BuildHelpMessage(muleEmojis, muleEmojisDesc, muleReplies, prefix));
                await reactingPlayer.SendMessageAsync($"{prefix}edit {message.Id}");
                needsUpdate = false;
             }
@@ -1113,15 +1169,16 @@ namespace PokeStar.ModuleParents
       /// </summary>
       /// <param name="emotes">List of emotes.</param>
       /// <param name="descriptions">List of emote descriptions.</param>
+      /// <param name="replies">List of reply options.</param>
+      /// <param name="prefix">Command prefix used for the guild.</param>
       /// <returns>Help messsage as a string.</returns>
-      private static string BuildHelpMessage(IEmote[] emotes, string[] descriptions)
+      private static string BuildHelpMessage(IEmote[] emotes, string[] descriptions, RaidReplyInfo[] replies, string prefix)
       {
          int offset = 0;
          IEmote startEmoji = null;
          IEmote endEmoji = null;
-         string desc = null;
          StringBuilder sb = new StringBuilder();
-         sb.AppendLine("Raid Help:");
+         sb.AppendLine("**Raid Emoji Help**:");
 
          for (int i = 0; i < emotes.Length; i++)
          {
@@ -1130,7 +1187,6 @@ namespace PokeStar.ModuleParents
                if (startEmoji == null)
                {
                   startEmoji = emotes[i];
-                  desc = descriptions[i];
                }
                offset++;
             }
@@ -1145,9 +1201,26 @@ namespace PokeStar.ModuleParents
                sb.AppendLine($"{emotes[i]} {descriptions[i - offset]}");
             }
          }
+
          sb.AppendLine($"\nIf you are inviting players who have not requested an invite, please use the {raidEmojis[(int)RAID_EMOJI_INDEX.REMOTE_RAID]} to indicate the amount.");
 
-         sb.AppendLine("\nHow To Edit:");
+         sb.AppendLine("\n**Raid Reply Help:**");
+         sb.AppendLine("Note: The following must be sent in a reply to the raid embed to be run.\n");
+         foreach (var reply in replies)
+         {
+            sb.AppendLine($"**{prefix}{reply.Command}**: {reply.Description}");
+            if (reply.Param.Count > 0)
+            {
+               sb.AppendLine("Parameters:");
+            }
+            foreach (var param in reply.Param)
+            {
+               sb.AppendLine(param);
+            }
+            sb.AppendLine();
+         }
+
+         sb.AppendLine($"\nUsing the {prefix}Edit command:");
          sb.AppendLine("To edit the raid copy and paste the following command, and add the part of the raid you want to change and the new value: ");
          return sb.ToString();
       }
