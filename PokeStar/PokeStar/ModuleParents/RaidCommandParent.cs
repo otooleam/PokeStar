@@ -526,7 +526,6 @@ namespace PokeStar.ModuleParents
             {
                string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
                await reactingPlayer.SendMessageAsync(BuildHelpMessage(raidEmojis, raidEmojisDesc, raidReplies, prefix));
-               await reactingPlayer.SendMessageAsync($"{prefix}edit {message.Id}");
                needsUpdate = false;
             }
             else
@@ -629,7 +628,6 @@ namespace PokeStar.ModuleParents
             {
                string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
                await reactingPlayer.SendMessageAsync(BuildHelpMessage(muleEmojis, muleEmojisDesc, muleReplies, prefix));
-               await reactingPlayer.SendMessageAsync($"{prefix}edit {message.Id}");
                needsUpdate = false;
             }
             else
@@ -1219,9 +1217,6 @@ namespace PokeStar.ModuleParents
             }
             sb.AppendLine();
          }
-
-         sb.AppendLine($"\nUsing the {prefix}Edit command:");
-         sb.AppendLine("To edit the raid copy and paste the following command, and add the part of the raid you want to change and the new value: ");
          return sb.ToString();
       }
 

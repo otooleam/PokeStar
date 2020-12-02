@@ -150,29 +150,6 @@ namespace PokeStar.Modules
          RemoveOldRaids();
       }
 
-      [Command("edit")]
-      [Alias("editRaid", "raidEdit")]
-      [Summary("Edit the time, location (loc), or tier/boss of a raid.")]
-      [RegisterChannel('R')]
-      public async Task Edit([Summary("Raid code given by the raid help message. (copy and paste this)")] ulong code,
-                             [Summary("Portion of the raid message to edit.")] string attribute,
-                             [Summary("New value of the edited attribute.")][Remainder] string edit)
-      {
-         if (raidMessages.ContainsKey(code))
-         {
-            SocketUserMessage raidMessage = (SocketUserMessage)await Context.Channel.GetMessageAsync(code);
-            RaidParent parent = raidMessages[code];
-            bool success = await EditRaid(raidMessage, parent, attribute, edit);
-
-            if (success)
-            {
-               List<SocketGuildUser> allUsers = parent.GetAllUsers();
-               await Context.Channel.SendMessageAsync(BuildEditPingList(allUsers.ToImmutableList(), (SocketGuildUser)Context.User, attribute, edit));
-               await Context.Message.DeleteAsync();
-            }
-         }
-      }
-
       [Command("bosslist")]
       [Alias("boss", "bossess", "raidboss", "raidbosses", "raidbosslist")]
       [Summary("Get the current list of raid bosses.")]
