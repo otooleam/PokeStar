@@ -32,14 +32,32 @@ namespace PokeStar.DataModels
       }
    }
 
+   /// <summary>
+   /// Information for a type of raid reply.
+   /// </summary>
    public struct RaidReplyInfo
    {
+      /// <summary>
+      /// Text to determine the command.
+      /// </summary>
       public string Command { get; }
 
+      /// <summary>
+      /// Description of the reply.
+      /// </summary>
       public string Description { get; }
 
+      /// <summary>
+      /// Parameter names for the reply.
+      /// </summary>
       public List<string> Param { get; }
 
+      /// <summary>
+      /// Creates a new RaidReplyInfo.
+      /// </summary>
+      /// <param name="cmd">Name of the command.</param>
+      /// <param name="desc">Description of the command.</param>
+      /// <param name="param">List of parameters for the command.</param>
       public RaidReplyInfo (string cmd, string desc, List<string>param)
       {
          Command = cmd;
@@ -47,7 +65,6 @@ namespace PokeStar.DataModels
          Param = param;
       }
    }
-
 
    /// <summary>
    /// Relation between types.

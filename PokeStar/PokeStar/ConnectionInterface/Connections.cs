@@ -371,7 +371,6 @@ namespace PokeStar.ConnectionInterface
          return POGODBConnector.GetPokemonWithTags();
       }
 
-
       /// <summary>
       /// Gets a given move.
       /// </summary>
