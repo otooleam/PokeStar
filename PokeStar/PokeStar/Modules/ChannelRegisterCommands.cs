@@ -22,7 +22,7 @@ namespace PokeStar.Modules
                "Information..................info / i\n" +
                "Player Registration....player / role / p\n" +
                "Raids.............................raid / r\n" +
-               //"Raid Trains..................train / t\n" +
+               "Raid Trains..................train / t\n" +
                "Leave blank to register for all command types.")]
       [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Register([Summary("(Optional) Register the channel for these commands.")] string register = null)
@@ -58,7 +58,7 @@ namespace PokeStar.Modules
                "Information..................info / i\n" +
                "Player Registration....player / role / p\n" +
                "Raids.............................raid / r\n" +
-               //"Raid Trains..................train / t\n" +
+               "Raid Trains..................train / t\n" +
                "Leave blank to register for all command types.")]
       [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Unregister([Summary("(Optional) Unregister the channel from these commands.")] string unregister = null)

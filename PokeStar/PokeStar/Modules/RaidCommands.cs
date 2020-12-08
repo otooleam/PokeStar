@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using Discord;
 using Discord.Rest;
 using Discord.Commands;
+using Discord.WebSocket;
 using PokeStar.DataModels;
 using PokeStar.ConnectionInterface;
 using PokeStar.PreConditions;
@@ -168,7 +169,7 @@ namespace PokeStar.Modules
          if (potentials.Count > 1)
          {
             fileName = $"Egg{calcTier}.png";
-            raid = new RaidTrain(calcTier, time, location)
+            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location)
             {
                RaidBossSelections = potentials
             };
@@ -185,7 +186,7 @@ namespace PokeStar.Modules
          else if (potentials.Count == 1)
          {
             string boss = potentials.First();
-            raid = new RaidTrain(calcTier, time, location, boss);
+            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location, boss);
             fileName = Connections.GetPokemonPicture(raid.Boss.Name);
 
             Connections.CopyFile(fileName);
@@ -197,7 +198,7 @@ namespace PokeStar.Modules
          else if (Global.USE_EMPTY_RAID)
          {
             string boss = Global.DEFAULT_RAID_BOSS_NAME;
-            raid = new RaidTrain(calcTier, time, location, boss);
+            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location, boss);
             fileName = Connections.GetPokemonPicture(raid.Boss.Name);
 
             Connections.CopyFile(fileName);
