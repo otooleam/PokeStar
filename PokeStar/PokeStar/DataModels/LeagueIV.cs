@@ -24,14 +24,14 @@ namespace PokeStar.DataModels
       public int Stamina { get; set; }
 
       /// <summary>
+      /// Best Level.
+      /// </summary>
+      public double Level { get; set; }
+
+      /// <summary>
       /// CP of the Pokémon given the IVs.
       /// </summary>
       public int CP { get; set; }
-
-      /// <summary>
-      /// Stat product of the IVs.
-      /// </summary>
-      public double StatProduct { get; set; }
 
       /// <summary>
       /// Gets the Best league IVs as a string.
@@ -41,6 +41,7 @@ namespace PokeStar.DataModels
       {
          StringBuilder sb = new StringBuilder();
          sb.AppendLine($"{Attack} / {Defense} / {Stamina}");
+         sb.AppendLine($"Level: {Level}");
          sb.AppendLine($"CP: {CP}");
          return sb.ToString();
       }
