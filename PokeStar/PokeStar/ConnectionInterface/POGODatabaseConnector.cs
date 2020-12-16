@@ -515,6 +515,37 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Checks if a Pokemon is the start of its evolutionary family.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokemon.</param>
+      /// <returns>True if the Pokemon is not evolved and has an evolution, otherwise false.</returns>
+      public bool IsBaseForm(string pokemonName)
+      {
+         bool isBaseForm = false;
+         string queryString = $@"SELECT COUNT(*) AS base_form
+                                 FROM evolution
+                                 WHERE (start_pokemon = '{pokemonName}'
+                                 OR end_pokemon = '{pokemonName}')
+                                 AND '{pokemonName}' NOT IN (
+                                 SELECT end_pokemon
+                                 FROM evolution);";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  isBaseForm = Convert.ToInt32(reader["base_form"]) == TRUE;
+               }
+            }
+            conn.Close();
+         }
+         return isBaseForm;
+      }
+
+      /// <summary>
       /// Get form tags for a Pokémon.
       /// </summary>
       /// <param name="pokemonName">name of the Pokémon.</param>
@@ -634,7 +665,7 @@ namespace PokeStar.ConnectionInterface
          sb.Append($@"({variable}='{types[0]}'");
          if (types.Count == 2)
          {
-            sb.Append($@" or {variable}='{types[1]}'");
+            sb.Append($@" OR {variable}='{types[1]}'");
          }
          sb.Append(')');
          return sb.ToString();

@@ -40,9 +40,9 @@ namespace PokeStar.DataModels
       public override string ToString()
       {
          StringBuilder sb = new StringBuilder();
-         sb.AppendLine($"{Attack} / {Defense} / {Stamina}");
-         sb.AppendLine($"Level: {Level}");
-         sb.AppendLine($"CP: {CP}");
+         sb.AppendLine($"**IVs:** {Attack} / {Defense} / {Stamina}");
+         sb.AppendLine($"**Level:** {Level}");
+         sb.AppendLine($"**CP:** {CP}");
          return sb.ToString();
       }
    }

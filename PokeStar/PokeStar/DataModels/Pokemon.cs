@@ -175,6 +175,16 @@ namespace PokeStar.DataModels
       public List<int> CPWild { get; } = new List<int>();
 
       /// <summary>
+      /// If the Pokémon is alowed in Little League.
+      /// </summary>
+      public bool CanBeLittleLeague { get; set; }
+
+      /// <summary>
+      /// Best IVs for Little League.
+      /// </summary>
+      public LeagueIV LittleIVs { get; set; }
+
+      /// <summary>
       /// Best IVs for Great League.
       /// </summary>
       public LeagueIV GreatIVs { get; set; }
@@ -183,6 +193,21 @@ namespace PokeStar.DataModels
       /// Best IVs for Ultra League.
       /// </summary>
       public LeagueIV UltraIVs { get; set; }
+
+      /// <summary>
+      /// Best IVs for Little League using XL candy.
+      /// </summary>
+      public LeagueIV LittleXLIVs { get; set; }
+
+      /// <summary>
+      /// Best IVs for Great League using XL candy.
+      /// </summary>
+      public LeagueIV GreatXLIVs { get; set; }
+
+      /// <summary>
+      /// Best IVs for Ultra League using XL candy.
+      /// </summary>
+      public LeagueIV UltraXLIVs { get; set; }
 
       /// <summary>
       /// Checks if the Pokémon is region locked.
@@ -482,8 +507,8 @@ namespace PokeStar.DataModels
       public string LeagueIVToString()
       {
          StringBuilder sb = new StringBuilder();
-         sb.AppendLine($"*Great League:*\n {GreatIVs}");
-         sb.AppendLine($"*Ultra League:*\n {UltraIVs}");
+         sb.AppendLine($"*Great League:*\n {GreatXLIVs}");
+         sb.AppendLine($"*Ultra League:*\n {UltraXLIVs}");
          return sb.ToString();
       }
    }

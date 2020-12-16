@@ -120,14 +120,15 @@ namespace PokeStar.Calculators
       /// <param name="defenseStat">Defense stat of the Pokémon.</param>
       /// <param name="staminaStat">Stamina stat of the Pokémon.</param>
       /// <param name="leagueCap">Max CP of the league.</param>
+      /// <param name="maxLevel">Max level to calculate to.</param>
       /// <returns>LeagueIV object with the best IVs for the league.</returns>
-      public static LeagueIV CalcPvPIVsPerLeague(int attackStat, int defenseStat, int staminaStat, int leagueCap)
+      public static LeagueIV CalcPvPIVsPerLeague(int attackStat, int defenseStat, int staminaStat, int leagueCap, int maxLevel)
       {
          LeagueIV bestIV = new LeagueIV();
          int bestTotal = -1;
          double bestProduct = -1;
 
-         for (double level = 1; level <= Global.MAX_LEVEL; level += Global.LEVEL_STEP)
+         for (double level = 1; level <= maxLevel; level += Global.LEVEL_STEP)
          {
             for (int attack = 0; attack <= Global.MAX_IV; attack++)
             {
