@@ -301,7 +301,7 @@ namespace PokeStar.ModuleParents
                      RestUserMessage raidMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
                      raidMessages.Add(raidMsg.Id, parent);
                      Connections.DeleteFile(fileName);
-                     await SetEmojis(raidMsg, raidEmojis.Concat(trainEmojis).ToArray());
+                     SetEmojis(raidMsg, raidEmojis.Concat(trainEmojis).ToArray());
                   }
                   else if (parent is Raid raid)
                   {
@@ -310,7 +310,7 @@ namespace PokeStar.ModuleParents
                      RestUserMessage raidMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
                      raidMessages.Add(raidMsg.Id, parent);
                      Connections.DeleteFile(fileName);
-                     await SetEmojis(raidMsg, raidEmojis);
+                     SetEmojis(raidMsg, raidEmojis);
                   }
                   else if (parent is RaidMule mule)
                   {
@@ -319,7 +319,7 @@ namespace PokeStar.ModuleParents
                      RestUserMessage raidMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(mule, fileName));
                      raidMessages.Add(raidMsg.Id, parent);
                      Connections.DeleteFile(fileName);
-                     await SetEmojis(raidMsg, muleEmojis);
+                     SetEmojis(raidMsg, muleEmojis);
                   }
                   return;
                }
@@ -421,8 +421,7 @@ namespace PokeStar.ModuleParents
                RestUserMessage remoteMsg = await reaction.Channel.SendMessageAsync(text: $"{reactingPlayer.Mention}",
                   embed: BuildPlayerRemoteEmbed(reactingPlayer.Nickname ?? reactingPlayer.Username));
                subMessages.Add(remoteMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.RAID_REMOTE_SUB_MESSAGE, message.Id));
-               await remoteMsg.AddReactionsAsync(remoteEmojis);
-               await remoteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
+               remoteMsg.AddReactionsAsync(remoteEmojis.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
             }
             else if (reaction.Emote.Equals(raidEmojis[(int)RAID_EMOJI_INDEX.INVITE_PLAYER]))
             {
@@ -436,16 +435,13 @@ namespace PokeStar.ModuleParents
                      RestUserMessage inviteMsg = await reaction.Channel.SendMessageAsync(text: $"{reactingPlayer.Mention}",
                         embed: BuildPlayerInviteEmbed(raid.GetReadonlyInviteList(), reactingPlayer.Nickname ?? reactingPlayer.Username, offset, listSize));
                      subMessages.Add(inviteMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.INVITE_SUB_MESSAGE, message.Id));
-                     for (int i = 0; i < listSize; i++)
-                     {
-                        await inviteMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-                     }
+
+                     IEmote[] emotes = Global.SELECTION_EMOJIS.Take(listSize).ToArray();
                      if (raid.GetReadonlyInviteList().Count > Global.SELECTION_EMOJIS.Length)
                      {
-                        await inviteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]);
-                        await inviteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]);
+                        emotes = emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).ToArray();
                      }
-                     await inviteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
+                     inviteMsg.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
                   }
                }
             }
@@ -514,12 +510,8 @@ namespace PokeStar.ModuleParents
                         RestUserMessage selectMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(train.RaidBossSelections, fileName, true));
                         subMessages.Add(selectMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.TRAIN_BOSS_SUB_MESSAGE, message.Id));
                         Connections.DeleteFile(fileName);
-                        for (int i = 0; i < train.RaidBossSelections.Count; i++)
-                        {
-                           await selectMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-                        }
-                        await selectMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]);
-                        await selectMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
+                        IEmote[] emotes = Global.SELECTION_EMOJIS.Take(train.RaidBossSelections.Count).ToArray();
+                        selectMsg.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
                         needsUpdate = false;
                      }
                      else
@@ -529,8 +521,7 @@ namespace PokeStar.ModuleParents
                         RestUserMessage selectMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildTierSelectEmbed(fileName));
                         subMessages.Add(selectMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.TRAIN_BOSS_SUB_MESSAGE, message.Id));
                         Connections.DeleteFile(fileName);
-                        await selectMsg.AddReactionsAsync(tierEmojis);
-                        await selectMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
+                        selectMsg.AddReactionsAsync(tierEmojis.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
                         needsUpdate = false;
                      }
                   }
@@ -594,11 +585,8 @@ namespace PokeStar.ModuleParents
                   RestUserMessage readyMsg = await reaction.Channel.SendMessageAsync(text: $"{reactingPlayer.Mention}",
                      embed: BuildMuleReadyEmbed(raid.GetTotalGroups(), reactingPlayer.Nickname ?? reactingPlayer.Username));
                   subMessages.Add(readyMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.MULE_READY_SUB_MESSAGE, message.Id));
-                  for (int i = 0; i < raid.GetTotalGroups(); i++)
-                  {
-                     await readyMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-                  }
-                  await readyMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
+                  IEmote[] emotes = Global.SELECTION_EMOJIS.Take(raid.GetTotalGroups()).ToArray();
+                  readyMsg.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
                }
             }
             else if (reaction.Emote.Equals(muleEmojis[(int)MULE_EMOJI_INDEX.REQUEST_INVITE]))
@@ -617,16 +605,12 @@ namespace PokeStar.ModuleParents
                   RestUserMessage inviteMsg = await reaction.Channel.SendMessageAsync(text: $"{reactingPlayer.Mention}",
                      embed: BuildPlayerInviteEmbed(raid.GetReadonlyInviteList(), reactingPlayer.Nickname ?? reactingPlayer.Username, offset, listSize));
                   subMessages.Add(inviteMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.INVITE_SUB_MESSAGE, message.Id));
-                  for (int i = 0; i < listSize; i++)
-                  {
-                     await inviteMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-                  }
+                  IEmote[] emotes = Global.SELECTION_EMOJIS.Take(listSize).ToArray();
                   if (raid.GetReadonlyInviteList().Count > Global.SELECTION_EMOJIS.Length)
                   {
-                     await inviteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]);
-                     await inviteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]);
+                     emotes = emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).ToArray();
                   }
-                  await inviteMsg.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
+                  inviteMsg.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
                }
 
             }
@@ -927,7 +911,7 @@ namespace PokeStar.ModuleParents
                   {
                      x.Embed = BuildTierSelectEmbed(fileName);
                   });
-                  await ((SocketUserMessage)message).AddReactionsAsync(tierEmojis);
+                  ((SocketUserMessage)message).AddReactionsAsync(tierEmojis);
                   Connections.DeleteFile(fileName);
                }
                else
@@ -978,21 +962,18 @@ namespace PokeStar.ModuleParents
                }
                if (raidBosses != null)
                {
-                  await message.RemoveAllReactionsAsync();
+                  SocketUserMessage msg = ((SocketUserMessage)message);
+                  await msg.RemoveAllReactionsAsync();
 
                   string fileName = Global.RAID_TRAIN_IMAGE_NAME;
                   Connections.CopyFile(fileName);
-                  await ((SocketUserMessage)message).ModifyAsync(x =>
+                  await msg.ModifyAsync(x =>
                   {
                      x.Embed = BuildBossSelectEmbed(raidBosses, fileName, true);
                   });
-                  for (int i = 0; i < raidBosses.Count; i++)
-                  {
-                     await message.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-                  }
-                  await message.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]);
-                  await message.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]);
                   Connections.DeleteFile(fileName);
+                  IEmote[] emotes = Global.SELECTION_EMOJIS.Take(raidBosses.Count).ToArray();
+                  msg.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
                }
             }
          }
@@ -1493,8 +1474,7 @@ namespace PokeStar.ModuleParents
       /// <returns>Completed Task.</returns>
       protected static async Task SetEmojis(RestUserMessage message, IEmote[] emotes)
       {
-         await message.AddReactionsAsync(emotes);
-         await message.AddReactionAsync(extraEmojis[(int)EXTRA_EMOJI_INDEX.HELP]);
+         message.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.HELP]).ToArray());
       }
 
       /// <summary>

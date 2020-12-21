@@ -46,10 +46,7 @@ namespace PokeStar.Modules
             RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
             raidMessages.Add(selectMsg.Id, raid);
             Connections.DeleteFile(fileName);
-            for (int i = 0; i < potentials.Count; i++)
-            {
-               await selectMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-            }
+            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -61,7 +58,7 @@ namespace PokeStar.Modules
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
-            await SetEmojis(raidMsg, raidEmojis);
+            SetEmojis(raidMsg, raidEmojis);
          }
          else if (Global.USE_EMPTY_RAID)
          {
@@ -73,7 +70,7 @@ namespace PokeStar.Modules
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);            
-            await SetEmojis(raidMsg, raidEmojis);
+            SetEmojis(raidMsg, raidEmojis);
          }
          else
          {
@@ -112,10 +109,7 @@ namespace PokeStar.Modules
             RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
             raidMessages.Add(selectMsg.Id, raid);
             Connections.DeleteFile(fileName);
-            for (int i = 0; i < potentials.Count; i++)
-            {
-               await selectMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-            }
+            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -127,7 +121,7 @@ namespace PokeStar.Modules
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(raid, fileName));
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
-            await SetEmojis(raidMsg, muleEmojis);
+            SetEmojis(raidMsg, muleEmojis);
          }
          else if (Global.USE_EMPTY_RAID)
          {
@@ -139,7 +133,7 @@ namespace PokeStar.Modules
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(raid, fileName));
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
-            await SetEmojis(raidMsg, muleEmojis);
+            SetEmojis(raidMsg, muleEmojis);
          }
          else
          {
@@ -180,10 +174,7 @@ namespace PokeStar.Modules
             RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
             raidMessages.Add(selectMsg.Id, raid);
             Connections.DeleteFile(fileName);
-            for (int i = 0; i < potentials.Count; i++)
-            {
-               await selectMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-            }
+            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -198,7 +189,7 @@ namespace PokeStar.Modules
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(raid, fileName));
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
-            await SetEmojis(raidMsg, raidEmojis.Concat(trainEmojis).ToArray());
+            SetEmojis(raidMsg, raidEmojis.Concat(trainEmojis).ToArray());
          }
          else if (Global.USE_EMPTY_RAID)
          {
@@ -213,7 +204,7 @@ namespace PokeStar.Modules
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(raid, fileName));
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
-            await SetEmojis(raidMsg, raidEmojis.Concat(trainEmojis).ToArray());
+            SetEmojis(raidMsg, raidEmojis.Concat(trainEmojis).ToArray());
          }
          else
          {

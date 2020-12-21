@@ -103,7 +103,7 @@ namespace PokeStar
          commands.Log += Log;
          client.MessageReceived += HandleCommandAsync;
          await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
-         client.ReactionAdded += HandleReactionAddedAsync;
+         client.ReactionAdded += HandleReactionAdded;
          client.Ready += HandleReady;
          client.JoinedGuild += HandleJoinGuild;
          client.LeftGuild += HandleLeftGuild;
@@ -141,8 +141,9 @@ namespace PokeStar
       /// <returns>Task Complete.</returns>
       private async Task<Task> HandleCommandAsync(SocketMessage cmdMessage)
       {
-         SocketUserMessage message = cmdMessage as SocketUserMessage;
-         if (message == null || (message.Author.IsBot && (!Global.USE_NONA_TEST || !message.Author.Username.Equals("NonaTest", StringComparison.OrdinalIgnoreCase))))
+         if (!(cmdMessage is SocketUserMessage message) || 
+             (message.Author.IsBot && 
+             (!Global.USE_NONA_TEST || !message.Author.Username.Equals("NonaTest", StringComparison.OrdinalIgnoreCase))))
          {
             return Task.CompletedTask;
          }
@@ -176,16 +177,15 @@ namespace PokeStar
 
       /// <summary>
       /// Handles the Reaction Added event.
-      /// Runs asyncronously.
       /// </summary>
       /// <param name="cachedMessage">Message that was reaction is on.</param>
       /// <param name="originChannel">Channel where the message is located.</param>
       /// <param name="reaction">Reaction made on the message.</param>
       /// <returns>Task Complete.</returns>
-      private async Task<Task> HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
+      private async Task<Task> HandleReactionAdded(Cacheable<IUserMessage, ulong> cachedMessage,
           ISocketMessageChannel originChannel, SocketReaction reaction)
       {
-         IUserMessage message = await cachedMessage.GetOrDownloadAsync();
+         IUserMessage message = cachedMessage.Value;
 
          SocketGuildChannel chnl = message.Channel as SocketGuildChannel;
          ulong guild = chnl.Guild.Id;

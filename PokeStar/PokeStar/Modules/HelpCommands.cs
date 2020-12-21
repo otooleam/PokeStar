@@ -47,7 +47,7 @@ namespace PokeStar.Modules
             if (validCommands.Count > MAX_COMMANDS)
             {
                helpMessages.Add(msg.Id, new HelpMessage(validCommands));
-               await msg.AddReactionsAsync(extraEmojis);
+               msg.AddReactionsAsync(extraEmojis);
             }
          }
          else if (Global.COMMAND_INFO.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase)) is CommandInfo cmdInfo

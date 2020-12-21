@@ -75,10 +75,7 @@ namespace PokeStar.Modules
                RestUserMessage selectMsg = await channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
                raidMessages.Add(selectMsg.Id, parent);
                Connections.DeleteFile(fileName);
-               for (int i = 0; i < potentials.Count; i++)
-               {
-                  await selectMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-               }
+               selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
                editComplete = true;
             }
             else if (potentials.Count == 1)
@@ -96,7 +93,7 @@ namespace PokeStar.Modules
                   RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
                   raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
-                  await raidMsg.AddReactionsAsync(prevReactions);
+                  raidMsg.AddReactionsAsync(prevReactions);
                }
                else if (parent is Raid raid)
                {
@@ -105,7 +102,7 @@ namespace PokeStar.Modules
                   RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
                   raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
-                  await raidMsg.AddReactionsAsync(prevReactions);
+                  raidMsg.AddReactionsAsync(prevReactions);
                }
                else if (parent is RaidMule mule)
                {
@@ -114,7 +111,7 @@ namespace PokeStar.Modules
                   RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(mule, fileName));
                   raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
-                  await raidMsg.AddReactionsAsync(prevReactions);
+                  raidMsg.AddReactionsAsync(prevReactions);
                }
                editComplete = true;
             }
@@ -133,7 +130,7 @@ namespace PokeStar.Modules
                   RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
                   raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
-                  await raidMsg.AddReactionsAsync(prevReactions);
+                  raidMsg.AddReactionsAsync(prevReactions);
                }
                else if (parent is Raid raid)
                {
@@ -142,7 +139,7 @@ namespace PokeStar.Modules
                   RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
                   raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
-                  await raidMsg.AddReactionsAsync(prevReactions);
+                  raidMsg.AddReactionsAsync(prevReactions);
                }
                else if (parent is RaidMule mule)
                {
@@ -151,7 +148,7 @@ namespace PokeStar.Modules
                   RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(mule, fileName));
                   raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
-                  await raidMsg.AddReactionsAsync(prevReactions);
+                  raidMsg.AddReactionsAsync(prevReactions);
                }
                editComplete = true;
             }

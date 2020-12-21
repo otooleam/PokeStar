@@ -29,7 +29,7 @@ namespace PokeStar.Modules
             RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(moveNames, fileName));
             dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.MOVE_MESSAGE, moveNames));
             Connections.DeleteFile(fileName);
-            await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
+            dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
          }
          else
          {
