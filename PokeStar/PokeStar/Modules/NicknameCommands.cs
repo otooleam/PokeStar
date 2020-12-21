@@ -109,12 +109,12 @@ namespace PokeStar.Modules
                string fileName = POKEDEX_SELECTION_IMAGE;
                Connections.CopyFile(fileName);
                RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonWithNumber, fileName));
+               dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, pokemonWithNumber));
+               Connections.DeleteFile(fileName);
                for (int i = 0; i < pokemonWithNumber.Count; i++)
                {
                   await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
                }
-               Connections.DeleteFile(fileName);
-               dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, pokemonWithNumber));
             }
             else
             {
@@ -141,10 +141,9 @@ namespace PokeStar.Modules
                   string fileName = POKEDEX_SELECTION_IMAGE;
                   Connections.CopyFile(fileName);
                   RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
-                  await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
-                  Connections.DeleteFile(fileName);
-
                   dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, pokemonNames));
+                  Connections.DeleteFile(fileName);
+                  await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
                }
                else
                {

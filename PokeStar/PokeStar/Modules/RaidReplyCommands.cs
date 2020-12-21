@@ -73,12 +73,12 @@ namespace PokeStar.Modules
 
                Connections.CopyFile(fileName);
                RestUserMessage selectMsg = await channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+               raidMessages.Add(selectMsg.Id, parent);
+               Connections.DeleteFile(fileName);
                for (int i = 0; i < potentials.Count; i++)
                {
                   await selectMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
                }
-               raidMessages.Add(selectMsg.Id, parent);
-               Connections.DeleteFile(fileName);
                editComplete = true;
             }
             else if (potentials.Count == 1)
@@ -94,27 +94,27 @@ namespace PokeStar.Modules
                   string fileName = Global.RAID_TRAIN_IMAGE_NAME;
                   Connections.CopyFile(fileName);
                   RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
-                  await raidMsg.AddReactionsAsync(prevReactions);
                   raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
+                  await raidMsg.AddReactionsAsync(prevReactions);
                }
                else if (parent is Raid raid)
                {
                   string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
                   Connections.CopyFile(fileName);
                   RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
-                  await raidMsg.AddReactionsAsync(prevReactions);
                   raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
+                  await raidMsg.AddReactionsAsync(prevReactions);
                }
                else if (parent is RaidMule mule)
                {
                   string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
                   Connections.CopyFile(fileName);
                   RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(mule, fileName));
-                  await raidMsg.AddReactionsAsync(prevReactions);
                   raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
+                  await raidMsg.AddReactionsAsync(prevReactions);
                }
                editComplete = true;
             }
@@ -131,27 +131,27 @@ namespace PokeStar.Modules
                   string fileName = Global.RAID_TRAIN_IMAGE_NAME;
                   Connections.CopyFile(fileName);
                   RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
-                  await raidMsg.AddReactionsAsync(prevReactions);
                   raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
+                  await raidMsg.AddReactionsAsync(prevReactions);
                }
                else if (parent is Raid raid)
                {
                   string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
                   Connections.CopyFile(fileName);
                   RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
-                  await raidMsg.AddReactionsAsync(prevReactions);
                   raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
+                  await raidMsg.AddReactionsAsync(prevReactions);
                }
                else if (parent is RaidMule mule)
                {
                   string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
                   Connections.CopyFile(fileName);
                   RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(mule, fileName));
-                  await raidMsg.AddReactionsAsync(prevReactions);
                   raidMessages.Add(raidMsg.Id, parent);
                   Connections.DeleteFile(fileName);
+                  await raidMsg.AddReactionsAsync(prevReactions);
                }
                editComplete = true;
             }
