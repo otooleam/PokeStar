@@ -137,56 +137,28 @@ namespace PokeStar.ModuleParents
       /// <summary>
       /// Replies for a raid message.
       /// </summary>
-      private static readonly RaidReplyInfo[] raidReplies = {
-         new RaidReplyInfo("edit", "Edit the time, location (loc), or tier/boss of a raid.",
-            new List<string> {
-               "<attribute>: Portion of the raid message to edit.",
-               "<value>: New value of the edited attribute."
-            }),
-         new RaidReplyInfo("invite", "Invite user(s) to the raid. Users must be mentioned with \'@\' to be added.",
-            new List<string> {
-               "<invites>: Tagged list of users to invite, separated by spaces.",
-            }),
-         new RaidReplyInfo("request", "Request an invite to the raid.",
-            new List<string> ()),
-         new RaidReplyInfo("remote", "Participate in the raid remotly without an invite.",
-            new List<string> {
-               "<amount>: Amount of users raiding remotly 0 - 6.",
-            }),
+      private static readonly string[] raidReplies = {
+         "edit",
+         "invite",
+         "request",
+         "remote",
       };
 
       /// <summary>
       /// Replies for a raid mule message.
       /// </summary>
-      private static readonly RaidReplyInfo[] muleReplies = {
-         new RaidReplyInfo("edit", "Edit the time, location (loc), or tier/boss of a raid.",
-            new List<string> {
-               "<attribute>\nPortion of the raid message to edit.",
-               "<value>\nNew value of the edited attribute."
-            }),
-         new RaidReplyInfo("invite", "Invite user(s) to the raid. Users must be mentioned with \'@\' to be added.",
-            new List<string> {
-               "<invites>\nTagged list of users to invite, separated by spaces.",
-            }),
-         new RaidReplyInfo("ready", "Mark a raid group as ready.",
-            new List<string> {
-               "<groupNum>\nNumber of the group that is ready to start.",
-            }),
+      private static readonly string[] muleReplies = {
+         "edit",
+         "invite",
+         "ready",
       };
 
       /// <summary>
       /// Replies for a raid train message.
       /// </summary>
-      private static readonly RaidReplyInfo[] trainReplies = {
-         new RaidReplyInfo("add", "Add a gym to the end of the raid train.",
-            new List<string> {
-               "<time>: Time of the raid.",
-               "<Location>: Location  of the raid.",
-            }),
-         new RaidReplyInfo("conductor", "Change the current conductor of the raid train.",
-            new List<string> {
-               "<player>: Tagged user to make new conductor.",
-            }),
+      private static readonly string[] trainReplies = {
+         "add",
+         "conductor",
       };
 
       /// Enumerations ********************************************************
@@ -276,36 +248,6 @@ namespace PokeStar.ModuleParents
          RAID_REMOTE_SUB_MESSAGE,
          MULE_READY_SUB_MESSAGE,
          TRAIN_BOSS_SUB_MESSAGE,
-      }
-
-      /// <summary>
-      /// Index of replies to a raid message.
-      /// </summary>
-      private enum RAID_REPLY_INDEX
-      {
-         EDIT,
-         INVITE,
-         REQUEST,
-         REMOTE,
-      }
-
-      /// <summary>
-      /// Index of replies to a raid mule message.
-      /// </summary>
-      private enum MULE_REPLY_INDEX
-      {
-         EDIT,
-         INVITE,
-         READY,
-      }
-
-      /// <summary>
-      /// Index of replies to a raid train message.
-      /// </summary>
-      private enum TRAIN_REPLY_INDEX
-      {
-         ADD,
-         CONDUCTOR,
       }
 
       /// Message checkers ****************************************************
@@ -423,143 +365,6 @@ namespace PokeStar.ModuleParents
          }
       }
 
-      ///  Message reply handlers *********************************************
-
-      /// <summary>
-      /// Handles a reply to a raid message.
-      /// </summary>
-      /// <param name="message">Rely message.</param>
-      /// <param name="prefix">Command prefix used for the guild.</param>
-      /// <param name="argPos">Posision of the first argument.</param>
-      /// <returns></returns>
-      public static async Task RaidMessageReplyHandle(SocketUserMessage message, string prefix, int argPos)
-      {
-         ISocketMessageChannel channel = message.Channel;
-         ulong code = message.Reference.MessageId.Value;
-         SocketUserMessage raidMessage = (SocketUserMessage)await channel.GetMessageAsync(code);
-         SocketGuildUser author = (SocketGuildUser)message.Author;
-         RaidParent parent = raidMessages[code];
-         string[] msgContent = message.Content.Split(' ');
-         bool needEdit = false;
-
-         if (msgContent[0].Equals($"{prefix}{raidReplies[(int)RAID_REPLY_INDEX.EDIT].Command}", StringComparison.OrdinalIgnoreCase)
-            || msgContent[0].Equals($"{prefix}{muleReplies[(int)MULE_REPLY_INDEX.EDIT].Command}", StringComparison.OrdinalIgnoreCase))
-         {
-            string attribute = msgContent[argPos];
-            string edit = string.Join(" ", msgContent, argPos + 1, msgContent.Length - (argPos + 1));
-            bool success = await EditRaid(raidMessage, parent, attribute, edit);
-            if (success)
-            {
-               List<SocketGuildUser> allUsers = parent.GetAllUsers();
-               await channel.SendMessageAsync(BuildEditPingList(allUsers.ToImmutableList(), author, attribute, edit));
-            }
-         }
-         else if (msgContent[0].Equals($"{prefix}{raidReplies[(int)RAID_REPLY_INDEX.INVITE].Command}", StringComparison.OrdinalIgnoreCase)
-            || msgContent[0].Equals($"{prefix}{muleReplies[(int)MULE_REPLY_INDEX.INVITE].Command}", StringComparison.OrdinalIgnoreCase))
-         {
-            if (!parent.HasActiveInvite())
-            {
-               parent.InvitingPlayer = author;
-               List<SocketUser> invites = message.MentionedUsers.ToList();
-               foreach (SocketGuildUser invite in invites)
-               {
-                  if (parent.InvitePlayer(invite, author))
-                  {
-                     await invite.SendMessageAsync($"You have been invited to a raid by {author.Nickname ?? author.Username}.");
-                  }
-               }
-               needEdit = true;
-               parent.InvitingPlayer = null;
-            }
-         }
-         else if (parent is Raid raid)
-         {
-            if (msgContent[0].Equals($"{prefix}{raidReplies[(int)RAID_REPLY_INDEX.REQUEST].Command}", StringComparison.OrdinalIgnoreCase))
-            {
-               raid.RequestInvite(author);
-               needEdit = true;
-            }
-            else if (msgContent[0].Equals($"{prefix}{raidReplies[(int)RAID_REPLY_INDEX.REMOTE].Command}", StringComparison.OrdinalIgnoreCase))
-            {
-               bool isNumber = int.TryParse(msgContent[argPos], out int groupSize);
-               if (isNumber && groupSize >= 0 && groupSize <= 6)
-               {
-                  raid.AddPlayer(author, groupSize, author);
-                  needEdit = true;
-               }
-               else
-               {
-                  await ResponseMessage.SendErrorMessage(channel, "remote", "Value must be a number between 0 and 6");
-               }
-            }
-            else if (raid is RaidTrain train)
-            {
-               if (msgContent[0].Equals($"{prefix}{trainReplies[(int)TRAIN_REPLY_INDEX.ADD].Command}", StringComparison.OrdinalIgnoreCase))
-               {
-                  string location = string.Join(" ", msgContent, argPos + 1, msgContent.Length - (argPos + 1));
-                  train.AddRaid(msgContent[argPos], location);
-                  needEdit = true;
-               }
-               else if (msgContent[0].Equals($"{prefix}{trainReplies[(int)TRAIN_REPLY_INDEX.CONDUCTOR].Command}", StringComparison.OrdinalIgnoreCase))
-               {
-                  SocketGuildUser newConductor = (SocketGuildUser)message.MentionedUsers.ElementAt(0);
-                  if (author.Equals(train.Conductor) && train.IsInRaid(newConductor, false) != Global.NOT_IN_RAID)
-                  {
-                     train.Conductor = newConductor;
-                     needEdit = true;
-                  }
-               }
-            }
-         }
-         else if (parent is RaidMule mule)
-         {
-            if (msgContent[0].Equals($"{prefix}{muleReplies[(int)MULE_REPLY_INDEX.READY].Command}", StringComparison.OrdinalIgnoreCase))
-            {
-               bool isNumber = int.TryParse(msgContent[argPos], out int groupNum);
-               if (isNumber && mule.GetTotalGroups() <= groupNum && groupNum > 0)
-               {
-                  await channel.SendMessageAsync($"{BuildRaidReadyPingList(mule.GetGroup(groupNum - 1).GetPingList(), mule.Location, groupNum, false)}");
-               }
-            }
-         }
-
-         if (needEdit && parent.Boss != null)
-         {
-            if (parent is RaidTrain train)
-            {
-               string fileName = Global.RAID_TRAIN_IMAGE_NAME;
-               Connections.CopyFile(fileName);
-               await raidMessage.ModifyAsync(x =>
-               {
-                  x.Embed = BuildRaidTrainEmbed(train, fileName);
-               });
-               Connections.DeleteFile(fileName);
-            }
-            else if (parent is Raid raid)
-            {
-               string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-               Connections.CopyFile(fileName);
-               await raidMessage.ModifyAsync(x =>
-               {
-                  x.Embed = BuildRaidEmbed(raid, fileName);
-               });
-               Connections.DeleteFile(fileName);
-            }
-            else if (parent is RaidMule mule)
-            {
-               string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-               Connections.CopyFile(fileName);
-               await raidMessage.ModifyAsync(x =>
-               {
-                  x.Embed = BuildRaidMuleEmbed(mule, fileName);
-               });
-               Connections.DeleteFile(fileName);
-            }
-            subMessages.Remove(message.Id);
-         }
-         await message.DeleteAsync();
-      }
-
       /// Reaction handlers ***************************************************
 
       /// <summary>
@@ -672,7 +477,7 @@ namespace PokeStar.ModuleParents
                {
                   IEmote[] emojis = raidEmojis.Concat(trainEmojis).ToArray();
                   string[] desc = raidEmojisDesc.Concat(trainEmojisDesc).ToArray();
-                  RaidReplyInfo[] replies = raidReplies.Concat(trainReplies).ToArray();
+                  string[] replies = raidReplies.Concat(trainReplies).ToArray();
                   await reactingPlayer.SendMessageAsync(BuildHelpMessage(emojis, desc, replies, prefix));
                }
                else
@@ -1457,7 +1262,7 @@ namespace PokeStar.ModuleParents
       /// <param name="location">Location of the raid.</param>
       /// <param name="groupNumber">Group number the players are part of.</param>
       /// <returns>List of players to ping as a string.</returns>
-      private static string BuildRaidReadyPingList(ImmutableList<SocketGuildUser> players, string location, int groupNumber, bool isNormalRaid)
+      protected static string BuildRaidReadyPingList(ImmutableList<SocketGuildUser> players, string location, int groupNumber, bool isNormalRaid)
       {
          StringBuilder sb = new StringBuilder();
          foreach (SocketGuildUser player in players)
@@ -1582,7 +1387,7 @@ namespace PokeStar.ModuleParents
       /// <param name="replies">List of reply options.</param>
       /// <param name="prefix">Command prefix used for the guild.</param>
       /// <returns>Help messsage as a string.</returns>
-      private static string BuildHelpMessage(IEmote[] emotes, string[] descriptions, RaidReplyInfo[] replies, string prefix)
+      private static string BuildHelpMessage(IEmote[] emotes, string[] descriptions, string[] replies, string prefix)
       {
          int offset = 0;
          IEmote startEmoji = null;
@@ -1615,19 +1420,10 @@ namespace PokeStar.ModuleParents
          sb.AppendLine("\n*See raid reply help for more options.");
 
          sb.AppendLine("\n**Raid Reply Help:**");
-         sb.AppendLine("Note: The following must be sent in a reply to the raid embed.\n");
-         foreach (var reply in replies)
+         sb.AppendLine($"Note: The following must be sent in a reply to the raid embed Use {prefix}help for more information.\n");
+         foreach (string reply in replies)
          {
-            sb.AppendLine($"**{prefix}{reply.Command}**: {reply.Description}");
-            if (reply.Param.Count > 0)
-            {
-               sb.AppendLine("Parameters:");
-            }
-            foreach (var param in reply.Param)
-            {
-               sb.AppendLine(param);
-            }
-            sb.AppendLine();
+            sb.AppendLine($"{prefix}{reply}");
          }
 
          return sb.ToString();
@@ -1748,191 +1544,6 @@ namespace PokeStar.ModuleParents
          {
             raidMessages.Remove(id);
          }
-      }
-
-      /// <summary>
-      /// Edits a Raid Parent object.
-      /// Values that can be edited include time, location (loc) or boss (tier).
-      /// </summary>
-      /// <param name="raidMessage">Message the raid is in.</param>
-      /// <param name="parent">Raid parent object.</param>
-      /// <param name="attribute">Attribute to edit.</param>
-      /// <param name="value">New value of the attribute.</param>
-      /// <returns>True if the edit was completed successfully, otherwise false.</returns>
-      protected static async Task<bool> EditRaid(SocketUserMessage raidMessage, RaidParent parent, string attribute, string value)
-      {
-         ulong code = raidMessage.Id;
-         ISocketMessageChannel channel = raidMessage.Channel;
-         bool editComplete = false;
-         bool simpleEdit = false;
-         if (attribute.Equals("time", StringComparison.OrdinalIgnoreCase))
-         {
-            if (parent is RaidTrain train)
-            {
-               train.UpdateRaidInformation(value, null);
-            }
-            else
-            {
-               parent.Time = value;
-            }
-            simpleEdit = true;
-         }
-         else if (attribute.Equals("location", StringComparison.OrdinalIgnoreCase) || attribute.Equals("loc", StringComparison.OrdinalIgnoreCase))
-         {
-            if (parent is RaidTrain train)
-            {
-               train.UpdateRaidInformation(null, value);
-            }
-            else
-            {
-               parent.Location = value;
-            }
-            simpleEdit = true;
-         }
-         else if (attribute.Equals("tier", StringComparison.OrdinalIgnoreCase) || attribute.Equals("boss", StringComparison.OrdinalIgnoreCase))
-         {
-            short calcTier = Global.RAID_TIER_STRING.ContainsKey(value) ? Global.RAID_TIER_STRING[value] : Global.INVALID_RAID_TIER;
-            Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
-            List<string> potentials = calcTier == Global.INVALID_RAID_TIER ? new List<string>() : allBosses[calcTier];
-
-            if (potentials.Count > 1)
-            {
-               parent.Tier = calcTier;
-               parent.SetBoss(null);
-               parent.RaidBossSelections = potentials;
-               string fileName = $"Egg{calcTier}.png";
-               await raidMessage.DeleteAsync();
-               raidMessages.Remove(code);
-
-               Connections.CopyFile(fileName);
-               RestUserMessage selectMsg = await channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
-               for (int i = 0; i < potentials.Count; i++)
-               {
-                  await selectMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-               }
-               raidMessages.Add(selectMsg.Id, parent);
-               Connections.DeleteFile(fileName);
-               editComplete = true;
-            }
-            else if (potentials.Count == 1)
-            {
-               parent.Tier = calcTier;
-               parent.SetBoss(potentials.First());
-               IEmote[] prevReactions = raidMessage.Reactions.Keys.ToArray();
-               await raidMessage.DeleteAsync();
-               raidMessages.Remove(code);
-
-               if (parent is RaidTrain train)
-               {
-                  string fileName = Global.RAID_TRAIN_IMAGE_NAME;
-                  Connections.CopyFile(fileName);
-                  RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
-                  await raidMsg.AddReactionsAsync(prevReactions);
-                  raidMessages.Add(raidMsg.Id, parent);
-                  Connections.DeleteFile(fileName);
-               }
-               else if (parent is Raid raid)
-               {
-                  string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                  Connections.CopyFile(fileName);
-                  RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
-                  await raidMsg.AddReactionsAsync(prevReactions);
-                  raidMessages.Add(raidMsg.Id, parent);
-                  Connections.DeleteFile(fileName);
-               }
-               else if (parent is RaidMule mule)
-               {
-                  string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                  Connections.CopyFile(fileName);
-                  RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(mule, fileName));
-                  await raidMsg.AddReactionsAsync(prevReactions);
-                  raidMessages.Add(raidMsg.Id, parent);
-                  Connections.DeleteFile(fileName);
-               }
-               editComplete = true;
-            }
-            else if (Global.USE_EMPTY_RAID)
-            {
-               parent.Tier = calcTier;
-               parent.SetBoss(Global.DEFAULT_RAID_BOSS_NAME);
-               IEmote[] prevReactions = raidMessage.Reactions.Keys.ToArray();
-               await raidMessage.DeleteAsync();
-               raidMessages.Remove(code);
-
-               if (parent is RaidTrain train)
-               {
-                  string fileName = Global.RAID_TRAIN_IMAGE_NAME;
-                  Connections.CopyFile(fileName);
-                  RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
-                  await raidMsg.AddReactionsAsync(prevReactions);
-                  raidMessages.Add(raidMsg.Id, parent);
-                  Connections.DeleteFile(fileName);
-               }
-               else if (parent is Raid raid)
-               {
-                  string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                  Connections.CopyFile(fileName);
-                  RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
-                  await raidMsg.AddReactionsAsync(prevReactions);
-                  raidMessages.Add(raidMsg.Id, parent);
-                  Connections.DeleteFile(fileName);
-               }
-               else if (parent is RaidMule mule)
-               {
-                  string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                  Connections.CopyFile(fileName);
-                  RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(mule, fileName));
-                  await raidMsg.AddReactionsAsync(prevReactions);
-                  raidMessages.Add(raidMsg.Id, parent);
-                  Connections.DeleteFile(fileName);
-               }
-               editComplete = true;
-            }
-            else
-            {
-               await ResponseMessage.SendErrorMessage(channel, "edit", $"No raid bosses found for tier {value}.");
-            }
-         }
-         else
-         {
-            await ResponseMessage.SendErrorMessage(channel, "edit", "Please enter a valid field to edit.");
-         }
-
-         if (simpleEdit)
-         {
-            if (parent is RaidTrain train)
-            {
-               string fileName = Global.RAID_TRAIN_IMAGE_NAME;
-               Connections.CopyFile(fileName);
-               await raidMessage.ModifyAsync(x =>
-               {
-                  x.Embed = BuildRaidTrainEmbed(train, fileName);
-               });
-               Connections.DeleteFile(fileName);
-            }
-            else if (parent is Raid raid)
-            {
-               string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-               Connections.CopyFile(fileName);
-               await raidMessage.ModifyAsync(x =>
-               {
-                  x.Embed = BuildRaidEmbed(raid, fileName);
-               });
-               Connections.DeleteFile(fileName);
-            }
-            else if (parent is RaidMule mule)
-            {
-               string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-               Connections.CopyFile(fileName);
-               await raidMessage.ModifyAsync(x =>
-               {
-                  x.Embed = BuildRaidMuleEmbed(mule, fileName);
-               });
-               Connections.DeleteFile(fileName);
-            }
-         }
-
-         return (simpleEdit || editComplete);
       }
    }
 }

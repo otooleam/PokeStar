@@ -208,6 +208,7 @@
     <Compile Include="Modules\MoveCommands.cs" />
     <Compile Include="Modules\NicknameCommands.cs" />
     <Compile Include="Modules\RaidCommands.cs" />
+    <Compile Include="Modules\RaidReplyCommands.cs" />
     <Compile Include="Modules\RocketCommands.cs" />
     <Compile Include="Modules\RoleCommands.cs" />
     <Compile Include="Modules\SetupCommands.cs" />
@@ -216,6 +217,7 @@
     <Compile Include="Modules\TypeCommands.cs" />
     <Compile Include="PreConditions\NonaAdminAttribute.cs" />
     <Compile Include="PreConditions\RegisterChannelAttribute.cs" />
+    <Compile Include="PreConditions\RaidReplyAttribute.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="DataModels\Raid.cs" />
     <Compile Include="ConnectionInterface\Connections.cs" />

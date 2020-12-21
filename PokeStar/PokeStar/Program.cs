@@ -166,17 +166,6 @@ namespace PokeStar
                //TODO: Add call for ex raid image processing
             }
          }
-         else if (message.Reference != null)
-         {
-            if (RaidCommandParent.IsRaidMessage(message.Reference.MessageId.Value) && message.HasStringPrefix(prefix, ref argPos))
-            {
-               await RaidCommandParent.RaidMessageReplyHandle(message, prefix, argPos);
-            }
-            else if (DexCommandParent.IsDexSubMessage(message.Reference.MessageId.Value) && message.HasStringPrefix(prefix, ref argPos))
-            {
-               //TODO: Add call for Dex Reply Handle
-            }
-         }
          else if (message.HasStringPrefix(prefix, ref argPos))
          {
             IResult result = await commands.ExecuteAsync(context, argPos, services);
