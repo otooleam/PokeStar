@@ -497,7 +497,7 @@ namespace PokeStar.ModuleParents
                if (msgContent[0].Equals($"{prefix}{trainReplies[(int)TRAIN_REPLY_INDEX.ADD].Command}", StringComparison.OrdinalIgnoreCase))
                {
                   string location = string.Join(" ", msgContent, argPos + 1, msgContent.Length - (argPos + 1));
-                  train.AddLocation(msgContent[argPos], location);
+                  train.AddRaid(msgContent[argPos], location);
                   needEdit = true;
                }
                else if (msgContent[0].Equals($"{prefix}{trainReplies[(int)TRAIN_REPLY_INDEX.CONDUCTOR].Command}", StringComparison.OrdinalIgnoreCase))
@@ -1093,11 +1093,11 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// 
+      /// Handles a reaction on a raid train boss update message.
       /// </summary>
-      /// <param name="message"></param>
-      /// <param name="reaction"></param>
-      /// <returns></returns>
+      /// <param name="message">Message that was reacted on.</param>
+      /// <param name="reaction">Reaction that was sent.</param>
+      /// <returns>Completed Task.</returns>
       private static async Task RaidTrainBossReactionHandle(IMessage message, SocketReaction reaction)
       {
          await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reaction.User.Value);
@@ -1271,8 +1271,8 @@ namespace PokeStar.ModuleParents
          embed.WithDescription("Press ? for help.");
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("**Time**", raid.GetCurrentTime(), true);
-         embed.AddField($"**Current Location {raid.GetCurrentGymCount()}**", $"{raid.GetCurrentLocation()} ({raid.GetCurrentBoss()})", true);
-         embed.AddField("**Next Location**", raid.GetNextLocation(), true);
+         embed.AddField($"**Current Location {raid.GetCurrentRaidCount()}**", $"{raid.GetCurrentLocation()} ({raid.GetCurrentBoss()})", true);
+         embed.AddField("**Next Location**", raid.GetNextRaid(), true);
          for (int i = 0; i < raid.GetTotalGroups(); i++)
          {
             string groupPrefix = raid.GetTotalGroups() == 1 ? "" : $"Group {i + 1} ";
@@ -1325,10 +1325,10 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// 
+      /// Builds a reaid tier select embed.
       /// </summary>
-      /// <param name="fileName"></param>
-      /// <returns></returns>
+      /// <param name="fileName">Name of image file.</param>
+      /// <returns>Embed for selecting a raid tier.</returns>
       protected static Embed BuildTierSelectEmbed(string fileName)
       {
          StringBuilder sb = new StringBuilder();
@@ -1758,7 +1758,7 @@ namespace PokeStar.ModuleParents
       /// <param name="parent">Raid parent object.</param>
       /// <param name="attribute">Attribute to edit.</param>
       /// <param name="value">New value of the attribute.</param>
-      /// <returns></returns>
+      /// <returns>True if the edit was completed successfully, otherwise false.</returns>
       protected static async Task<bool> EditRaid(SocketUserMessage raidMessage, RaidParent parent, string attribute, string value)
       {
          ulong code = raidMessage.Id;
@@ -1769,7 +1769,7 @@ namespace PokeStar.ModuleParents
          {
             if (parent is RaidTrain train)
             {
-               train.UpdateLocation(value, null);
+               train.UpdateRaidInformation(value, null);
             }
             else
             {
@@ -1781,7 +1781,7 @@ namespace PokeStar.ModuleParents
          {
             if (parent is RaidTrain train)
             {
-               train.UpdateLocation(null, value);
+               train.UpdateRaidInformation(null, value);
             }
             else
             {

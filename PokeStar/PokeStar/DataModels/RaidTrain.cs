@@ -22,22 +22,22 @@ namespace PokeStar.DataModels
       private readonly List<RaidTrainLoc> Locations = new List<RaidTrainLoc>();
 
       /// <summary>
-      /// The player who is incharge of advancing the train.
+      /// The player in charge of the train.
       /// </summary>
       public SocketGuildUser Conductor { get; set; }
 
       /// <summary>
-      /// 
+      /// List of all current raid bosses.
       /// </summary>
       public Dictionary<int, List<string>> AllBosses { get; set; }
 
       /// <summary>
-      /// 
+      /// Tier of new raid boss to be selected from.
       /// </summary>
       public short SelectionTier { get; set; }
 
       /// <summary>
-      /// Creates a new raid.
+      /// Creates a new raid train.
       /// </summary>
       /// <param name="conductor">Player in charge of the raid.</param>
       /// <param name="tier">Tier of the raid.</param>
@@ -57,53 +57,53 @@ namespace PokeStar.DataModels
       /// Gets the name of the current gym count over the total count.
       /// </summary>
       /// <returns></returns>
-      public string GetCurrentGymCount()
+      public string GetCurrentRaidCount()
       {
          return $"{CurrentLocation + 1} / {Locations.Count}";
       }
 
       /// <summary>
-      /// 
+      /// Gets the time for the current raid.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Time of the current raid.</returns>
       public string GetCurrentTime()
       {
          return Locations.ElementAt(CurrentLocation).Time;
       }
 
       /// <summary>
-      /// Gets the name of the current location.
+      /// Gets the location for the current raid.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Location of the current raid.</returns>
       public string GetCurrentLocation()
       {
          return $"{Locations.ElementAt(CurrentLocation).Location}";
       }
 
       /// <summary>
-      /// 
+      /// Gets the name of the current raid boss.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Name of the current raid boss.</returns>
       public string GetCurrentBoss()
       {
          return Locations.ElementAt(CurrentLocation).BossName;
       }
 
       /// <summary>
-      /// Gets the name of the next location.
+      /// Gets the information for the next raid.
       /// </summary>
-      /// <returns></returns>
-      public string GetNextLocation()
+      /// <returns>Information for the next raid.</returns>
+      public string GetNextRaid()
       {
          return (CurrentLocation + 1 == Locations.Count) ? Global.EMPTY_FIELD : $"{Locations.ElementAt(CurrentLocation + 1).Location} ({Locations.ElementAt(CurrentLocation + 1).BossName})";
       }
 
       /// <summary>
-      /// Adds a location to the list of locations.
+      /// Adds a raid to the list of locations.
       /// </summary>
-      /// <param name="time"></param>
-      /// <param name="location"></param>
-      public void AddLocation(string time, string location)
+      /// <param name="time">Time of the raid.</param>
+      /// <param name="location">Location of the raid.</param>
+      public void AddRaid(string time, string location)
       {
          if (!Locations.Any(raidTrainLoc => raidTrainLoc.Location.Equals(location, StringComparison.OrdinalIgnoreCase)))
          {
@@ -112,11 +112,11 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// 
+      /// Update information for a location.
       /// </summary>
-      /// <param name="time"></param>
-      /// <param name="location"></param>
-      public void UpdateLocation(string time = null, string location = null)
+      /// <param name="time">New time of the raid.</param>
+      /// <param name="location">New location of the raid.</param>
+      public void UpdateRaidInformation(string time = null, string location = null)
       {
          if (time != null)
          {
@@ -158,9 +158,9 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// 
+      /// Sets the tier to select the raid boss from.
       /// </summary>
-      /// <param name="tier"></param>
+      /// <param name="tier">Tier of the raid bosses.</param>
       public void SetSelectionTier(short tier)
       {
          SelectionTier = tier;
@@ -170,7 +170,7 @@ namespace PokeStar.DataModels
       /// Counts forward to the next location.
       /// If the count can be moved all players are reset to attending.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>True if the location changed, otherwise false.</returns>
       public bool NextLocation()
       {
          int OldLocation = CurrentLocation;
@@ -192,7 +192,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Counts back to the previous location.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>True if the location changed, otherwise false.</returns>
       public bool PreviousLocation()
       {
          int OldLocation = CurrentLocation;
@@ -204,7 +204,7 @@ namespace PokeStar.DataModels
       /// Checks if all participants in the raid are ready.
       /// Checks all raid groups.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>True if all players in all raid groups are ready, otherwise false.</returns>
       public bool AllReady()
       {
          bool allReady = true;
