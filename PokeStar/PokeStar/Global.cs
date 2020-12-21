@@ -69,7 +69,6 @@ namespace PokeStar
       /// <summary>
       /// Embed Colors
       /// </summary>
-
       public static readonly Color EMBED_COLOR_INFO_RESPONSE      = Color.Purple;
       public static readonly Color EMBED_COLOR_WARNING_RESPONSE   = Color.Orange;
       public static readonly Color EMBED_COLOR_ERROR_RESPONSE     = Color.Red;
@@ -242,6 +241,13 @@ namespace PokeStar
       public static readonly int NOT_IN_RAID  = -1;
       public static readonly string DEFAULT_RAID_BOSS_NAME = "Empty";
       public static readonly string EMPTY_FIELD = "-----";
+
+      /// <summary>
+      /// Catch ring colors
+      /// </summary>
+      public static readonly int MAX_CATCH_COLOR = 0xFF0000;
+      public static readonly int MID_CATCH_COLOR = 0xFFFF00;
+      public static readonly int MIN_CATCH_COLOR = 0x00FF00;
 
       /// <summary>
       /// Nickname delimiter
