@@ -204,6 +204,7 @@ namespace PokeStar.Modules
             List<SocketGuildUser> allUsers = parent.GetAllUsers();
             await Context.Channel.SendMessageAsync(BuildEditPingList(allUsers.ToImmutableList(), (SocketGuildUser)Context.Message.Author, attribute, value));
          }
+         await Context.Message.DeleteAsync();
       }
 
       [Command("invite")]
@@ -261,6 +262,7 @@ namespace PokeStar.Modules
 
             parent.InvitingPlayer = null;
          }
+         await Context.Message.DeleteAsync();
       }
 
       [Command("request")]
@@ -302,6 +304,7 @@ namespace PokeStar.Modules
                Connections.DeleteFile(fileName);
             }
          }
+         await Context.Message.DeleteAsync();
       }
 
       [Command("remote")]
@@ -351,6 +354,7 @@ namespace PokeStar.Modules
                }
             }
          }
+         await Context.Message.DeleteAsync();
       }
 
       [Command("ready")]
@@ -376,6 +380,7 @@ namespace PokeStar.Modules
                await Context.Channel.SendMessageAsync($"{BuildRaidReadyPingList(mule.GetGroup(groupNum - 1).GetPingList(), mule.Location, groupNum, false)}");
             }
          }
+         await Context.Message.DeleteAsync();
       }
 
       [Command("add")]
@@ -404,6 +409,7 @@ namespace PokeStar.Modules
             });
             Connections.DeleteFile(fileName);
          }
+         await Context.Message.DeleteAsync();
       }
 
       [Command("conductor")]
@@ -446,6 +452,7 @@ namespace PokeStar.Modules
             });
             Connections.DeleteFile(fileName);
          }
+         await Context.Message.DeleteAsync();
       }
    }
 }
