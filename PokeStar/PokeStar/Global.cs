@@ -133,6 +133,8 @@ namespace PokeStar
          ["1"]         = COMMON_RAID_TIER,
       };
 
+      public static readonly string RAID_TRAIN_IMAGE_NAME = "Raid_Train.png";
+
       /// <summary>
       /// Egg Tiers
       /// </summary>
