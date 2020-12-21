@@ -99,6 +99,15 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Get the full list of raid bosses.
+      /// </summary>
+      /// <returns>List of raid bosses sorted by tier.</returns>
+      public static Dictionary<int, List<string>> GetFullBossList()
+      {
+         return SilphData.GetRaidBosses();
+      }
+
+      /// <summary>
       /// Gets a list of current eggs for a given tier.
       /// </summary>
       /// <param name="tier">Tier of eggs.</param>
@@ -160,7 +169,7 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       public void UpdateRocketList()
       {
-         Rockets = SilphData.GetRockets().Union(SilphData.GetRocketLeaders()).ToDictionary(k => k.Key, v => v.Value, StringComparer.OrdinalIgnoreCase);
+         //Rockets = SilphData.GetRockets().Union(SilphData.GetRocketLeaders()).ToDictionary(k => k.Key, v => v.Value, StringComparer.OrdinalIgnoreCase);
       }
 
       /// <summary>

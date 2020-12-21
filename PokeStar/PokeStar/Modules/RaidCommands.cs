@@ -163,7 +163,8 @@ namespace PokeStar.Modules
                            [Summary("Where the train will start.")][Remainder] string location)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-         List<string> potentials = Connections.GetBossList(calcTier);
+         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         List<string> potentials = calcTier == Global.INVALID_RAID_TIER ? new List<string>() : allBosses[calcTier];
          RaidTrain raid;
          string fileName;
          if (potentials.Count > 1)
@@ -171,7 +172,8 @@ namespace PokeStar.Modules
             fileName = $"Egg{calcTier}.png";
             raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location)
             {
-               RaidBossSelections = potentials
+               RaidBossSelections = potentials,
+               AllBosses = allBosses
             };
 
             Connections.CopyFile(fileName);
@@ -186,24 +188,30 @@ namespace PokeStar.Modules
          else if (potentials.Count == 1)
          {
             string boss = potentials.First();
-            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location, boss);
-            fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, string.Empty, boss)
+            {
+               AllBosses = allBosses
+            };
+            fileName = Connections.GetPokemonPicture(Global.RAID_TRAIN_IMAGE_NAME);
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(raid, fileName));
-            await SetEmojis(raidMsg, raidEmojis, true);
+            await SetEmojis(raidMsg, raidEmojis.Concat(trainEmojis).ToArray());
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
          }
          else if (Global.USE_EMPTY_RAID)
          {
             string boss = Global.DEFAULT_RAID_BOSS_NAME;
-            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location, boss);
-            fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location, boss)
+            {
+               AllBosses = allBosses
+            };
+            fileName = Global.RAID_TRAIN_IMAGE_NAME;
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(raid, fileName));
-            await SetEmojis(raidMsg, raidEmojis, true);
+            await SetEmojis(raidMsg, raidEmojis.Concat(trainEmojis).ToArray());
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
          }

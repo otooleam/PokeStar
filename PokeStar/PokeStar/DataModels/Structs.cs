@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Discord.Commands;
 using Discord.WebSocket;
 
@@ -38,7 +37,7 @@ namespace PokeStar.DataModels
    public struct RaidReplyInfo
    {
       /// <summary>
-      /// Text to determine the command.
+      /// Name to determine the command.
       /// </summary>
       public string Command { get; }
 
@@ -63,6 +62,39 @@ namespace PokeStar.DataModels
          Command = cmd;
          Description = desc;
          Param = param;
+      }
+   }
+
+   /// <summary>
+   /// Location in a raid train.
+   /// </summary>
+   public struct RaidTrainLoc
+   {
+      /// <summary>
+      /// Time the raid starts
+      /// </summary>
+      public string Time { get; }
+      /// <summary>
+      /// Location of the raid.
+      /// </summary>
+      public string Location { get; }
+
+      /// <summary>
+      /// Boss that is at the location.
+      /// </summary>
+      public string BossName { get; set; }
+
+      /// <summary>
+      /// Creates a new RaidTrainLoc.
+      /// </summary>
+      /// <param name="time">Time the raid starts.</param>
+      /// <param name="location">Location of the raid.</param>
+      /// <param name="bossName">Boss that is at the location.</param>
+      public RaidTrainLoc(string time, string location, string bossName)
+      {
+         Time = time;
+         Location = location;
+         BossName = bossName;
       }
    }
 

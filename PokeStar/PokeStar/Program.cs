@@ -232,7 +232,7 @@ namespace PokeStar
       {
          SocketGuild server = client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(Global.HOME_SERVER, StringComparison.OrdinalIgnoreCase));
          SetEmotes(server);
-         RaidCommandParent.SetRaidEmotes();
+         RaidCommandParent.SetInitialEmotes();
 
          foreach (SocketGuild guild in client.Guilds)
          {
