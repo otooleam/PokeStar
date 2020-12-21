@@ -194,8 +194,8 @@ namespace PokeStar
       /// Level constants
       /// </summary>
       public static readonly double LEVEL_STEP  = 0.5;
-      public static readonly int MAX_LEVEL      = 50;
-      public static readonly int MAX_HALF_LEVEL = 40;
+      public static readonly int MAX_XL_LEVEL   = 50;
+      public static readonly int MAX_REG_LEVEL  = 40;
       public static readonly int MIN_WILD_LEVEL = 1;
       public static readonly int MAX_WILD_LEVEL = 35;
       public static readonly int RAID_LEVEL     = 20;
@@ -213,8 +213,9 @@ namespace PokeStar
       /// <summary>
       /// League constants
       /// </summary>
-      public static readonly int MAX_GREAT_CP = 1500;
-      public static readonly int MAX_ULTRA_CP = 2500;
+      public static readonly int MAX_LITTLE_CP = 500;
+      public static readonly int MAX_GREAT_CP  = 1500;
+      public static readonly int MAX_ULTRA_CP  = 2500;
 
       /// <summary>
       /// Evolution tree

@@ -179,6 +179,86 @@ namespace PokeStar.Modules
          }
       }
 
+      [Command("pvp")]
+      [Alias("pvpiv")]
+      [Summary("Gets rank 1 PvP IV values for a given Pokémon.")]
+      [Remarks("Can search by Pokémon name or by number." +
+               "Tags can be used to search for specific forms.")]
+      [RegisterChannel('D')]
+      public async Task PvP([Summary("Get PvP IVs for this Pokémon.")][Remainder] string pokemon)
+      {
+         bool isNumber = int.TryParse(pokemon, out int pokemonNum);
+         if (isNumber)
+         {
+            List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
+
+            if (pokemonWithNumber.Count == 0)
+            {
+               await ResponseMessage.SendErrorMessage(Context.Channel, "pvp", $"Pokémon with number {pokemonNum} cannot be found.");
+            }
+            else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER && pokemonNum != Global.ARCEUS_NUMBER)
+            {
+               string fileName = POKEDEX_SELECTION_IMAGE;
+               Connections.CopyFile(fileName);
+               RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonWithNumber, fileName));
+               Connections.DeleteFile(fileName);
+               for (int i = 0; i < pokemonWithNumber.Count; i++)
+               {
+                  await dexMessage.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
+               }
+               dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.PVP_MESSAGE, pokemonWithNumber));
+            }
+            else
+            {
+               Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber.First());
+               Connections.Instance().GetPokemonPvP(ref pkmn);
+               string fileName = Connections.GetPokemonPicture(pkmn.Name);
+               Connections.CopyFile(fileName);
+               await Context.Channel.SendFileAsync(fileName, embed: BuildPvPEmbed(pkmn, fileName));
+               Connections.DeleteFile(fileName);
+            }
+         }
+         else
+         {
+            string name = GetPokemonName(pokemon);
+            Pokemon pkmn = Connections.Instance().GetPokemon(name);
+            if (pkmn == null)
+            {
+               pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
+
+               if (pkmn == null)
+               {
+                  List<string> pokemonNames = Connections.Instance().SearchPokemon(name);
+
+                  string fileName = POKEDEX_SELECTION_IMAGE;
+                  Connections.CopyFile(fileName);
+                  RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
+                  await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
+                  Connections.DeleteFile(fileName);
+
+                  dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.PVP_MESSAGE, pokemonNames));
+               }
+               else
+               {
+                  Connections.Instance().GetPokemonPvP(ref pkmn);
+                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
+                  Connections.CopyFile(fileName);
+                  await Context.Channel.SendFileAsync(fileName, embed: BuildPvPEmbed(pkmn, fileName));
+                  Connections.DeleteFile(fileName);
+               }
+            }
+            else
+            {
+               Connections.Instance().GetPokemonPvP(ref pkmn);
+               string fileName = Connections.GetPokemonPicture(pkmn.Name);
+               Connections.CopyFile(fileName);
+               await Context.Channel.SendFileAsync(fileName, embed: BuildPvPEmbed(pkmn, fileName));
+               Connections.DeleteFile(fileName);
+            }
+         }
+      }
+
+
       [Command("form")]
       [Summary("Gets all forms for a given Pokémon.")]
       [Remarks("Leave blank to get a list of all Pokémon with forms.\n" +
