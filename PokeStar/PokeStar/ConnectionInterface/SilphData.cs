@@ -182,12 +182,12 @@ namespace PokeStar.ConnectionInterface
                {
                   if (slot == 0)
                   {
+                     type = words[i - 1].Trim();
                      StringBuilder sb = new StringBuilder();
-                     for (int j = 0; j < i - 7; j++)
+                     for (int j = 0; j < i - 1; j++)
                      {
-                        sb.AppendLine(words[j].Trim());
+                        sb.AppendLine(words[j]);
                      }
-                     type = words[i - 7].Trim();
                      rocket.SetGrunt(type, sb.ToString());
                   }
 
