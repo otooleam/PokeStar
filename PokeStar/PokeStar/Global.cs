@@ -330,36 +330,66 @@ namespace PokeStar
       /// <summary>
       /// Nona emojis
       /// </summary>
-      public static readonly string[] EMOTE_NAMES = {
-         "valor_emote", "mystic_emote", "instinct_emote",
-         "raid_emote", "ex_emote", "mega_emote", 
-         "ex_pass_emote", "remote_pass_emote",
+      public static readonly Dictionary<string, string> NONA_EMOJIS = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+      { 
+         ["valor_emote"]         = "Badge_Team_Valor_01",
+         ["mystic_emote"]        = "Badge_Team_Mystic_01",
+         ["instinct_emote"]      = "Badge_Team_Instinct_01",
 
-         "bug_emote", "dark_emote", "dragon_emote",
-         "electric_emote", "fairy_emote", "fighting_emote",
-         "fire_emote", "flying_emote", "ghost_emote",
-         "grass_emote", "ground_emote", "ice_emote",
-         "normal_emote", "poison_emote", "psychic_emote",
-         "rock_emote", "steel_emote", "water_emote",
+         ["raid_emote"]          = "Badge_Raid_01",
+         ["ex_emote"]            = "Badge_EX_01",
+         ["mega_emote"]          = "Badge_Mega_01",
+         ["ex_pass_emote"]       = "Badge_EX_Pass_01",
+         ["remote_pass_emote"]   = "Badge_Remote_Pass_01",
 
-         "sunny_emote", "clear_emote", "rain_emote",
-         "partly_cloudy_emote", "cloudy_emote",
-         "windy_emote", "snow_emote", "fog_emote",
+         ["bug_emote"]           = "Badge_Type_Bug_01",
+         ["dark_emote"]          = "Badge_Type_Dark_01",
+         ["dragon_emote"]        = "Badge_Type_Dragon_01",
+         ["electric_emote"]      = "Badge_Type_Electric_01",
+         ["fairy_emote"]         = "Badge_Type_Fairy_01",
+         ["fighting_emote"]      = "Badge_Type_Fighting_01",
+         ["fire_emote"]          = "Badge_Type_Fire_01",
+         ["flying_emote"]        = "Badge_Type_Flying_01",
+         ["ghost_emote"]         = "Badge_Type_Ghost_01",
+         ["grass_emote"]         = "Badge_Type_Grass_01",
+         ["ground_emote"]        = "Badge_Type_Ground_01",
+         ["ice_emote"]           = "Badge_Type_Ice_01",
+         ["normal_emote"]        = "Badge_Type_Normal_01",
+         ["poison_emote"]        = "Badge_Type_Poison_01",
+         ["psychic_emote"]       = "Badge_Type_Psychic_01",
+         ["rock_emote"]          = "Badge_Type_Rock_01",
+         ["steel_emote"]         = "Badge_Type_Steel_01",
+         ["water_emote"]         = "Badge_Type_Water_01",
 
-         "rave_emote", "scream_emote"
+         ["sunny_emote"]         = "Badge_Weather_Sunny_01",
+         ["clear_emote"]         = "Badge_Weather_Clear_01",
+         ["rain_emote"]          = "Badge_Weather_Rain_01",
+         ["partly_cloudy_emote"] = "Badge_Weather_Partly_Cloudy_01",
+         ["cloudy_emote"]        = "Badge_Weather_Cloudy_01",
+         ["windy_emote"]         = "Badge_Weather_Windy_01",
+         ["snow_emote"]          = "Badge_Weather_Snow_01",
+         ["fog_emote"]           = "Badge_Weather_Fog_01",
+
+         ["rave_emote"]          = "ravewizard",
+         ["scream_emote"]        = "rowletscrem",
       };
-      public static readonly Dictionary<string, string> NONA_EMOJIS = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
       /// <summary>
       /// Number Emojis
       /// </summary>
-      public static readonly string[] NUM_EMOJI_NAMES = {
-         "number_1_emote", "number_2_emote",
-         "number_3_emote", "number_4_emote",
-         "number_5_emote", "number_6_emote",
-         "number_7_emote", "number_8_emote",
-         "number_9_emote",  "number_10_emote",
-         "number_11_emote"
+      public static readonly Dictionary<string, string> NUM_EMOJI_NAMES = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+      {
+         ["number_1_emote"] = "number_1",
+         ["number_2_emote"] = "number_2",
+         ["number_3_emote"] = "number_3",
+         ["number_4_emote"] = "number_4",
+         ["number_5_emote"] = "number_5",
+         ["number_6_emote"] = "number_6",
+         ["number_7_emote"] = "number_7",
+         ["number_8_emote"] = "number_8",
+         ["number_9_emote"] = "number_9",
+         ["number_10_emote"] = "number_10",
+         ["number_11_emote"] = "number_11",
       };
       public static readonly int NUM_SELECTIONS = 10;
       public static readonly Emote[] SELECTION_EMOJIS = new Emote[NUM_SELECTIONS];
