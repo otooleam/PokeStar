@@ -1,36 +1,45 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
+using System.Collections.Generic;
 using Discord;
 using PokeStar.Calculators;
 
 namespace PokeStar.DataModels
 {
+   /// <summary>
+   /// Simulates catching Pokémon.
+   /// </summary>
    public class CatchSimulation
    {
-      private const int TRUE = 1;
-      private const int FALSE = 0;
-
+      /// <summary>
+      /// Pokémon to simulate catching.
+      /// </summary>
       public Pokemon Pokemon { get; private set; }
 
+      /// <summary>
+      /// Chance to catch the Pokémon.
+      /// </summary>
       public double CatchChance { get; private set; }
 
+      /// <summary>
+      /// Custom radius value.
+      /// </summary>
       public double CustomRadius { get; private set; }
 
-      private enum MODIFIER_INDEX
-      {
-         LEVEL,
-         BALL,
-         BERRY,
-         THROW,
-         CURVEBALL,
-         MEDAL_1,
-         MEDAL_2,
-         ENCOUNTER,
-      };
+      /// <summary>
+      /// Current modifer index.
+      /// </summary>
+      private int CurrentModifier;
 
+      /// <summary>
+      /// Array of modifer indices.
+      /// </summary>
       private readonly int[] Modifiers = new int[(int)Enum.GetValues(typeof(MODIFIER_INDEX)).Cast<MODIFIER_INDEX>().Max() + 1];
 
+      /// <summary>
+      /// Dictionary of modifer values.
+      /// Key is modifier name, value is max modifier value.
+      /// </summary>
       private readonly Dictionary<string, int> ModifierStats = new Dictionary<string, int>()
       {
          ["Pokémon Level"]  = Global.MAX_WILD_LEVEL - 1,
@@ -43,8 +52,20 @@ namespace PokeStar.DataModels
          ["Encounter Type"] = Global.ENCOUNTER_RATE.Count - 1,
       };
 
-
-      private int CurrentModifier;
+      /// <summary>
+      /// Modifer list index.
+      /// </summary>
+      private enum MODIFIER_INDEX
+      {
+         LEVEL,
+         BALL,
+         BERRY,
+         THROW,
+         CURVEBALL,
+         MEDAL_1,
+         MEDAL_2,
+         ENCOUNTER,
+      };
 
       /// <summary>
       /// Creates a new CatchSimulation.
@@ -67,46 +88,84 @@ namespace PokeStar.DataModels
          return ModifierStats.Keys.ElementAt(CurrentModifier);
       }
 
+      /// <summary>
+      /// Get level text.
+      /// </summary>
+      /// <returns>Level as a string.</returns>
       public string GetLevel()
       {
          return $"{Modifiers[(int)MODIFIER_INDEX.LEVEL] + 1}";
       }
 
+      /// <summary>
+      /// Get 
+      /// </summary>
+      /// <returns></returns>
       public string GetBall()
       {
          return Global.POKE_BALL_RATE.Keys.ElementAt(Modifiers[(int)MODIFIER_INDEX.BALL]);
       }
 
+      /// <summary>
+      /// Get berry test.
+      /// </summary>
+      /// <returns>Berry as a string.</returns>
       public string GetBerry()
       {
          return Global.BERRY_RATE.Keys.ElementAt(Modifiers[(int)MODIFIER_INDEX.BERRY]);
       }
 
+      /// <summary>
+      /// Get throw text.
+      /// Will display custom radius if set.
+      /// </summary>
+      /// <returns>Throw radius as a string.</returns>
       public string GetThrow()
       {
-         return CustomRadius == 0 ? Global.THROW_RATE.Keys.ElementAt(Modifiers[(int)MODIFIER_INDEX.THROW]) : $"{CustomRadius}";
+         return CustomRadius == 0 ? Global.THROW_RATE.Keys.ElementAt(Modifiers[(int)MODIFIER_INDEX.THROW]) : $"Custom ({CustomRadius})";
       }
 
+      /// <summary>
+      /// Get curveball text.
+      /// </summary>
+      /// <returns>Curveball as a string.</returns>
       public string GetCurveball()
       {
          return Global.CURVEBALL_RATE.Keys.ElementAt(Modifiers[(int)MODIFIER_INDEX.CURVEBALL]);
       }
 
+      /// <summary>
+      /// Get medal 1 text.
+      /// </summary>
+      /// <returns>Medal 1 as a string.</returns>
       public string GetMedal1()
       {
          return Global.MEDAL_RATE.Keys.ElementAt(Modifiers[(int)MODIFIER_INDEX.MEDAL_1]);
       }
 
+      /// <summary>
+      /// Get medal 2 text.
+      /// </summary>
+      /// <returns>Medal 2 as a string.</returns>
       public string GetMedal2()
       {
          return Global.MEDAL_RATE.Keys.ElementAt(Modifiers[(int)MODIFIER_INDEX.MEDAL_2]);
       }
 
+      /// <summary>
+      /// Get encounter text.
+      /// </summary>
+      /// <returns>Encounter type as a string.</returns>
       public string GetEncounter()
       {
          return Global.ENCOUNTER_RATE.Keys.ElementAt(Modifiers[(int)MODIFIER_INDEX.ENCOUNTER]);
       }
 
+      /// <summary>
+      /// Set a custom level.
+      /// </summary>
+      /// <param name="newLevel">New level value.</param>
+      /// <returns>True if the custom value is set, otherwise false.</returns>
       public bool SetCustomLevel(int newLevel)
       {
          if (newLevel >= Global.MIN_WILD_LEVEL && newLevel <= Global.MAX_WILD_LEVEL)
@@ -118,6 +177,11 @@ namespace PokeStar.DataModels
          return false;
       }
 
+      /// <summary>
+      /// Set a custom throw radius.
+      /// </summary>
+      /// <param name="newRadius">New radius value.</param>
+      /// <returns>True if the custom value is set, otherwise false.</returns>
       public bool SetCustomRadius(double newRadius)
       {
          if (newRadius >= 1.0 && newRadius <= 2.0)
@@ -150,7 +214,7 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// 
+      /// Increment the current modifier.
       /// </summary>
       public void IncrementModifierValue()
       {
@@ -171,7 +235,7 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// 
+      /// Decrement the current modifier.
       /// </summary>
       public void DecrementModifierValue()
       {
