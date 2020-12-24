@@ -10,7 +10,7 @@ namespace PokeStar.PreConditions
    {
       public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
       {
-         if (context.Message.Reference.MessageId.IsSpecified && RaidCommandParent.IsRaidMessage(context.Message.Reference.MessageId.Value))
+         if (context.Message.Reference != null && RaidCommandParent.IsRaidMessage(context.Message.Reference.MessageId.Value))
          {
             return await Task.FromResult(PreconditionResult.FromSuccess());
          }
