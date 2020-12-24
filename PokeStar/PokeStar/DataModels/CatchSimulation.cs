@@ -107,20 +107,26 @@ namespace PokeStar.DataModels
          return Global.ENCOUNTER_RATE.Keys.ElementAt(Modifiers[(int)MODIFIER_INDEX.ENCOUNTER]);
       }
 
-      public void SetCustomLevel(int newLevel)
+      public bool SetCustomLevel(int newLevel)
       {
          if (newLevel >= Global.MIN_WILD_LEVEL && newLevel <= Global.MAX_WILD_LEVEL)
          {
             Modifiers[(int)MODIFIER_INDEX.LEVEL] = newLevel;
+            CalcCatchChance();
+            return true;
          }
+         return false;
       }
 
-      public void SetCustomRadius(double newRadius)
+      public bool SetCustomRadius(double newRadius)
       {
          if (newRadius >= 1.0 && newRadius <= 2.0)
          {
             CustomRadius = Math.Round(newRadius, 2);
+            CalcCatchChance();
+            return true;
          }
+         return false;
       }
 
       /// <summary>
