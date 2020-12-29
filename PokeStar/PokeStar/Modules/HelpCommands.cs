@@ -43,7 +43,7 @@ namespace PokeStar.Modules
             string prefix = Connections.Instance().GetPrefix(Context.Guild.Id);
 
 
-            IUserMessage msg = await ReplyAsync(embed: BuildGeneralHelpEmbed(validCommands.Take(MAX_COMMANDS).ToList(), prefix));
+            IUserMessage msg = await ReplyAsync(embed: BuildGeneralHelpEmbed(validCommands.Take(MAX_COMMANDS).ToList(), prefix, 1));
             if (validCommands.Count > MAX_COMMANDS)
             {
                helpMessages.Add(msg.Id, new HelpMessage(validCommands));
@@ -133,31 +133,24 @@ namespace PokeStar.Modules
          int offset = helpMessage.Page;
          string prefix = Connections.Instance().GetPrefix(guildId);
 
-         if (reaction.Emote.Equals(extraEmojis[BACK_ARROW]))
+         if (reaction.Emote.Equals(extraEmojis[BACK_ARROW]) && offset > 0)
          {
-            if (offset > 0)
-            {
-               offset--;
-               SocketUserMessage msg = (SocketUserMessage)message;
-               await msg.ModifyAsync(x =>
-               {
-                  x.Embed = BuildGeneralHelpEmbed(helpMessage.Commands.Skip(offset * MAX_COMMANDS).Take(MAX_COMMANDS).ToList(), prefix);
-               });
-            }
+            offset--;
          }
-         else if (reaction.Emote.Equals(extraEmojis[FORWARD_ARROR]))
+         else if (reaction.Emote.Equals(extraEmojis[FORWARD_ARROR]) && helpMessage.Commands.Count > (offset + 1) * MAX_COMMANDS)
          {
-            if (helpMessage.Commands.Count > ((offset + 1) * MAX_COMMANDS))
-            {
-               offset++;
-               SocketUserMessage msg = (SocketUserMessage)message;
-               await msg.ModifyAsync(x =>
-               {
-                  x.Embed = BuildGeneralHelpEmbed(helpMessage.Commands.Skip(offset * MAX_COMMANDS).Take(MAX_COMMANDS).ToList(), prefix);
-               });
-            }
+            offset++;
          }
-         helpMessage.Page = offset;
+
+         if (helpMessage.Page != offset)
+         {
+            await ((SocketUserMessage)message).ModifyAsync(x =>
+            {
+               x.Embed = BuildGeneralHelpEmbed(helpMessage.Commands.Skip(offset * MAX_COMMANDS).Take(MAX_COMMANDS).ToList(), prefix, offset + 1);
+            });
+         }
+
+         helpMessages[message.Id] = new HelpMessage(helpMessage.Commands, offset);
          await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
       }
 
@@ -167,11 +160,11 @@ namespace PokeStar.Modules
       /// <param name="commands">List of commands to display.</param>
       /// <param name="prefix">Prefix used for the server.</param>
       /// <returns>Embed for viewing a General list of commands.</returns>
-      private static Embed BuildGeneralHelpEmbed(List<CommandInfo> commands, string prefix)
+      private static Embed BuildGeneralHelpEmbed(List<CommandInfo> commands, string prefix, int page)
       {
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithTitle("**Command List**");
-         embed.WithDescription($"List of commands supported by Nona.");
+         embed.WithDescription($"List of commands supported by Nona.\n**Current Page:** {page}");
          foreach (CommandInfo cmdInfo in commands)
          {
             embed.AddField($"**{prefix}{cmdInfo.Name}**", cmdInfo.Summary ?? "No description available");

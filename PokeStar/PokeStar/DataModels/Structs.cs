@@ -204,9 +204,10 @@ namespace PokeStar.DataModels
       /// Creates a new HelpMessage.
       /// </summary>
       /// <param name="commands">All commands that can be shown.</param>
-      public HelpMessage(List<CommandInfo> commands)
+      /// <param name="page">Current Page. Defaults to 0.</param>
+      public HelpMessage(List<CommandInfo> commands, int page = 0)
       {
-         Page = 0;
+         Page = page;
          Commands = commands;
       }
    }

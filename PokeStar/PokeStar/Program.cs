@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -278,22 +279,24 @@ namespace PokeStar
       /// <param name="server">Server that the emotes are on.</param>
       private static void SetEmotes(SocketGuild server)
       {
-         foreach (string emote in Global.EMOTE_NAMES)
+         List<string> nonaEmojiKeys = Global.NONA_EMOJIS.Keys.ToList();
+         foreach (string emote in nonaEmojiKeys)
          {
             Global.NONA_EMOJIS[emote] = Emote.Parse(
                server.Emotes.FirstOrDefault(
                   x => x.Name.Equals(
-                     Global.ENV_FILE.GetValue(emote).ToString(),
+                     Global.NONA_EMOJIS[emote],
                      StringComparison.OrdinalIgnoreCase)
                   ).ToString()).ToString();
          }
-         
-         foreach (string emote in Global.NUM_EMOJI_NAMES)
+
+         List<string> noumEmojiKeys = Global.NUM_EMOJI_NAMES.Keys.ToList();
+         foreach (string emote in noumEmojiKeys)
          {
             Global.NUM_EMOJIS.Add(Emote.Parse(
                server.Emotes.FirstOrDefault(
                   x => x.Name.Equals(
-                     Global.ENV_FILE.GetValue(emote).ToString(),
+                     Global.NUM_EMOJI_NAMES[emote], 
                      StringComparison.OrdinalIgnoreCase)
                   ).ToString()));
          }
