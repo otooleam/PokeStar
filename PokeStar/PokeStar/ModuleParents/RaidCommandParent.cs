@@ -1515,11 +1515,11 @@ namespace PokeStar.ModuleParents
       protected static void RemoveOldRaids()
       {
          List<ulong> ids = new List<ulong>();
-         foreach (KeyValuePair<ulong, RaidParent> temp in raidMessages)
+         foreach (KeyValuePair<ulong, RaidParent> raid in raidMessages)
          {
-            if (Math.Abs((temp.Value.CreatedAt - DateTime.Now).TotalDays) >= 1)
+            if (Math.Abs((DateTime.Now - raid.Value.CreatedAt).TotalDays) >= 1)
             {
-               ids.Add(temp.Key);
+               ids.Add(raid.Key);
             }
          }
          foreach (ulong id in ids)
