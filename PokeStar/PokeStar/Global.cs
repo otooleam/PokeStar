@@ -69,7 +69,6 @@ namespace PokeStar
       /// <summary>
       /// Embed Colors
       /// </summary>
-
       public static readonly Color EMBED_COLOR_INFO_RESPONSE      = Color.Purple;
       public static readonly Color EMBED_COLOR_WARNING_RESPONSE   = Color.Orange;
       public static readonly Color EMBED_COLOR_ERROR_RESPONSE     = Color.Red;
@@ -133,6 +132,8 @@ namespace PokeStar
          ["1"]         = COMMON_RAID_TIER,
       };
 
+      public static readonly string RAID_TRAIN_IMAGE_NAME = "Raid_Train.png";
+
       /// <summary>
       /// Egg Tiers
       /// </summary>
@@ -194,9 +195,23 @@ namespace PokeStar
       /// <summary>
       /// Level constants
       /// </summary>
+      public static readonly double[] DISCRETE_CPM = {
+         0.094     , 0.16639787, 0.21573247, 0.25572005, 0.29024988,
+         0.3210876 , 0.34921268, 0.3752356 , 0.39956728, 0.4225    ,
+         0.44310755, 0.4627984 , 0.48168495, 0.49985844, 0.51739395,
+         0.5343543 , 0.5507927 , 0.5667545 , 0.5822789 , 0.5974    ,
+         0.6121573 , 0.6265671 , 0.64065295, 0.65443563, 0.667934  ,
+         0.6811649 , 0.69414365, 0.7068842 , 0.7193991 , 0.7317    ,
+         0.7377695 , 0.74378943, 0.74976104, 0.7556855 , 0.76156384,
+         0.76739717, 0.7731865 , 0.77893275, 0.784637  , 0.7903    ,
+         0.7953    , 0.8003    , 0.8053    , 0.8103    , 0.8153    ,
+         0.8203    , 0.8253    , 0.8303    , 0.8353    , 0.8403    ,
+         0.8453    , 0.8503    , 0.8553    , 0.8603    , 0.8653
+      };
+
       public static readonly double LEVEL_STEP  = 0.5;
-      public static readonly int MAX_LEVEL      = 50;
-      public static readonly int MAX_HALF_LEVEL = 40;
+      public static readonly int MAX_XL_LEVEL   = 50;
+      public static readonly int MAX_REG_LEVEL  = 40;
       public static readonly int MIN_WILD_LEVEL = 1;
       public static readonly int MAX_WILD_LEVEL = 35;
       public static readonly int RAID_LEVEL     = 20;
@@ -204,6 +219,55 @@ namespace PokeStar
       public static readonly int QUEST_LEVEL    = 15;
       public static readonly int WEATHER_BOOST  = 5;
       public static readonly int BUDDY_BOOST    = 1;
+
+      /// <summary>
+      /// Catch multipliers
+      /// </summary> 
+      public static readonly Dictionary<string, double> POKE_BALL_RATE = new Dictionary<string, double>()
+      {
+         ["Pokéball"]  = 1.0,
+         ["Great Ball"] = 1.5,
+         ["Ultra Ball"] = 2.0,
+      };
+      public static readonly Dictionary<string, double> BERRY_RATE = new Dictionary<string, double>()
+      {
+         ["None"]         = 1.0,
+         ["Razz"]         = 1.5,
+         ["Silver Pinap"] = 1.8,
+         ["Golden Razz"]  = 2.5,
+      };
+      public static readonly Dictionary<string, double> THROW_RATE = new Dictionary<string, double>()
+      {
+         ["Regular"] = 1.0,
+         ["Nice"] = 1.0,
+         ["Great"] = 1.3,
+         ["Excellent"] = 1.7,
+      };
+      public static readonly Dictionary<string, double> CURVEBALL_RATE = new Dictionary<string, double>()
+      {
+         ["No"] = 1.0,
+         ["Yes"] = 1.7,
+      };
+      public static readonly Dictionary<string, double> MEDAL_RATE = new Dictionary<string, double>()
+      {
+         ["None"]     = 1.0,
+         ["Bronze"]   = 1.1,
+         ["Silver"]   = 1.2,
+         ["Gold"]     = 1.3,
+         ["Platinum"] = 1.4,
+      };
+      public static readonly Dictionary<string, double> ENCOUNTER_RATE = new Dictionary<string, double>()
+      {
+         ["Standard"] = 1.0,
+         ["Special"]  = 2.0,
+      };
+
+      /// <summary>
+      /// Catch ring colors
+      /// </summary>
+      public static readonly uint MIN_CATCH_COLOR = 0xFF0000; // RED    0%
+      public static readonly uint MID_CATCH_COLOR = 0xFFFF00; // YELLOW 50%
+      public static readonly uint MAX_CATCH_COLOR = 0x00FF00; // GREEN  100%
 
       /// <summary>
       /// IV constants
@@ -214,8 +278,9 @@ namespace PokeStar
       /// <summary>
       /// League constants
       /// </summary>
-      public static readonly int MAX_GREAT_CP = 1500;
-      public static readonly int MAX_ULTRA_CP = 2500;
+      public static readonly int MAX_LITTLE_CP = 500;
+      public static readonly int MAX_GREAT_CP  = 1500;
+      public static readonly int MAX_ULTRA_CP  = 2500;
 
       /// <summary>
       /// Evolution tree
@@ -263,8 +328,7 @@ namespace PokeStar
       public static readonly char REGISTER_STRING_INFO  = 'I';
       public static readonly char REGISTER_STRING_ROLE  = 'P';
       public static readonly char REGISTER_STRING_RAID  = 'R';
-      public static readonly char REGISTER_STRING_TRAIN = 'T';
-      public static readonly string FULL_REGISTER_STRING = "DEIPRT";
+      public static readonly string FULL_REGISTER_STRING = "DEIPR";
       public static readonly Dictionary<string, string> REGISTER_STRING_TYPE = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
          [REGISTER_STRING_DEX.ToString()]   = "PokéDex",
@@ -272,7 +336,6 @@ namespace PokeStar
          [REGISTER_STRING_INFO.ToString()]  = "Information",
          [REGISTER_STRING_ROLE.ToString()]  = "Player Roles",
          [REGISTER_STRING_RAID.ToString()]  = "Raid",
-         [REGISTER_STRING_TRAIN.ToString()] = "Raid Train",
       };
       public static readonly Dictionary<string, string> REGISTER_VALIE_STRING = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
@@ -290,8 +353,6 @@ namespace PokeStar
          ["P"]                  = REGISTER_STRING_ROLE.ToString(),
          ["RAID"]               = REGISTER_STRING_RAID.ToString(),
          ["R"]                  = REGISTER_STRING_RAID.ToString(),
-         ["TRAIN"]              = REGISTER_STRING_TRAIN.ToString(),
-         ["T"]                  = REGISTER_STRING_TRAIN.ToString()
 
       };
 
@@ -330,36 +391,66 @@ namespace PokeStar
       /// <summary>
       /// Nona emojis
       /// </summary>
-      public static readonly string[] EMOTE_NAMES = {
-         "valor_emote", "mystic_emote", "instinct_emote",
-         "raid_emote", "ex_emote", "mega_emote", 
-         "ex_pass_emote", "remote_pass_emote",
+      public static readonly Dictionary<string, string> NONA_EMOJIS = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+      { 
+         ["valor_emote"]         = "Badge_Team_Valor_01",
+         ["mystic_emote"]        = "Badge_Team_Mystic_01",
+         ["instinct_emote"]      = "Badge_Team_Instinct_01",
 
-         "bug_emote", "dark_emote", "dragon_emote",
-         "electric_emote", "fairy_emote", "fighting_emote",
-         "fire_emote", "flying_emote", "ghost_emote",
-         "grass_emote", "ground_emote", "ice_emote",
-         "normal_emote", "poison_emote", "psychic_emote",
-         "rock_emote", "steel_emote", "water_emote",
+         ["raid_emote"]          = "Badge_Raid_01",
+         ["ex_emote"]            = "Badge_EX_01",
+         ["mega_emote"]          = "Badge_Mega_01",
+         ["ex_pass_emote"]       = "Badge_EX_Pass_01",
+         ["remote_pass_emote"]   = "Badge_Remote_Pass_01",
 
-         "sunny_emote", "clear_emote", "rain_emote",
-         "partly_cloudy_emote", "cloudy_emote",
-         "windy_emote", "snow_emote", "fog_emote",
+         ["bug_emote"]           = "Badge_Type_Bug_01",
+         ["dark_emote"]          = "Badge_Type_Dark_01",
+         ["dragon_emote"]        = "Badge_Type_Dragon_01",
+         ["electric_emote"]      = "Badge_Type_Electric_01",
+         ["fairy_emote"]         = "Badge_Type_Fairy_01",
+         ["fighting_emote"]      = "Badge_Type_Fighting_01",
+         ["fire_emote"]          = "Badge_Type_Fire_01",
+         ["flying_emote"]        = "Badge_Type_Flying_01",
+         ["ghost_emote"]         = "Badge_Type_Ghost_01",
+         ["grass_emote"]         = "Badge_Type_Grass_01",
+         ["ground_emote"]        = "Badge_Type_Ground_01",
+         ["ice_emote"]           = "Badge_Type_Ice_01",
+         ["normal_emote"]        = "Badge_Type_Normal_01",
+         ["poison_emote"]        = "Badge_Type_Poison_01",
+         ["psychic_emote"]       = "Badge_Type_Psychic_01",
+         ["rock_emote"]          = "Badge_Type_Rock_01",
+         ["steel_emote"]         = "Badge_Type_Steel_01",
+         ["water_emote"]         = "Badge_Type_Water_01",
 
-         "rave_emote", "scream_emote"
+         ["sunny_emote"]         = "Badge_Weather_Sunny_01",
+         ["clear_emote"]         = "Badge_Weather_Clear_01",
+         ["rain_emote"]          = "Badge_Weather_Rain_01",
+         ["partly_cloudy_emote"] = "Badge_Weather_Partly_Cloudy_01",
+         ["cloudy_emote"]        = "Badge_Weather_Cloudy_01",
+         ["windy_emote"]         = "Badge_Weather_Windy_01",
+         ["snow_emote"]          = "Badge_Weather_Snow_01",
+         ["fog_emote"]           = "Badge_Weather_Fog_01",
+
+         ["rave_emote"]          = "ravewizard",
+         ["scream_emote"]        = "rowletscrem",
       };
-      public static readonly Dictionary<string, string> NONA_EMOJIS = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
       /// <summary>
       /// Number Emojis
       /// </summary>
-      public static readonly string[] NUM_EMOJI_NAMES = {
-         "number_1_emote", "number_2_emote",
-         "number_3_emote", "number_4_emote",
-         "number_5_emote", "number_6_emote",
-         "number_7_emote", "number_8_emote",
-         "number_9_emote",  "number_10_emote",
-         "number_11_emote"
+      public static readonly Dictionary<string, string> NUM_EMOJI_NAMES = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
+      {
+         ["number_1_emote"] = "number_1",
+         ["number_2_emote"] = "number_2",
+         ["number_3_emote"] = "number_3",
+         ["number_4_emote"] = "number_4",
+         ["number_5_emote"] = "number_5",
+         ["number_6_emote"] = "number_6",
+         ["number_7_emote"] = "number_7",
+         ["number_8_emote"] = "number_8",
+         ["number_9_emote"] = "number_9",
+         ["number_10_emote"] = "number_10",
+         ["number_11_emote"] = "number_11",
       };
       public static readonly int NUM_SELECTIONS = 10;
       public static readonly Emote[] SELECTION_EMOJIS = new Emote[NUM_SELECTIONS];

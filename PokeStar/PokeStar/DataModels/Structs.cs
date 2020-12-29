@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Discord.Commands;
 using Discord.WebSocket;
 
@@ -32,22 +31,38 @@ namespace PokeStar.DataModels
       }
    }
 
-   public struct RaidReplyInfo
+   /// <summary>
+   /// Location in a raid train.
+   /// </summary>
+   public struct RaidTrainLoc
    {
-      public string Command { get; }
+      /// <summary>
+      /// Time the raid starts
+      /// </summary>
+      public string Time { get; }
+      /// <summary>
+      /// Location of the raid.
+      /// </summary>
+      public string Location { get; }
 
-      public string Description { get; }
+      /// <summary>
+      /// Boss that is at the location.
+      /// </summary>
+      public string BossName { get; set; }
 
-      public List<string> Param { get; }
-
-      public RaidReplyInfo (string cmd, string desc, List<string>param)
+      /// <summary>
+      /// Creates a new RaidTrainLoc.
+      /// </summary>
+      /// <param name="time">Time the raid starts.</param>
+      /// <param name="location">Location of the raid.</param>
+      /// <param name="bossName">Boss that is at the location.</param>
+      public RaidTrainLoc(string time, string location, string bossName)
       {
-         Command = cmd;
-         Description = desc;
-         Param = param;
+         Time = time;
+         Location = location;
+         BossName = bossName;
       }
    }
-
 
    /// <summary>
    /// Relation between types.
@@ -204,9 +219,10 @@ namespace PokeStar.DataModels
       /// Creates a new HelpMessage.
       /// </summary>
       /// <param name="commands">All commands that can be shown.</param>
-      public HelpMessage(List<CommandInfo> commands)
+      /// <param name="page">Current Page. Defaults to 0.</param>
+      public HelpMessage(List<CommandInfo> commands, int page = 0)
       {
-         Page = 0;
+         Page = page;
          Commands = commands;
       }
    }

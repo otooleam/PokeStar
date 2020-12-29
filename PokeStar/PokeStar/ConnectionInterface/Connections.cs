@@ -99,6 +99,15 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Get the full list of raid bosses.
+      /// </summary>
+      /// <returns>List of raid bosses sorted by tier.</returns>
+      public static Dictionary<int, List<string>> GetFullBossList()
+      {
+         return SilphData.GetRaidBosses();
+      }
+
+      /// <summary>
       /// Gets a list of current eggs for a given tier.
       /// </summary>
       /// <param name="tier">Tier of eggs.</param>
@@ -160,7 +169,7 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       public void UpdateRocketList()
       {
-         Rockets = SilphData.GetRockets().Union(SilphData.GetRocketLeaders()).ToDictionary(k => k.Key, v => v.Value, StringComparer.OrdinalIgnoreCase);
+         // Rockets = SilphData.GetRockets().Union(SilphData.GetRocketLeaders()).ToDictionary(k => k.Key, v => v.Value, StringComparer.OrdinalIgnoreCase);
       }
 
       /// <summary>
@@ -237,12 +246,15 @@ namespace PokeStar.ConnectionInterface
 
          pokemon.CPMax = CPCalculator.CalcCPPerLevel(
             pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_LEVEL);
+            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_XL_LEVEL);
 
-         pokemon.GreatIVs = CPCalculator.CalcPvPIVsPerLeague(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina, Global.MAX_GREAT_CP);
-         pokemon.UltraIVs = CPCalculator.CalcPvPIVsPerLeague(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina, Global.MAX_ULTRA_CP);
+         pokemon.GreatXLIVs = CPCalculator.CalcPvPIVsPerLeague(
+            pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+            Global.MAX_GREAT_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
+
+         pokemon.UltraXLIVs = CPCalculator.CalcPvPIVsPerLeague(
+            pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+            Global.MAX_ULTRA_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
       }
 
       /// <summary>
@@ -256,16 +268,16 @@ namespace PokeStar.ConnectionInterface
          {
             pokemon.CPMaxHalf = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_HALF_LEVEL);
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_REG_LEVEL);
 
             pokemon.CPMax = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_LEVEL);
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_XL_LEVEL);
 
             pokemon.CPBestBuddy = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                Global.MAX_IV, Global.MAX_IV, Global.MAX_IV,
-               Global.MAX_LEVEL + Global.BUDDY_BOOST);
+               Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
 
             pokemon.CPRaidMin = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
@@ -311,6 +323,50 @@ namespace PokeStar.ConnectionInterface
                   Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, level));
             }
          }
+      }
+
+      /// <summary>
+      /// Calculates the best PvP IVs of a Pokémon. Calculated for
+      /// Little, Great, and Ultra Leagues for both levels 41 and 51 max.
+      /// </summary>
+      /// <param name="pokemon">Reference to a Pokémon.</param>
+      public void GetPokemonPvP(ref Pokemon pokemon)
+      {
+         if (pokemon != null)
+         {
+            pokemon.GreatIVs = CPCalculator.CalcPvPIVsPerLeague(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+               Global.MAX_GREAT_CP, Global.MAX_REG_LEVEL + Global.BUDDY_BOOST);
+
+            pokemon.UltraIVs = CPCalculator.CalcPvPIVsPerLeague(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+               Global.MAX_ULTRA_CP, Global.MAX_REG_LEVEL + Global.BUDDY_BOOST);
+
+            pokemon.GreatXLIVs = CPCalculator.CalcPvPIVsPerLeague(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+               Global.MAX_GREAT_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
+
+            pokemon.UltraXLIVs = CPCalculator.CalcPvPIVsPerLeague(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+               Global.MAX_ULTRA_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
+
+            pokemon.CanBeLittleLeague = CanBeLittleLeague(ReformatName(pokemon.Name));
+            if (pokemon.CanBeLittleLeague)
+            {
+               pokemon.LittleIVs = CPCalculator.CalcPvPIVsPerLeague(
+                  pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+                  Global.MAX_LITTLE_CP, Global.MAX_REG_LEVEL + Global.BUDDY_BOOST);
+
+               pokemon.LittleXLIVs = CPCalculator.CalcPvPIVsPerLeague(
+                  pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+                  Global.MAX_LITTLE_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
+            }
+         }
+      }
+
+      public bool CanBeLittleLeague(string pokemonName)
+      {
+         return POGODBConnector.IsBaseForm(pokemonName);
       }
 
       /// <summary>
@@ -370,7 +426,6 @@ namespace PokeStar.ConnectionInterface
       {
          return POGODBConnector.GetPokemonWithTags();
       }
-
 
       /// <summary>
       /// Gets a given move.

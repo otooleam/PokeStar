@@ -1,8 +1,6 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using System.Collections.Immutable;
 using Discord;
 using Discord.Rest;
 using Discord.Commands;
@@ -20,7 +18,7 @@ namespace PokeStar.Modules
    public class RaidCommands : RaidCommandParent
    {
       [Command("raid")]
-      [Summary("Creates a new interactive raid coordination message.")]
+      [Summary("Creates a new raid coordination message.")]
       [Remarks("Valid Tier values:\n" +
          "0 (raid with no boss assigned)\n" +
          "1, common, C\n" +
@@ -46,12 +44,9 @@ namespace PokeStar.Modules
 
             Connections.CopyFile(fileName);
             RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
-            for (int i = 0; i < potentials.Count; i++)
-            {
-               await selectMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-            }
             raidMessages.Add(selectMsg.Id, raid);
             Connections.DeleteFile(fileName);
+            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -61,9 +56,9 @@ namespace PokeStar.Modules
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
-            await SetEmojis(raidMsg, raidEmojis);
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
+            SetEmojis(raidMsg, raidEmojis);
          }
          else if (Global.USE_EMPTY_RAID)
          {
@@ -73,9 +68,9 @@ namespace PokeStar.Modules
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
-            await SetEmojis(raidMsg, raidEmojis);
             raidMessages.Add(raidMsg.Id, raid);
-            Connections.DeleteFile(fileName);
+            Connections.DeleteFile(fileName);            
+            SetEmojis(raidMsg, raidEmojis);
          }
          else
          {
@@ -86,7 +81,7 @@ namespace PokeStar.Modules
 
       [Command("mule")]
       [Alias("raidmule")]
-      [Summary("Creates a new interactive remote raid coordination message.")]
+      [Summary("Creates a new remote raid coordination message.")]
       [Remarks("Valid Tier values:\n" +
          "0 (raid with no boss assigned)\n" +
          "1, common, C\n" +
@@ -112,12 +107,9 @@ namespace PokeStar.Modules
 
             Connections.CopyFile(fileName);
             RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
-            for (int i = 0; i < potentials.Count; i++)
-            {
-               await selectMsg.AddReactionAsync(Global.SELECTION_EMOJIS[i]);
-            }
             raidMessages.Add(selectMsg.Id, raid);
             Connections.DeleteFile(fileName);
+            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -127,9 +119,9 @@ namespace PokeStar.Modules
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(raid, fileName));
-            await SetEmojis(raidMsg, muleEmojis);
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
+            SetEmojis(raidMsg, muleEmojis);
          }
          else if (Global.USE_EMPTY_RAID)
          {
@@ -139,13 +131,84 @@ namespace PokeStar.Modules
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(raid, fileName));
-            await SetEmojis(raidMsg, muleEmojis);
             raidMessages.Add(raidMsg.Id, raid);
             Connections.DeleteFile(fileName);
+            SetEmojis(raidMsg, muleEmojis);
          }
          else
          {
             await ResponseMessage.SendErrorMessage(Context.Channel, "mule", $"No raid bosses found for tier {tier}");
+         }
+         RemoveOldRaids();
+      }
+
+      [Command("train")]
+      [Alias("raidtrain")]
+      [Summary("Creates a new raid train coordination message.")]
+      [Remarks("Valid Tier values:\n" +
+         "0 (raid with no boss assigned)\n" +
+         "1, common, C\n" +
+         "3, rare, R\n" +
+         "5, legendary, L\n" +
+         "7, mega, M\n")]
+      [RegisterChannel('R')]
+      public async Task RaidTrain([Summary("Tier of the raids.")] string tier,
+                           [Summary("Time the train will start.")] string time,
+                           [Summary("Where the train will start.")][Remainder] string location)
+      {
+         short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
+         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         List<string> potentials = calcTier == Global.INVALID_RAID_TIER ? new List<string>() : allBosses[calcTier];
+         RaidTrain raid;
+         string fileName;
+         if (potentials.Count > 1)
+         {
+            fileName = $"Egg{calcTier}.png";
+            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location)
+            {
+               RaidBossSelections = potentials,
+               AllBosses = allBosses
+            };
+
+            Connections.CopyFile(fileName);
+            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+            raidMessages.Add(selectMsg.Id, raid);
+            Connections.DeleteFile(fileName);
+            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
+         }
+         else if (potentials.Count == 1)
+         {
+            string boss = potentials.First();
+            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location, boss)
+            {
+               AllBosses = allBosses
+            };
+            fileName = Global.RAID_TRAIN_IMAGE_NAME;
+
+            Connections.CopyFile(fileName);
+            RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(raid, fileName));
+            raidMessages.Add(raidMsg.Id, raid);
+            Connections.DeleteFile(fileName);
+            SetEmojis(raidMsg, raidEmojis.Concat(trainEmojis).ToArray());
+         }
+         else if (Global.USE_EMPTY_RAID)
+         {
+            string boss = Global.DEFAULT_RAID_BOSS_NAME;
+            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location, boss)
+            {
+               AllBosses = allBosses
+            };
+            fileName = Global.RAID_TRAIN_IMAGE_NAME;
+
+            Connections.CopyFile(fileName);
+            RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(raid, fileName));
+            raidMessages.Add(raidMsg.Id, raid);
+            Connections.DeleteFile(fileName);
+            SetEmojis(raidMsg, raidEmojis.Concat(trainEmojis).ToArray());
+         }
+         else
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "train", $"No raid bosses found for tier {tier}");
          }
          RemoveOldRaids();
       }

@@ -14,27 +14,16 @@ namespace PokeStar.Calculators
       /// </summary>
       private static readonly double[] discrete_cp_multiplier = {
          0.094     , 0.16639787, 0.21573247, 0.25572005, 0.29024988,
-         0.3210876 , 0.34921268, 0.37523559, 0.39956728, 0.42250001,
-         0.44310755, 0.46279839, 0.48168495, 0.49985844, 0.51739395,
-         0.53435433, 0.55079269, 0.56675452, 0.58227891, 0.59740001,
-         0.61215729, 0.62656713, 0.64065295, 0.65443563, 0.667934  ,
-         0.68116492, 0.69414365, 0.70688421, 0.71939909, 0.7317    ,
-         0.73776948, 0.74378943, 0.74976104, 0.75568551, 0.76156384,
-         0.76739717, 0.7731865 , 0.77893275, 0.78463697, 0.79030001,
-         0.79530001, 0.8003    , 0.8053    , 0.81029999, 0.81529999,
-         0.8203    , 0.8253    , 0.8303    , 0.8353     , 0.8403   , 
-         0.8453    , 0.8503    , 0.8553    , 0.8603     , 0.8653, 
-      };
-
-      /// <summary>
-      /// CPM step for half levels.
-      /// </summary>
-      private static readonly double[][] cpm_step_list = {
-          new double[] { 1 , 9.5 , 0.009426125469 },
-          new double[] { 10, 19.5, 0.008919025675 },
-          new double[] { 20, 29.5, 0.008924905903 },
-          new double[] { 30, 39.5, 0.00445946079 },
-          new double[] { 40, 49.5, 0.0 },
+         0.3210876 , 0.34921268, 0.3752356 , 0.39956728, 0.4225    ,
+         0.44310755, 0.4627984 , 0.48168495, 0.49985844, 0.51739395,
+         0.5343543 , 0.5507927 , 0.5667545 , 0.5822789 , 0.5974    ,
+         0.6121573 , 0.6265671 , 0.64065295, 0.65443563, 0.667934  ,
+         0.6811649 , 0.69414365, 0.7068842 , 0.7193991 , 0.7317    ,
+         0.7377695 , 0.74378943, 0.74976104, 0.7556855 , 0.76156384,
+         0.76739717, 0.7731865 , 0.77893275, 0.784637  , 0.7903    ,
+         0.7953    , 0.8003    , 0.8053    , 0.8103    , 0.8153    ,
+         0.8203    , 0.8253    , 0.8303    , 0.8353    , 0.8403    ,
+         0.8453    , 0.8503    , 0.8553    , 0.8603    , 0.8653
       };
 
       /// <summary>
@@ -45,17 +34,12 @@ namespace PokeStar.Calculators
       /// <returns>CPM for the half level</returns>
       private static double CalcHalfLevelCPM(double halfLevel)
       {
-         double cpmStep = 0;
-         for (int i = 0; i < cpm_step_list.Length && cpmStep == 0; i++)
-         {
-            if (halfLevel <= cpm_step_list[i][1])
-            {
-               cpmStep = cpm_step_list[i][2];
-            }
-         }
-         double cpmLevelSqrt = Math.Pow(discrete_cp_multiplier[(int)(halfLevel - 1.5)], 2);
 
-         return Math.Sqrt(cpmLevelSqrt + cpmStep);
+         double lowerCPM = discrete_cp_multiplier[(int)(halfLevel - Global.LEVEL_STEP) - 1];
+         double upperCPM = discrete_cp_multiplier[(int)(halfLevel + Global.LEVEL_STEP) - 1];
+
+         double cpmStep = ((upperCPM * upperCPM) - (lowerCPM * lowerCPM)) / 2;
+         return Math.Sqrt((lowerCPM * lowerCPM) + cpmStep);
       }
 
       /// <summary>
@@ -71,7 +55,7 @@ namespace PokeStar.Calculators
          }
          else
          {
-            return discrete_cp_multiplier[(int)(level - 1)];
+            return Global.DISCRETE_CPM[(int)(level - 1)];
          }
       }
 
@@ -138,48 +122,40 @@ namespace PokeStar.Calculators
       /// <param name="defenseStat">Defense stat of the Pokémon.</param>
       /// <param name="staminaStat">Stamina stat of the Pokémon.</param>
       /// <param name="leagueCap">Max CP of the league.</param>
+      /// <param name="maxLevel">Max level to calculate to.</param>
       /// <returns>LeagueIV object with the best IVs for the league.</returns>
-      public static LeagueIV CalcPvPIVsPerLeague(int attackStat, int defenseStat, int staminaStat, int leagueCap)
+      public static LeagueIV CalcPvPIVsPerLeague(int attackStat, int defenseStat, int staminaStat, int leagueCap, int maxLevel)
       {
-         int bestA = -1;
-         int bestD = -1;
-         int bestS = -1;
-         int bestCP = -1;
+         LeagueIV bestIV = new LeagueIV();
          int bestTotal = -1;
          double bestProduct = -1;
 
-         for (double l = 1; l <= Global.MAX_LEVEL; l += Global.LEVEL_STEP)
+         for (double level = 1; level <= maxLevel; level += Global.LEVEL_STEP)
          {
-            for (int a = 0; a <= Global.MAX_IV; a++)
+            for (int attack = 0; attack <= Global.MAX_IV; attack++)
             {
-               for (int d = 0; d <= Global.MAX_IV; d++)
+               for (int defense = 0; defense <= Global.MAX_IV; defense++)
                {
-                  for (int s = 0; s <= Global.MAX_IV; s++)
+                  for (int stamina = 0; stamina <= Global.MAX_IV; stamina++)
                   {
-                     int cpLevel = CalcCPPerLevel(attackStat, defenseStat, staminaStat, a, d, s, l);
-                     int total = a + d + s;
-                     double product = CalcAttack(attackStat, a, l) * CalcDefense(defenseStat, d, l) * Math.Floor(CalcStamina(staminaStat, s, l));
-                     if (cpLevel <= leagueCap && (product > bestProduct || (product == bestProduct && total > bestTotal)))
+                     int calcCP = CalcCPPerLevel(attackStat, defenseStat, staminaStat, attack, defense, stamina, level);
+                     int total = attack + defense + stamina;
+                     double product = CalcAttack(attackStat, attack, level) * CalcDefense(defenseStat, defense, level) * Math.Floor(CalcStamina(staminaStat, stamina, level));
+                     if (calcCP <= leagueCap && (product > bestProduct || (product == bestProduct && total > bestTotal)))
                      {
-                        bestA = a;
-                        bestD = d;
-                        bestS = s;
+                        bestIV.Attack = attack;
+                        bestIV.Defense = defense;
+                        bestIV.Stamina = stamina;
+                        bestIV.Level = level;
+                        bestIV.CP = calcCP;
                         bestTotal = total;
-                        bestCP = cpLevel;
                         bestProduct = product;
                      }
                   }
                }
             }
          }
-         return new LeagueIV
-         {
-            Attack = bestA,
-            Defense = bestD,
-            Stamina = bestS,
-            CP = bestCP,
-            StatProduct = bestProduct
-         };
+         return bestIV;
       }
    }
 }

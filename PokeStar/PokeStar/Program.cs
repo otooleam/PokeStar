@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
@@ -103,7 +104,7 @@ namespace PokeStar
          commands.Log += Log;
          client.MessageReceived += HandleCommandAsync;
          await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
-         client.ReactionAdded += HandleReactionAddedAsync;
+         client.ReactionAdded += HandleReactionAdded;
          client.Ready += HandleReady;
          client.JoinedGuild += HandleJoinGuild;
          client.LeftGuild += HandleLeftGuild;
@@ -141,8 +142,10 @@ namespace PokeStar
       /// <returns>Task Complete.</returns>
       private async Task<Task> HandleCommandAsync(SocketMessage cmdMessage)
       {
-         SocketUserMessage message = cmdMessage as SocketUserMessage;
-         if (message == null || (message.Author.IsBot && (!Global.USE_NONA_TEST || !message.Author.Username.Equals("NonaTest", StringComparison.OrdinalIgnoreCase))))
+         if (!(cmdMessage is SocketUserMessage message) || 
+             (message.Author.IsBot && 
+             (!Global.USE_NONA_TEST || !message.Author.Username.Equals("NonaTest", StringComparison.OrdinalIgnoreCase)))
+             || cmdMessage.Channel is IPrivateChannel)
          {
             return Task.CompletedTask;
          }
@@ -166,17 +169,6 @@ namespace PokeStar
                //TODO: Add call for ex raid image processing
             }
          }
-         else if (message.Reference != null)
-         {
-            if (RaidCommandParent.IsRaidMessage(message.Reference.MessageId.Value) && message.HasStringPrefix(prefix, ref argPos))
-            {
-               await RaidCommandParent.RaidMessageReplyHandle(message, prefix, argPos);
-            }
-            else if (DexCommandParent.IsDexSubMessage(message.Reference.MessageId.Value) && message.HasStringPrefix(prefix, ref argPos))
-            {
-               //TODO: Add call for Dex Reply Handle
-            }
-         }
          else if (message.HasStringPrefix(prefix, ref argPos))
          {
             IResult result = await commands.ExecuteAsync(context, argPos, services);
@@ -187,16 +179,15 @@ namespace PokeStar
 
       /// <summary>
       /// Handles the Reaction Added event.
-      /// Runs asyncronously.
       /// </summary>
       /// <param name="cachedMessage">Message that was reaction is on.</param>
       /// <param name="originChannel">Channel where the message is located.</param>
       /// <param name="reaction">Reaction made on the message.</param>
       /// <returns>Task Complete.</returns>
-      private async Task<Task> HandleReactionAddedAsync(Cacheable<IUserMessage, ulong> cachedMessage,
+      private async Task<Task> HandleReactionAdded(Cacheable<IUserMessage, ulong> cachedMessage,
           ISocketMessageChannel originChannel, SocketReaction reaction)
       {
-         IUserMessage message = await cachedMessage.GetOrDownloadAsync();
+         IUserMessage message = cachedMessage.Value;
 
          SocketGuildChannel chnl = message.Channel as SocketGuildChannel;
          ulong guild = chnl.Guild.Id;
@@ -216,6 +207,10 @@ namespace PokeStar
             {
                await DexCommandParent.DexMessageReactionHandle(message, reaction, guild);
             }
+            else if (DexCommandParent.IsCatchMessage(message.Id))
+            {
+               await DexCommandParent.CatchMessageReactionHandle(message, reaction);
+            }
             else if (HelpCommands.IsHelpMessage(message.Id))
             {
                await HelpCommands.HelpMessageReactionHandle(message, reaction, guild);
@@ -232,7 +227,7 @@ namespace PokeStar
       {
          SocketGuild server = client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(Global.HOME_SERVER, StringComparison.OrdinalIgnoreCase));
          SetEmotes(server);
-         RaidCommandParent.SetRaidEmotes();
+         RaidCommandParent.SetInitialEmotes();
 
          foreach (SocketGuild guild in client.Guilds)
          {
@@ -274,22 +269,24 @@ namespace PokeStar
       /// <param name="server">Server that the emotes are on.</param>
       private static void SetEmotes(SocketGuild server)
       {
-         foreach (string emote in Global.EMOTE_NAMES)
+         List<string> nonaEmojiKeys = Global.NONA_EMOJIS.Keys.ToList();
+         foreach (string emote in nonaEmojiKeys)
          {
             Global.NONA_EMOJIS[emote] = Emote.Parse(
                server.Emotes.FirstOrDefault(
                   x => x.Name.Equals(
-                     Global.ENV_FILE.GetValue(emote).ToString(),
+                     Global.NONA_EMOJIS[emote],
                      StringComparison.OrdinalIgnoreCase)
                   ).ToString()).ToString();
          }
-         
-         foreach (string emote in Global.NUM_EMOJI_NAMES)
+
+         List<string> noumEmojiKeys = Global.NUM_EMOJI_NAMES.Keys.ToList();
+         foreach (string emote in noumEmojiKeys)
          {
             Global.NUM_EMOJIS.Add(Emote.Parse(
                server.Emotes.FirstOrDefault(
                   x => x.Name.Equals(
-                     Global.ENV_FILE.GetValue(emote).ToString(),
+                     Global.NUM_EMOJI_NAMES[emote], 
                      StringComparison.OrdinalIgnoreCase)
                   ).ToString()));
          }

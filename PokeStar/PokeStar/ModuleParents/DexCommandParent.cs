@@ -4,6 +4,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Discord;
+using Discord.Rest;
 using Discord.Commands;
 using Discord.WebSocket;
 using PokeStar.DataModels;
@@ -29,6 +30,37 @@ namespace PokeStar.ModuleParents
       /// </summary>
       protected static readonly Dictionary<ulong, DexSelectionMessage> dexMessages = new Dictionary<ulong, DexSelectionMessage>();
 
+      protected static readonly Dictionary<ulong, CatchSimulation> catchMessages = new Dictionary<ulong, CatchSimulation>();
+
+      protected static readonly Emoji[] catchEmojis = {
+         new Emoji("⬅️"),
+         new Emoji("⏺️"),
+         new Emoji("➡️"),
+         new Emoji("❓"),
+      };
+
+      private static readonly string[] catchEmojisDesc = {
+         "means decrement current modifier value.",
+         "means cycle through modifiers to edit.",
+         "means increment current modifier value."
+      };
+
+      private static readonly string[] catchReplies = {
+         "level <level>",
+         "radius <radius>"
+      };
+
+      /// <summary>
+      /// Index of all emotes on catch message.
+      /// </summary>
+      private enum CATCH_EMOJI_INDEX
+      {
+         DECREMENT,
+         MODIFIER,
+         INCREMENT,
+         HELP,
+      }
+
       /// <summary>
       /// Types of dex sub messages.
       /// </summary>
@@ -36,22 +68,34 @@ namespace PokeStar.ModuleParents
       {
          DEX_MESSAGE,
          CP_MESSAGE,
+         PVP_MESSAGE,
          FORM_MESSAGE,
          EVO_MESSAGE,
          NICKNAME_MESSAGE,
-         MOVE_MESSAGE
+         MOVE_MESSAGE,
+         CATCH_MESSAGE,
       }
 
       /// Message checkers ****************************************************
 
       /// <summary>
-      /// Checks if a message is a dex message.
+      /// Checks if a message is a dex select message.
       /// </summary>
       /// <param name="id">Id of the message.</param>
-      /// <returns>True if the message is a dex message, otherwise false.</returns>
+      /// <returns>True if the message is a dex select message, otherwise false.</returns>
       public static bool IsDexSubMessage(ulong id)
       {
          return dexMessages.ContainsKey(id);
+      }
+
+      /// <summary>
+      /// Checks if a message is a catch message.
+      /// </summary>
+      /// <param name="id">Id of the message.</param>
+      /// <returns>True if the message is a catch message, otherwise false.</returns>
+      public static bool IsCatchMessage(ulong id)
+      {
+         return catchMessages.ContainsKey(id);
       }
 
       /// Message reaction handlers *******************************************
@@ -135,10 +179,84 @@ namespace PokeStar.ModuleParents
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildMoveEmbed(pkmnMove, fileName));
                   Connections.DeleteFile(fileName);
                }
+               else if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.CATCH_MESSAGE)
+               {
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Selections[i]);
+                  CatchSimulation catchSim = new CatchSimulation(pokemon);
+                  string fileName = Connections.GetPokemonPicture(pokemon.Name);
+                  Connections.CopyFile(fileName);
+                  RestUserMessage catchMessage = await reaction.Channel.SendFileAsync(fileName, embed: BuildCatchEmbed(catchSim, fileName));
+                  catchMessages.Add(catchMessage.Id, catchSim);
+                  Connections.DeleteFile(fileName);
+                  catchMessage.AddReactionsAsync(catchEmojis);
+               }
                dexMessages.Remove(message.Id);
                return;
             }
          }
+         await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
+      }
+
+      /// <summary>
+      /// Handles a reaction on a catch message.
+      /// </summary>
+      /// <param name="message">Message that was reacted on.</param>
+      /// <param name="reaction">Reaction that was sent.</param>
+      /// <returns></returns>
+      public static async Task CatchMessageReactionHandle(IMessage message, SocketReaction reaction)
+      {
+         CatchSimulation catchSim = catchMessages[message.Id];
+         bool needsUpdate = true;
+         if (reaction.Emote.Equals(catchEmojis[(int)CATCH_EMOJI_INDEX.DECREMENT]))
+         {
+            catchSim.DecrementModifierValue();
+         }
+         else if (reaction.Emote.Equals(catchEmojis[(int)CATCH_EMOJI_INDEX.MODIFIER]))
+         {
+            catchSim.UpdateModifier();
+         }
+         else if (reaction.Emote.Equals(catchEmojis[(int)CATCH_EMOJI_INDEX.INCREMENT]))
+         {
+            catchSim.IncrementModifierValue();
+         }
+         else if (reaction.Emote.Equals(catchEmojis[(int)CATCH_EMOJI_INDEX.HELP]))
+         {
+            string prefix = Connections.Instance().GetPrefix(((SocketGuildChannel)message.Channel).Guild.Id);
+
+            StringBuilder sb = new StringBuilder();
+
+            sb.AppendLine("**Catch Emoji Help:**");
+            for(int i = 0; i < catchEmojisDesc.Length; i++)
+            {
+               sb.AppendLine($"{catchEmojis[i]} {catchEmojisDesc[i]}");
+            }
+
+            sb.AppendLine("\n**Catch Reply Help:**");
+            foreach (string reply in catchReplies)
+            {
+               sb.AppendLine($"{prefix}{reply}");
+            }
+
+            await ((SocketGuildUser)reaction.User).SendMessageAsync(sb.ToString());
+            needsUpdate = false;
+         }
+         else
+         {
+            needsUpdate = false;
+         }
+
+         if (needsUpdate)
+         {
+            SocketUserMessage msg = (SocketUserMessage)message;
+            string fileName = Connections.GetPokemonPicture(catchSim.Pokemon.Name);
+            Connections.CopyFile(fileName);
+            await msg.ModifyAsync(x =>
+            {
+               x.Embed = BuildCatchEmbed(catchSim, fileName);
+            });
+            Connections.DeleteFile(fileName);
+         }
+
          await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
       }
 
@@ -180,7 +298,7 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// Builds a cp embed
+      /// Builds a cp embed.
       /// </summary>
       /// <param name="pokemon">Pokémon to display.</param>
       /// <param name="fileName">Name of image file.</param>
@@ -200,6 +318,31 @@ namespace PokeStar.ModuleParents
          embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
          embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          embed.WithFooter($"{Global.WEATHER_BOOST_SYMBOL} denotes Weather Boosted CP");
+         return embed.Build();
+      }
+
+      /// <summary>
+      /// Builds a pvp embed.
+      /// </summary>
+      /// <param name="pokemon">Pokémon to display.</param>
+      /// <param name="fileName">Name of image file.</param>
+      /// <returns>Embed for viewing a Pokémon's CP.</returns>
+      protected static Embed BuildPvPEmbed(Pokemon pokemon, string fileName)
+      {
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
+         embed.WithDescription($"Max Pvp IV values for {pokemon.Name}");
+         embed.WithThumbnailUrl($"attachment://{fileName}");
+         if (pokemon.CanBeLittleLeague)
+         {
+            embed.AddField($"Little League (Max Level 41)", pokemon.LittleIVs, false);
+            embed.AddField($"Little League XL (Max Level 51)", pokemon.LittleXLIVs, false);
+         }
+         embed.AddField($"Great League (Max Level 41)", pokemon.GreatIVs, false);
+         embed.AddField($"Great League XL (Max Level 51)", pokemon.GreatXLIVs, false);
+         embed.AddField($"Ultra League (Max Level 41)", pokemon.UltraIVs, false);
+         embed.AddField($"Ultra League XL (Max Level 51)", pokemon.UltraXLIVs, false);
+         embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          return embed.Build();
       }
 
@@ -310,6 +453,35 @@ namespace PokeStar.ModuleParents
          embed.AddField("PvE Damage Window", move.DamageWindowString(), true);
          embed.AddField("Number of Pokémon that can learn this move", move.PokemonWithMove.Count, false);
          embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
+         return embed.Build();
+      }
+
+      /// <summary>
+      /// Builds a catch embed.
+      /// </summary>
+      /// <param name="catchSim">Catch simulator to display.</param>
+      /// <param name="fileName">Name of image file.</param>
+      /// <returns></returns>
+      protected static Embed BuildCatchEmbed(CatchSimulation catchSim, string fileName)
+      {
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithTitle($@"#{catchSim.Pokemon.Number} {catchSim.Pokemon.Name}");
+         embed.WithDescription($"**Catch Chance:** {catchSim.CatchChance}%");
+         embed.WithThumbnailUrl($"attachment://{fileName}");
+         embed.AddField($"Base Catch Rate:", $"{catchSim.Pokemon.CatchRate * 100.0}%", true);
+         embed.AddField("Pokémon Level:", $"{catchSim.GetLevel()}", true);
+         embed.AddField("Pokéball Type:", $"{catchSim.GetBall()}", true);
+         embed.AddField("Berry Type:", $"{catchSim.GetBerry()}", true);
+         embed.AddField("Throw Type:", $"{catchSim.GetThrow()}", true);
+         embed.AddField("Is Curveball:", $"{catchSim.GetCurveball()}", true);
+         embed.AddField("Medal 1 Bonus:", $"{catchSim.GetMedal1()}", true);
+         if (catchSim.Pokemon.Type.Count != 1)
+         {
+            embed.AddField("Medal 2 Bonus:", $"{catchSim.GetMedal2()}", true);
+         }
+         embed.AddField("Encounter Type:", $"{catchSim.GetEncounter()}", true);
+         embed.WithColor(catchSim.CalcRingColor());
+         embed.WithFooter($"Currently editing: {catchSim.GetCurrentModifier()}");
          return embed.Build();
       }
 

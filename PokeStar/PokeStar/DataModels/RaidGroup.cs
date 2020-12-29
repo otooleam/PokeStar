@@ -449,6 +449,15 @@ namespace PokeStar.DataModels
             group.Invited.Clear();
          }
       }
+
+      /// <summary>
+      /// Resets all ready users to attending.
+      /// </summary>
+      public void ResetReady()
+      {
+         Attending = Attending.Union(Ready).ToDictionary(k => k.Key, v => v.Value);
+         Ready.Clear();
+      }
       
       /// <summary>
       /// Get total number of players in a party.

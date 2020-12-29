@@ -100,6 +100,36 @@ namespace PokeStar.DataModels
       public string Regional { get; set; }
 
       /// <summary>
+      /// Base rate the Pokémon will be caught.
+      /// </summary>
+      public double CatchRate { get; set; }
+
+      /// <summary>
+      /// Base rate the Pokémon will flee.
+      /// </summary>
+      public double FleeRate { get; set; }
+
+      /// <summary>
+      /// Amount of candy needed for a second charge move.
+      /// </summary>
+      public int SecondMoveCandy { get; set; }
+
+      /// <summary>
+      /// Amount of stardust needed for a second charge move.
+      /// </summary>
+      public int SecondMoveStardust { get; set; }
+
+      /// <summary>
+      /// Average height of the Pokémon.
+      /// </summary>
+      public double Height { get; set; }
+
+      /// <summary>
+      /// Average weight of the Pokémon.
+      /// </summary>
+      public double Weight { get; set; }
+
+      /// <summary>
       /// List of the Pokémon's fast moves.
       /// </summary>
       public List<PokemonMove> FastMove { get; set; }
@@ -175,6 +205,16 @@ namespace PokeStar.DataModels
       public List<int> CPWild { get; } = new List<int>();
 
       /// <summary>
+      /// If the Pokémon is alowed in Little League.
+      /// </summary>
+      public bool CanBeLittleLeague { get; set; }
+
+      /// <summary>
+      /// Best IVs for Little League.
+      /// </summary>
+      public LeagueIV LittleIVs { get; set; }
+
+      /// <summary>
       /// Best IVs for Great League.
       /// </summary>
       public LeagueIV GreatIVs { get; set; }
@@ -183,6 +223,21 @@ namespace PokeStar.DataModels
       /// Best IVs for Ultra League.
       /// </summary>
       public LeagueIV UltraIVs { get; set; }
+
+      /// <summary>
+      /// Best IVs for Little League using XL candy.
+      /// </summary>
+      public LeagueIV LittleXLIVs { get; set; }
+
+      /// <summary>
+      /// Best IVs for Great League using XL candy.
+      /// </summary>
+      public LeagueIV GreatXLIVs { get; set; }
+
+      /// <summary>
+      /// Best IVs for Ultra League using XL candy.
+      /// </summary>
+      public LeagueIV UltraXLIVs { get; set; }
 
       /// <summary>
       /// Checks if the Pokémon is region locked.
@@ -212,13 +267,14 @@ namespace PokeStar.DataModels
       public string DetailsToString()
       {
          StringBuilder sb = new StringBuilder();
+         sb.AppendLine($"**Can be Obtained:** {(Obtainable ? "Yes" : "No")}");
+         sb.AppendLine($"**Can be Shiny:** {(Shiny ? "Yes" : "No")}");
+         sb.AppendLine($"**Can be Shadow:** {(Shadow ? "Yes" : "No")}");
+         sb.AppendLine($"**Region:** {Region}");
+         sb.AppendLine($"**Category:** {Category}");
+         sb.AppendLine($"**Buddy Distance:** {BuddyDistance} km");
+         sb.AppendLine($"**Second Charge Move:**\n*Candy:* {SecondMoveCandy}\n*Stardust:* {SecondMoveStardust}");
 
-         sb.AppendLine($"Region\t: {Region}");
-         sb.AppendLine($"Category\t: {Category}");
-         sb.AppendLine($"Buddy Distance\t: {BuddyDistance} km");
-         sb.AppendLine($"Can be Obtained\t: {(Obtainable ? "Yes" : "No")}");
-         sb.AppendLine($"Can be Shiny\t: {(Shiny ? "Yes" : "No")}");
-         sb.AppendLine($"Can be Shadow\t: {(Shadow ? "Yes" : "No")}");
 
          return sb.ToString();
       }
@@ -261,10 +317,10 @@ namespace PokeStar.DataModels
       {
          StringBuilder sb = new StringBuilder();
 
-         sb.AppendLine($"Max CP : {CPMax}");
-         sb.AppendLine($"Attack : {Attack}");
-         sb.AppendLine($"Defense: {Defense}");
-         sb.AppendLine($"Stamina: {Stamina}");
+         sb.AppendLine($"**Max CP:** {CPMax}");
+         sb.AppendLine($"**Attack:** {Attack}");
+         sb.AppendLine($"**Defense:** {Defense}");
+         sb.AppendLine($"**Stamina:** {Stamina}");
 
          return sb.ToString();
       }
@@ -482,8 +538,8 @@ namespace PokeStar.DataModels
       public string LeagueIVToString()
       {
          StringBuilder sb = new StringBuilder();
-         sb.AppendLine($"*Great League:*\n {GreatIVs}");
-         sb.AppendLine($"*Ultra League:*\n {UltraIVs}");
+         sb.AppendLine($"*Great League:*\n {GreatXLIVs}");
+         sb.AppendLine($"*Ultra League:*\n {UltraXLIVs}");
          return sb.ToString();
       }
    }

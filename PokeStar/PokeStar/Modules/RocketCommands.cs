@@ -10,6 +10,7 @@ namespace PokeStar.Modules
 {
    public class RocketCommands: ModuleBase<SocketCommandContext>
    {
+      /*
       [Command("rocket")]
       [Summary("Gets lists of Pokémon currently used by Team GO Rocket.\n" +
                "Leave blank for a list of valid egg tiers.")]
@@ -72,5 +73,6 @@ namespace PokeStar.Modules
          Connections.Instance().UpdateEggList();
          await ResponseMessage.SendInfoMessage(Context.Channel, $"Egg list has been updated.");
       }
+      /**/
    }
 }
