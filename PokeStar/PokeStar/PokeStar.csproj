@@ -175,11 +175,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Calculators\CatchCalculator.cs" />
     <Compile Include="Calculators\CPCalculator.cs" />
     <Compile Include="Calculators\TypeCalculator.cs" />
     <Compile Include="ConnectionInterface\DatabaseConnector.cs" />
     <Compile Include="ConnectionInterface\NONADatabaseConnector.cs" />
     <Compile Include="ConnectionInterface\POGODatabaseConnector.cs" />
+    <Compile Include="DataModels\CatchSimulation.cs" />
     <Compile Include="DataModels\Evolution.cs" />
     <Compile Include="DataModels\EvolutionNode.cs" />
     <Compile Include="DataModels\LeagueIV.cs" />
@@ -199,6 +201,8 @@
     <Compile Include="ModuleParents\DexCommandParent.cs" />
     <Compile Include="ModuleParents\RaidCommandParent.cs" />
     <Compile Include="Modules\BasicCommands.cs" />
+    <Compile Include="Modules\CatchCommand.cs" />
+    <Compile Include="Modules\CatchReplyCommands.cs" />
     <Compile Include="Modules\ChannelRegisterCommands.cs" />
     <Compile Include="Modules\DexCommands.cs" />
     <Compile Include="Modules\EggCommands.cs" />
@@ -213,6 +217,7 @@
     <Compile Include="DataModels\Counter.cs" />
     <Compile Include="Modules\SystemEditCommands.cs" />
     <Compile Include="Modules\TypeCommands.cs" />
+    <Compile Include="PreConditions\CatchReplyAttribute.cs" />
     <Compile Include="PreConditions\NonaAdminAttribute.cs" />
     <Compile Include="PreConditions\RegisterChannelAttribute.cs" />
     <Compile Include="Program.cs" />

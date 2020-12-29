@@ -69,7 +69,6 @@ namespace PokeStar
       /// <summary>
       /// Embed Colors
       /// </summary>
-
       public static readonly Color EMBED_COLOR_INFO_RESPONSE      = Color.Purple;
       public static readonly Color EMBED_COLOR_WARNING_RESPONSE   = Color.Orange;
       public static readonly Color EMBED_COLOR_ERROR_RESPONSE     = Color.Red;
@@ -194,6 +193,20 @@ namespace PokeStar
       /// <summary>
       /// Level constants
       /// </summary>
+      public static readonly double[] DISCRETE_CPM = {
+         0.094     , 0.16639787, 0.21573247, 0.25572005, 0.29024988,
+         0.3210876 , 0.34921268, 0.3752356 , 0.39956728, 0.4225    ,
+         0.44310755, 0.4627984 , 0.48168495, 0.49985844, 0.51739395,
+         0.5343543 , 0.5507927 , 0.5667545 , 0.5822789 , 0.5974    ,
+         0.6121573 , 0.6265671 , 0.64065295, 0.65443563, 0.667934  ,
+         0.6811649 , 0.69414365, 0.7068842 , 0.7193991 , 0.7317    ,
+         0.7377695 , 0.74378943, 0.74976104, 0.7556855 , 0.76156384,
+         0.76739717, 0.7731865 , 0.77893275, 0.784637  , 0.7903    ,
+         0.7953    , 0.8003    , 0.8053    , 0.8103    , 0.8153    ,
+         0.8203    , 0.8253    , 0.8303    , 0.8353    , 0.8403    ,
+         0.8453    , 0.8503    , 0.8553    , 0.8603    , 0.8653
+      };
+
       public static readonly double LEVEL_STEP  = 0.5;
       public static readonly int MAX_XL_LEVEL   = 50;
       public static readonly int MAX_REG_LEVEL  = 40;
@@ -204,6 +217,55 @@ namespace PokeStar
       public static readonly int QUEST_LEVEL    = 15;
       public static readonly int WEATHER_BOOST  = 5;
       public static readonly int BUDDY_BOOST    = 1;
+
+      /// <summary>
+      /// Catch multipliers
+      /// </summary> 
+      public static readonly Dictionary<string, double> POKE_BALL_RATE = new Dictionary<string, double>()
+      {
+         ["Pokéball"]  = 1.0,
+         ["Great Ball"] = 1.5,
+         ["Ultra Ball"] = 2.0,
+      };
+      public static readonly Dictionary<string, double> BERRY_RATE = new Dictionary<string, double>()
+      {
+         ["None"]         = 1.0,
+         ["Razz"]         = 1.5,
+         ["Silver Pinap"] = 1.8,
+         ["Golden Razz"]  = 2.5,
+      };
+      public static readonly Dictionary<string, double> THROW_RATE = new Dictionary<string, double>()
+      {
+         ["Regular"] = 1.0,
+         ["Nice"] = 1.0,
+         ["Great"] = 1.3,
+         ["Excellent"] = 1.7,
+      };
+      public static readonly Dictionary<string, double> CURVEBALL_RATE = new Dictionary<string, double>()
+      {
+         ["No"] = 1.0,
+         ["Yes"] = 1.7,
+      };
+      public static readonly Dictionary<string, double> MEDAL_RATE = new Dictionary<string, double>()
+      {
+         ["None"]     = 1.0,
+         ["Bronze"]   = 1.1,
+         ["Silver"]   = 1.2,
+         ["Gold"]     = 1.3,
+         ["Platinum"] = 1.4,
+      };
+      public static readonly Dictionary<string, double> ENCOUNTER_RATE = new Dictionary<string, double>()
+      {
+         ["Standard"] = 1.0,
+         ["Special"]  = 2.0,
+      };
+
+      /// <summary>
+      /// Catch ring colors
+      /// </summary>
+      public static readonly uint MIN_CATCH_COLOR = 0xFF0000; // RED    0%
+      public static readonly uint MID_CATCH_COLOR = 0xFFFF00; // YELLOW 50%
+      public static readonly uint MAX_CATCH_COLOR = 0x00FF00; // GREEN  100%
 
       /// <summary>
       /// IV constants

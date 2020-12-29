@@ -115,7 +115,13 @@ namespace PokeStar.ConnectionInterface
                      Shadow = Convert.ToInt32(reader["shadow"]) == TRUE,
                      Shiny = Convert.ToInt32(reader["shiny"]) == TRUE,
                      Obtainable = Convert.ToInt32(reader["obtainable"]) == TRUE,
-                     Regional = (reader["regional"].GetType() == typeof(DBNull))? null :Convert.ToString(reader["regional"])
+                     Regional = (reader["regional"].GetType() == typeof(DBNull))? null :Convert.ToString(reader["regional"]),
+                     CatchRate = Convert.ToDouble(reader["catch_rate"]),
+                     FleeRate = Convert.ToDouble(reader["flee_rate"]),
+                     SecondMoveCandy = Convert.ToInt32(reader["second_move_candy"]),
+                     SecondMoveStardust = Convert.ToInt32(reader["second_move_stardust"]),
+                     Height = Convert.ToDouble(reader["height"]),
+                     Weight = Convert.ToDouble(reader["weight"]),
                   };
                   pokemon.Type.Add(Convert.ToString(reader["type_1"]));
                   if (reader["type_2"].GetType() != typeof(DBNull))
