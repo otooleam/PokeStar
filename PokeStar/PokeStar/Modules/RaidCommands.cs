@@ -151,7 +151,7 @@ namespace PokeStar.Modules
          "3, rare, R\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
-      [RegisterChannel('T')]
+      [RegisterChannel('R')]
       public async Task RaidTrain([Summary("Tier of the raids.")] string tier,
                            [Summary("Time the train will start.")] string time,
                            [Summary("Where the train will start.")][Remainder] string location)
