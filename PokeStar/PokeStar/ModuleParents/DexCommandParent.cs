@@ -36,6 +36,7 @@ namespace PokeStar.ModuleParents
       {
          DEX_MESSAGE,
          CP_MESSAGE,
+         PVP_MESSAGE,
          FORM_MESSAGE,
          EVO_MESSAGE,
          NICKNAME_MESSAGE,
@@ -180,7 +181,7 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// Builds a cp embed
+      /// Builds a cp embed.
       /// </summary>
       /// <param name="pokemon">Pokémon to display.</param>
       /// <param name="fileName">Name of image file.</param>
@@ -200,6 +201,31 @@ namespace PokeStar.ModuleParents
          embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
          embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          embed.WithFooter($"{Global.WEATHER_BOOST_SYMBOL} denotes Weather Boosted CP");
+         return embed.Build();
+      }
+
+      /// <summary>
+      /// Builds a pvp embed.
+      /// </summary>
+      /// <param name="pokemon">Pokémon to display.</param>
+      /// <param name="fileName">Name of image file.</param>
+      /// <returns>Embed for viewing a Pokémon's CP.</returns>
+      protected static Embed BuildPvPEmbed(Pokemon pokemon, string fileName)
+      {
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
+         embed.WithDescription($"Max Pvp IV values for {pokemon.Name}");
+         embed.WithThumbnailUrl($"attachment://{fileName}");
+         if (pokemon.CanBeLittleLeague)
+         {
+            embed.AddField($"Little League (Max Level 41)", pokemon.LittleIVs, false);
+            embed.AddField($"Little League XL (Max Level 51)", pokemon.LittleXLIVs, false);
+         }
+         embed.AddField($"Great League (Max Level 41)", pokemon.GreatIVs, false);
+         embed.AddField($"Great League XL (Max Level 51)", pokemon.GreatXLIVs, false);
+         embed.AddField($"Ultra League (Max Level 41)", pokemon.UltraIVs, false);
+         embed.AddField($"Ultra League XL (Max Level 51)", pokemon.UltraXLIVs, false);
+         embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          return embed.Build();
       }
 
