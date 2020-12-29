@@ -54,6 +54,15 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
+      /// Check if the current location is the first location.
+      /// </summary>
+      /// <returns>True if first location, otherwise false.</returns>
+      public bool IsFirstLocation()
+      {
+         return CurrentLocation == 0;
+      }
+
+      /// <summary>
       /// Gets the name of the current gym count over the total count.
       /// </summary>
       /// <returns></returns>

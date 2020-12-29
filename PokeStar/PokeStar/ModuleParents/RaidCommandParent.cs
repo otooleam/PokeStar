@@ -138,27 +138,27 @@ namespace PokeStar.ModuleParents
       /// Replies for a raid message.
       /// </summary>
       private static readonly string[] raidReplies = {
-         "edit",
-         "invite",
+         "edit <attribute> <value>",
+         "invite <invites>",
+         "remote <group size>",
          "request",
-         "remote",
       };
 
       /// <summary>
       /// Replies for a raid mule message.
       /// </summary>
       private static readonly string[] muleReplies = {
-         "edit",
-         "invite",
-         "ready",
+         "edit <attribute> <value>",
+         "invite <invites>",
+         "ready <group number>",
       };
 
       /// <summary>
       /// Replies for a raid train message.
       /// </summary>
       private static readonly string[] trainReplies = {
-         "add",
-         "conductor",
+         "add <time> <location>",
+         "conductor <conductor>",
       };
 
       /// Enumerations ********************************************************
@@ -503,26 +503,29 @@ namespace PokeStar.ModuleParents
                   }
                   else if (reaction.Emote.Equals(trainEmojis[(int)TRAIN_EMOJI_INDEX.BOSS]))
                   {
-                     if (train.RaidBossSelections.Count != 0)
+                     if (!train.IsFirstLocation())
                      {
-                        string fileName = Global.RAID_TRAIN_IMAGE_NAME;
-                        Connections.CopyFile(fileName);
-                        RestUserMessage selectMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(train.RaidBossSelections, fileName, true));
-                        subMessages.Add(selectMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.TRAIN_BOSS_SUB_MESSAGE, message.Id));
-                        Connections.DeleteFile(fileName);
-                        IEmote[] emotes = Global.SELECTION_EMOJIS.Take(train.RaidBossSelections.Count).ToArray();
-                        selectMsg.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
-                        needsUpdate = false;
-                     }
-                     else
-                     {
-                        string fileName = Global.RAID_TRAIN_IMAGE_NAME;
-                        Connections.CopyFile(fileName);
-                        RestUserMessage selectMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildTierSelectEmbed(fileName));
-                        subMessages.Add(selectMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.TRAIN_BOSS_SUB_MESSAGE, message.Id));
-                        Connections.DeleteFile(fileName);
-                        selectMsg.AddReactionsAsync(tierEmojis.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
-                        needsUpdate = false;
+                        if (train.RaidBossSelections.Count != 0)
+                        {
+                           string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                           Connections.CopyFile(fileName);
+                           RestUserMessage selectMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(train.RaidBossSelections, fileName, true));
+                           subMessages.Add(selectMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.TRAIN_BOSS_SUB_MESSAGE, message.Id));
+                           Connections.DeleteFile(fileName);
+                           IEmote[] emotes = Global.SELECTION_EMOJIS.Take(train.RaidBossSelections.Count).ToArray();
+                           selectMsg.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
+                           needsUpdate = false;
+                        }
+                        else
+                        {
+                           string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                           Connections.CopyFile(fileName);
+                           RestUserMessage selectMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildTierSelectEmbed(fileName));
+                           subMessages.Add(selectMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.TRAIN_BOSS_SUB_MESSAGE, message.Id));
+                           Connections.DeleteFile(fileName);
+                           selectMsg.AddReactionsAsync(tierEmojis.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
+                           needsUpdate = false;
+                        }
                      }
                   }
                }

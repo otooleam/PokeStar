@@ -170,7 +170,7 @@ namespace PokeStar.DataModels
       {
          if (newLevel >= Global.MIN_WILD_LEVEL && newLevel <= Global.MAX_WILD_LEVEL)
          {
-            Modifiers[(int)MODIFIER_INDEX.LEVEL] = newLevel;
+            Modifiers[(int)MODIFIER_INDEX.LEVEL] = newLevel - 1;
             CalcCatchChance();
             return true;
          }

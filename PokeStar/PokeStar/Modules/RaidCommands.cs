@@ -179,11 +179,11 @@ namespace PokeStar.Modules
          else if (potentials.Count == 1)
          {
             string boss = potentials.First();
-            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, string.Empty, boss)
+            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location, boss)
             {
                AllBosses = allBosses
             };
-            fileName = Connections.GetPokemonPicture(Global.RAID_TRAIN_IMAGE_NAME);
+            fileName = Global.RAID_TRAIN_IMAGE_NAME;
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(raid, fileName));

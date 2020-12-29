@@ -46,8 +46,8 @@ namespace PokeStar.ModuleParents
       };
 
       private static readonly string[] catchReplies = {
-         "level",
-         "radius"
+         "level <level>",
+         "radius <radius>"
       };
 
       /// <summary>
