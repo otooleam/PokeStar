@@ -99,6 +99,15 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Get the full list of raid bosses.
+      /// </summary>
+      /// <returns>List of raid bosses sorted by tier.</returns>
+      public static Dictionary<int, List<string>> GetFullBossList()
+      {
+         return SilphData.GetRaidBosses();
+      }
+
+      /// <summary>
       /// Gets a list of current eggs for a given tier.
       /// </summary>
       /// <param name="tier">Tier of eggs.</param>

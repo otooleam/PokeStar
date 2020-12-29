@@ -49,7 +49,7 @@ namespace PokeStar.ConnectionInterface
       /// would constitute a change to this method.
       /// </summary>
       /// <returns>Dictionary of current raid bosses.</returns>
-      private static Dictionary<int, List<string>> GetRaidBosses()
+      public static Dictionary<int, List<string>> GetRaidBosses()
       {
          int tier = -1;
          bool tierStart = false;

@@ -27,10 +27,9 @@ namespace PokeStar.Modules
             string fileName = BLANK_IMAGE;
             Connections.CopyFile(fileName);
             RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(moveNames, fileName));
-            await dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
-            Connections.DeleteFile(fileName);
-
             dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.MOVE_MESSAGE, moveNames));
+            Connections.DeleteFile(fileName);
+            dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
          }
          else
          {

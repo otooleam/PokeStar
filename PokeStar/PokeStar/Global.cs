@@ -132,6 +132,8 @@ namespace PokeStar
          ["1"]         = COMMON_RAID_TIER,
       };
 
+      public static readonly string RAID_TRAIN_IMAGE_NAME = "Raid_Train.png";
+
       /// <summary>
       /// Egg Tiers
       /// </summary>
@@ -326,8 +328,7 @@ namespace PokeStar
       public static readonly char REGISTER_STRING_INFO  = 'I';
       public static readonly char REGISTER_STRING_ROLE  = 'P';
       public static readonly char REGISTER_STRING_RAID  = 'R';
-      public static readonly char REGISTER_STRING_TRAIN = 'T';
-      public static readonly string FULL_REGISTER_STRING = "DEIPRT";
+      public static readonly string FULL_REGISTER_STRING = "DEIPR";
       public static readonly Dictionary<string, string> REGISTER_STRING_TYPE = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
          [REGISTER_STRING_DEX.ToString()]   = "PokéDex",
@@ -335,7 +336,6 @@ namespace PokeStar
          [REGISTER_STRING_INFO.ToString()]  = "Information",
          [REGISTER_STRING_ROLE.ToString()]  = "Player Roles",
          [REGISTER_STRING_RAID.ToString()]  = "Raid",
-         [REGISTER_STRING_TRAIN.ToString()] = "Raid Train",
       };
       public static readonly Dictionary<string, string> REGISTER_VALIE_STRING = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
@@ -353,8 +353,6 @@ namespace PokeStar
          ["P"]                  = REGISTER_STRING_ROLE.ToString(),
          ["RAID"]               = REGISTER_STRING_RAID.ToString(),
          ["R"]                  = REGISTER_STRING_RAID.ToString(),
-         ["TRAIN"]              = REGISTER_STRING_TRAIN.ToString(),
-         ["T"]                  = REGISTER_STRING_TRAIN.ToString()
 
       };
 
