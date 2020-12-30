@@ -1376,7 +1376,7 @@ namespace PokeStar.ModuleParents
          IEmote startEmoji = null;
          IEmote endEmoji = null;
          StringBuilder sb = new StringBuilder();
-         sb.AppendLine("**Raid Emoji Help**:");
+         sb.AppendLine("**Raid Emoji Help:**");
 
          for (int i = 0; i < emotes.Length; i++)
          {
