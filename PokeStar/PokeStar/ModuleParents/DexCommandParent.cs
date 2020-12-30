@@ -28,7 +28,7 @@ namespace PokeStar.ModuleParents
       /// </summary>
       protected static readonly string BLANK_IMAGE = "battle.png";
 
-      /// Message holders *****************************************************
+      // Message holders ******************************************************
 
       /// <summary>
       /// Saved dex selection messages.
@@ -45,7 +45,7 @@ namespace PokeStar.ModuleParents
       /// </summary>
       protected static readonly Dictionary<ulong, CatchSimulation> catchMessages = new Dictionary<ulong, CatchSimulation>();
 
-      /// Emotes **************************************************************
+      // Emotes ***************************************************************
 
       /// <summary>
       /// Emotes for a dex message.
@@ -99,7 +99,7 @@ namespace PokeStar.ModuleParents
          "radius <radius>"
       };
 
-      /// Enumerations ********************************************************
+      // Enumerations *********************************************************
 
       /// <summary>
       /// Types of dex sub messages.
@@ -172,7 +172,7 @@ namespace PokeStar.ModuleParents
          HELP,
       }
 
-      /// Message checkers ****************************************************
+      // Message checkers *****************************************************
 
       /// <summary>
       /// Checks if a message is a dex select message.
@@ -204,7 +204,7 @@ namespace PokeStar.ModuleParents
          return catchMessages.ContainsKey(id);
       }
 
-      /// Message reaction handlers *******************************************
+      // Message reaction handlers ********************************************
 
       /// <summary>
       /// Handles a reaction on a dex select message.
@@ -467,7 +467,7 @@ namespace PokeStar.ModuleParents
          await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
       }
 
-      /// Embed builders ******************************************************
+      // Embed builders *******************************************************
 
       /// <summary>
       /// Builds a dex embed.
@@ -710,7 +710,7 @@ namespace PokeStar.ModuleParents
          return embed.Build();
       }
 
-      /// Name processors *****************************************************
+      // Name processors ******************************************************
 
       /// <summary>
       /// Processes the Pokémon name given from a command.
@@ -955,7 +955,7 @@ namespace PokeStar.ModuleParents
          return pokemonName;
       }
 
-      /// Evolution processors ************************************************
+      // Evolution processors *************************************************
 
       /// <summary>
       /// Generage an ordered dictionary of evolutions.
@@ -1055,7 +1055,7 @@ namespace PokeStar.ModuleParents
          return evolutions;
       }
 
-      /// Type processors ************************************************
+      // Type processors *************************************************
 
       /// <summary>
       /// Formats weather boosts as a string.
@@ -1104,7 +1104,7 @@ namespace PokeStar.ModuleParents
          return Global.NONA_EMOJIS.ContainsKey($"{type}_emote");
       }
 
-      /// Message senders *****************************************************
+      // Message senders ******************************************************
 
       /// <summary>
       /// Sends a dex selection message.
@@ -1144,7 +1144,7 @@ namespace PokeStar.ModuleParents
          }
       }
 
-      /// Miscellaneous *******************************************************
+      // Miscellaneous ********************************************************
 
       /// <summary>
       /// Sets custom emotes used for dex messages.

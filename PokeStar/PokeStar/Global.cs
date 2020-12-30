@@ -11,7 +11,7 @@ namespace PokeStar
    /// </summary>
    public static class Global
    {
-      /// é *******************************************************************
+      // é ********************************************************************
       
       /// <summary>
       /// Save formated Pokémon.
@@ -28,7 +28,7 @@ namespace PokeStar
       /// </summary>
       private const string POKEBALL = "PokéBall";
 
-      /// File IO *************************************************************
+      // File IO **************************************************************
 
       /// <summary>
       /// Path to .exe file.
@@ -80,7 +80,7 @@ namespace PokeStar
       /// </summary>
       public static bool USE_EMPTY_RAID { get; set; }
 
-      /// Help command hidding ************************************************
+      // Help command hidding *************************************************
 
       /// <summary>
       /// List of all commands.
@@ -122,7 +122,7 @@ namespace PokeStar
          "updateRocketList"
       };
 
-      /// Embed colors ********************************************************
+      // Embed colors *********************************************************
 
       /// <summary>
       /// Nona info response embed color.
@@ -159,7 +159,7 @@ namespace PokeStar
       /// </summary>
       public static readonly Color EMBED_COLOR_GAME_INFO_RESPONSE = Color.Teal;
 
-      /// Raid tiers **********************************************************
+      // Raid tiers ***********************************************************
 
       /// <summary>
       /// EX raid tier value.
@@ -233,7 +233,7 @@ namespace PokeStar
       /// </summary>
       public static readonly string RAID_TRAIN_IMAGE_NAME = "Raid_Train.png";
 
-      /// Raid limits *********************************************************
+      // Raid limits **********************************************************
 
       /// <summary>
       /// Raid player limit.
@@ -265,7 +265,7 @@ namespace PokeStar
       /// </summary>
       public static readonly int LIMIT_RAID_MULE_GROUP  = 6;
 
-      /// Raid Group bits *****************************************************
+      // Raid Group bits ******************************************************
 
       /// <summary>
       /// Mask for attending value.
@@ -285,7 +285,7 @@ namespace PokeStar
       /// </summary>
       public static readonly int REMOTE_SHIFT = 4;
 
-      /// Bad raid values *****************************************************
+      // Bad raid values ******************************************************
 
       /// <summary>
       /// Do not change values.
@@ -307,8 +307,7 @@ namespace PokeStar
       /// </summary>
       public static readonly string EMPTY_FIELD            = "-----";
 
-
-      /// Level constents *****************************************************
+      // Level constents ******************************************************
 
       /// <summary>
       /// Discrete CP multiplier.
@@ -377,7 +376,7 @@ namespace PokeStar
       /// </summary>
       public static readonly int BUDDY_BOOST    = 1;
 
-      /// IV constants ********************************************************
+      // IV constants *********************************************************
 
       /// <summary>
       /// Min special IV.
@@ -389,7 +388,7 @@ namespace PokeStar
       /// </summary>
       public static readonly int MAX_IV         = 15;
 
-      /// GBL League constants ************************************************
+      // GBL League constants *************************************************
 
       /// <summary>
       /// Little league max CP.
@@ -406,14 +405,14 @@ namespace PokeStar
       /// </summary>
       public static readonly int MAX_ULTRA_CP  = 2500;
 
-      /// Dex switch options **************************************************
+      // Dex switch options ***************************************************
 
       /// <summary>
       /// Dex switch option number.
       /// </summary>
       public static readonly int DEX_SWITCH_OPTIONS = 6;
 
-      /// Bad dex values ******************************************************
+      // Bad dex values *******************************************************
 
       /// <summary>
       /// Evolution method has been combined.
@@ -430,7 +429,7 @@ namespace PokeStar
       /// </summary>
       public static readonly int ARCEUS_NUMBER = 493;
 
-      /// Catch multipliers ***************************************************
+      // Catch multipliers ****************************************************
 
       /// <summary>
       /// PokéBall multipliers.
@@ -494,7 +493,7 @@ namespace PokeStar
          ["Special"]  = 2.0,
       };
 
-      /// Catch ring colors ***************************************************
+      // Catch ring colors ****************************************************
 
       /// <summary>
       /// Minimum color value.
@@ -514,7 +513,7 @@ namespace PokeStar
       /// </summary>
       public static readonly uint MAX_CATCH_COLOR = 0x00FF00;
 
-      /// Text formating ******************************************************
+      // Text formating *******************************************************
 
       /// <summary>
       /// Character denotes STAB (Same type attack bonus).
@@ -566,7 +565,7 @@ namespace PokeStar
       /// </summary>
       public static readonly int MAX_LEN_MEGA = 3;
 
-      /// Delimiters **********************************************************
+      // Delimiters ***********************************************************
 
       /// <summary>
       /// Nickname delimiter
@@ -588,7 +587,7 @@ namespace PokeStar
       /// </summary>
       public static readonly int POKE_MOVE_DELIMITER_MISSING = -1;
 
-      /// Egg tiers ***********************************************************
+      // Egg tiers ************************************************************
 
       /// <summary>
       /// 2KM egg value.
@@ -665,7 +664,7 @@ namespace PokeStar
          ["12 KM"] = EGG_TIER_12KM,
       };
 
-      /// Channel register values *********************************************
+      // Channel register values **********************************************
 
       /// <summary>
       /// Dex register character.
@@ -731,7 +730,7 @@ namespace PokeStar
 
       };
 
-      /// Role values *********************************************************
+      // Role values **********************************************************
 
       /// <summary>
       /// Trainer role name.
@@ -773,7 +772,7 @@ namespace PokeStar
       /// </summary>
       public static readonly int ROLE_INDEX_INSTINCT      = 2;
 
-      /// Role colors *********************************************************
+      // Role colors **********************************************************
 
       /// <summary>
       /// Trainer role color.
@@ -795,7 +794,7 @@ namespace PokeStar
       /// </summary>
       public static readonly Color ROLE_COLOR_INSTINCT = new Color(241, 196, 15);
 
-      /// Image processing ****************************************************
+      // Image processing *****************************************************
 
       /// <summary>
       /// scaled image width.
@@ -817,7 +816,7 @@ namespace PokeStar
       /// </summary>
       public static readonly System.Drawing.Rectangle IMAGE_RECT_TEAM_COLOR = new System.Drawing.Rectangle(410, 60, 10, 10);
 
-      /// Emotes **************************************************************
+      // Emotes ***************************************************************
 
       /// <summary>
       /// Nona emotes.

@@ -18,7 +18,7 @@ namespace PokeStar.ModuleParents
    /// </summary>
    public class RaidCommandParent : ModuleBase<SocketCommandContext>
    {
-      /// Message holders *****************************************************
+      // Message holders ******************************************************
 
       /// <summary>
       /// Saved raid messages.
@@ -30,7 +30,7 @@ namespace PokeStar.ModuleParents
       /// </summary>
       protected static readonly Dictionary<ulong, RaidSubMessage> subMessages = new Dictionary<ulong, RaidSubMessage>();
 
-      /// Emotes **************************************************************
+      // Emotes ***************************************************************
 
       /// <summary>
       /// Emotes for a raid message.
@@ -137,7 +137,7 @@ namespace PokeStar.ModuleParents
          "means change the boss for the current gym. Can only be done by the train conductor.",
       };
 
-      /// Replies *************************************************************
+      // Replies **************************************************************
 
       /// <summary>
       /// Replies for a raid message.
@@ -166,7 +166,7 @@ namespace PokeStar.ModuleParents
          "conductor <conductor>",
       };
 
-      /// Enumerations ********************************************************
+      // Enumerations *********************************************************
 
       /// <summary>
       /// Index of emotes on a raid message.
@@ -255,7 +255,7 @@ namespace PokeStar.ModuleParents
          TRAIN_BOSS_SUB_MESSAGE,
       }
 
-      /// Message checkers ****************************************************
+      // Message checkers *****************************************************
 
       /// <summary>
       /// Checks if a message is a raid message.
@@ -277,7 +277,7 @@ namespace PokeStar.ModuleParents
          return subMessages.ContainsKey(id);
       }
 
-      /// Message reaction handlers *******************************************
+      // Message reaction handlers ********************************************
 
       /// <summary>
       /// Handles a reaction on a general raid message.
@@ -370,7 +370,7 @@ namespace PokeStar.ModuleParents
          }
       }
 
-      /// Reaction handlers ***************************************************
+      // Reaction handlers ****************************************************
 
       /// <summary>
       /// Handles a reaction on a raid message.
@@ -987,7 +987,7 @@ namespace PokeStar.ModuleParents
          }
       }
 
-      /// Embed builders ******************************************************
+      // Embed builders *******************************************************
 
       /// <summary>
       /// Builds a raid embed.
@@ -1219,7 +1219,7 @@ namespace PokeStar.ModuleParents
          return embed.Build();
       }
 
-      /// String builders *****************************************************
+      // String builders ******************************************************
 
       /// <summary>
       /// Builds the title of the raid.
@@ -1474,7 +1474,7 @@ namespace PokeStar.ModuleParents
          return "";
       }
 
-      /// Miscellaneous *******************************************************
+      // Miscellaneous ********************************************************
 
       /// <summary>
       /// Set emotes on a raid message.
