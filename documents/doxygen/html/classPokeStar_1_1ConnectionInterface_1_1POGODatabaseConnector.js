@@ -1,0 +1,25 @@
+var classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector =
+[
+    [ "POGODatabaseConnector", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#ab722104c0707d1b4dab2100ed6fe8ded", null ],
+    [ "GetCounters", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#aec43b9dc90f76b026cb5b9b267e52bd0", null ],
+    [ "GetEvolutions", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#a959407af2058b610c02ce21ff989c469", null ],
+    [ "GetFormTags", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#af28357f3c2f55540ad76ef9610bd7c57", null ],
+    [ "GetMove", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#a89b86e84edf1b4e95a5c7c860e2047ac", null ],
+    [ "GetMoveByType", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#aba3596835fca790500d52f7290049c6d", null ],
+    [ "GetMoveNameList", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#aa7d8a03793b89989e4031a9f6d43ed86", null ],
+    [ "GetPokemon", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#ae47a5671cc025ad579721c8d62421eb7", null ],
+    [ "GetPokemonByNumber", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#ad5512771dc822bdc3b133b6db7a9f654", null ],
+    [ "GetPokemonMove", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#ae08359b48557762e088c7f5f955f56f9", null ],
+    [ "GetPokemonMoves", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#a4fa1a985dc292e5a5936b70e2cc80e75", null ],
+    [ "GetPokemonNameList", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#a9d3127ebbac7034e33be46a0cf2f7796", null ],
+    [ "GetPokemonWithMove", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#a176b27fcdfb1274b6d7c4e8971a44eed", null ],
+    [ "GetPokemonWithTags", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#acb9482c27b9f0249d0f9fd507407a457", null ],
+    [ "GetTypeAttackRelations", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#a3055f434a4ef42db1762e98a1cd3f3e1", null ],
+    [ "GetTypeDefenseRelations", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#a3a61e3c4ddf984df85979c508d4d5d5b", null ],
+    [ "GetTypeWhere", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#ab28d86a6db0f62d2b5818c3f04b09175", null ],
+    [ "GetWeather", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#a23b0455632abfca357f9d38048cb9d1e", null ],
+    [ "IsBaseForm", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#a7b0304adedd875a8c0611147de714a06", null ],
+    [ "SetPokemonAttribute", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#a773a324a3aeac13a3efb5195ee3a0eb7", null ],
+    [ "SetPokemonMove", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#a7efc7ac1a7055c2edda747e6cce9df17", null ],
+    [ "ShadowMoves", "classPokeStar_1_1ConnectionInterface_1_1POGODatabaseConnector.html#adc76e87e9fde1a664a30dd5a532b6924", null ]
+];
