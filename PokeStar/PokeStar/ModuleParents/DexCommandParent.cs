@@ -30,10 +30,32 @@ namespace PokeStar.ModuleParents
       /// </summary>
       protected static readonly Dictionary<ulong, DexSelectionMessage> dexSelectMessages = new Dictionary<ulong, DexSelectionMessage>();
 
+      /// <summary>
+      /// 
+      /// </summary>
       protected static readonly Dictionary<ulong, Pokemon> dexMessages = new Dictionary<ulong, Pokemon>();
 
+      /// <summary>
+      /// 
+      /// </summary>
       protected static readonly Dictionary<ulong, CatchSimulation> catchMessages = new Dictionary<ulong, CatchSimulation>();
 
+      /// <summary>
+      /// 
+      /// </summary>
+      private static readonly IEmote[] dexEmojis = {
+         new Emoji("1️⃣"),
+         new Emoji("2️⃣"),
+         new Emoji("3️⃣"),
+         new Emoji("4️⃣"),
+         new Emoji("5️⃣"),
+         new Emoji("6️⃣"),
+         new Emoji("❓"),
+      };
+
+      /// <summary>
+      /// 
+      /// </summary>
       protected static readonly Emoji[] catchEmojis = {
          new Emoji("⬅️"),
          new Emoji("⏺️"),
@@ -41,30 +63,38 @@ namespace PokeStar.ModuleParents
          new Emoji("❓"),
       };
 
+      /// <summary>
+      /// 
+      /// </summary>
+      private static readonly string[] dexEmojisDesc = {
+         "means switch to the Main dex page.",
+         "means switch to the CP page.",
+         "means switch to the PvP IV page.",
+         "means switch to the Form page.",
+         "means switch to the Evolution page.",
+         "means switch to the Nickname page.",
+      };
+
+      /// <summary>
+      /// 
+      /// </summary>
       private static readonly string[] catchEmojisDesc = {
          "means decrement current modifier value.",
          "means cycle through modifiers to edit.",
          "means increment current modifier value."
       };
 
+      /// <summary>
+      /// 
+      /// </summary>
       private static readonly string[] catchReplies = {
          "level <level>",
          "radius <radius>"
       };
 
       /// <summary>
-      /// Index of all emotes on catch message.
-      /// </summary>
-      private enum CATCH_EMOJI_INDEX
-      {
-         DECREMENT,
-         MODIFIER,
-         INCREMENT,
-         HELP,
-      }
-
-      /// <summary>
       /// Types of dex sub messages.
+      /// Also used for dex emoji index.
       /// </summary>
       protected enum DEX_MESSAGE_TYPES
       {
@@ -76,6 +106,17 @@ namespace PokeStar.ModuleParents
          NICKNAME_MESSAGE,
          CATCH_MESSAGE,
          MOVE_MESSAGE,
+      }
+
+      /// <summary>
+      /// Index of all emotes on catch message.
+      /// </summary>
+      private enum CATCH_EMOJI_INDEX
+      {
+         DECREMENT,
+         MODIFIER,
+         INCREMENT,
+         HELP,
       }
 
       /// Message checkers ****************************************************
@@ -204,13 +245,31 @@ namespace PokeStar.ModuleParents
          await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
       }
 
+      /// <summary>
+      /// 
+      /// </summary>
+      /// <param name="message"></param>
+      /// <param name="reaction"></param>
+      /// <param name="guildId"></param>
+      /// <returns></returns>
       public static async Task DexMessageReactionHandle(IMessage message, SocketReaction reaction, ulong guildId)
       {
          Pokemon pokemon = dexMessages[message.Id];
          SocketUserMessage msg = (SocketUserMessage)message;
          string fileName = Connections.GetPokemonPicture(pokemon.Name);
          Connections.CopyFile(fileName);
-         if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[(int)DEX_MESSAGE_TYPES.DEX_MESSAGE]))
+         if (reaction.Emote.Equals(dexEmojis[dexEmojis.Length - 1]))
+         {
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("**Dex Message Emoji Help:**");
+
+            for (int i = 0; i < dexEmojis.Length - 1; i++)
+            {
+               sb.AppendLine($"{dexEmojis[i]} {dexEmojisDesc[i]}");
+            }
+            await reaction.User.Value.SendMessageAsync(sb.ToString());
+         }
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_MESSAGE_TYPES.DEX_MESSAGE]))
          {
             if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.DEX_MESSAGE])
             {
@@ -222,7 +281,7 @@ namespace PokeStar.ModuleParents
                x.Embed = BuildDexEmbed(pokemon, fileName);
             });
          }
-         else if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[(int)DEX_MESSAGE_TYPES.CP_MESSAGE]))
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_MESSAGE_TYPES.CP_MESSAGE]))
          {
             if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.CP_MESSAGE])
             {
@@ -234,7 +293,7 @@ namespace PokeStar.ModuleParents
                x.Embed = BuildCPEmbed(pokemon, fileName);
             });
          }
-         else if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[(int)DEX_MESSAGE_TYPES.PVP_MESSAGE]))
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_MESSAGE_TYPES.PVP_MESSAGE]))
          {
             if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.PVP_MESSAGE])
             {
@@ -246,7 +305,7 @@ namespace PokeStar.ModuleParents
                x.Embed = BuildPvPEmbed(pokemon, fileName);
             });
          }
-         else if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[(int)DEX_MESSAGE_TYPES.FORM_MESSAGE]))
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_MESSAGE_TYPES.FORM_MESSAGE]))
          {
             if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.FORM_MESSAGE])
             {
@@ -268,7 +327,7 @@ namespace PokeStar.ModuleParents
                x.Embed = BuildFormEmbed(pokemon, fileName);
             });
          }
-         else if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE]))
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE]))
          {
             if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE])
             {
@@ -280,7 +339,7 @@ namespace PokeStar.ModuleParents
                x.Embed = BuildEvoEmbed(pokemon, fileName);
             });
          }
-         else if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[(int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE]))
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE]))
          {
             pokemon.Nicknames = Connections.Instance().GetNicknames(guildId, pokemon.Name);
             await msg.ModifyAsync(x =>
@@ -995,6 +1054,8 @@ namespace PokeStar.ModuleParents
          return Global.NONA_EMOJIS.ContainsKey($"{type}_emote");
       }
 
+      /// Message senders *****************************************************
+
       /// <summary>
       /// 
       /// </summary>
@@ -1029,21 +1090,43 @@ namespace PokeStar.ModuleParents
          Connections.DeleteFile(fileName);
          if (addEmojis)
          {
-            SetDexEmojis(message);
+            message.AddReactionsAsync(dexEmojis);
          }
       }
-
 
       /// Miscellaneous *******************************************************
 
       /// <summary>
-      /// 
+      /// Sets custom emotes used for dex messages.
       /// </summary>
-      /// <param name="message"></param>
-      /// <returns></returns>
-      protected static async Task SetDexEmojis(RestUserMessage message)
+      public static void SetInitialEmotes()
       {
-         message.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(Global.DEX_SWITCH_OPTIONS).ToArray());
+         dexEmojis[(int)DEX_MESSAGE_TYPES.DEX_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.DEX_MESSAGE];
+         dexEmojis[(int)DEX_MESSAGE_TYPES.CP_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.CP_MESSAGE];
+         dexEmojis[(int)DEX_MESSAGE_TYPES.PVP_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.PVP_MESSAGE];
+         dexEmojis[(int)DEX_MESSAGE_TYPES.FORM_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.FORM_MESSAGE];
+         dexEmojis[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE];
+         dexEmojis[(int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE];
+      }
+
+      /// <summary>
+      /// Removes old dex messages from the list of dex messages.
+      /// Old dex messages are messages older than one day.
+      /// </summary>
+      protected static void RemoveOldDexMessages()
+      {
+         List<ulong> ids = new List<ulong>();
+         foreach (KeyValuePair<ulong, Pokemon> dexMessage in dexMessages)
+         {
+            if (Math.Abs((DateTime.Now - dexMessage.Value.CreatedAt).TotalDays) >= 1)
+            {
+               ids.Add(dexMessage.Key);
+            }
+         }
+         foreach (ulong id in ids)
+         {
+            dexMessages.Remove(id);
+         }
       }
    }
 }

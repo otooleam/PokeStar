@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Text;
 using System.Collections.Generic;
 
@@ -240,7 +241,14 @@ namespace PokeStar.DataModels
 
       public Dictionary<string, string> Evolutions { get; set; }
 
+      public DateTime CreatedAt { get; private set; }
+
       public bool[] CompleteDataLookUp = new bool[Global.DEX_SWITCH_OPTIONS];
+
+      public Pokemon()
+      {
+         CreatedAt = DateTime.Now;
+      }
 
       /// <summary>
       /// Checks if the Pokémon is region locked.
@@ -273,8 +281,9 @@ namespace PokeStar.DataModels
          sb.AppendLine($"**Region:** {Region}");
          sb.AppendLine($"**Category:** {Category}");
          sb.AppendLine($"**Buddy Distance:** {BuddyDistance} km");
-         sb.AppendLine($"**Third Move Candy:** {SecondMoveCandy}");
-         sb.AppendLine($"**Third Move Stardust:** {SecondMoveStardust}");
+         sb.AppendLine($"**Second Charge Move:**");
+         sb.AppendLine($"*Candy:* {SecondMoveCandy}");
+         sb.AppendLine($"*Stardust:* {SecondMoveStardust}");
          sb.AppendLine($"**Height:** {Height} m");
          sb.AppendLine($"**Weight:** {Height} g");
          return sb.ToString();
