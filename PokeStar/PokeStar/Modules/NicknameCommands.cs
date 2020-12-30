@@ -25,7 +25,7 @@ namespace PokeStar.Modules
                "\nFor each option format the nicknameString as following:\n" +
                "Add Nickname..............nickname > Pokémon name\n" +
                "Update Nickname........new nickname > old nickname\n" +
-               "Delete Nickname.........nickname\n" +
+               "Delete Nickname.........> nickname\n" +
                "\nNote: Spaces are allowed for nicknames")]
       [RegisterChannel('D')]
       public async Task Nickname([Summary("Update the nickname of a Pokémon using this string.")][Remainder] string nicknameString)
@@ -35,17 +35,7 @@ namespace PokeStar.Modules
 
          if (delimeterIndex == Global.NICKNAME_DELIMITER_MISSING)
          {
-            string trim = nicknameString.Trim();
-            string name = Connections.Instance().GetPokemonWithNickname(guild, trim);
-            if (name == null)
-            {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"The nickname {trim} is not registered with a Pokémon.");
-            }
-            else
-            {
-               Connections.Instance().DeleteNickname(guild, trim);
-               await ResponseMessage.SendInfoMessage(Context.Channel, $"Removed {trim} from {name}.");
-            }
+            await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"No nicknam delimiter (>) found.");
          }
          else
          {
@@ -54,37 +44,53 @@ namespace PokeStar.Modules
             {
                string newNickname = arr[IndexNickname].Trim();
                string other = arr[IndexName].Trim();
-               Pokemon pokemon = Connections.Instance().GetPokemon(GetPokemonName(other));
 
-               if (pokemon == null)
+               if (string.IsNullOrEmpty(newNickname))
                {
-                  if (Connections.Instance().GetPokemonWithNickname(guild, other) == null)
+                  string name = Connections.Instance().GetPokemonWithNickname(guild, newNickname);
+                  if (name == null)
                   {
-                     await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"{other} is not a registered nickname.");
+                     await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"The nickname {newNickname} is not registered with a Pokémon.");
                   }
                   else
                   {
-                     Connections.Instance().UpdateNickname(guild, other, newNickname);
-                     string pkmn = Connections.Instance().GetPokemonWithNickname(guild, other);
-                     await ResponseMessage.SendInfoMessage(Context.Channel, $"{newNickname} has replaced {other} as a valid nickname for {pkmn}.");
+                     Connections.Instance().DeleteNickname(guild, newNickname);
+                     await ResponseMessage.SendInfoMessage(Context.Channel, $"Removed {newNickname} from {name}.");
                   }
                }
                else
                {
-                  Connections.Instance().AddNickname(guild, newNickname, pokemon.Name);
-                  await ResponseMessage.SendInfoMessage(Context.Channel, $"{newNickname} is now a valid nickname for {pokemon.Name}.");
+                  Pokemon pokemon = Connections.Instance().GetPokemon(GetPokemonName(other));
+
+                  if (pokemon == null)
+                  {
+                     if (Connections.Instance().GetPokemonWithNickname(guild, other) == null)
+                     {
+                        await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"{other} is not a registered nickname.");
+                     }
+                     else
+                     {
+                        Connections.Instance().UpdateNickname(guild, other, newNickname);
+                        string pkmn = Connections.Instance().GetPokemonWithNickname(guild, other);
+                        await ResponseMessage.SendInfoMessage(Context.Channel, $"{newNickname} has replaced {other} as a valid nickname for {pkmn}.");
+                     }
+                  }
+                  else
+                  {
+                     Connections.Instance().AddNickname(guild, newNickname, pokemon.Name);
+                     await ResponseMessage.SendInfoMessage(Context.Channel, $"{newNickname} is now a valid nickname for {pokemon.Name}.");
+                  }
                }
             }
             else
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"Too many delimiters found.");
+               await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"Too many delimiters (>) found.");
             }
          }
       }
 
-
-      [Command("getNicknames")]
-      [Alias("getNickname")]
+      [Command("getNickname")]
+      [Alias("getNicknames")]
       [Summary("Gets nicknames for a given Pokémon.")]
       [Remarks("Can search by Pokémon name, nickname, or number.")]
       [RegisterChannel('D')]
@@ -106,24 +112,16 @@ namespace PokeStar.Modules
             }
             else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER)
             {
-               string fileName = POKEDEX_SELECTION_IMAGE;
-               Connections.CopyFile(fileName);
-               RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonWithNumber, fileName));
-               dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, pokemonWithNumber));
-               Connections.DeleteFile(fileName);
-               dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(pokemonWithNumber.Count).ToArray());
+               await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, pokemonWithNumber, Context.Channel);
             }
             else
             {
                Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber.First());
-               List<string> Nicknames = Connections.Instance().GetNicknames(guild, pkmn.Name);
-               string fileName = Connections.GetPokemonPicture(pkmn.Name);
-               Connections.CopyFile(fileName);
-               await Context.Channel.SendFileAsync(fileName, embed: BuildNicknameEmbed(Nicknames, pkmn.Name, fileName));
-               Connections.DeleteFile(fileName);
+               pkmn.Nicknames = Connections.Instance().GetNicknames(guild, pkmn.Name);
+               await SendDexMessage(pkmn, BuildNicknameEmbed, Context.Channel, true);
             }
          }
-         else // Is string
+         else
          {
             string name = GetPokemonName(pokemon);
             Pokemon pkmn = Connections.Instance().GetPokemon(name);
@@ -133,31 +131,18 @@ namespace PokeStar.Modules
 
                if (pkmn == null)
                {
-                  List<string> pokemonNames = Connections.Instance().SearchPokemon(name);
-
-                  string fileName = POKEDEX_SELECTION_IMAGE;
-                  Connections.CopyFile(fileName);
-                  RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
-                  dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, pokemonNames));
-                  Connections.DeleteFile(fileName);
-                  dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
+                  await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, Connections.Instance().SearchPokemon(name), Context.Channel);
                }
                else
                {
-                  List<string> Nicknames = Connections.Instance().GetNicknames(guild, pkmn.Name);
-                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
-                  Connections.CopyFile(fileName);
-                  await Context.Channel.SendFileAsync(fileName, embed: BuildNicknameEmbed(Nicknames, pkmn.Name, fileName));
-                  Connections.DeleteFile(fileName);
+                  pkmn.Nicknames = Connections.Instance().GetNicknames(guild, pkmn.Name);
+                  await SendDexMessage(pkmn, BuildNicknameEmbed, Context.Channel, true);
                }
             }
             else
             {
-               List<string> Nicknames = Connections.Instance().GetNicknames(guild, pkmn.Name);
-               string fileName = Connections.GetPokemonPicture(pkmn.Name);
-               Connections.CopyFile(fileName);
-               await Context.Channel.SendFileAsync(fileName, embed: BuildNicknameEmbed(Nicknames, pkmn.Name, fileName));
-               Connections.DeleteFile(fileName);
+               pkmn.Nicknames = Connections.Instance().GetNicknames(guild, pkmn.Name);
+               await SendDexMessage(pkmn, BuildNicknameEmbed, Context.Channel, true);
             }
          }
       }

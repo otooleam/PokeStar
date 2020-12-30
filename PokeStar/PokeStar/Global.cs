@@ -263,6 +263,11 @@ namespace PokeStar
       };
 
       /// <summary>
+      /// Dex switch option number
+      /// </summary>
+      public static readonly int DEX_SWITCH_OPTIONS = 6;
+
+      /// <summary>
       /// Catch ring colors
       /// </summary>
       public static readonly uint MIN_CATCH_COLOR = 0xFF0000; // RED    0%

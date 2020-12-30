@@ -203,7 +203,11 @@ namespace PokeStar
             {
                await RaidCommandParent.RaidSubMessageReactionHandle(message, reaction);
             }
-            else if (DexCommandParent.IsDexSubMessage(message.Id))
+            else if (DexCommandParent.IsDexSelectMessage(message.Id))
+            {
+               await DexCommandParent.DexSelectMessageReactionHandle(message, reaction, guild);
+            }
+            else if (DexCommandParent.IsDexMessage(message.Id))
             {
                await DexCommandParent.DexMessageReactionHandle(message, reaction, guild);
             }

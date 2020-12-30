@@ -20,11 +20,6 @@ namespace PokeStar.DataModels
       public string Name { get; set; } = Global.DEFAULT_RAID_BOSS_NAME;
 
       /// <summary>
-      /// List of alternate forms.
-      /// </summary>
-      public List<string> Forms { get; set; }
-
-      /// <summary>
       /// Description of the Pokémon.
       /// </summary>
       public string Description { get; set; }
@@ -65,21 +60,6 @@ namespace PokeStar.DataModels
       public List<string> Resistance { get; set; }
 
       /// <summary>
-      /// Region the Pokémon is originally from.
-      /// </summary>
-      public string Region { get; set; }
-
-      /// <summary>
-      /// Category of the Pokémon.
-      /// </summary>
-      public string Category { get; set; }
-
-      /// <summary>
-      /// Buddy distance of the Pokémon.
-      /// </summary>
-      public int BuddyDistance { get; set; }
-
-      /// <summary>
       /// Is the Pokémon obtainable.
       /// </summary>
       public bool Obtainable { get; set; }
@@ -93,6 +73,21 @@ namespace PokeStar.DataModels
       /// Is the Pokémon shadowable.
       /// </summary>
       public bool Shadow { get; set; }
+
+      /// <summary>
+      /// Region the Pokémon is originally from.
+      /// </summary>
+      public string Region { get; set; }
+
+      /// <summary>
+      /// Category of the Pokémon.
+      /// </summary>
+      public string Category { get; set; }
+
+      /// <summary>
+      /// Buddy distance of the Pokémon.
+      /// </summary>
+      public int BuddyDistance { get; set; }
 
       /// <summary>
       /// Is the Pokémon a regional.
@@ -239,6 +234,14 @@ namespace PokeStar.DataModels
       /// </summary>
       public LeagueIV UltraXLIVs { get; set; }
 
+      public List<string> Nicknames { get; set; }
+
+      public Form Forms { get; set; }
+
+      public Dictionary<string, string> Evolutions { get; set; }
+
+      public bool[] CompleteDataLookUp = new bool[Global.DEX_SWITCH_OPTIONS];
+
       /// <summary>
       /// Checks if the Pokémon is region locked.
       /// </summary>
@@ -249,33 +252,31 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Checks if the Pokémon has alternate forms.
-      /// </summary>
-      /// <returns>True if the Pokémon has alternate forms, otherwise false.</returns>
-      public bool HasForms()
-      {
-         return Forms.Count > 1;
-      }
-
-      /// <summary>
       /// Gets the details of the Pokémon as a string.
       /// Details include but are not limited to region, 
       /// category, obtainability, shiny status, and
       /// shadow status.
       /// </summary>
       /// <returns>Pokémon detail string.</returns>
-      public string DetailsToString()
+      public string StatusToString()
       {
          StringBuilder sb = new StringBuilder();
          sb.AppendLine($"**Can be Obtained:** {(Obtainable ? "Yes" : "No")}");
          sb.AppendLine($"**Can be Shiny:** {(Shiny ? "Yes" : "No")}");
          sb.AppendLine($"**Can be Shadow:** {(Shadow ? "Yes" : "No")}");
+         return sb.ToString();
+      }
+
+      public string DetailsToString()
+      {
+         StringBuilder sb = new StringBuilder();
          sb.AppendLine($"**Region:** {Region}");
          sb.AppendLine($"**Category:** {Category}");
          sb.AppendLine($"**Buddy Distance:** {BuddyDistance} km");
-         sb.AppendLine($"**Second Charge Move:**\n*Candy:* {SecondMoveCandy}\n*Stardust:* {SecondMoveStardust}");
-
-
+         sb.AppendLine($"**Third Move Candy:** {SecondMoveCandy}");
+         sb.AppendLine($"**Third Move Stardust:** {SecondMoveStardust}");
+         sb.AppendLine($"**Height:** {Height} m");
+         sb.AppendLine($"**Weight:** {Height} g");
          return sb.ToString();
       }
 
@@ -290,20 +291,6 @@ namespace PokeStar.DataModels
          foreach (string region in regions)
          {
             sb.AppendLine(region);
-         }
-         return sb.ToString().Trim();
-      }
-
-      /// <summary>
-      /// Gets the forms of the Pokémon as a string.
-      /// </summary>
-      /// <returns>Pokémon form string.</returns>
-      public string FormsToString()
-      {
-         StringBuilder sb = new StringBuilder();
-         foreach (string form in Forms)
-         {
-            sb.AppendLine(form);
          }
          return sb.ToString().Trim();
       }

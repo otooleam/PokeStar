@@ -228,33 +228,26 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemon">Reference to a Pokémon.</param>
       public void GetPokemonStats(ref Pokemon pokemon)
       {
-         pokemon.Forms = POGODBConnector.GetPokemonByNumber(pokemon.Number);
-
-         TypeRelation typeRelations = GetTypeDefenseRelations(pokemon.Type);
-         pokemon.Weakness = typeRelations.Weak.Keys.ToList();
-         pokemon.Resistance = typeRelations.Strong.Keys.ToList();
-         pokemon.Weather = GetWeather(pokemon.Type);
-         pokemon.FastMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.FAST_MOVE_CATEGORY);
-         pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
-         pokemon.Counter = POGODBConnector.GetCounters(pokemon.Name);
-
-         foreach (Counter counter in pokemon.Counter)
+         if (pokemon != null)
          {
-            counter.FastAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.FastAttack.Name);
-            counter.ChargeAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.ChargeAttack.Name);
+            TypeRelation typeRelations = GetTypeDefenseRelations(pokemon.Type);
+            pokemon.Weakness = typeRelations.Weak.Keys.ToList();
+            pokemon.Resistance = typeRelations.Strong.Keys.ToList();
+            pokemon.Weather = GetWeather(pokemon.Type);
+            pokemon.FastMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.FAST_MOVE_CATEGORY);
+            pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
+            pokemon.Counter = POGODBConnector.GetCounters(pokemon.Name);
+
+            foreach (Counter counter in pokemon.Counter)
+            {
+               counter.FastAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.FastAttack.Name);
+               counter.ChargeAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.ChargeAttack.Name);
+            }
+
+            pokemon.CPMax = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_XL_LEVEL);
          }
-
-         pokemon.CPMax = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_XL_LEVEL);
-
-         pokemon.GreatXLIVs = CPCalculator.CalcPvPIVsPerLeague(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
-            Global.MAX_GREAT_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
-
-         pokemon.UltraXLIVs = CPCalculator.CalcPvPIVsPerLeague(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
-            Global.MAX_ULTRA_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
       }
 
       /// <summary>
