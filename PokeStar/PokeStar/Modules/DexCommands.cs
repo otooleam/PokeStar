@@ -14,10 +14,15 @@ using PokeStar.ConnectionInterface;
 namespace PokeStar.Modules
 {
    /// <summary>
-   /// Handles pokedex commands.
+   /// Handles PokéDex commands.
    /// </summary>
    public class DexCommands : DexCommandParent
    {
+      /// <summary>
+      /// Handle dex command.
+      /// </summary>
+      /// <param name="pokemon">Get information for this Pokémon.</param>
+      /// <returns>Completed Task.</returns>
       [Command("dex")]
       [Alias("pokedex")]
       [Summary("Gets the PokéDex entry for a given Pokémon.")]
@@ -79,6 +84,11 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle cp command.
+      /// </summary>
+      /// <param name="pokemon">Get CPs for this Pokémon.</param>
+      /// <returns>Completed Task.</returns>
       [Command("cp")]
       [Summary("Gets max CP values for a given Pokémon.")]
       [Remarks("Can search by Pokémon name or by number." +
@@ -135,6 +145,11 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle pvp command.
+      /// </summary>
+      /// <param name="pokemon">Get PvP IVs for this Pokémon.</param>
+      /// <returns>Completed Task.</returns>
       [Command("pvp")]
       [Alias("pvpiv")]
       [Summary("Gets rank 1 PvP IV values for a given Pokémon.")]
@@ -192,12 +207,17 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle form command.
+      /// </summary>
+      /// <param name="pokemon">(Optional) Get form information for this Pokémon.</param>
+      /// <returns>Completed Task.</returns>
       [Command("form")]
       [Summary("Gets all forms for a given Pokémon.")]
       [Remarks("Leave blank to get a list of all Pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
       [RegisterChannel('D')]
-      public async Task Form([Summary("(Optional) Pokémon with forms.")][Remainder] string pokemon = null)
+      public async Task Form([Summary("(Optional) Get form information for this Pokémon.")][Remainder] string pokemon = null)
       {
          if (pokemon == null)
          {
@@ -315,6 +335,11 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle evo command.
+      /// </summary>
+      /// <param name="pokemon">Get evolution family for this Pokémon.</param>
+      /// <returns>Completed Task.</returns>
       [Command("evo")]
       [Alias("evolution", "evolve")]
       [Summary("Gets the evolution family for a given Pokémon.")]

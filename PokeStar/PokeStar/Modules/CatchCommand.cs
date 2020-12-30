@@ -11,8 +11,16 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles catch commands.
+   /// </summary>
    public class CatchCommand : DexCommandParent
    {
+      /// <summary>
+      /// Handle catch command
+      /// </summary>
+      /// <param name="pokemon">Simulate catching this Pokémon.</param>
+      /// <returns>Completed Task.</returns>
       [Command("catch")]
       [Summary("Simulates catching a Pokémon.")]
       [RegisterChannel('I')]

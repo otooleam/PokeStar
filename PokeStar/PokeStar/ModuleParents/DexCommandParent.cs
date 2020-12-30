@@ -13,6 +13,9 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.ModuleParents
 {
+   /// <summary>
+   /// Parent for dex command modules.
+   /// </summary>
    public class DexCommandParent : ModuleBase<SocketCommandContext>
    {
       /// <summary>
@@ -25,23 +28,27 @@ namespace PokeStar.ModuleParents
       /// </summary>
       protected static readonly string BLANK_IMAGE = "battle.png";
 
+      /// Message holders *****************************************************
+
       /// <summary>
-      /// Saved dex messages.
+      /// Saved dex selection messages.
       /// </summary>
       protected static readonly Dictionary<ulong, DexSelectionMessage> dexSelectMessages = new Dictionary<ulong, DexSelectionMessage>();
 
       /// <summary>
-      /// 
+      /// Saved dex messages.
       /// </summary>
       protected static readonly Dictionary<ulong, Pokemon> dexMessages = new Dictionary<ulong, Pokemon>();
 
       /// <summary>
-      /// 
+      /// Saved catch messages.
       /// </summary>
       protected static readonly Dictionary<ulong, CatchSimulation> catchMessages = new Dictionary<ulong, CatchSimulation>();
 
+      /// Emotes **************************************************************
+
       /// <summary>
-      /// 
+      /// Emotes for a dex message.
       /// </summary>
       private static readonly IEmote[] dexEmojis = {
          new Emoji("1️⃣"),
@@ -54,7 +61,7 @@ namespace PokeStar.ModuleParents
       };
 
       /// <summary>
-      /// 
+      /// Emotes for a catch message.
       /// </summary>
       protected static readonly Emoji[] catchEmojis = {
          new Emoji("⬅️"),
@@ -64,7 +71,7 @@ namespace PokeStar.ModuleParents
       };
 
       /// <summary>
-      /// 
+      /// Descriptions for dex emotes.
       /// </summary>
       private static readonly string[] dexEmojisDesc = {
          "means switch to the Main dex page.",
@@ -76,7 +83,7 @@ namespace PokeStar.ModuleParents
       };
 
       /// <summary>
-      /// 
+      /// Descriptions for catch emotes.
       /// </summary>
       private static readonly string[] catchEmojisDesc = {
          "means decrement current modifier value.",
@@ -85,18 +92,65 @@ namespace PokeStar.ModuleParents
       };
 
       /// <summary>
-      /// 
+      /// Replies for a catch message.
       /// </summary>
       private static readonly string[] catchReplies = {
          "level <level>",
          "radius <radius>"
       };
 
+      /// Enumerations ********************************************************
+
       /// <summary>
       /// Types of dex sub messages.
-      /// Also used for dex emoji index.
       /// </summary>
       protected enum DEX_MESSAGE_TYPES
+      {
+         /// <summary>
+         /// Dex message type.
+         /// </summary>
+         DEX_MESSAGE,
+
+         /// <summary>
+         /// CP message type.
+         /// </summary>
+         CP_MESSAGE,
+
+         /// <summary>
+         /// PvP message type.
+         /// </summary>
+         PVP_MESSAGE,
+
+         /// <summary>
+         /// Form message type.
+         /// </summary>
+         FORM_MESSAGE,
+
+         /// <summary>
+         /// Evo message type.
+         /// </summary>
+         EVO_MESSAGE,
+
+         /// <summary>
+         /// Nickname message type.
+         /// </summary>
+         NICKNAME_MESSAGE,
+
+         /// <summary>
+         /// Catch message type.
+         /// </summary>
+         CATCH_MESSAGE,
+
+         /// <summary>
+         /// Move message type.
+         /// </summary>
+         MOVE_MESSAGE,
+      }
+
+      /// <summary>
+      /// Index of emotes on a dex message.
+      /// </summary>
+      private enum DEX_EMOJI_INDEX
       {
          DEX_MESSAGE,
          CP_MESSAGE,
@@ -104,12 +158,11 @@ namespace PokeStar.ModuleParents
          FORM_MESSAGE,
          EVO_MESSAGE,
          NICKNAME_MESSAGE,
-         CATCH_MESSAGE,
-         MOVE_MESSAGE,
+         HELP,
       }
 
       /// <summary>
-      /// Index of all emotes on catch message.
+      /// Index of emotes on a catch message.
       /// </summary>
       private enum CATCH_EMOJI_INDEX
       {
@@ -246,19 +299,19 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// 
+      /// Handles a reaction on a dex message.
       /// </summary>
-      /// <param name="message"></param>
-      /// <param name="reaction"></param>
-      /// <param name="guildId"></param>
-      /// <returns></returns>
+      /// <param name="message">Message that was reacted on.</param>
+      /// <param name="reaction">Reaction that was sent.</param>
+      /// <param name="guildId">Id of the guild that the message was sent in.</param>
+      /// <returns>Completed Task.</returns>
       public static async Task DexMessageReactionHandle(IMessage message, SocketReaction reaction, ulong guildId)
       {
          Pokemon pokemon = dexMessages[message.Id];
          SocketUserMessage msg = (SocketUserMessage)message;
          string fileName = Connections.GetPokemonPicture(pokemon.Name);
          Connections.CopyFile(fileName);
-         if (reaction.Emote.Equals(dexEmojis[dexEmojis.Length - 1]))
+         if (reaction.Emote.Equals(dexEmojis[(int)DEX_EMOJI_INDEX.HELP]))
          {
             StringBuilder sb = new StringBuilder();
             sb.AppendLine("**Dex Message Emoji Help:**");
@@ -269,7 +322,7 @@ namespace PokeStar.ModuleParents
             }
             await reaction.User.Value.SendMessageAsync(sb.ToString());
          }
-         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_MESSAGE_TYPES.DEX_MESSAGE]))
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_EMOJI_INDEX.DEX_MESSAGE]))
          {
             if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.DEX_MESSAGE])
             {
@@ -281,7 +334,7 @@ namespace PokeStar.ModuleParents
                x.Embed = BuildDexEmbed(pokemon, fileName);
             });
          }
-         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_MESSAGE_TYPES.CP_MESSAGE]))
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_EMOJI_INDEX.CP_MESSAGE]))
          {
             if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.CP_MESSAGE])
             {
@@ -293,7 +346,7 @@ namespace PokeStar.ModuleParents
                x.Embed = BuildCPEmbed(pokemon, fileName);
             });
          }
-         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_MESSAGE_TYPES.PVP_MESSAGE]))
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_EMOJI_INDEX.PVP_MESSAGE]))
          {
             if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.PVP_MESSAGE])
             {
@@ -305,7 +358,7 @@ namespace PokeStar.ModuleParents
                x.Embed = BuildPvPEmbed(pokemon, fileName);
             });
          }
-         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_MESSAGE_TYPES.FORM_MESSAGE]))
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_EMOJI_INDEX.FORM_MESSAGE]))
          {
             if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.FORM_MESSAGE])
             {
@@ -327,7 +380,7 @@ namespace PokeStar.ModuleParents
                x.Embed = BuildFormEmbed(pokemon, fileName);
             });
          }
-         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE]))
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_EMOJI_INDEX.EVO_MESSAGE]))
          {
             if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE])
             {
@@ -339,7 +392,7 @@ namespace PokeStar.ModuleParents
                x.Embed = BuildEvoEmbed(pokemon, fileName);
             });
          }
-         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE]))
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_EMOJI_INDEX.NICKNAME_MESSAGE]))
          {
             pokemon.Nicknames = Connections.Instance().GetNicknames(guildId, pokemon.Name);
             await msg.ModifyAsync(x =>
@@ -356,7 +409,7 @@ namespace PokeStar.ModuleParents
       /// </summary>
       /// <param name="message">Message that was reacted on.</param>
       /// <param name="reaction">Reaction that was sent.</param>
-      /// <returns></returns>
+      /// <returns>Completed Task.</returns>
       public static async Task CatchMessageReactionHandle(IMessage message, SocketReaction reaction)
       {
          CatchSimulation catchSim = catchMessages[message.Id];
@@ -476,7 +529,7 @@ namespace PokeStar.ModuleParents
       /// </summary>
       /// <param name="pokemon">Pokémon to display.</param>
       /// <param name="fileName">Name of image file.</param>
-      /// <returns>Embed for viewing a Pokémon's CP.</returns>
+      /// <returns>Embed for viewing a Pokémon's best PvP IVs.</returns>
       protected static Embed BuildPvPEmbed(Pokemon pokemon, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
@@ -499,11 +552,9 @@ namespace PokeStar.ModuleParents
       /// <summary>
       /// Builds a form embed.
       /// </summary>
-      /// <param name="baseName">Name of the base form of the Pokémon.</param>
-      /// <param name="forms">List of forms of the Pokémon.</param>
-      /// <param name="defaultForm">Default form of the Pokémon.</param>
+      /// <param name="pokemon">Pokémon to display.</param>
       /// <param name="fileName">Name of image file.</param>
-      /// <returns></returns>
+      /// <returns>Embed for viewing a Pokémon's form differences.</returns>
       protected static Embed BuildFormEmbed(Pokemon pokemon, string fileName)
       {
 
@@ -531,10 +582,9 @@ namespace PokeStar.ModuleParents
       /// <summary>
       /// Builds an evolution embed.
       /// </summary>
-      /// <param name="evolutions">Dictionary of evolutions.</param>
-      /// <param name="initialPokemon">Pokémon that was searched for.</param>
+      /// <param name="pokemon">Pokémon to display.</param>
       /// <param name="fileName">Name of image file.</param>
-      /// <returns>Embed for viewing a Pokémon's evolutions.</returns>
+      /// <returns>Embed for viewing a Pokémon's evolution family.</returns>
       protected static Embed BuildEvoEmbed(Pokemon pokemon, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
@@ -558,8 +608,7 @@ namespace PokeStar.ModuleParents
       /// <summary>
       /// Builds a nickname embed.
       /// </summary>
-      /// <param name="nicknames">List of nicknames.</param>
-      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="pokemon">Pokémon to display.</param>
       /// <param name="fileName">Name of image file.</param>
       /// <returns>Embed for viewing a Pokémon's nicknames.</returns>
       protected static Embed BuildNicknameEmbed(Pokemon pokemon, string fileName)
@@ -588,6 +637,7 @@ namespace PokeStar.ModuleParents
       /// Builds a move embed.
       /// </summary>
       /// <param name="move">Move to display.</param>
+      /// <param name="fileName">Name of image file.</param>
       /// <returns>Embed for viewing a move.</returns>
       protected static Embed BuildMoveEmbed(Move move, string fileName)
       {
@@ -614,7 +664,7 @@ namespace PokeStar.ModuleParents
       /// </summary>
       /// <param name="catchSim">Catch simulator to display.</param>
       /// <param name="fileName">Name of image file.</param>
-      /// <returns></returns>
+      /// <returns>Embed for viewing a catch simulation.</returns>
       protected static Embed BuildCatchEmbed(CatchSimulation catchSim, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
@@ -1057,12 +1107,12 @@ namespace PokeStar.ModuleParents
       /// Message senders *****************************************************
 
       /// <summary>
-      /// 
+      /// Sends a dex selection message.
       /// </summary>
-      /// <param name="messageType"></param>
-      /// <param name="options"></param>
-      /// <param name="channel"></param>
-      /// <returns></returns>
+      /// <param name="messageType">Type of message to select.</param>
+      /// <param name="options">List of options.</param>
+      /// <param name="channel">Channel to send message to.</param>
+      /// <returns>Completed Task.</returns>
       protected static async Task SendDexSelectionMessage(int messageType, List<string> options, ISocketMessageChannel channel)
       {
          string fileName = POKEDEX_SELECTION_IMAGE;
@@ -1074,13 +1124,13 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// 
+      /// Sends a dex message using a given embed method.
       /// </summary>
-      /// <param name="pokemon"></param>
-      /// <param name="EmbedMethod"></param>
-      /// <param name="channel"></param>
-      /// <param name="addEmojis"></param>
-      /// <returns></returns>
+      /// <param name="pokemon">Pokémon to display.</param>
+      /// <param name="EmbedMethod">Embed method to use.</param>
+      /// <param name="channel">Channel to send message to.</param>
+      /// <param name="addEmojis">Should emotes be added. Defaults to false.</param>
+      /// <returns>Completed Task.</returns>
       protected static async Task SendDexMessage(Pokemon pokemon, Func<Pokemon, string, Embed> EmbedMethod, ISocketMessageChannel channel, bool addEmojis = false)
       {
          string fileName = Connections.GetPokemonPicture(pokemon.Name);

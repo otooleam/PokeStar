@@ -13,6 +13,10 @@ namespace PokeStar.Modules
    /// </summary>
    public class SetupCommands : ModuleBase<SocketCommandContext>
    {
+      /// <summary>
+      /// Handle setup command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
       [Command("setup")]
       [Summary("Creates roles used by Nona.")]
       [Remarks("Roles created include Trainer, Valor, Mystic, and Instinct.\n" +

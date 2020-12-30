@@ -24,7 +24,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the move as a string.
       /// </summary>
-      /// <returns>Move string.</returns>
+      /// <returns>Move as a string.</returns>
       public override string ToString()
       {
          string str = $@"{Name} {Global.NONA_EMOJIS[$"{Type}_emote"]}";

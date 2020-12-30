@@ -28,7 +28,7 @@ namespace PokeStar.DataModels
       /// Pokémon used by rockets.
       /// Length is always 3.
       /// </summary>
-      public List<string>[] Slots { get; private set; } =
+      public List<string>[] Slots  =
       {
          new List<string>(),
          new List<string>(),

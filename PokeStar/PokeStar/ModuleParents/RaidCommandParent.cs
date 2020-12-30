@@ -13,8 +13,13 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.ModuleParents
 {
+   /// <summary>
+   /// Parent for raid command modules.
+   /// </summary>
    public class RaidCommandParent : ModuleBase<SocketCommandContext>
    {
+      /// Message holders *****************************************************
+
       /// <summary>
       /// Saved raid messages.
       /// </summary>
@@ -1140,6 +1145,8 @@ namespace PokeStar.ModuleParents
       /// </summary>
       /// <param name="invite">List of players to invite.</param>
       /// <param name="player">Player that wants to invite someone.</param>
+      /// <param name="offset">Where to start in the list of invites.</param>
+      /// <param name="listSize">How many players to display.</param>
       /// <returns>Embed for inviting a player to a raid.</returns>
       private static Embed BuildPlayerInviteEmbed(ImmutableList<SocketGuildUser> invite, string player, int offset, int listSize)
       {
@@ -1244,6 +1251,7 @@ namespace PokeStar.ModuleParents
       /// <param name="players">List of players.</param>
       /// <param name="location">Location of the raid.</param>
       /// <param name="groupNumber">Group number the players are part of.</param>
+      /// <param name="isNormalRaid">Is the raid a normal raid (raid or raid train).</param>
       /// <returns>List of players to ping as a string.</returns>
       protected static string BuildRaidReadyPingList(ImmutableList<SocketGuildUser> players, string location, int groupNumber, bool isNormalRaid)
       {
@@ -1475,7 +1483,7 @@ namespace PokeStar.ModuleParents
       /// <param name="message">Message to add emotes to.</param>
       /// <param name="emotes">Emotes to add.</param>
       /// <returns>Completed Task.</returns>
-      protected static async Task SetEmojis(RestUserMessage message, IEmote[] emotes)
+      protected static void SetEmojis(RestUserMessage message, IEmote[] emotes)
       {
          message.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.HELP]).ToArray());
       }

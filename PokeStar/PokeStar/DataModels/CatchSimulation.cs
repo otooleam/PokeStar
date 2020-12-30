@@ -98,16 +98,16 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Get 
+      /// Get Pokéball text.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Pokéball as a string.</returns>
       public string GetBall()
       {
          return Global.POKE_BALL_RATE.Keys.ElementAt(Modifiers[(int)MODIFIER_INDEX.BALL]);
       }
 
       /// <summary>
-      /// Get berry test.
+      /// Get berry text.
       /// </summary>
       /// <returns>Berry as a string.</returns>
       public string GetBerry()

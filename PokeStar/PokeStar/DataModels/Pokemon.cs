@@ -235,16 +235,34 @@ namespace PokeStar.DataModels
       /// </summary>
       public LeagueIV UltraXLIVs { get; set; }
 
+      /// <summary>
+      /// List of registered nicknames.
+      /// </summary>
       public List<string> Nicknames { get; set; }
 
+      /// <summary>
+      /// Forms of the Pokémon.
+      /// </summary>
       public Form Forms { get; set; }
 
+      /// <summary>
+      /// Evolution family of the Pokémon.
+      /// </summary>
       public Dictionary<string, string> Evolutions { get; set; }
 
+      /// <summary>
+      /// When the Pokémon was created.
+      /// </summary>
       public DateTime CreatedAt { get; private set; }
 
+      /// <summary>
+      /// Has the data
+      /// </summary>
       public bool[] CompleteDataLookUp = new bool[Global.DEX_SWITCH_OPTIONS];
 
+      /// <summary>
+      /// Creates a new Pokémon.
+      /// </summary>
       public Pokemon()
       {
          CreatedAt = DateTime.Now;
@@ -260,12 +278,11 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Gets the details of the Pokémon as a string.
-      /// Details include but are not limited to region, 
-      /// category, obtainability, shiny status, and
-      /// shadow status.
+      /// Gets the status of the Pokémon as a string.
+      /// Status includes obtainability, shiny status, 
+      /// and shadow status.
       /// </summary>
-      /// <returns>Pokémon detail string.</returns>
+      /// <returns>Pokémon status as a string.</returns>
       public string StatusToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -275,6 +292,12 @@ namespace PokeStar.DataModels
          return sb.ToString();
       }
 
+      /// <summary>
+      /// Gets the details of the Pokémon as a string.
+      /// Details include but are not limited to region, 
+      /// category, buddy distance, and second move data.
+      /// </summary>
+      /// <returns>Pokémon details as a string.</returns>
       public string DetailsToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -292,7 +315,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the regions to find the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokémon region string.</returns>
+      /// <returns>Pokémon regions as a string.</returns>
       public string RegionalToString()
       {
          List<string> regions = Regional.Split(',').ToList();
@@ -308,7 +331,7 @@ namespace PokeStar.DataModels
       /// Gets the stats of the Pokémon as a string.
       /// Stats include Max CP, attack, defense, and stamina(hp).
       /// </summary>
-      /// <returns>Pokémon stats string.</returns>
+      /// <returns>Pokémon stats as a string.</returns>
       public string StatsToString() 
       {
          StringBuilder sb = new StringBuilder();
@@ -324,7 +347,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the type(s) of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokémon type string.</returns>
+      /// <returns>Pokémon type as a string.</returns>
       public string TypeToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -340,7 +363,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the weather that boosts the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokémon weather string.</returns>
+      /// <returns>Pokémon weather boosts as a string.</returns>
       public string WeatherToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -354,7 +377,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the types the Pokémon is weak to as a string.
       /// </summary>
-      /// <returns>Pokémon weakness string.</returns>
+      /// <returns>Pokémon weaknesses as a string.</returns>
       public string WeaknessToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -375,7 +398,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the types the Pokémon is resistant to as a string.
       /// </summary>
-      /// <returns>Pokémon resistance string.</returns>
+      /// <returns>Pokémon resistances as a string.</returns>
       public string ResistanceToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -396,7 +419,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the fast moves of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokémon fast move string.</returns>
+      /// <returns>Pokémon fast moves as a string.</returns>
       public string FastMoveToString()
       {
          if (FastMove.Count == 0)
@@ -427,7 +450,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the charge moves of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokémon charge move string.</returns>
+      /// <returns>Pokémon charge moves as a string.</returns>
       public string ChargeMoveToString()
       {
          if (ChargeMove.Count == 0)
@@ -458,7 +481,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the top counters of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokémon counter string.</returns>
+      /// <returns>Pokémon counters as a string.</returns>
       public string CounterToString()
       {
          if (Counter.Count == 0)
@@ -479,7 +502,7 @@ namespace PokeStar.DataModels
       /// Includes min and max CPs and weather boosted
       /// min and max CPs.
       /// </summary>
-      /// <returns>Pokémon raid CP string.</returns>
+      /// <returns>Pokémon raid CPas a string.</returns>
       public string RaidCPToString()
       {
          return $"{CPRaidMin} - {CPRaidMax}\n{CPRaidBoostedMin}{Global.WEATHER_BOOST_SYMBOL} - {CPRaidBoostedMax}{Global.WEATHER_BOOST_SYMBOL}";
@@ -488,7 +511,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the min and max quest CPs of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokémon quest CP string.</returns>
+      /// <returns>Pokémon quest CP as a string.</returns>
       public string QuestCPToString()
       {
          return $"{CPQuestMin} - {CPQuestMax}";
@@ -497,7 +520,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the min and max hatch CPs of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokémon hatch CP string.</returns>
+      /// <returns>Pokémon hatch CP as a string.</returns>
       public string HatchCPToString()
       {
          return $"{CPHatchMin} - {CPHatchMax}";
@@ -508,7 +531,7 @@ namespace PokeStar.DataModels
       /// Wild CP goes from level 1 to 35 in full level 
       /// increments.
       /// </summary>
-      /// <returns>Pokémon max wild CP string.</returns>
+      /// <returns>Pokémon max wild CP as a string.</returns>
       public string WildCPToString()
       {
          StringBuilder sb = new StringBuilder();
@@ -524,18 +547,6 @@ namespace PokeStar.DataModels
             sb.Append($"**{column2level}** - {CPWild[column2level - 1]}");
             sb.AppendLine($"{(column3level <= Global.MAX_WILD_LEVEL ? $" . **{column3level}** - {CPWild[column3level - 1]}{(column3level > maxNonBoostedLevel ? Global.WEATHER_BOOST_SYMBOL.ToString() : "")}" : "")}");
          }
-         return sb.ToString();
-      }
-
-      /// <summary>
-      /// Gets league IVs as a string.
-      /// </summary>
-      /// <returns></returns>
-      public string LeagueIVToString()
-      {
-         StringBuilder sb = new StringBuilder();
-         sb.AppendLine($"*Great League:*\n {GreatXLIVs}");
-         sb.AppendLine($"*Ultra League:*\n {UltraXLIVs}");
          return sb.ToString();
       }
    }

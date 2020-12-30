@@ -25,7 +25,7 @@ namespace PokeStar.PreConditions
       /// <param name="context">Context that the command was sent with.</param>
       /// <param name="command">Command that was sent.</param>
       /// <param name="services">Service collection used for dependency injection</param>
-      /// <returns></returns>
+      /// <returns>Precondition result.</returns>
       public override async Task<PreconditionResult> CheckPermissionsAsync(ICommandContext context, CommandInfo command, IServiceProvider services)
       {
          if (ChannelRegisterCommands.IsRegisteredChannel(context.Guild.Id, context.Channel.Id, register))

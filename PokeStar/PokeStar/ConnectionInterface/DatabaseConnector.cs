@@ -7,9 +7,19 @@ namespace PokeStar.ConnectionInterface
    /// </summary>
    public abstract class DatabaseConnector
    {
+      /// <summary>
+      /// String used to connect to the database.
+      /// </summary>
       private string ConnectionString { get; set; }
 
+      /// <summary>
+      /// True value as an integer.
+      /// </summary>
       protected const int TRUE = 1;
+
+      /// <summary>
+      /// False value as an integer.
+      /// </summary>
       protected const int FALSE = 0;
 
       /// <summary>

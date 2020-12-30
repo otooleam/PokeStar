@@ -14,8 +14,17 @@ using PokeStar.ModuleParents;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles raid reply commands.
+   /// </summary>
    public class RaidReplyCommands : RaidCommandParent
    {
+      /// <summary>
+      /// Handle edit command.
+      /// </summary>
+      /// <param name="attribute">Portion of the raid message to edit.</param>
+      /// <param name="value">New value of the edited attribute.</param>
+      /// <returns></returns>
       [Command("edit")]
       [Summary("Edit the time, location (loc), or tier/boss of a raid.")]
       [Remarks("Must be a reply to any type of raid message.")]
@@ -211,6 +220,11 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle invite command.
+      /// </summary>
+      /// <param name="invites">List of users to invite, separated by spaces.</param>
+      /// <returns>Completed Task.</returns>
       [Command("invite")]
       [Summary("Invite user(s) to the raid.")]
       [Remarks("Users may be mentioned using \'@\' or username/nickname may be used.\n" +
@@ -302,6 +316,10 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle request command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
       [Command("request")]
       [Summary("Request an invite to a raid.")]
       [Remarks("The user must not already be in the raid." +
@@ -345,6 +363,11 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle remote command.
+      /// </summary>
+      /// <param name="groupSize">Amount of users raiding remotly 0 - 6.</param>
+      /// <returns>Completed Task.</returns>
       [Command("remote")]
       [Summary("Participate in the raid remotly without an invite.")]
       [Remarks("Must be a reply to a raid or raid train message.")]
@@ -395,6 +418,11 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle ready command.
+      /// </summary>
+      /// <param name="groupNum">Number of the raid group that is ready to start.</param>
+      /// <returns>Completed Task.</returns>
       [Command("ready")]
       [Summary("Mark a raid group as ready.")]
       [Remarks("Can only be run by a raid mule for the raid." +
@@ -422,6 +450,12 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle add command.
+      /// </summary>
+      /// <param name="time">Time of the raid.</param>
+      /// <param name="location">Location of the raid.</param>
+      /// <returns>Completed Task.</returns>
       [Command("add")]
       [Summary("Add a raid to the end of the raid train.")]
       [Remarks("Can only be run by the train\'s conductor." +
@@ -459,6 +493,11 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle conductor command.
+      /// </summary>
+      /// <param name="conductor">User to make new conductor.</param>
+      /// <returns>Completed Task.</returns>
       [Command("conductor")]
       [Summary("Change the current conductor of the raid train.")]
       [Remarks("Can only be run by the train\'s conductor." +

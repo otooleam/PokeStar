@@ -357,6 +357,11 @@ namespace PokeStar.ConnectionInterface
          }
       }
 
+      /// <summary>
+      /// Checks if the Pokémon is little league eligable.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>True if the Pokémon can be in little league, otherwise false.</returns>
       public bool CanBeLittleLeague(string pokemonName)
       {
          return POGODBConnector.IsBaseForm(pokemonName);
@@ -525,9 +530,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="attribute">Attribute to change.</param>
       /// <param name="value">New value of the attribute.</param>
-      public void UpdatePokemon(string pokemonName, string attrbute, int value)
+      public void UpdatePokemon(string pokemonName, string attribute, int value)
       {
-         POGODBConnector.SetPokemonAttribute(ReformatName(pokemonName), attrbute, value);
+         POGODBConnector.SetPokemonAttribute(ReformatName(pokemonName), attribute, value);
       }
 
       /// <summary>
@@ -536,9 +541,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="moveName">Name of the move.</param>
       /// <param name="isLegacy">Is the move a legacy move.</param>
-      public void UpdatePokemonMove(string pokemonName, string move, int isLegacy)
+      public void UpdatePokemonMove(string pokemonName, string moveName, int isLegacy)
       {
-         POGODBConnector.SetPokemonMove(ReformatName(pokemonName), move, isLegacy);
+         POGODBConnector.SetPokemonMove(ReformatName(pokemonName), moveName, isLegacy);
       }
 
       /// <summary>

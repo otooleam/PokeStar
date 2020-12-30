@@ -12,12 +12,30 @@ using PokeStar.PreConditions;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handle nickname commands.
+   /// </summary>
    public class NicknameCommands : DexCommandParent
    {
+      /// <summary>
+      /// Max number of values in nickname string.
+      /// </summary>
       private const int NumArguments = 2;
-      private const int IndexNickname = 0;
-      private const int IndexName = 1;
 
+      /// <summary>
+      /// Index of values in nickname string.
+      /// </summary>
+      private enum NICKNAME_INDEX
+      {
+         NEW_VALUE,
+         OLD_VALUE,
+      }
+
+      /// <summary>
+      /// Handle nickname command.
+      /// </summary>
+      /// <param name="nicknameString">Update the nickname of a Pokémon using this string.</param>
+      /// <returns>Completed Task.</returns>
       [Command("nickname")]
       [Summary("Edit Pokémon nicknames.")]
       [Remarks("This command is used for adding, updating, and removing nicknames.\n" +
@@ -42,43 +60,43 @@ namespace PokeStar.Modules
             string[] arr = nicknameString.Split(Global.NICKNAME_DELIMITER);
             if (arr.Length == NumArguments)
             {
-               string newNickname = arr[IndexNickname].Trim();
-               string other = arr[IndexName].Trim();
+               string newValue = arr[(int)NICKNAME_INDEX.NEW_VALUE].Trim();
+               string oldValue = arr[(int)NICKNAME_INDEX.OLD_VALUE].Trim();
 
-               if (string.IsNullOrEmpty(newNickname))
+               if (string.IsNullOrEmpty(newValue))
                {
-                  string name = Connections.Instance().GetPokemonWithNickname(guild, newNickname);
+                  string name = Connections.Instance().GetPokemonWithNickname(guild, newValue);
                   if (name == null)
                   {
-                     await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"The nickname {newNickname} is not registered with a Pokémon.");
+                     await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"The nickname {newValue} is not registered with a Pokémon.");
                   }
                   else
                   {
-                     Connections.Instance().DeleteNickname(guild, newNickname);
-                     await ResponseMessage.SendInfoMessage(Context.Channel, $"Removed {newNickname} from {name}.");
+                     Connections.Instance().DeleteNickname(guild, newValue);
+                     await ResponseMessage.SendInfoMessage(Context.Channel, $"Removed {newValue} from {name}.");
                   }
                }
                else
                {
-                  Pokemon pokemon = Connections.Instance().GetPokemon(GetPokemonName(other));
+                  Pokemon pokemon = Connections.Instance().GetPokemon(GetPokemonName(oldValue));
 
                   if (pokemon == null)
                   {
-                     if (Connections.Instance().GetPokemonWithNickname(guild, other) == null)
+                     if (Connections.Instance().GetPokemonWithNickname(guild, oldValue) == null)
                      {
-                        await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"{other} is not a registered nickname.");
+                        await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"{oldValue} is not a registered nickname.");
                      }
                      else
                      {
-                        Connections.Instance().UpdateNickname(guild, other, newNickname);
-                        string pkmn = Connections.Instance().GetPokemonWithNickname(guild, other);
-                        await ResponseMessage.SendInfoMessage(Context.Channel, $"{newNickname} has replaced {other} as a valid nickname for {pkmn}.");
+                        Connections.Instance().UpdateNickname(guild, oldValue, newValue);
+                        string pkmn = Connections.Instance().GetPokemonWithNickname(guild, oldValue);
+                        await ResponseMessage.SendInfoMessage(Context.Channel, $"{newValue} has replaced {oldValue} as a valid nickname for {pkmn}.");
                      }
                   }
                   else
                   {
-                     Connections.Instance().AddNickname(guild, newNickname, pokemon.Name);
-                     await ResponseMessage.SendInfoMessage(Context.Channel, $"{newNickname} is now a valid nickname for {pokemon.Name}.");
+                     Connections.Instance().AddNickname(guild, newValue, pokemon.Name);
+                     await ResponseMessage.SendInfoMessage(Context.Channel, $"{newValue} is now a valid nickname for {pokemon.Name}.");
                   }
                }
             }
@@ -89,8 +107,13 @@ namespace PokeStar.Modules
          }
       }
 
-      [Command("getNickname")]
-      [Alias("getNicknames")]
+      /// <summary>
+      /// Handle getnickname command.
+      /// </summary>
+      /// <param name="pokemon">Get the nicknames for this Pokémon.</param>
+      /// <returns>Completed Task.</returns>
+      [Command("getnickname")]
+      [Alias("getnicknames")]
       [Summary("Gets nicknames for a given Pokémon.")]
       [Remarks("Can search by Pokémon name, nickname, or number.")]
       [RegisterChannel('D')]

@@ -8,15 +8,23 @@ using PokeStar.ModuleParents;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles catch reply commands.
+   /// </summary>
    public class CatchReplyCommands : DexCommandParent
    {
+      /// <summary>
+      /// Handle level command.
+      /// </summary>
+      /// <param name="level">New Pokémon level.</param>
+      /// <returns>Completed Task</returns>
       [Command("level")]
       [Summary("Set level of Pokémon.")]
       [Remarks("Level must be between 1 and 35 inclusive." +
                "Must be a reply to a catch message.")]
       [RegisterChannel('I')]
       [CatchReply()]
-      public async Task Level([Summary("Level to set Pokémon to.")] int level)
+      public async Task Level([Summary("New Pokémon level.")] int level)
       {
          ulong catchMessageId = Context.Message.Reference.MessageId.Value;
          SocketUserMessage catchMessageMessage = (SocketUserMessage)await Context.Channel.GetMessageAsync(catchMessageId);
@@ -40,6 +48,11 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle radius command.
+      /// </summary>
+      /// <param name="radius">New catch radius.</param>
+      /// <returns>Completed Task</returns>
       [Command("radius")]
       [Summary("Set custom catch radius of Pokémon.")]
       [Remarks("Radius must be between 1.0 and 2.0 inclusive." +

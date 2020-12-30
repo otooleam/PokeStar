@@ -8,16 +8,11 @@ namespace PokeStar.Calculators
    public static class CatchCalculator
    {
       /// <summary>
-      /// Multiplier for curveball throws.
-      /// </summary>
-      private const double CurveballMultiplier = 1.7;
-
-      /// <summary>
       /// Calculates the multiplier for multiple medal bonuses.
       /// </summary>
       /// <param name="medal1">First medal bonus.</param>
       /// <param name="medal2">Second medal bonus.</param>
-      /// <returns></returns>
+      /// <returns>Multiplier for both medals.</returns>
       public static double CalculateMultiMedalMultiplier(double medal1, double medal2)
       {
          return (medal1 + medal2) / 2;
