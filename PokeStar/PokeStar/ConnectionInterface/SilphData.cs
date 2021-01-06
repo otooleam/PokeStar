@@ -276,6 +276,22 @@ namespace PokeStar.ConnectionInterface
          {
             return "Sand Cloak Burmy";
          }
+         else if (name.Equals("GENESECT (BURN DRIVE)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Burn Drive Genesect";
+         }
+         else if (name.Equals("GENESECT (CHILL DRIVE)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Chill Drive Genesect";
+         }
+         else if (name.Equals("GENESECT (DOUSE DRIVE)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Douse Drive Genesect";
+         }
+         else if (name.Equals("GENESECT (SHOCK DRIVE)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Shock Drive Genesect";
+         }
          return name;
       }
    }
