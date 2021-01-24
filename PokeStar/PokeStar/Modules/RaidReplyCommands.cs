@@ -484,7 +484,7 @@ namespace PokeStar.Modules
             {
                if (train.IsInRaid((SocketGuildUser)conductor, false) == Global.NOT_IN_RAID)
                {
-                  await ResponseMessage.SendErrorMessage(Context.Channel, "conductor", $"New conductor must be in the raid.");
+                  await ResponseMessage.SendErrorMessage(Context.Channel, "conductor", $"New conductor must be in the raid train.");
                }
                else
                {
@@ -530,7 +530,7 @@ namespace PokeStar.Modules
             {
                if (train.IsInRaid((SocketGuildUser)user, false) == Global.NOT_IN_RAID)
                {
-                  await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"The user is not in the raid.");
+                  await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"The user is not in the raid train.");
                }
                else
                {
