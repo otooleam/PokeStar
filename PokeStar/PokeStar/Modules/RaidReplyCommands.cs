@@ -504,8 +504,10 @@ namespace PokeStar.Modules
       }
 
       [Command("remove")]
-      [Summary("Change the current conductor of the raid train.")]
-      [Remarks("Can only be run by the train\'s conductor." +
+      [Summary("Remove a user from a raid train.")]
+      [Remarks("This should only be used to remove a user that " +
+               "is preventing the train from moving forward." +
+               "Can only be run by the train\'s conductor." +
                "Must be a reply to a raid train message.")]
       [RegisterChannel('R')]
       [RaidReply()]
