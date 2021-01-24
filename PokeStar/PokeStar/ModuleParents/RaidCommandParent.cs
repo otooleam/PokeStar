@@ -159,6 +159,7 @@ namespace PokeStar.ModuleParents
       private static readonly string[] trainReplies = {
          "add <time> <location>",
          "conductor <conductor>",
+         "remove <user>",
       };
 
       /// Enumerations ********************************************************
@@ -456,14 +457,8 @@ namespace PokeStar.ModuleParents
 
                if (returnValue.Group != Global.NOT_IN_RAID)
                {
-                  if (raid is RaidTrain train)
-                  {
-                     await reaction.Channel.SendMessageAsync(BuildRaidReadyPingList(train.GetGroup(returnValue.Group).GetPingList(), train.GetCurrentLocation(), returnValue.Group + 1, true));
-                  }
-                  else
-                  {
-                     await reaction.Channel.SendMessageAsync(BuildRaidReadyPingList(raid.GetGroup(returnValue.Group).GetPingList(), raid.Location, returnValue.Group + 1, true));
-                  }
+                  string location = raid is RaidTrain train ? train.GetCurrentLocation() : raid.Location;
+                  await reaction.Channel.SendMessageAsync(BuildRaidReadyPingList(raid.GetGroup(returnValue.Group).GetPingList(), location, returnValue.Group + 1, true));
                }
             }
             else if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.HELP]))
@@ -1419,7 +1414,7 @@ namespace PokeStar.ModuleParents
       /// </summary>
       /// <param name="player">Player that has left the raid.</param>
       /// <returns>Uninvited message as a string</returns>
-      private static string BuildUnInvitedMessage(SocketGuildUser player)
+      protected static string BuildUnInvitedMessage(SocketGuildUser player)
       {
          return $"{player.Nickname ?? player.Username} has left the raid. You have been moved back to \"Need Invite\".";
       }
