@@ -541,6 +541,8 @@ namespace PokeStar.Modules
                      await invite.SendMessageAsync(BuildUnInvitedMessage((SocketGuildUser)user));
                   }
 
+                  await user.SendMessageAsync(BuildRaidTrainRemoveMessage((SocketGuildUser)Context.Message.Author));
+
                   if (returnValue.Group != Global.NOT_IN_RAID)
                   {
                      await Context.Channel.SendMessageAsync(BuildRaidReadyPingList(parent.GetGroup(returnValue.Group).GetPingList(), train.GetCurrentLocation(), returnValue.Group + 1, true));

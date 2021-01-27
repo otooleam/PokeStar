@@ -1419,6 +1419,14 @@ namespace PokeStar.ModuleParents
          return $"{player.Nickname ?? player.Username} has left the raid. You have been moved back to \"Need Invite\".";
       }
 
+      protected static string BuildRaidTrainRemoveMessage(SocketGuildUser conductor)
+      {
+         return $"You have been removed from a raid train by {conductor.Nickname ?? conductor.Username}\n" +
+                $"This was most likely due to you not marking yourself as ready and holding up the raid train.\n" +
+                $"Please keep in mind you are free to leave and rejoin a raid train as you wish.";
+      }
+
+
       /// <summary>
       /// Builds a list of raid bosses.
       /// </summary>
