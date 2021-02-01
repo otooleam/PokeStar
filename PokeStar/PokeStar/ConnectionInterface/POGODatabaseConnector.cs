@@ -611,7 +611,7 @@ namespace PokeStar.ConnectionInterface
 
       /// <summary>
       /// Updates an attribute of a Pokémon.
-      /// Only updates true false values.
+      /// Only updates true/false values.
       /// </summary>
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="attribute">Attribute to change.</param>
