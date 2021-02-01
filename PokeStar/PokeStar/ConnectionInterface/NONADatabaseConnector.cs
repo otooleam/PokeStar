@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Data.SqlClient;
 using System.Collections.Generic;
+using PokeStar.DataModels;
 
 namespace PokeStar.ConnectionInterface
 {
@@ -262,9 +263,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="guild">Id of the guild.</param>
       /// <param name="nickname">Nickname of the Pokémon.</param>
       /// <returns>Name of the Pokémon with the nickname, otherwiase null.</returns>
-      public string GetPokemon(ulong guild, string nickname)
+      public string GetPokemonByNickname(ulong guild, string nickname)
       {
-         string prefix = null;
+         string pokemonName = null;
          string queryString = $@"SELECT name 
                                  FROM nickname 
                                  WHERE guild={guild}
@@ -277,12 +278,12 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  prefix = Convert.ToString(reader["name"]);
+                  pokemonName = Convert.ToString(reader["name"]);
                }
             }
             conn.Close();
          }
-         return prefix;
+         return pokemonName;
       }
 
       /// <summary>
@@ -371,6 +372,129 @@ namespace PokeStar.ConnectionInterface
             _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
             conn.Close();
          }
+      }
+
+      /// POI *****************************************************************
+
+      /// <summary>
+      /// Gets a POI by name.
+      /// </summary>
+      /// <param name="poiName">Name of the POI.</param>
+      /// <returns>A gym if the name is in the database, otherwise null.</returns>
+      public POI GetPOI(ulong guild, string poiName)
+      {
+         POI poi = null;
+         string queryString = $@"SELECT *
+                                 FROM poi 
+                                 WHERE guild={guild}
+                                 AND name='{poiName}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  poi = new POI
+                  {
+                     Name = Convert.ToString(reader["name"]),
+                     Latitude = Convert.ToString(reader["latitude"]),
+                     Longitude = Convert.ToString(reader["longitude"]),
+                     IsGym = Convert.ToInt32(reader["is_gym"]) == TRUE,
+                     IsSponsored = Convert.ToInt32(reader["is_sponsored"]) == TRUE,
+                     IsExGym = Convert.ToInt32(reader["is_ex_gym"]) == TRUE,
+                  };
+               }
+            }
+            conn.Close();
+         }
+         return poi;
+      }
+
+      /// <summary>
+      /// Get a gym by nickname.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="nickname">Nickname of the gym.</param>
+      /// <returns>Name of the gym with the nickname, otherwiase null.</returns>
+      public string GetPOIByNickname(ulong guild, string nickname)
+      {
+         string poi = null;
+         string queryString = $@"SELECT name 
+                                 FROM poi_nickname 
+                                 WHERE guild={guild}
+                                 AND nickname = '{nickname}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  poi = Convert.ToString(reader["name"]);
+               }
+            }
+            conn.Close();
+         }
+         return poi;
+      }
+
+      /// <summary>
+      /// Gets all nicknames for a POI in a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="poi">Name of the POI.</param>
+      /// <returns>List of all nicknames for the POI in the guild.</returns>
+      public List<string> GetPOINicknames(ulong guild, string poi)
+      {
+         List<string> nicknames = new List<string>();
+         string queryString = $@"SELECT nickname 
+                                 FROM poi_nickname 
+                                 WHERE guild={guild}
+                                 AND name = '{poi}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  nicknames.Add(Convert.ToString(reader["nickname"]));
+               }
+            }
+            conn.Close();
+         }
+         return nicknames;
+      }
+
+      /// <summary>
+      /// Gets all POIs in a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <returns>List of all POIs in the guild.</returns>
+      public List<string> GetGuildPOIs(ulong guild)
+      {
+         List<string> pois = new List<string>();
+         string queryString = $@"SELECT name 
+                                 FROM poi 
+                                 WHERE guild={guild};";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  pois.Add(Convert.ToString(reader["name"]));
+               }
+            }
+            conn.Close();
+         }
+         return pois;
       }
    }
 }

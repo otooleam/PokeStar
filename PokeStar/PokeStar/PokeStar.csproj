@@ -184,6 +184,7 @@
     <Compile Include="DataModels\CatchSimulation.cs" />
     <Compile Include="DataModels\Evolution.cs" />
     <Compile Include="DataModels\EvolutionNode.cs" />
+    <Compile Include="DataModels\POI.cs" />
     <Compile Include="DataModels\LeagueIV.cs" />
     <Compile Include="DataModels\Move.cs" />
     <Compile Include="DataModels\RaidTrain.cs" />
@@ -207,6 +208,7 @@
     <Compile Include="Modules\ChannelRegisterCommands.cs" />
     <Compile Include="Modules\DexCommands.cs" />
     <Compile Include="Modules\EggCommands.cs" />
+    <Compile Include="Modules\POICommands.cs" />
     <Compile Include="Modules\HelpCommands.cs" />
     <Compile Include="Modules\JokeCommands.cs" />
     <Compile Include="Modules\MoveCommands.cs" />

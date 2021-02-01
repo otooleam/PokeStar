@@ -211,6 +211,10 @@ namespace PokeStar
             {
                await DexCommandParent.CatchMessageReactionHandle(message, reaction);
             }
+            else if (POICommands.IsPOISubMessage(message.Id))
+            {
+               await POICommands.POIMessageReactionHandle(message, reaction, guild);
+            }
             else if (HelpCommands.IsHelpMessage(message.Id))
             {
                await HelpCommands.HelpMessageReactionHandle(message, reaction, guild);

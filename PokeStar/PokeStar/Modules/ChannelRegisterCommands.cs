@@ -16,12 +16,14 @@ namespace PokeStar.Modules
       [Command("register")]
       [Summary("Registers a channel to run a given type of command.")]
       [Remarks("To register a channel\n" +
-               "for this..........................use one of these:\n" +
-               "Pokedex........................pokedex / dex / d\n" +
-               //"EX Raids.......................ex / e\n" +
-               "Information..................info / i\n" +
-               "Player Registration....player / role / p\n" +
-               "Raids.............................raid / r\n" +
+               "for this.............................use one of these:\n" +
+               //"Player Accounts............account / a\n" +
+               "PokéDex..........................pokedex / dex / d\n" +
+               //"EX Raids..........................ex / e\n" +
+               "Information....................info / i\n" +
+               "Player Registration.......role / p\n" +
+               "Raids................................raid / r\n" +
+               "Point of Interest............poi / pokestop / stop / gym / s\n" + 
                "Leave blank to register for all command types.")]
       [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Register([Summary("(Optional) Register the channel for these commands.")] string register = null)
@@ -50,13 +52,15 @@ namespace PokeStar.Modules
 
       [Command("unregister")]
       [Summary("Unregisters a channel from a given type of command.")]
-      [Remarks("To unregister a channel\n" +
-               "for this..........................use one of these:\n" +
-               "Pokedex........................pokedex / dex / d\n" +
-               //"EX Raids.......................ex / e\n" +
-               "Information..................info / i\n" +
-               "Player Registration....player / role / p\n" +
-               "Raids.............................raid / r\n" +
+      [Remarks("To register a channel\n" +
+               "for this.............................use one of these:\n" +
+               //"Player Accounts............account / a\n" +
+               "PokéDex..........................pokedex / dex / d\n" +
+               //"EX Raids..........................ex / e\n" +
+               "Information....................info / i\n" +
+               "Player Registration.......role / p\n" +
+               "Raids................................raid / r\n" +
+               "Point of Interest............poi / pokestop / stop / gym / s\n" +
                "Leave blank to register for all command types.")]
       [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Unregister([Summary("(Optional) Unregister the channel from these commands.")] string unregister = null)

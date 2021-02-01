@@ -193,6 +193,17 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Searches for the closest guild POI by name.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="poi">Name of the POI.</param>
+      /// <returns>List of closest guild POI names.</returns>
+      public List<string> SearchPOI(ulong guild, string poi)
+      {
+         return FuzzyNameSearch(poi, NONADBConnector.GetGuildPOIs(guild));
+      }
+
+      /// <summary>
       /// Searches for the closest strings in a list of strings.
       /// </summary>
       /// <param name="search">Value to search for.</param>
@@ -657,7 +668,7 @@ namespace PokeStar.ConnectionInterface
       /// <returns>Name of the Pokémon if it is assigned, otherwise null.</returns>
       public string GetPokemonWithNickname(ulong guild, string nickname)
       {
-         return NONADBConnector.GetPokemon(guild, nickname);
+         return NONADBConnector.GetPokemonByNickname(guild, ReformatName(nickname));
       }
 
       /// <summary>
@@ -668,7 +679,7 @@ namespace PokeStar.ConnectionInterface
       /// <returns>List of nicknames assigned to the Pokémon for the guild.</returns>
       public List<string> GetNicknames(ulong guild, string pokemonName)
       {
-         return NONADBConnector.GetNicknames(guild, pokemonName);
+         return NONADBConnector.GetNicknames(guild, ReformatName(pokemonName));
       }
 
       /// <summary>
@@ -701,6 +712,39 @@ namespace PokeStar.ConnectionInterface
       public void DeleteNickname(ulong guild, string nickname)
       {
          NONADBConnector.DeleteNickname(guild, nickname);
+      }
+
+      /// <summary>
+      /// Gets a POI.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="poi">Name of the POI.</param>
+      /// <returns>POI registered the guild with the given name.</returns>
+      public POI GetPOI(ulong guild, string poi)
+      {
+         return poi == null ? null : NONADBConnector.GetPOI(guild, ReformatName(poi));
+      }
+
+      /// <summary>
+      /// Gets a POI by its nickname.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="nickname">Nickname of the POI.</param>
+      /// <returns>Name of the POI if it is assigned, otherwise null.</returns>
+      public string GetPOIWithNickname(ulong guild, string nickname)
+      {
+         return NONADBConnector.GetPOIByNickname(guild, ReformatName(nickname));
+      }
+
+      /// <summary>
+      /// Gets a guild's list of nicknames for a POI.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="poi">Name of the POI.</param>
+      /// <returns>List of nicknames assigned to the POI for the guild.</returns>
+      public List<string> GetPOINicknames(ulong guild, string poi)
+      {
+         return NONADBConnector.GetPOINicknames(guild, ReformatName(poi));
       }
    }
 }
