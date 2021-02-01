@@ -401,9 +401,9 @@ namespace PokeStar.ConnectionInterface
                      Name = Convert.ToString(reader["name"]),
                      Latitude = Convert.ToString(reader["latitude"]),
                      Longitude = Convert.ToString(reader["longitude"]),
-                     IsGym = Convert.ToInt32(reader["is_gym"]) == TRUE,
-                     IsSponsored = Convert.ToInt32(reader["is_sponsored"]) == TRUE,
-                     IsExGym = Convert.ToInt32(reader["is_ex_gym"]) == TRUE,
+                     IsGym = Convert.ToInt32(reader["gym"]) == TRUE,
+                     IsSponsored = Convert.ToInt32(reader["sponsored"]) == TRUE,
+                     IsExGym = Convert.ToInt32(reader["ex"]) == TRUE,
                   };
                }
             }
@@ -495,6 +495,142 @@ namespace PokeStar.ConnectionInterface
             conn.Close();
          }
          return pois;
+      }
+
+      /// <summary>
+      /// Adds a Point of Interest to a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="poiName">Name of the Point of Interest.</param>
+      /// <param name="latitude">Latitudinal coordinate.</param>
+      /// <param name="longitude">Longitudinal coordinate.</param>
+      /// <param name="gym">Is the Point of Interest a gym.</param>
+      /// <param name="sponsored">Is the Point of Interest sponsored.</param>
+      /// <param name="ex">Is the Point of Interest an EX Gym.</param>
+      public void AddPOI(ulong guild, string poiName, float latitude, float longitude, int gym, int sponsored, int ex)
+      {
+         if ((gym != TRUE && gym != FALSE) ||
+             (sponsored != TRUE && sponsored != FALSE) ||
+             (ex != TRUE && ex != FALSE))
+         {
+            return;
+         }
+
+         string queryString = $@"INSERT INTO poi (guild, name, latitude, longitude, gym, sponsored, ex)
+                                 VALUES ({guild}, '{poiName}', '{latitude}', '{longitude}', {gym}, {sponsored}, {ex})";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+      /// <summary>
+      /// Updates an attribute of a Point of Interest.
+      /// Only updates true/false values.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="poiName">Name of the Point of Interest.</param>
+      /// <param name="attribute">Attribute to change.</param>
+      /// <param name="value">New value of the attribute</param>
+      public void UpdatePOI(ulong guild, string poiName, string attribute, int value)
+      {
+         if (value != TRUE && value != FALSE)
+         {
+            return;
+         }
+
+         string queryString = $@"UPDATE poi 
+                                 SET {attribute} = {value}
+                                 WHERE guild = {guild}
+                                 AND name = '{poiName}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+      /// <summary>
+      /// Delete a Point of Interest from a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="poiName">Name of the Point of Interest.</param>
+      public void RemovePOI(ulong guild, string poiName)
+      {
+         string queryString = $@"DELETE FROM poi
+                                 WHERE guild={guild}
+                                 AND name = '{poiName}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+      /// <summary>
+      /// Adds a nickname to a Point of Interest for a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="poiName">Name of the Point of Interest.</param>
+      /// <param name="nickname">Nickname of the Point of Interest.</param>
+      public void AddPOINickname(ulong guild, string poiName, string nickname)
+      {
+         string queryString = $@"INSERT INTO poi (guild, name, nickname)
+                                 VALUES ({guild}, '{poiName}', '{nickname}')";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+      /// <summary>
+      /// Updates a Point of Interest nickname for a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="newNickname">New nickname.</param>
+      /// <param name="originalNickname">Old nickname.</param>
+      public void UpdatePOINickname(ulong guild, string newNickname, string originalNickname)
+      {
+         string queryString = $@"UPDATE poi 
+                                 SET nickname = '{newNickname}'
+                                 WHERE guild={guild}
+                                 AND nickname = '{originalNickname}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+      /// <summary>
+      /// Delete a Point of Interest nickname from a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="nickname">Nickname of a Pokémon.</param>
+      public void DeletePOINickname(ulong guild, string nickname)
+      {
+         string queryString = $@"DELETE FROM poi
+                                 WHERE guild={guild}
+                                 AND nickname='{nickname}';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
       }
    }
 }

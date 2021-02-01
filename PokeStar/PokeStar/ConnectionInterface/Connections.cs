@@ -685,7 +685,7 @@ namespace PokeStar.ConnectionInterface
       /// <summary>
       /// Adds a nickname to a Pokémon for a guild.
       /// </summary>
-      /// <param name="guild">Id of the guild</param>
+      /// <param name="guild">Id of the guild.</param>
       /// <param name="nickname">Nickname for the Pokémon.</param>
       /// <param name="pokemonName">Pokémon the nickname applies to.</param>
       public void AddNickname(ulong guild, string nickname, string pokemonName)
@@ -745,6 +745,99 @@ namespace PokeStar.ConnectionInterface
       public List<string> GetPOINicknames(ulong guild, string poi)
       {
          return NONADBConnector.GetPOINicknames(guild, ReformatName(poi));
+      }
+
+      /// <summary>
+      /// Adds a Point of Interest to a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      /// <param name="latitude">Latitudinal coordinate.</param>
+      /// <param name="longitude">Longitudinal coordinate.</param>
+      /// <param name="gym">Is the Point of Interest a gym.</param>
+      public void AddPOI(ulong guild, string name, float latitude, float longitude, int gym)
+      {
+         NONADBConnector.AddPOI(guild, name, latitude, longitude, gym, 0, 0);
+      }
+
+      /// <summary>
+      /// Adds a Sponsored Point of Interest to a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      /// <param name="latitude">Latitudinal coordinate.</param>
+      /// <param name="longitude">Longitudinal coordinate.</param>
+      /// <param name="gym">Is the Point of Interest a gym.</param>
+      public void AddSponsoredPOI(ulong guild, string name, float latitude, float longitude, int gym)
+      {
+         NONADBConnector.AddPOI(guild, name, latitude, longitude, gym, 1, 0);
+      }
+
+      /// <summary>
+      /// Adds an EX Gym Point of Interest to a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      /// <param name="latitude">Latitudinal coordinate.</param>
+      /// <param name="longitude">Longitudinal coordinate.</param>
+      public void AddExGym(ulong guild, string name, float latitude, float longitude)
+      {
+         NONADBConnector.AddPOI(guild, name, latitude, longitude, 1, 0, 1);
+      }
+
+      /// <summary>
+      /// Updates an attribute of a Point of Interest.
+      /// Only updates true/false values.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      /// <param name="attribute">Attribute to change.</param>
+      /// <param name="value">New value of the attribute</param>
+      public void UpdatePOI(ulong guild, string name, string attribute, int value)
+      {
+         NONADBConnector.UpdatePOI(guild, name, attribute, value);
+      }
+
+      /// <summary>
+      /// Delete a Point of Interest from a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      public void RemovePOI(ulong guild, string name)
+      {
+         NONADBConnector.RemovePOI(guild, name);
+      }
+
+      /// <summary>
+      /// Adds a nickname to a Point of Interest for a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="nickname">Nickname for the Point of Interest.</param>
+      /// <param name="poiName">Point of Interest the nickname applies to.</param>
+      public void AddPOINickname(ulong guild, string nickname, string poiName)
+      {
+         NONADBConnector.AddPOINickname(guild, poiName, nickname);
+      }
+
+      /// <summary>
+      /// Updates the nickname of a Point of Interest for a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="oldNickname">Nickname to replace.</param>
+      /// <param name="newNickname">Nickname to replace with.</param>
+      public void UpdatePOINickname(ulong guild, string oldNickname, string newNickname)
+      {
+         NONADBConnector.UpdatePOINickname(guild, newNickname, oldNickname);
+      }
+
+      /// <summary>
+      /// Deletes a Point of Interest nickname from a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="nickname">Nickname to delete.</param>
+      public void DeletePOINickname(ulong guild, string nickname)
+      {
+         NONADBConnector.DeletePOINickname(guild, nickname);
       }
    }
 }
