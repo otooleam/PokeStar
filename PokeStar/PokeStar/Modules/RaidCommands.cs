@@ -214,7 +214,7 @@ namespace PokeStar.Modules
       }
 
       [Command("bosslist")]
-      [Alias("boss", "bossess", "raidboss", "raidbosses", "raidbosslist")]
+      [Alias("boss", "bosses", "raidboss", "raidbosses", "raidbosslist")]
       [Summary("Get the current list of raid bosses.")]
       [RegisterChannel('I')]
       public async Task BossList()
