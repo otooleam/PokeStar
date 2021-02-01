@@ -1,7 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
+using System.Collections.Generic;
 using Discord;
 using Discord.Rest;
 using Discord.Commands;
@@ -18,7 +17,8 @@ namespace PokeStar.Modules
       private const int IndexNickname = 0;
       private const int IndexName = 1;
 
-      [Command("nickname")]
+      [Command("editNickname")]
+      [Alias("editNicknames")]
       [Summary("Edit Pokémon nicknames.")]
       [Remarks("This command is used for adding, updating, and removing nicknames.\n" +
                "To add or update a nickname a special character (>) is used.\n" +
@@ -28,7 +28,7 @@ namespace PokeStar.Modules
                "Delete Nickname.........nickname\n" +
                "\nNote: Spaces are allowed for nicknames")]
       [RegisterChannel('D')]
-      public async Task Nickname([Summary("Update the nickname of a Pokémon using this string.")][Remainder] string nicknameString)
+      public async Task EditNickname([Summary("Update the nickname of a Pokémon using this string.")][Remainder] string nicknameString)
       {
          ulong guild = Context.Guild.Id;
          int delimeterIndex = nicknameString.IndexOf(Global.NICKNAME_DELIMITER);
@@ -83,12 +83,12 @@ namespace PokeStar.Modules
       }
 
 
-      [Command("getNicknames")]
-      [Alias("getNickname")]
+      [Command("nickname")]
+      [Alias("nicknames")]
       [Summary("Gets nicknames for a given Pokémon.")]
       [Remarks("Can search by Pokémon name, nickname, or number.")]
       [RegisterChannel('D')]
-      public async Task GetNickname([Summary("Get the nicknames for this Pokémon.")][Remainder] string pokemon)
+      public async Task Nickname([Summary("Get the nicknames for this Pokémon.")][Remainder] string pokemon)
       {
          ulong guild = Context.Guild.Id;
          bool isNumber = int.TryParse(pokemon, out int pokemonNum);
@@ -123,7 +123,7 @@ namespace PokeStar.Modules
                Connections.DeleteFile(fileName);
             }
          }
-         else // Is string
+         else
          {
             string name = GetPokemonName(pokemon);
             Pokemon pkmn = Connections.Instance().GetPokemon(name);
