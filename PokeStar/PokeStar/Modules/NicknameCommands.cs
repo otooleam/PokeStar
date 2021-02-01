@@ -20,7 +20,7 @@ namespace PokeStar.Modules
       [Command("editNickname")]
       [Alias("editNicknames")]
       [Summary("Edit Pokémon nicknames.")]
-      [Remarks("This command is used for adding, updating, and removing nicknames.\n" +
+      [Remarks("This command is used for adding, updating, and removing Pokémon nicknames.\n" +
                "To add or update a nickname a special character (>) is used.\n" +
                "\nFor each option format the nicknameString as following:\n" +
                "Add Nickname..............nickname > Pokémon name\n" +
@@ -39,7 +39,7 @@ namespace PokeStar.Modules
             string name = Connections.Instance().GetPokemonWithNickname(guild, trim);
             if (name == null)
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"The nickname {trim} is not registered with a Pokémon.");
+               await ResponseMessage.SendErrorMessage(Context.Channel, "editNickname", $"The nickname {trim} is not registered to a Pokémon.");
             }
             else
             {
@@ -58,15 +58,15 @@ namespace PokeStar.Modules
 
                if (pokemon == null)
                {
-                  if (Connections.Instance().GetPokemonWithNickname(guild, other) == null)
+                  pokemon = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(guild, other));
+                  if (pokemon == null)
                   {
-                     await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"{other} is not a registered nickname.");
+                     await ResponseMessage.SendErrorMessage(Context.Channel, "editNickname", $"{other} is not a registered nickname.");
                   }
                   else
                   {
                      Connections.Instance().UpdateNickname(guild, other, newNickname);
-                     string pkmn = Connections.Instance().GetPokemonWithNickname(guild, other);
-                     await ResponseMessage.SendInfoMessage(Context.Channel, $"{newNickname} has replaced {other} as a valid nickname for {pkmn}.");
+                     await ResponseMessage.SendInfoMessage(Context.Channel, $"{newNickname} has replaced {other} as a valid nickname for {pokemon.Name}.");
                   }
                }
                else
@@ -77,11 +77,10 @@ namespace PokeStar.Modules
             }
             else
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"Too many delimiters found.");
+               await ResponseMessage.SendErrorMessage(Context.Channel, "editNickname", $"Too many delimiters found.");
             }
          }
       }
-
 
       [Command("nickname")]
       [Alias("nicknames")]
@@ -98,11 +97,11 @@ namespace PokeStar.Modules
 
             if (pokemonWithNumber.Count == 0)
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "getNickname", $"Pokémon with number {pokemonNum} cannot be found.");
+               await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"Pokémon with number {pokemonNum} cannot be found.");
             }
             else if (pokemonNum == Global.ARCEUS_NUMBER)
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "dex", $"Arceus #{pokemonNum} has too many forms to display, please search by name.");
+               await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"Arceus #{pokemonNum} has too many forms to display, please search by name.");
             }
             else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER)
             {
