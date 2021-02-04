@@ -61,6 +61,7 @@ namespace PokeStar.ModuleParents
          new Emoji("⬅️"),
          new Emoji("➡️"),
          new Emoji("⚔️"),
+         new Emoji("🗺️"),
       };
 
       /// <summary>
@@ -130,6 +131,7 @@ namespace PokeStar.ModuleParents
          "means return to the previous gym. Can only be done by the train conductor.",
          "means continue to the next gym. Can only be done by the train conductor.",
          "means change the boss for the current gym. Can only be done by the train conductor.",
+         "means check the list of incomplete raids.",
       };
 
       /// Replies *************************************************************
@@ -159,6 +161,7 @@ namespace PokeStar.ModuleParents
       private static readonly string[] trainReplies = {
          "add <time> <location>",
          "conductor <conductor>",
+         "station",
       };
 
       /// Enumerations ********************************************************
@@ -199,6 +202,7 @@ namespace PokeStar.ModuleParents
          BACK_ARROW,
          FORWARD_ARROR,
          BOSS,
+         STATION,
       }
 
       /// <summary>
@@ -535,6 +539,18 @@ namespace PokeStar.ModuleParents
                            needsUpdate = false;
                         }
                      }
+                  }
+                  else if (reaction.Emote.Equals(trainEmojis[(int)TRAIN_EMOJI_INDEX.STATION]))
+                  {
+                     List<RaidTrainLoc> futureRaids = train.GetIncompleteRaids();
+                     if (train.StationMessageId.HasValue && reaction.Channel.GetCachedMessage(train.StationMessageId.Value) != null)
+                     {
+                        await reaction.Channel.DeleteMessageAsync(train.StationMessageId.Value);
+                     }
+                     RestUserMessage stationMsg = await reaction.Channel.SendMessageAsync(embed: BuildStationEmbed(futureRaids, train.Conductor));
+                     train.StationMessageId = stationMsg.Id;
+
+                     needsUpdate = false;
                   }
                }
             }
@@ -953,6 +969,8 @@ namespace PokeStar.ModuleParents
             }
             else
             {
+               await message.RemoveAllReactionsAsync();
+
                List<string> raidBosses = null;
                if (reaction.Emote.Equals(tierEmojis[(int)TIER_EMOJI_INDEX.COMMON]))
                {
@@ -1124,7 +1142,7 @@ namespace PokeStar.ModuleParents
       }
 
       /// <summary>
-      /// Builds a reaid tier select embed.
+      /// Builds a raid tier select embed.
       /// </summary>
       /// <param name="fileName">Name of image file.</param>
       /// <returns>Embed for selecting a raid tier.</returns>
@@ -1142,6 +1160,42 @@ namespace PokeStar.ModuleParents
          embed.WithTitle($"Raid Tier Selection");
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Please Select Tier", sb.ToString());
+
+         return embed.Build();
+      }
+
+      /// <summary>
+      /// Builds a train station embed.
+      /// </summary>
+      /// <param name="futureRaids">List of incomplete raids.</param>
+      /// <param name="conductor">Current conductor of the train.</param>
+      /// <returns>Embed for viewing future train stations.</returns>
+      protected static Embed BuildStationEmbed(List<RaidTrainLoc> futureRaids, SocketGuildUser conductor)
+      {
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
+         embed.WithTitle($"**Stations for Raid Train Lead By: {conductor.Nickname ?? conductor.Username}**");
+
+         RaidTrainLoc currentLoc = futureRaids.First();
+
+         embed.AddField("**Current Time**", currentLoc.Time, true);
+         embed.AddField("**Current Location**", currentLoc.Location, true);
+         embed.AddField("**Current Boss**", currentLoc.BossName, true);
+
+         StringBuilder timeSB = new StringBuilder();
+         StringBuilder locSB = new StringBuilder();
+         StringBuilder bossSB = new StringBuilder();
+
+         foreach (RaidTrainLoc raid in futureRaids.Skip(1))
+         {
+            timeSB.AppendLine(raid.Time);
+            locSB.AppendLine(raid.Location);
+            bossSB.AppendLine(raid.BossName);
+         }
+
+         embed.AddField("**Time**", futureRaids.Count == 1 ? Global.EMPTY_FIELD : timeSB.ToString(), true);
+         embed.AddField("**Location**", futureRaids.Count == 1 ? Global.EMPTY_FIELD : locSB.ToString(), true);
+         embed.AddField("**Boss**", futureRaids.Count == 1 ? Global.EMPTY_FIELD : bossSB.ToString(), true);
 
          return embed.Build();
       }

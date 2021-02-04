@@ -501,5 +501,32 @@ namespace PokeStar.Modules
          }
          await Context.Message.DeleteAsync();
       }
+
+      [Command("station")]
+      [Alias("stations")]
+      [Summary("View a list of upcoming stations.")]
+      [Remarks("Must be a reply to a raid train message.")]
+      [RegisterChannel('R')]
+      [RaidReply()]
+      public async Task Station()
+      {
+         ulong raidMessageId = Context.Message.Reference.MessageId.Value;
+         RaidParent parent = raidMessages[raidMessageId];
+         if (!(parent is RaidTrain train))
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "station", $"Command must be a reply to a raid train message.");
+         }
+         else
+         {
+            List<RaidTrainLoc> futureRaids = train.GetIncompleteRaids();
+            if (train.StationMessageId.HasValue && Context.Channel.GetCachedMessage(train.StationMessageId.Value) != null)
+            {
+               await Context.Channel.DeleteMessageAsync(train.StationMessageId.Value);
+            }
+            RestUserMessage stationMsg = await Context.Channel.SendMessageAsync(embed: BuildStationEmbed(futureRaids, train.Conductor));
+            train.StationMessageId = stationMsg.Id;
+         }
+         await Context.Message.DeleteAsync();
+      }
    }
 }
