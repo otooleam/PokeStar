@@ -377,6 +377,7 @@ namespace PokeStar.ModuleParents
       private static async Task RaidReactionHandle(IMessage message, SocketReaction reaction, Raid raid)
       {
          SocketGuildUser reactingPlayer = (SocketGuildUser)reaction.User;
+         bool messageExists = true;
 
          if (raid.InvitingPlayer == null || !raid.InvitingPlayer.Equals(reactingPlayer))
          {
@@ -492,13 +493,20 @@ namespace PokeStar.ModuleParents
                   }
                   else if (reaction.Emote.Equals(trainEmojis[(int)TRAIN_EMOJI_INDEX.FORWARD_ARROR]))
                   {
-                     if (train.AllReady())
+                     if (train.AllReady() && train.NextLocation())
                      {
-                        needsUpdate = train.NextLocation();
-                     }
-                     else
-                     {
-                        needsUpdate = false;
+                        await reaction.Channel.SendMessageAsync(BuildTrainAdvancePingList(train.GetAllUsers().ToImmutableList(), train.GetCurrentLocation()));
+
+                        raidMessages.Remove(message.Id);
+                        message.DeleteAsync();
+                        string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                        Connections.CopyFile(fileName);
+                        RestUserMessage raidMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
+                        raidMessages.Add(raidMsg.Id, train);
+                        Connections.DeleteFile(fileName);
+                        SetEmojis(raidMsg, raidEmojis.Concat(trainEmojis).ToArray());
+
+                        messageExists = false;
                      }
                   }
                   else if (reaction.Emote.Equals(trainEmojis[(int)TRAIN_EMOJI_INDEX.BOSS]))
@@ -535,7 +543,7 @@ namespace PokeStar.ModuleParents
                needsUpdate = false;
             }
 
-            if (needsUpdate)
+            if (messageExists && needsUpdate)
             {
                SocketUserMessage msg = (SocketUserMessage)message;
 
@@ -561,7 +569,10 @@ namespace PokeStar.ModuleParents
                }
             }
          }
-         await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reactingPlayer);
+         if (messageExists)
+         {
+            await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, reactingPlayer);
+         }
       }
 
       /// <summary>
@@ -1280,6 +1291,24 @@ namespace PokeStar.ModuleParents
             sb.Append($"{player.Mention} ");
          }
          sb.Append($"{editor.Nickname ?? editor.Username} has changed {field} to {value} for a raid you are in.");
+         return sb.ToString();
+      }
+
+      /// <summary>
+      /// Builds a list of players to ping when a raid train is advanced.
+      /// </summary>
+      /// <param name="players">List of players.</param>
+      /// <param name="newLocation">Where the train is heading next.</param>
+      /// <returns>List of players to ping as a string.</returns>
+      protected static string BuildTrainAdvancePingList(ImmutableList<SocketGuildUser> players, string newLocation)
+      {
+         StringBuilder sb = new StringBuilder();
+         sb.Append("The train has left the station: ");
+         foreach (SocketGuildUser player in players)
+         {
+            sb.Append($"{player.Mention} ");
+         }
+         sb.Append($"The raid train is moving to {newLocation}. Please mark yourself as ready when you arrive, or remove yourself if you wish to get off the train.");
          return sb.ToString();
       }
 

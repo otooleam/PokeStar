@@ -204,8 +204,7 @@ namespace PokeStar.Modules
 
             if (simpleEdit || editComplete)
             {
-               List<SocketGuildUser> allUsers = parent.GetAllUsers();
-               await Context.Channel.SendMessageAsync(BuildEditPingList(allUsers.ToImmutableList(), (SocketGuildUser)Context.Message.Author, attribute, value));
+               await Context.Channel.SendMessageAsync(BuildEditPingList(parent.GetAllUsers().ToImmutableList(), (SocketGuildUser)Context.Message.Author, attribute, value));
             }
          }
          await Context.Message.DeleteAsync();
