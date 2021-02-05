@@ -523,11 +523,69 @@ namespace PokeStar.Modules
             {
                if (train.IsInRaid((SocketGuildUser)conductor, false) == Global.NOT_IN_RAID)
                {
-                  await ResponseMessage.SendErrorMessage(Context.Channel, "conductor", $"New conductor must be in the raid.");
+                  await ResponseMessage.SendErrorMessage(Context.Channel, "conductor", $"New conductor must be in the raid train.");
                }
                else
                {
                   train.Conductor = (SocketGuildUser)conductor;
+               }
+            }
+
+            string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+            Connections.CopyFile(fileName);
+            await raidMessage.ModifyAsync(x =>
+            {
+               x.Embed = BuildRaidTrainEmbed(train, fileName);
+            });
+            Connections.DeleteFile(fileName);
+         }
+         await Context.Message.DeleteAsync();
+      }
+
+      [Command("remove")]
+      [Summary("Remove a user from a raid train.")]
+      [Remarks("This should only be used to remove a user that " +
+               "is preventing the train from moving forward." +
+               "Can only be run by the train\'s conductor." +
+               "Must be a reply to a raid train message.")]
+      [RegisterChannel('R')]
+      [RaidReply()]
+      public async Task Remove([Summary("User to remove from raid train.")] IGuildUser user)
+      {
+         ulong raidMessageId = Context.Message.Reference.MessageId.Value;
+         SocketUserMessage raidMessage = (SocketUserMessage)await Context.Channel.GetMessageAsync(raidMessageId);
+         RaidParent parent = raidMessages[raidMessageId];
+         if (!(parent is RaidTrain train))
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"Command must be a reply to a raid train message.");
+         }
+         else
+         {
+            if (!Context.Message.Author.Equals(train.Conductor))
+            {
+               await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"Command can only be run by the current conductor.");
+            }
+            else
+            {
+               if (train.IsInRaid((SocketGuildUser)user, false) == Global.NOT_IN_RAID)
+               {
+                  await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"The user is not in the raid train.");
+               }
+               else
+               {
+                  RaidRemoveResult returnValue = parent.RemovePlayer((SocketGuildUser)user);
+
+                  foreach (SocketGuildUser invite in returnValue.Users)
+                  {
+                     await invite.SendMessageAsync(BuildUnInvitedMessage((SocketGuildUser)user));
+                  }
+
+                  await user.SendMessageAsync(BuildRaidTrainRemoveMessage((SocketGuildUser)Context.Message.Author));
+
+                  if (returnValue.Group != Global.NOT_IN_RAID)
+                  {
+                     await Context.Channel.SendMessageAsync(BuildRaidReadyPingList(parent.GetGroup(returnValue.Group).GetPingList(), train.GetCurrentLocation(), returnValue.Group + 1, true));
+                  }
                }
             }
 
