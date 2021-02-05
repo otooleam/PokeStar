@@ -234,12 +234,9 @@ namespace PokeStar.Modules
          RemoveOldRaids();
       }
 
-      /// <summary>
-      /// Handle boss command.
-      /// </summary>
-      /// <returns>Completed Task.</returns>
-      [Command("boss")]
-      [Alias("bossess", "bosslist", "raidboss", "raidbosses", "raidbosslist")]
+
+      [Command("bosslist")]
+      [Alias("boss", "bosses", "raidboss", "raidbosses", "raidbosslist")]
       [Summary("Get the current list of raid bosses.")]
       [RegisterChannel('I')]
       public async Task BossList()

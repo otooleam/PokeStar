@@ -71,7 +71,7 @@ namespace PokeStar.Modules
                msg.AddReactionsAsync(helpEmojis);
             }
          }
-         else if (Global.COMMAND_INFO.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase)) is CommandInfo cmdInfo
+         else if (Global.COMMAND_INFO.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase) || x.Aliases.Contains(command)) is CommandInfo cmdInfo
             && CheckShowCommand(cmdInfo.Name, isAdmin, isNona))
          {
             EmbedBuilder embed = new EmbedBuilder();
