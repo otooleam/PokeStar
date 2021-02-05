@@ -143,6 +143,10 @@ namespace PokeStar
       /// Help response embed color.
       /// </summary>
       public static readonly Color EMBED_COLOR_HELP_RESPONSE      = Color.Gold;
+      public static readonly Color EMBED_COLOR_RAID_RESPONSE      = Color.Blue;
+      public static readonly Color EMBED_COLOR_DEX_RESPONSE       = Color.Green;
+      public static readonly Color EMBED_COLOR_GAME_INFO_RESPONSE = Color.Teal;
+      public static readonly Color EMBED_COLOR_GYM_RESPONSE       = Color.Magenta;
 
       /// <summary>
       /// Raid response embed color.
@@ -669,43 +673,25 @@ namespace PokeStar
       /// <summary>
       /// Dex register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_DEX   = 'D';
 
-      /// <summary>
-      /// EX raid register character.
-      /// </summary>
-      public static readonly char REGISTER_STRING_EX    = 'E';
+      public static readonly char REGISTER_STRING_ACCOUNT = 'A';
+      public static readonly char REGISTER_STRING_DEX     = 'D';
+      public static readonly char REGISTER_STRING_EX      = 'E';
+      public static readonly char REGISTER_STRING_INFO    = 'I';
+      public static readonly char REGISTER_STRING_ROLE    = 'P';
+      public static readonly char REGISTER_STRING_RAID    = 'R';
+      public static readonly char REGISTER_STRING_POI     = 'S';
+      public static readonly string FULL_REGISTER_STRING  = "ADEIPRS";
 
-      /// <summary>
-      /// Information register character.
-      /// </summary>
-      public static readonly char REGISTER_STRING_INFO  = 'I';
-
-      /// <summary>
-      /// Role register character.
-      /// </summary>
-      public static readonly char REGISTER_STRING_ROLE  = 'P';
-
-      /// <summary>
-      /// Raid register character.
-      /// </summary>
-      public static readonly char REGISTER_STRING_RAID  = 'R';
-
-      /// <summary>
-      /// Full register string.
-      /// </summary>
-      public static readonly string FULL_REGISTER_STRING = "DEIPR";
-
-      /// <summary>
-      /// Register character to register string.
-      /// </summary>
       public static readonly Dictionary<string, string> REGISTER_STRING_TYPE = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
-         [REGISTER_STRING_DEX.ToString()]   = "PokéDex",
-         [REGISTER_STRING_EX.ToString()]    = "EX Raid",
-         [REGISTER_STRING_INFO.ToString()]  = "Information",
-         [REGISTER_STRING_ROLE.ToString()]  = "Player Roles",
-         [REGISTER_STRING_RAID.ToString()]  = "Raid",
+         [REGISTER_STRING_ACCOUNT.ToString()] = "Player Account",
+         [REGISTER_STRING_DEX.ToString()]     = "PokéDex",
+         [REGISTER_STRING_EX.ToString()]      = "EX Raid",
+         [REGISTER_STRING_INFO.ToString()]    = "Information",
+         [REGISTER_STRING_ROLE.ToString()]    = "Player Role",
+         [REGISTER_STRING_RAID.ToString()]    = "Raid",
+         [REGISTER_STRING_POI.ToString()]     = "Point of Interest",
       };
 
       /// <summary>
@@ -714,6 +700,8 @@ namespace PokeStar
       public static readonly Dictionary<string, string> REGISTER_VALIE_STRING = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
          [FULL_REGISTER_STRING] = FULL_REGISTER_STRING,
+         ["ACCOUNT"]            = REGISTER_STRING_ACCOUNT.ToString(),
+         ["A"]                  = REGISTER_STRING_ACCOUNT.ToString(),
          ["POKEDEX"]            = REGISTER_STRING_DEX.ToString(),
          ["DEX"]                = REGISTER_STRING_DEX.ToString(),
          ["D"]                  = REGISTER_STRING_DEX.ToString(),
@@ -722,11 +710,15 @@ namespace PokeStar
          ["INFORMATION"]        = REGISTER_STRING_INFO.ToString(),
          ["INFO"]               = REGISTER_STRING_INFO.ToString(),
          ["I"]                  = REGISTER_STRING_INFO.ToString(),
-         ["PLAYER"]             = REGISTER_STRING_ROLE.ToString(),
          ["ROLE"]               = REGISTER_STRING_ROLE.ToString(),
          ["P"]                  = REGISTER_STRING_ROLE.ToString(),
          ["RAID"]               = REGISTER_STRING_RAID.ToString(),
          ["R"]                  = REGISTER_STRING_RAID.ToString(),
+         ["POI"]                = REGISTER_STRING_POI.ToString(),
+         ["POKESTOP"]           = REGISTER_STRING_POI.ToString(),
+         ["STOP"]               = REGISTER_STRING_POI.ToString(),
+         ["GYM"]                = REGISTER_STRING_POI.ToString(),
+         ["S"]                  = REGISTER_STRING_POI.ToString(),
 
       };
 
