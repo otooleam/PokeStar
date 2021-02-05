@@ -15,6 +15,13 @@ namespace PokeStar.Modules
    /// </summary>
    public class RoleCommands : ModuleBase<SocketCommandContext>
    {
+      /// <summary>
+      /// Handles role command.
+      /// </summary>
+      /// <param name="user">Set nickname and role for this user.</param>
+      /// <param name="nickname">User's nickname.</param>
+      /// <param name="teamName">User's team (Valor, Mystic, or Instinct)</param>
+      /// <returns>Completed Task.</returns>
       [Command("role")]
       [Summary("Sets a player\'s nickname and team.")]
       [Remarks("The user will get their team role and the trainer role.\n" +
@@ -24,7 +31,7 @@ namespace PokeStar.Modules
       [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Role([Summary("Set nickname and role for this user.")] IGuildUser user,
                              [Summary("User\'s nickname.")] string nickname,
-                             [Summary("User\'s team (Valor, Mystic, or Instinct)")] string teamName)
+                             [Summary("User\'s team (Valor, Mystic, or Instinct).")] string teamName)
       {
          if (!Connections.Instance().GetSetupComplete(Context.Guild.Id))
          {
@@ -47,7 +54,7 @@ namespace PokeStar.Modules
                {
                   await user.ModifyAsync(x => { x.Nickname = nickname; });
                }
-               catch (Exception e)
+               catch (Discord.Net.HttpException e)
                {
                   Console.WriteLine(e.Message);
                   await ResponseMessage.SendWarningMessage(Context.Channel, "role", $"Unable to set nickname for {user.Username}.\nPlease set your server nickname to match your Pokémon Go trainer name.");

@@ -21,9 +21,6 @@ namespace PokeStar
    /// </summary>
    public class Program
    {
-      /// <summary>
-      /// Services
-      /// </summary>
       private static DiscordSocketClient client;
       private static CommandService commands;
       private static IServiceProvider services;
@@ -203,13 +200,21 @@ namespace PokeStar
             {
                await RaidCommandParent.RaidSubMessageReactionHandle(message, reaction);
             }
-            else if (DexCommandParent.IsDexSubMessage(message.Id))
+            else if (DexCommandParent.IsDexSelectMessage(message.Id))
+            {
+               await DexCommandParent.DexSelectMessageReactionHandle(message, reaction, guild);
+            }
+            else if (DexCommandParent.IsDexMessage(message.Id))
             {
                await DexCommandParent.DexMessageReactionHandle(message, reaction, guild);
             }
             else if (DexCommandParent.IsCatchMessage(message.Id))
             {
                await DexCommandParent.CatchMessageReactionHandle(message, reaction);
+            }
+            else if (POICommands.IsPOISubMessage(message.Id))
+            {
+               await POICommands.POIMessageReactionHandle(message, reaction, guild);
             }
             else if (HelpCommands.IsHelpMessage(message.Id))
             {
@@ -228,6 +233,7 @@ namespace PokeStar
          SocketGuild server = client.Guilds.FirstOrDefault(x => x.Name.ToString().Equals(Global.HOME_SERVER, StringComparison.OrdinalIgnoreCase));
          SetEmotes(server);
          RaidCommandParent.SetInitialEmotes();
+         DexCommandParent.SetInitialEmotes();
 
          foreach (SocketGuild guild in client.Guilds)
          {
@@ -300,7 +306,7 @@ namespace PokeStar
       /// <summary>
       /// Get the name of the bot.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Bot name as a string.</returns>
       public static string GetName()
       {
          return client.CurrentUser.Username;
@@ -309,7 +315,7 @@ namespace PokeStar
       /// <summary>
       /// Get the status of the bot.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Bot status as a string.</returns>
       public static string GetStatus()
       {
          return client.Status.ToString();
@@ -318,7 +324,7 @@ namespace PokeStar
       /// <summary>
       /// Get the connection status of the bot.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Bot connection state as a string.</returns>
       public static string GetConnectionState()
       {
          return client.ConnectionState.ToString();
@@ -327,7 +333,7 @@ namespace PokeStar
       /// <summary>
       /// Get the number of guilds the bot is in.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Number of guilds the bot is in.</returns>
       public static int GetGuildCount()
       {
          return client.Guilds.Count;
@@ -336,7 +342,7 @@ namespace PokeStar
       /// <summary>
       /// Get the latency of the bot and the server in milliseconds (ms).
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Latency of the bot and server.</returns>
       public static int GetLatency()
       {
          return client.Latency;

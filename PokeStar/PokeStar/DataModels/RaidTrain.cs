@@ -71,7 +71,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the name of the current gym count over the total count.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Current raid count as a string.</returns>
       public string GetCurrentRaidCount()
       {
          return $"{CurrentLocation + 1} / {Locations.Count}";

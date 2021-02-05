@@ -24,7 +24,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the counter as a string.
       /// </summary>
-      /// <returns>Counter string.</returns>
+      /// <returns>Counter as a string.</returns>
       public override string ToString()
       {
          return $@"**{Name}**: {FastAttack} / {ChargeAttack}";

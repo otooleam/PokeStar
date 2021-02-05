@@ -3,8 +3,15 @@ using Discord.Commands;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles joke commands.
+   /// </summary>
    public class JokeCommands : ModuleBase<SocketCommandContext>
    {
+      /// <summary>
+      /// Handle rave command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
       [Command("rave")]
       [Summary("Its time for a rave.")]
       public async Task Rave()
@@ -12,6 +19,10 @@ namespace PokeStar.Modules
          await ReplyAsync(Global.NONA_EMOJIS["rave_emote"]);
       }
 
+      /// <summary>
+      /// Handle screm command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
       [Command("screm")]
       [Summary("AAAHHHHHHHHHHHHHHH!")]
       public async Task Screm()
