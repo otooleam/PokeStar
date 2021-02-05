@@ -210,7 +210,7 @@ namespace PokeStar.DataModels
       /// Marks a player as ready in the raid.
       /// </summary>
       /// <param name="player">Player to mark ready.</param>
-      /// <returns></returns>
+      /// <returns>Group number the player is in, else NotInRaid.</returns>
       public int MarkPlayerReady(SocketGuildUser player)
       {
          int groupNum = IsInRaid(player, false);

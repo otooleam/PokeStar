@@ -349,7 +349,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets a list of players to notify of an edit.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>List of players to notify.</returns>
       public ImmutableList<SocketGuildUser> GetNotifyList()
       {
          return Ready.Keys.ToList().Union(Invited.Keys.ToList()).Union(Attending.Keys.ToList()).Distinct().ToImmutableList();

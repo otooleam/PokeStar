@@ -60,7 +60,7 @@ namespace PokeStar.DataModels
       /// Build an embed for an info message.
       /// </summary>
       /// <param name="message">Message to send.</param>
-      /// <returns></returns>
+      /// <returns>Embed for an info message.</returns>
       private static Embed BuildInfoEmbed(string message)
       {
          EmbedBuilder embed = new EmbedBuilder();
@@ -74,7 +74,7 @@ namespace PokeStar.DataModels
       /// </summary>
       /// <param name="command">Command that was executing.</param>
       /// <param name="message">Message to send.</param>
-      /// <returns></returns>
+      /// <returns>Embed for a warning message.</returns>
 
       private static Embed BuildWarningEmbed(string command, string message)
       {
@@ -90,7 +90,7 @@ namespace PokeStar.DataModels
       /// </summary>
       /// <param name="command">Command that was executing.</param>
       /// <param name="message">Message to send.</param>
-      /// <returns></returns>
+      /// <returns>Embed for an error message.</returns>
       private static Embed BuildErrorEmbed(string command, string message)
       {
          EmbedBuilder embed = new EmbedBuilder();

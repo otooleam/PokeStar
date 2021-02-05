@@ -202,6 +202,7 @@ namespace PokeStar.DataModels
       /// raid groups over the group limit.
       /// </summary>
       /// <param name="player">Player to add.</param>
+      /// <param name="partySize">Number of accounts the player is bringing.</param>
       /// <param name="invitedBy">Who invited the user.</param>
       /// <returns>True if the user was added, otherwise false.</returns>
       public abstract bool AddPlayer(SocketGuildUser player, int partySize, SocketGuildUser invitedBy = null);

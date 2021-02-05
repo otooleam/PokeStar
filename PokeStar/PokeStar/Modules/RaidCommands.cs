@@ -17,6 +17,13 @@ namespace PokeStar.Modules
    /// </summary>
    public class RaidCommands : RaidCommandParent
    {
+      /// <summary>
+      /// Handle raid command.
+      /// </summary>
+      /// <param name="tier">Tier of the raid.</param>
+      /// <param name="time">Time the raid will start.</param>
+      /// <param name="location">Where the raid will be.</param>
+      /// <returns>Completed Task.</returns>
       [Command("raid")]
       [Summary("Creates a new raid coordination message.")]
       [Remarks("Valid Tier values:\n" +
@@ -79,6 +86,13 @@ namespace PokeStar.Modules
          RemoveOldRaids();
       }
 
+      /// <summary>
+      /// Handle mule command.
+      /// </summary>
+      /// <param name="tier">Tier of the raid.</param>
+      /// <param name="time">Time the raid will start.</param>
+      /// <param name="location">Where the raid will be.</param>
+      /// <returns>Completed Task.</returns>
       [Command("mule")]
       [Alias("raidmule")]
       [Summary("Creates a new remote raid coordination message.")]
@@ -142,6 +156,13 @@ namespace PokeStar.Modules
          RemoveOldRaids();
       }
 
+      /// <summary>
+      /// Handle train command.
+      /// </summary>
+      /// <param name="tier">Tier of the raid.</param>
+      /// <param name="time">Time the raid will start.</param>
+      /// <param name="location">Where the raid will be.</param>
+      /// <returns>Completed Task.</returns>
       [Command("train")]
       [Alias("raidtrain")]
       [Summary("Creates a new raid train coordination message.")]
@@ -212,6 +233,7 @@ namespace PokeStar.Modules
          }
          RemoveOldRaids();
       }
+
 
       [Command("bosslist")]
       [Alias("boss", "bosses", "raidboss", "raidbosses", "raidbosslist")]

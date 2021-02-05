@@ -11,8 +11,17 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles type commands.
+   /// </summary>
    public class TypeCommands : DexCommandParent
    {
+      /// <summary>
+      /// Handle type command.
+      /// </summary>
+      /// <param name="type1">(Optional) Get information about this type.</param>
+      /// <param name="type2">(Optional) Get information about this secondary type.</param>
+      /// <returns>Completed Task.</returns>
       [Command("type")]
       [Summary("Gets information for a given Pokémon type.")]
       [RegisterChannel('D')]

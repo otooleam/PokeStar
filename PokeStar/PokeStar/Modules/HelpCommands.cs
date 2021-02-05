@@ -16,17 +16,38 @@ namespace PokeStar.Modules
    /// </summary>
    public class HelpCommands : ModuleBase<SocketCommandContext>
    {
+      /// <summary>
+      /// Saved help messages.
+      /// </summary>
       private static readonly Dictionary<ulong, HelpMessage> helpMessages = new Dictionary<ulong, HelpMessage>();
 
+      /// <summary>
+      /// Max commands dispayed per page.
+      /// </summary>
       private const int MAX_COMMANDS = 10;
-      private const int BACK_ARROW = 0;
-      private const int FORWARD_ARROR = 1;
 
-      private static readonly Emoji[] extraEmojis = {
+      /// <summary>
+      /// Emotes for a help message.
+      /// </summary>
+      private static readonly Emoji[] helpEmojis = {
          new Emoji("⬅️"),
          new Emoji("➡️")
       };
 
+      /// <summary>
+      /// Index of emotes on a help message.
+      /// </summary>
+      private enum HELP_EMOJI_INDEX
+      {
+         BACK_ARROW,
+         FORWARD_ARROR,
+      }
+
+      /// <summary>
+      /// Handle help command.
+      /// </summary>
+      /// <param name="command">(Optional) Get help with this command.</param>
+      /// <returns>Completed Task.</returns>
       [Command("help")]
       [Summary("Displays info about commands." +
                "Leave blank to get a list of all commands.")]
@@ -47,7 +68,7 @@ namespace PokeStar.Modules
             if (validCommands.Count > MAX_COMMANDS)
             {
                helpMessages.Add(msg.Id, new HelpMessage(validCommands));
-               msg.AddReactionsAsync(extraEmojis);
+               msg.AddReactionsAsync(helpEmojis);
             }
          }
          else if (Global.COMMAND_INFO.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase) || x.Aliases.Contains(command)) is CommandInfo cmdInfo
@@ -92,7 +113,7 @@ namespace PokeStar.Modules
       /// <summary>
       /// Checks if the command should be shown to the user.
       /// Uses the following check:
-      /// Z = (!A && !B && !C) || (B && D) || (C && D && E)
+      /// Z = (NOT(A) AND NOT(B) AND NOT(C)) OR (B AND D) OR (C AND D AND E)
       /// 
       /// Input:
       /// A: Is hidden command
@@ -126,6 +147,7 @@ namespace PokeStar.Modules
       /// </summary>
       /// <param name="message">Message that was reacted on.</param>
       /// <param name="reaction">Reaction that was sent.</param>
+      /// <param name="guildId">Id of the guild that the message was sent in.</param>
       /// <returns>Completed Task.</returns>
       public static async Task HelpMessageReactionHandle(IMessage message, SocketReaction reaction, ulong guildId)
       {
@@ -133,11 +155,11 @@ namespace PokeStar.Modules
          int offset = helpMessage.Page;
          string prefix = Connections.Instance().GetPrefix(guildId);
 
-         if (reaction.Emote.Equals(extraEmojis[BACK_ARROW]) && offset > 0)
+         if (reaction.Emote.Equals(helpEmojis[(int)HELP_EMOJI_INDEX.BACK_ARROW]) && offset > 0)
          {
             offset--;
          }
-         else if (reaction.Emote.Equals(extraEmojis[FORWARD_ARROR]) && helpMessage.Commands.Count > (offset + 1) * MAX_COMMANDS)
+         else if (reaction.Emote.Equals(helpEmojis[(int)HELP_EMOJI_INDEX.FORWARD_ARROR]) && helpMessage.Commands.Count > (offset + 1) * MAX_COMMANDS)
          {
             offset++;
          }
@@ -159,6 +181,7 @@ namespace PokeStar.Modules
       /// </summary>
       /// <param name="commands">List of commands to display.</param>
       /// <param name="prefix">Prefix used for the server.</param>
+      /// <param name="page">Current page number.</param>
       /// <returns>Embed for viewing a General list of commands.</returns>
       private static Embed BuildGeneralHelpEmbed(List<CommandInfo> commands, string prefix, int page)
       {

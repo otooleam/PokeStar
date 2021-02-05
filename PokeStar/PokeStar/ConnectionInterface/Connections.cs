@@ -193,6 +193,17 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Searches for the closest guild POI by name.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="poi">Name of the POI.</param>
+      /// <returns>List of closest guild POI names.</returns>
+      public List<string> SearchPOI(ulong guild, string poi)
+      {
+         return FuzzyNameSearch(poi, NONADBConnector.GetGuildPOIs(guild));
+      }
+
+      /// <summary>
       /// Searches for the closest strings in a list of strings.
       /// </summary>
       /// <param name="search">Value to search for.</param>
@@ -228,33 +239,26 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemon">Reference to a Pokémon.</param>
       public void GetPokemonStats(ref Pokemon pokemon)
       {
-         pokemon.Forms = POGODBConnector.GetPokemonByNumber(pokemon.Number);
-
-         TypeRelation typeRelations = GetTypeDefenseRelations(pokemon.Type);
-         pokemon.Weakness = typeRelations.Weak.Keys.ToList();
-         pokemon.Resistance = typeRelations.Strong.Keys.ToList();
-         pokemon.Weather = GetWeather(pokemon.Type);
-         pokemon.FastMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.FAST_MOVE_CATEGORY);
-         pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
-         pokemon.Counter = POGODBConnector.GetCounters(pokemon.Name);
-
-         foreach (Counter counter in pokemon.Counter)
+         if (pokemon != null)
          {
-            counter.FastAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.FastAttack.Name);
-            counter.ChargeAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.ChargeAttack.Name);
+            TypeRelation typeRelations = GetTypeDefenseRelations(pokemon.Type);
+            pokemon.Weakness = typeRelations.Weak.Keys.ToList();
+            pokemon.Resistance = typeRelations.Strong.Keys.ToList();
+            pokemon.Weather = GetWeather(pokemon.Type);
+            pokemon.FastMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.FAST_MOVE_CATEGORY);
+            pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
+            pokemon.Counter = POGODBConnector.GetCounters(pokemon.Name);
+
+            foreach (Counter counter in pokemon.Counter)
+            {
+               counter.FastAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.FastAttack.Name);
+               counter.ChargeAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.ChargeAttack.Name);
+            }
+
+            pokemon.CPMax = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_XL_LEVEL);
          }
-
-         pokemon.CPMax = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_XL_LEVEL);
-
-         pokemon.GreatXLIVs = CPCalculator.CalcPvPIVsPerLeague(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
-            Global.MAX_GREAT_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
-
-         pokemon.UltraXLIVs = CPCalculator.CalcPvPIVsPerLeague(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
-            Global.MAX_ULTRA_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
       }
 
       /// <summary>
@@ -364,6 +368,11 @@ namespace PokeStar.ConnectionInterface
          }
       }
 
+      /// <summary>
+      /// Checks if the Pokémon is little league eligable.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>True if the Pokémon can be in little league, otherwise false.</returns>
       public bool CanBeLittleLeague(string pokemonName)
       {
          return POGODBConnector.IsBaseForm(pokemonName);
@@ -532,9 +541,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="attribute">Attribute to change.</param>
       /// <param name="value">New value of the attribute.</param>
-      public void UpdatePokemon(string pokemonName, string attrbute, int value)
+      public void UpdatePokemon(string pokemonName, string attribute, int value)
       {
-         POGODBConnector.SetPokemonAttribute(ReformatName(pokemonName), attrbute, value);
+         POGODBConnector.SetPokemonAttribute(ReformatName(pokemonName), attribute, value);
       }
 
       /// <summary>
@@ -543,9 +552,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="moveName">Name of the move.</param>
       /// <param name="isLegacy">Is the move a legacy move.</param>
-      public void UpdatePokemonMove(string pokemonName, string move, int isLegacy)
+      public void UpdatePokemonMove(string pokemonName, string moveName, int isLegacy)
       {
-         POGODBConnector.SetPokemonMove(ReformatName(pokemonName), move, isLegacy);
+         POGODBConnector.SetPokemonMove(ReformatName(pokemonName), moveName, isLegacy);
       }
 
       /// <summary>
@@ -657,7 +666,7 @@ namespace PokeStar.ConnectionInterface
       /// <returns>Name of the Pokémon if it is assigned, otherwise null.</returns>
       public string GetPokemonWithNickname(ulong guild, string nickname)
       {
-         return NONADBConnector.GetPokemon(guild, nickname);
+         return NONADBConnector.GetPokemonByNickname(guild, ReformatName(nickname));
       }
 
       /// <summary>
@@ -668,13 +677,13 @@ namespace PokeStar.ConnectionInterface
       /// <returns>List of nicknames assigned to the Pokémon for the guild.</returns>
       public List<string> GetNicknames(ulong guild, string pokemonName)
       {
-         return NONADBConnector.GetNicknames(guild, pokemonName);
+         return NONADBConnector.GetNicknames(guild, ReformatName(pokemonName));
       }
 
       /// <summary>
       /// Adds a nickname to a Pokémon for a guild.
       /// </summary>
-      /// <param name="guild">Id of the guild</param>
+      /// <param name="guild">Id of the guild.</param>
       /// <param name="nickname">Nickname for the Pokémon.</param>
       /// <param name="pokemonName">Pokémon the nickname applies to.</param>
       public void AddNickname(ulong guild, string nickname, string pokemonName)
@@ -701,6 +710,132 @@ namespace PokeStar.ConnectionInterface
       public void DeleteNickname(ulong guild, string nickname)
       {
          NONADBConnector.DeleteNickname(guild, nickname);
+      }
+
+      /// <summary>
+      /// Gets a POI.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="poi">Name of the POI.</param>
+      /// <returns>POI registered the guild with the given name.</returns>
+      public POI GetPOI(ulong guild, string poi)
+      {
+         return poi == null ? null : NONADBConnector.GetPOI(guild, ReformatName(poi));
+      }
+
+      /// <summary>
+      /// Gets a POI by its nickname.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="nickname">Nickname of the POI.</param>
+      /// <returns>Name of the POI if it is assigned, otherwise null.</returns>
+      public string GetPOIWithNickname(ulong guild, string nickname)
+      {
+         return NONADBConnector.GetPOIByNickname(guild, ReformatName(nickname));
+      }
+
+      /// <summary>
+      /// Gets a guild's list of nicknames for a POI.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="poi">Name of the POI.</param>
+      /// <returns>List of nicknames assigned to the POI for the guild.</returns>
+      public List<string> GetPOINicknames(ulong guild, string poi)
+      {
+         return NONADBConnector.GetPOINicknames(guild, ReformatName(poi));
+      }
+
+      /// <summary>
+      /// Adds a Point of Interest to a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      /// <param name="latitude">Latitudinal coordinate.</param>
+      /// <param name="longitude">Longitudinal coordinate.</param>
+      /// <param name="gym">Is the Point of Interest a gym.</param>
+      public void AddPOI(ulong guild, string name, float latitude, float longitude, int gym)
+      {
+         NONADBConnector.AddPOI(guild, name, latitude, longitude, gym, 0, 0);
+      }
+
+      /// <summary>
+      /// Adds a Sponsored Point of Interest to a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      /// <param name="latitude">Latitudinal coordinate.</param>
+      /// <param name="longitude">Longitudinal coordinate.</param>
+      /// <param name="gym">Is the Point of Interest a gym.</param>
+      public void AddSponsoredPOI(ulong guild, string name, float latitude, float longitude, int gym)
+      {
+         NONADBConnector.AddPOI(guild, name, latitude, longitude, gym, 1, 0);
+      }
+
+      /// <summary>
+      /// Adds an EX Gym Point of Interest to a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      /// <param name="latitude">Latitudinal coordinate.</param>
+      /// <param name="longitude">Longitudinal coordinate.</param>
+      public void AddExGym(ulong guild, string name, float latitude, float longitude)
+      {
+         NONADBConnector.AddPOI(guild, name, latitude, longitude, 1, 0, 1);
+      }
+
+      /// <summary>
+      /// Updates an attribute of a Point of Interest.
+      /// Only updates true/false values.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      /// <param name="attribute">Attribute to change.</param>
+      /// <param name="value">New value of the attribute</param>
+      public void UpdatePOI(ulong guild, string name, string attribute, int value)
+      {
+         NONADBConnector.UpdatePOI(guild, name, attribute, value);
+      }
+
+      /// <summary>
+      /// Delete a Point of Interest from a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      public void RemovePOI(ulong guild, string name)
+      {
+         NONADBConnector.RemovePOI(guild, name);
+      }
+
+      /// <summary>
+      /// Adds a nickname to a Point of Interest for a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="nickname">Nickname for the Point of Interest.</param>
+      /// <param name="poiName">Point of Interest the nickname applies to.</param>
+      public void AddPOINickname(ulong guild, string nickname, string poiName)
+      {
+         NONADBConnector.AddPOINickname(guild, poiName, nickname);
+      }
+
+      /// <summary>
+      /// Updates the nickname of a Point of Interest for a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="oldNickname">Nickname to replace.</param>
+      /// <param name="newNickname">Nickname to replace with.</param>
+      public void UpdatePOINickname(ulong guild, string oldNickname, string newNickname)
+      {
+         NONADBConnector.UpdatePOINickname(guild, newNickname, oldNickname);
+      }
+
+      /// <summary>
+      /// Deletes a Point of Interest nickname from a guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="nickname">Nickname to delete.</param>
+      public void DeletePOINickname(ulong guild, string nickname)
+      {
+         NONADBConnector.DeletePOINickname(guild, nickname);
       }
    }
 }

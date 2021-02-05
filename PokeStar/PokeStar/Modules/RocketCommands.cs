@@ -8,14 +8,22 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles rocket commands.
+   /// </summary>
    public class RocketCommands: ModuleBase<SocketCommandContext>
    {
       /*
+      /// <summary>
+      /// Handle rocket command.
+      /// </summary>
+      /// <param name="type">(Optional) Get information for this type of Rocket.</param>
+      /// <returns>Completed Task.</returns>
       [Command("rocket")]
       [Summary("Gets lists of Pokémon currently used by Team GO Rocket.\n" +
                "Leave blank for a list of valid egg tiers.")]
       [RegisterChannel('I')]
-      public async Task Rocket([Summary("Get information for this type of Rocket.")][Remainder] string type = null)
+      public async Task Rocket([Summary("(Optional) Get information for this type of Rocket.")][Remainder] string type = null)
       {
          if (type == null)
          {
@@ -64,6 +72,10 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle updateRocketList command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
       [Command("updateRocketList")]
       [Summary("Updates the saved list of Rocket Grunts from The Silph Road.")]
       [RequireUserPermission(GuildPermission.Administrator)]

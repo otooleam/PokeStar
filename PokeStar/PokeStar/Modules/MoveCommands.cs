@@ -12,8 +12,16 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles move commands.
+   /// </summary>
    public class MoveCommands : DexCommandParent
    {
+      /// <summary>
+      /// Handle move command.
+      /// </summary>
+      /// <param name="move">Get information about this move.</param>
+      /// <returns>Completed Task.</returns>
       [Command("move")]
       [Summary("Gets information for a given move.")]
       [RegisterChannel('D')]
@@ -27,7 +35,7 @@ namespace PokeStar.Modules
             string fileName = BLANK_IMAGE;
             Connections.CopyFile(fileName);
             RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(moveNames, fileName));
-            dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.MOVE_MESSAGE, moveNames));
+            dexSelectMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.MOVE_MESSAGE, moveNames));
             Connections.DeleteFile(fileName);
             dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
          }
@@ -40,6 +48,12 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle movetype command.
+      /// </summary>
+      /// <param name="type">Get moves for this type.</param>
+      /// <param name="category">(Optional) Get moves of this category (fast / charge).</param>
+      /// <returns>Completed Task.</returns>
       [Command("movetype")]
       [Summary("Gets information for a given type of move.")]
       [RegisterChannel('D')]

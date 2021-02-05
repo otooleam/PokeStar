@@ -13,8 +13,13 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.ModuleParents
 {
+   /// <summary>
+   /// Parent for raid command modules.
+   /// </summary>
    public class RaidCommandParent : ModuleBase<SocketCommandContext>
    {
+      // Message holders ******************************************************
+
       /// <summary>
       /// Saved raid messages.
       /// </summary>
@@ -25,7 +30,7 @@ namespace PokeStar.ModuleParents
       /// </summary>
       protected static readonly Dictionary<ulong, RaidSubMessage> subMessages = new Dictionary<ulong, RaidSubMessage>();
 
-      /// Emotes **************************************************************
+      // Emotes ***************************************************************
 
       /// <summary>
       /// Emotes for a raid message.
@@ -132,7 +137,7 @@ namespace PokeStar.ModuleParents
          "means change the boss for the current gym. Can only be done by the train conductor.",
       };
 
-      /// Replies *************************************************************
+      // Replies **************************************************************
 
       /// <summary>
       /// Replies for a raid message.
@@ -159,9 +164,10 @@ namespace PokeStar.ModuleParents
       private static readonly string[] trainReplies = {
          "add <time> <location>",
          "conductor <conductor>",
+         "remove <user>",
       };
 
-      /// Enumerations ********************************************************
+      // Enumerations *********************************************************
 
       /// <summary>
       /// Index of emotes on a raid message.
@@ -250,7 +256,7 @@ namespace PokeStar.ModuleParents
          TRAIN_BOSS_SUB_MESSAGE,
       }
 
-      /// Message checkers ****************************************************
+      // Message checkers *****************************************************
 
       /// <summary>
       /// Checks if a message is a raid message.
@@ -272,7 +278,7 @@ namespace PokeStar.ModuleParents
          return subMessages.ContainsKey(id);
       }
 
-      /// Message reaction handlers *******************************************
+      // Message reaction handlers ********************************************
 
       /// <summary>
       /// Handles a reaction on a general raid message.
@@ -365,7 +371,7 @@ namespace PokeStar.ModuleParents
          }
       }
 
-      /// Reaction handlers ***************************************************
+      // Reaction handlers ****************************************************
 
       /// <summary>
       /// Handles a reaction on a raid message.
@@ -456,14 +462,8 @@ namespace PokeStar.ModuleParents
 
                if (returnValue.Group != Global.NOT_IN_RAID)
                {
-                  if (raid is RaidTrain train)
-                  {
-                     await reaction.Channel.SendMessageAsync(BuildRaidReadyPingList(train.GetGroup(returnValue.Group).GetPingList(), train.GetCurrentLocation(), returnValue.Group + 1, true));
-                  }
-                  else
-                  {
-                     await reaction.Channel.SendMessageAsync(BuildRaidReadyPingList(raid.GetGroup(returnValue.Group).GetPingList(), raid.Location, returnValue.Group + 1, true));
-                  }
+                  string location = raid is RaidTrain train ? train.GetCurrentLocation() : raid.Location;
+                  await reaction.Channel.SendMessageAsync(BuildRaidReadyPingList(raid.GetGroup(returnValue.Group).GetPingList(), location, returnValue.Group + 1, true));
                }
             }
             else if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.HELP]))
@@ -982,7 +982,7 @@ namespace PokeStar.ModuleParents
          }
       }
 
-      /// Embed builders ******************************************************
+      // Embed builders *******************************************************
 
       /// <summary>
       /// Builds a raid embed.
@@ -1140,6 +1140,8 @@ namespace PokeStar.ModuleParents
       /// </summary>
       /// <param name="invite">List of players to invite.</param>
       /// <param name="player">Player that wants to invite someone.</param>
+      /// <param name="offset">Where to start in the list of invites.</param>
+      /// <param name="listSize">How many players to display.</param>
       /// <returns>Embed for inviting a player to a raid.</returns>
       private static Embed BuildPlayerInviteEmbed(ImmutableList<SocketGuildUser> invite, string player, int offset, int listSize)
       {
@@ -1212,7 +1214,7 @@ namespace PokeStar.ModuleParents
          return embed.Build();
       }
 
-      /// String builders *****************************************************
+      // String builders ******************************************************
 
       /// <summary>
       /// Builds the title of the raid.
@@ -1244,6 +1246,7 @@ namespace PokeStar.ModuleParents
       /// <param name="players">List of players.</param>
       /// <param name="location">Location of the raid.</param>
       /// <param name="groupNumber">Group number the players are part of.</param>
+      /// <param name="isNormalRaid">Is the raid a normal raid (raid or raid train).</param>
       /// <returns>List of players to ping as a string.</returns>
       protected static string BuildRaidReadyPingList(ImmutableList<SocketGuildUser> players, string location, int groupNumber, bool isNormalRaid)
       {
@@ -1376,7 +1379,7 @@ namespace PokeStar.ModuleParents
          IEmote startEmoji = null;
          IEmote endEmoji = null;
          StringBuilder sb = new StringBuilder();
-         sb.AppendLine("**Raid Emoji Help**:");
+         sb.AppendLine("**Raid Emoji Help:**");
 
          for (int i = 0; i < emotes.Length; i++)
          {
@@ -1419,10 +1422,18 @@ namespace PokeStar.ModuleParents
       /// </summary>
       /// <param name="player">Player that has left the raid.</param>
       /// <returns>Uninvited message as a string</returns>
-      private static string BuildUnInvitedMessage(SocketGuildUser player)
+      protected static string BuildUnInvitedMessage(SocketGuildUser player)
       {
          return $"{player.Nickname ?? player.Username} has left the raid. You have been moved back to \"Need Invite\".";
       }
+
+      protected static string BuildRaidTrainRemoveMessage(SocketGuildUser conductor)
+      {
+         return $"You have been removed from a raid train by {conductor.Nickname ?? conductor.Username}\n" +
+                $"This was most likely due to you not marking yourself as ready and holding up the raid train.\n" +
+                $"Please keep in mind you are free to leave and rejoin a raid train as you wish.";
+      }
+
 
       /// <summary>
       /// Builds a list of raid bosses.
@@ -1466,7 +1477,7 @@ namespace PokeStar.ModuleParents
          return "";
       }
 
-      /// Miscellaneous *******************************************************
+      // Miscellaneous ********************************************************
 
       /// <summary>
       /// Set emotes on a raid message.
@@ -1475,7 +1486,7 @@ namespace PokeStar.ModuleParents
       /// <param name="message">Message to add emotes to.</param>
       /// <param name="emotes">Emotes to add.</param>
       /// <returns>Completed Task.</returns>
-      protected static async Task SetEmojis(RestUserMessage message, IEmote[] emotes)
+      protected static void SetEmojis(RestUserMessage message, IEmote[] emotes)
       {
          message.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.HELP]).ToArray());
       }
@@ -1515,11 +1526,11 @@ namespace PokeStar.ModuleParents
       protected static void RemoveOldRaids()
       {
          List<ulong> ids = new List<ulong>();
-         foreach (KeyValuePair<ulong, RaidParent> temp in raidMessages)
+         foreach (KeyValuePair<ulong, RaidParent> raid in raidMessages)
          {
-            if (Math.Abs((temp.Value.CreatedAt - DateTime.Now).TotalDays) >= 1)
+            if (Math.Abs((DateTime.Now - raid.Value.CreatedAt).TotalDays) >= 1)
             {
-               ids.Add(temp.Key);
+               ids.Add(raid.Key);
             }
          }
          foreach (ulong id in ids)

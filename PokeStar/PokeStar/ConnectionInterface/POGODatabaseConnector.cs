@@ -261,7 +261,7 @@ namespace PokeStar.ConnectionInterface
       /// Gets moves of a Pokémon.
       /// </summary>
       /// <param name="pokemonName">Name of the Pokémon.</param>
-      /// <param name="isFastMove">Is the type of move a fast move, else charge move.</param>
+      /// <param name="category">Category of moves.</param>
       /// <param name="shadowable">Is the Pokémon shadowable.</param>
       /// <returns>List of moves of the Pokémon.</returns>
       public List<PokemonMove> GetPokemonMoves(string pokemonName, string category, bool shadowable = false)
@@ -611,7 +611,7 @@ namespace PokeStar.ConnectionInterface
 
       /// <summary>
       /// Updates an attribute of a Pokémon.
-      /// Only updates true false values.
+      /// Only updates true/false values.
       /// </summary>
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="attribute">Attribute to change.</param>

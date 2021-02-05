@@ -14,8 +14,17 @@ using PokeStar.ModuleParents;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles raid reply commands.
+   /// </summary>
    public class RaidReplyCommands : RaidCommandParent
    {
+      /// <summary>
+      /// Handle edit command.
+      /// </summary>
+      /// <param name="attribute">Portion of the raid message to edit.</param>
+      /// <param name="value">New value of the edited attribute.</param>
+      /// <returns></returns>
       [Command("edit")]
       [Summary("Edit the time, location (loc), or tier/boss of a raid.")]
       [Remarks("Must be a reply to any type of raid message.")]
@@ -28,7 +37,7 @@ namespace PokeStar.Modules
          SocketUserMessage raidMessage = (SocketUserMessage)await Context.Channel.GetMessageAsync(raidMessageId);
          RaidParent parent = raidMessages[raidMessageId];
 
-         if (parent is RaidTrain initTrain && !initTrain.Conductor.Equals(raidMessage.Author))
+         if (parent is RaidTrain initTrain && !Context.Message.Author.Equals(initTrain.Conductor))
          {
             await ResponseMessage.SendErrorMessage(raidMessage.Channel, "edit", $"Command can only be run by the current conductor.");
          }
@@ -211,6 +220,11 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle invite command.
+      /// </summary>
+      /// <param name="invites">List of users to invite, separated by spaces.</param>
+      /// <returns>Completed Task.</returns>
       [Command("invite")]
       [Summary("Invite user(s) to the raid.")]
       [Remarks("Users may be mentioned using \'@\' or username/nickname may be used.\n" +
@@ -302,6 +316,10 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle request command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
       [Command("request")]
       [Summary("Request an invite to a raid.")]
       [Remarks("The user must not already be in the raid." +
@@ -345,6 +363,11 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle remote command.
+      /// </summary>
+      /// <param name="groupSize">Amount of users raiding remotly 0 - 6.</param>
+      /// <returns>Completed Task.</returns>
       [Command("remote")]
       [Summary("Participate in the raid remotly without an invite.")]
       [Remarks("Must be a reply to a raid or raid train message.")]
@@ -395,6 +418,11 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle ready command.
+      /// </summary>
+      /// <param name="groupNum">Number of the raid group that is ready to start.</param>
+      /// <returns>Completed Task.</returns>
       [Command("ready")]
       [Summary("Mark a raid group as ready.")]
       [Remarks("Can only be run by a raid mule for the raid." +
@@ -422,6 +450,12 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle add command.
+      /// </summary>
+      /// <param name="time">Time of the raid.</param>
+      /// <param name="location">Location of the raid.</param>
+      /// <returns>Completed Task.</returns>
       [Command("add")]
       [Summary("Add a raid to the end of the raid train.")]
       [Remarks("Can only be run by the train\'s conductor." +
@@ -459,6 +493,11 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
+      /// <summary>
+      /// Handle conductor command.
+      /// </summary>
+      /// <param name="conductor">User to make new conductor.</param>
+      /// <returns>Completed Task.</returns>
       [Command("conductor")]
       [Summary("Change the current conductor of the raid train.")]
       [Remarks("Can only be run by the train\'s conductor." +
@@ -484,11 +523,69 @@ namespace PokeStar.Modules
             {
                if (train.IsInRaid((SocketGuildUser)conductor, false) == Global.NOT_IN_RAID)
                {
-                  await ResponseMessage.SendErrorMessage(Context.Channel, "conductor", $"New conductor must be in the raid.");
+                  await ResponseMessage.SendErrorMessage(Context.Channel, "conductor", $"New conductor must be in the raid train.");
                }
                else
                {
                   train.Conductor = (SocketGuildUser)conductor;
+               }
+            }
+
+            string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+            Connections.CopyFile(fileName);
+            await raidMessage.ModifyAsync(x =>
+            {
+               x.Embed = BuildRaidTrainEmbed(train, fileName);
+            });
+            Connections.DeleteFile(fileName);
+         }
+         await Context.Message.DeleteAsync();
+      }
+
+      [Command("remove")]
+      [Summary("Remove a user from a raid train.")]
+      [Remarks("This should only be used to remove a user that " +
+               "is preventing the train from moving forward." +
+               "Can only be run by the train\'s conductor." +
+               "Must be a reply to a raid train message.")]
+      [RegisterChannel('R')]
+      [RaidReply()]
+      public async Task Remove([Summary("User to remove from raid train.")] IGuildUser user)
+      {
+         ulong raidMessageId = Context.Message.Reference.MessageId.Value;
+         SocketUserMessage raidMessage = (SocketUserMessage)await Context.Channel.GetMessageAsync(raidMessageId);
+         RaidParent parent = raidMessages[raidMessageId];
+         if (!(parent is RaidTrain train))
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"Command must be a reply to a raid train message.");
+         }
+         else
+         {
+            if (!Context.Message.Author.Equals(train.Conductor))
+            {
+               await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"Command can only be run by the current conductor.");
+            }
+            else
+            {
+               if (train.IsInRaid((SocketGuildUser)user, false) == Global.NOT_IN_RAID)
+               {
+                  await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"The user is not in the raid train.");
+               }
+               else
+               {
+                  RaidRemoveResult returnValue = parent.RemovePlayer((SocketGuildUser)user);
+
+                  foreach (SocketGuildUser invite in returnValue.Users)
+                  {
+                     await invite.SendMessageAsync(BuildUnInvitedMessage((SocketGuildUser)user));
+                  }
+
+                  await user.SendMessageAsync(BuildRaidTrainRemoveMessage((SocketGuildUser)Context.Message.Author));
+
+                  if (returnValue.Group != Global.NOT_IN_RAID)
+                  {
+                     await Context.Channel.SendMessageAsync(BuildRaidReadyPingList(parent.GetGroup(returnValue.Group).GetPingList(), train.GetCurrentLocation(), returnValue.Group + 1, true));
+                  }
                }
             }
 
