@@ -11,8 +11,16 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles catch commands.
+   /// </summary>
    public class CatchCommand : DexCommandParent
    {
+      /// <summary>
+      /// Handle catch command
+      /// </summary>
+      /// <param name="pokemon">Simulate catching this Pokémon.</param>
+      /// <returns>Completed Task.</returns>
       [Command("catch")]
       [Summary("Simulates catching a Pokémon.")]
       [RegisterChannel('I')]
@@ -32,7 +40,7 @@ namespace PokeStar.Modules
                string fileName = POKEDEX_SELECTION_IMAGE;
                Connections.CopyFile(fileName);
                RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonWithNumber, fileName));
-               dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.CATCH_MESSAGE, pokemonWithNumber));
+               dexSelectMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.CATCH_MESSAGE, pokemonWithNumber));
                Connections.DeleteFile(fileName);
                dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(pokemonWithNumber.Count).ToArray());
             }
@@ -63,7 +71,7 @@ namespace PokeStar.Modules
                   string fileName = POKEDEX_SELECTION_IMAGE;
                   Connections.CopyFile(fileName);
                   RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(pokemonNames, fileName));
-                  dexMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.CATCH_MESSAGE, pokemonNames));
+                  dexSelectMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.CATCH_MESSAGE, pokemonNames));
                   Connections.DeleteFile(fileName);
                   dexMessage.AddReactionsAsync(Global.SELECTION_EMOJIS);
                }

@@ -1,5 +1,4 @@
-﻿using System;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using Discord.WebSocket;
 
@@ -39,6 +38,7 @@ namespace PokeStar.DataModels
       /// raid groups over the group limit.
       /// </summary>
       /// <param name="player">Player to add.</param>
+      /// <param name="partySize">Number of accounts the player is bringing. Should always be 1.</param>
       /// <param name="invitedBy">Who invited the user.</param>
       /// <returns>True if the user was added, otherwise false.</returns>
       public override bool AddPlayer(SocketGuildUser player, int partySize, SocketGuildUser invitedBy = null)

@@ -126,7 +126,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// List of all form tags.
       /// </summary>
-      public List<string> FromList { get; }
+      public List<string> FormList { get; }
 
       /// <summary>
       /// Default form tag.
@@ -141,7 +141,7 @@ namespace PokeStar.DataModels
       /// <param name="defaultForm"></param>
       public Form(List<string> fromList, string defaultForm)
       {
-         FromList = fromList;
+         FormList = fromList;
          DefaultForm = defaultForm;
       }
    }

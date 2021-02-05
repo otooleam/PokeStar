@@ -67,8 +67,9 @@ namespace PokeStar.ImageProcessors
 
                   await ResponseMessage.SendInfoMessage(context.Channel, $"{user.Username} now has the nickname {nickname}");
                }
-               catch (Exception e)
+               catch (Discord.Net.HttpException e)
                {
+                  
                   Console.WriteLine(e.Message);
                   await ResponseMessage.SendWarningMessage(context.Channel, "Roll image proccessing", $"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{context.Guild.Name}\"");
                }

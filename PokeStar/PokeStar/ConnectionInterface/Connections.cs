@@ -228,33 +228,26 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemon">Reference to a Pokémon.</param>
       public void GetPokemonStats(ref Pokemon pokemon)
       {
-         pokemon.Forms = POGODBConnector.GetPokemonByNumber(pokemon.Number);
-
-         TypeRelation typeRelations = GetTypeDefenseRelations(pokemon.Type);
-         pokemon.Weakness = typeRelations.Weak.Keys.ToList();
-         pokemon.Resistance = typeRelations.Strong.Keys.ToList();
-         pokemon.Weather = GetWeather(pokemon.Type);
-         pokemon.FastMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.FAST_MOVE_CATEGORY);
-         pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
-         pokemon.Counter = POGODBConnector.GetCounters(pokemon.Name);
-
-         foreach (Counter counter in pokemon.Counter)
+         if (pokemon != null)
          {
-            counter.FastAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.FastAttack.Name);
-            counter.ChargeAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.ChargeAttack.Name);
+            TypeRelation typeRelations = GetTypeDefenseRelations(pokemon.Type);
+            pokemon.Weakness = typeRelations.Weak.Keys.ToList();
+            pokemon.Resistance = typeRelations.Strong.Keys.ToList();
+            pokemon.Weather = GetWeather(pokemon.Type);
+            pokemon.FastMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.FAST_MOVE_CATEGORY);
+            pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
+            pokemon.Counter = POGODBConnector.GetCounters(pokemon.Name);
+
+            foreach (Counter counter in pokemon.Counter)
+            {
+               counter.FastAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.FastAttack.Name);
+               counter.ChargeAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.ChargeAttack.Name);
+            }
+
+            pokemon.CPMax = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_XL_LEVEL);
          }
-
-         pokemon.CPMax = CPCalculator.CalcCPPerLevel(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina,
-            Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.MAX_XL_LEVEL);
-
-         pokemon.GreatXLIVs = CPCalculator.CalcPvPIVsPerLeague(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
-            Global.MAX_GREAT_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
-
-         pokemon.UltraXLIVs = CPCalculator.CalcPvPIVsPerLeague(
-            pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
-            Global.MAX_ULTRA_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
       }
 
       /// <summary>
@@ -364,6 +357,11 @@ namespace PokeStar.ConnectionInterface
          }
       }
 
+      /// <summary>
+      /// Checks if the Pokémon is little league eligable.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>True if the Pokémon can be in little league, otherwise false.</returns>
       public bool CanBeLittleLeague(string pokemonName)
       {
          return POGODBConnector.IsBaseForm(pokemonName);
@@ -532,9 +530,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="attribute">Attribute to change.</param>
       /// <param name="value">New value of the attribute.</param>
-      public void UpdatePokemon(string pokemonName, string attrbute, int value)
+      public void UpdatePokemon(string pokemonName, string attribute, int value)
       {
-         POGODBConnector.SetPokemonAttribute(ReformatName(pokemonName), attrbute, value);
+         POGODBConnector.SetPokemonAttribute(ReformatName(pokemonName), attribute, value);
       }
 
       /// <summary>
@@ -543,9 +541,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="moveName">Name of the move.</param>
       /// <param name="isLegacy">Is the move a legacy move.</param>
-      public void UpdatePokemonMove(string pokemonName, string move, int isLegacy)
+      public void UpdatePokemonMove(string pokemonName, string moveName, int isLegacy)
       {
-         POGODBConnector.SetPokemonMove(ReformatName(pokemonName), move, isLegacy);
+         POGODBConnector.SetPokemonMove(ReformatName(pokemonName), moveName, isLegacy);
       }
 
       /// <summary>

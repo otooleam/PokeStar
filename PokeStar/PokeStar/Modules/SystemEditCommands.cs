@@ -13,10 +13,23 @@ namespace PokeStar.Modules
    /// </summary>
    public class SystemEditCommands : ModuleBase<SocketCommandContext>
    {
+      /// <summary>
+      /// Max number of values in nickname string.
+      /// </summary>
       private const int NumArguments = 2;
-      private const int IndexPokemon = 0;
-      private const int IndexMove = 1;
 
+      /// <summary>
+      /// Index of values in add pokemon move string.
+      /// </summary>
+      private enum MOVE_UPDATE_INDEX
+      {
+         POKEMON,
+         MOVE,
+      }
+
+      /// <summary>
+      /// Valid editable attributes.
+      /// </summary>
       private readonly List<string> EditableAttributes = new List<string>()
       {
          "SHINY",
@@ -24,6 +37,11 @@ namespace PokeStar.Modules
          "OBTAINABLE"
       };
 
+      /// <summary>
+      /// Handle prefix command.
+      /// </summary>
+      /// <param name="prefix">Prefex to set for commands.</param>
+      /// <returns>Completed Task.</returns>
       [Command("prefix")]
       [Summary("Sets the command prefix for this server.")]
       [Remarks("Prefix may only be a single character long.")]
@@ -34,6 +52,10 @@ namespace PokeStar.Modules
          await ResponseMessage.SendInfoMessage(Context.Channel, $"Command prefix has been set to \'{prefix}\' for this server.");
       }
 
+      /// <summary>
+      /// Handle updatePokemonNames command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
       [Command("updatePokemonNames")]
       [Summary("Updates the saved list of Pokémon names from the database.")]
       [RequireUserPermission(GuildPermission.Administrator)]
@@ -44,7 +66,11 @@ namespace PokeStar.Modules
          await ResponseMessage.SendInfoMessage(Context.Channel, $"Pokémon name list has been updated.");
       }
 
-      [Command("updateMovenNames")]
+      /// <summary>
+      /// Handle updateMoveNames command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("updateMoveNames")]
       [Summary("Updates the saved list of Move names from the database.")]
       public async Task UpdateMoveNames()
       {
@@ -52,6 +78,10 @@ namespace PokeStar.Modules
          await ResponseMessage.SendInfoMessage(Context.Channel, $"Move name list has been updated.");
       }
 
+      /// <summary>
+      /// Handle toggleUseEmptyRaid command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
       [Command("toggleUseEmptyRaid")]
       [Summary("Toggle empty raid feature for all servers.")]
       [RequireUserPermission(GuildPermission.Administrator)]
@@ -63,6 +93,10 @@ namespace PokeStar.Modules
          await ResponseMessage.SendInfoMessage(Context.Channel, $"Nona will {text} use the empty raid feature.");
       }
 
+      /// <summary>
+      /// Handle toggleUseNonaTest command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
       [Command("toggleUseNonaTest")]
       [Summary("Toggle accepting messages from Nona Test Bot.")]
       [RequireUserPermission(GuildPermission.Administrator)]
@@ -74,6 +108,13 @@ namespace PokeStar.Modules
          await ResponseMessage.SendInfoMessage(Context.Channel, $"Nona will {text} accept message from a Nona Test Bot.");
       }
 
+      /// <summary>
+      /// Handle updatePokemon command.
+      /// </summary>
+      /// <param name="attribute">Update this attribute.</param>
+      /// <param name="value">Update the attribute with this value.</param>
+      /// <param name="pokemon">Update attribute of this Pokémon.</param>
+      /// <returns>Completed Task.</returns>
       [Command("updatePokemon")]
       [Summary("Edit an attribute of a Pokémon.")]
       [Remarks("Valid attributes to edit are shiny, shadow, and obtainable." +
@@ -103,6 +144,12 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle updatePokemonMove command.
+      /// </summary>
+      /// <param name="isLegacy">Is the move a legacy move.</param>
+      /// <param name="pokemonMove">Add a move to a Pokémon using this string.</param>
+      /// <returns>Completed Task.</returns>
       [Command("updatePokemonMove")]
       [Summary("Add a move to a Pokémon.")]
       [Remarks("IsLegacy can only be set to either 1(true) or 0(false)" +
@@ -121,8 +168,8 @@ namespace PokeStar.Modules
             string[] arr = pokemonMove.Split(Global.NICKNAME_DELIMITER);
             if (arr.Length == NumArguments)
             {
-               string pokemonStr = arr[IndexPokemon].Trim();
-               string moveStr = arr[IndexMove].Trim();
+               string pokemonStr = arr[(int)MOVE_UPDATE_INDEX.POKEMON].Trim();
+               string moveStr = arr[(int)MOVE_UPDATE_INDEX.MOVE].Trim();
                Pokemon pkmn = Connections.Instance().GetPokemon(pokemonStr);
                Move move = Connections.Instance().GetMove(moveStr);
                if (pkmn == null)
