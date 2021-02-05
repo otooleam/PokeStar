@@ -276,6 +276,10 @@ namespace PokeStar.ConnectionInterface
          {
             return "Sand Cloak Burmy";
          }
+         else if (name.Equals("GENESECT (BURN DRIVE)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Burn Drive Genesect";
+         }
          return name;
       }
    }
