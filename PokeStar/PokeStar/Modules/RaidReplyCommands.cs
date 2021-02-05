@@ -28,7 +28,7 @@ namespace PokeStar.Modules
          SocketUserMessage raidMessage = (SocketUserMessage)await Context.Channel.GetMessageAsync(raidMessageId);
          RaidParent parent = raidMessages[raidMessageId];
 
-         if (parent is RaidTrain initTrain && !initTrain.Conductor.Equals(raidMessage.Author))
+         if (parent is RaidTrain initTrain && !Context.Message.Author.Equals(initTrain.Conductor))
          {
             await ResponseMessage.SendErrorMessage(raidMessage.Channel, "edit", $"Command can only be run by the current conductor.");
          }

@@ -280,6 +280,18 @@ namespace PokeStar.ConnectionInterface
          {
             return "Burn Drive Genesect";
          }
+         else if (name.Equals("GENESECT (CHILL DRIVE)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Chill Drive Genesect";
+         }
+         else if (name.Equals("GENESECT (DOUSE DRIVE)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Douse Drive Genesect";
+         }
+         else if (name.Equals("GENESECT (SHOCK DRIVE)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Shock Drive Genesect";
+         }
          return name;
       }
    }

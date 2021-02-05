@@ -7,10 +7,13 @@ To invite Nona to your server, invite it from [here](https://discord.com/api/oau
 * Raid coordination
    * Standard raids
    * Invite only raids (raid mule)
+   * Raid trains
 * Pokémon lookup by name or number
    * Pokédex information
    * CP information
+   * PvP information
    * Evolution information
+   * Catch information and simulation.
 * Basic Role Management
 * Type relations
 * Move lookup by name
@@ -18,15 +21,15 @@ To invite Nona to your server, invite it from [here](https://discord.com/api/oau
    * Move type information
 * Current raid boss list *
 * Current Egg pool list *
-* Current Team GO Rocket rotation *
+
 
 ### Future Features:
 * Support for EX-Raids
-* Support for Raid trains
-* Pokémon PvP stat loopkup
 * Player Accounts
 * Gym/Pokéstop location tracking
 * Raid image processing
-* Catch information
+
+### Current Issues:
+* Current Team GO Rocket rotation *
 
 ###### * Data is retrieved from the Silph Road [here](https://thesilphroad.com).
