@@ -37,6 +37,12 @@ namespace PokeStar.DataModels
       public short SelectionTier { get; set; }
 
       /// <summary>
+      /// Id of the current station message.
+      /// Only 1 should exist at a time.
+      /// </summary>
+      public ulong? StationMessageId { get; set; } = null;
+
+      /// <summary>
       /// Creates a new raid train.
       /// </summary>
       /// <param name="conductor">Player in charge of the raid.</param>
@@ -104,7 +110,16 @@ namespace PokeStar.DataModels
       /// <returns>Information for the next raid.</returns>
       public string GetNextRaid()
       {
-         return (CurrentLocation + 1 == Locations.Count) ? Global.EMPTY_FIELD : $"{Locations.ElementAt(CurrentLocation + 1).Location} ({Locations.ElementAt(CurrentLocation + 1).BossName})";
+         return (CurrentLocation + 1 == Locations.Count) ? Global.EMPTY_FIELD : $"{Locations.ElementAt(CurrentLocation + 1).Time} at {Locations.ElementAt(CurrentLocation + 1).Location} ({Locations.ElementAt(CurrentLocation + 1).BossName})";
+      }
+
+      /// <summary>
+      /// Gets information for all raids that are not finished.
+      /// </summary>
+      /// <returns>List of all incomplete raids.</returns>
+      public List<RaidTrainLoc> GetIncompleteRaids()
+      {
+         return Locations.GetRange(CurrentLocation, Locations.Count - CurrentLocation);
       }
 
       /// <summary>
