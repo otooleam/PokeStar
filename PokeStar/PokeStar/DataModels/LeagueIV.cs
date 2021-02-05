@@ -1,11 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace PokeStar.DataModels
 {
+   /// <summary>
+   /// Best IV for a GBL league.
+   /// </summary>
    public class LeagueIV
    {
       /// <summary>
@@ -36,7 +35,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the Best league IVs as a string.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>League IV as a string.</returns>
       public override string ToString()
       {
          StringBuilder sb = new StringBuilder();

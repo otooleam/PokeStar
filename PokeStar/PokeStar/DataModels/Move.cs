@@ -79,7 +79,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the type of the Move as a string.
       /// </summary>
-      /// <returns>Move type string.</returns>
+      /// <returns>Type as a string.</returns>
       public string TypeToString()
       {
          return Global.NONA_EMOJIS[$"{Type}_emote"];
@@ -88,7 +88,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the weather that boosts the Move as a string.
       /// </summary>
-      /// <returns>Move weather string.</returns>
+      /// <returns>Weather boost string.</returns>
       public string WeatherToString()
       {
          StringBuilder sb = new StringBuilder();

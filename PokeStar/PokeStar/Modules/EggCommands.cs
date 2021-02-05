@@ -10,13 +10,21 @@ using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles egg commands.
+   /// </summary>
    public class EggCommands : ModuleBase<SocketCommandContext>
    {
+      /// <summary>
+      /// Handle egg command.
+      /// </summary>
+      /// <param name="tier">(Optional) Get information for this Egg tier.</param>
+      /// <returns>Completed task.</returns>
       [Command("egg")]
       [Summary("Gets lists of Pokémon currently in eggs.\n" +
                "Leave blank for a list of valid egg tiers.")]
       [RegisterChannel('I')]
-      public async Task Egg([Summary("Get information for this Egg tier.")][Remainder]string tier = null)
+      public async Task Egg([Summary("(Optional) Get information for this Egg tier.")][Remainder]string tier = null)
       {
          if (tier == null)
          {
@@ -83,6 +91,10 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle updateEggList command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
       [Command("updateEggList")]
       [Summary("Updates the saved list of Pokémon in eggs from The Silph Road.")]
       [RequireUserPermission(GuildPermission.Administrator)]

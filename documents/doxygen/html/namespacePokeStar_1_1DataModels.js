@@ -1,0 +1,26 @@
+var namespacePokeStar_1_1DataModels =
+[
+    [ "CatchSimulation", "classPokeStar_1_1DataModels_1_1CatchSimulation.html", "classPokeStar_1_1DataModels_1_1CatchSimulation" ],
+    [ "Counter", "classPokeStar_1_1DataModels_1_1Counter.html", "classPokeStar_1_1DataModels_1_1Counter" ],
+    [ "Evolution", "classPokeStar_1_1DataModels_1_1Evolution.html", "classPokeStar_1_1DataModels_1_1Evolution" ],
+    [ "EvolutionNode", "classPokeStar_1_1DataModels_1_1EvolutionNode.html", "classPokeStar_1_1DataModels_1_1EvolutionNode" ],
+    [ "LeagueIV", "classPokeStar_1_1DataModels_1_1LeagueIV.html", "classPokeStar_1_1DataModels_1_1LeagueIV" ],
+    [ "Move", "classPokeStar_1_1DataModels_1_1Move.html", "classPokeStar_1_1DataModels_1_1Move" ],
+    [ "Pokemon", "classPokeStar_1_1DataModels_1_1Pokemon.html", "classPokeStar_1_1DataModels_1_1Pokemon" ],
+    [ "PokemonMove", "classPokeStar_1_1DataModels_1_1PokemonMove.html", "classPokeStar_1_1DataModels_1_1PokemonMove" ],
+    [ "Raid", "classPokeStar_1_1DataModels_1_1Raid.html", "classPokeStar_1_1DataModels_1_1Raid" ],
+    [ "RaidGroup", "classPokeStar_1_1DataModels_1_1RaidGroup.html", "classPokeStar_1_1DataModels_1_1RaidGroup" ],
+    [ "RaidMule", "classPokeStar_1_1DataModels_1_1RaidMule.html", "classPokeStar_1_1DataModels_1_1RaidMule" ],
+    [ "RaidParent", "classPokeStar_1_1DataModels_1_1RaidParent.html", "classPokeStar_1_1DataModels_1_1RaidParent" ],
+    [ "RaidTrain", "classPokeStar_1_1DataModels_1_1RaidTrain.html", "classPokeStar_1_1DataModels_1_1RaidTrain" ],
+    [ "ResponseMessage", "classPokeStar_1_1DataModels_1_1ResponseMessage.html", "classPokeStar_1_1DataModels_1_1ResponseMessage" ],
+    [ "Rocket", "classPokeStar_1_1DataModels_1_1Rocket.html", "classPokeStar_1_1DataModels_1_1Rocket" ],
+    [ "RaidRemoveResult", "structPokeStar_1_1DataModels_1_1RaidRemoveResult.html", "structPokeStar_1_1DataModels_1_1RaidRemoveResult" ],
+    [ "RaidTrainLoc", "structPokeStar_1_1DataModels_1_1RaidTrainLoc.html", "structPokeStar_1_1DataModels_1_1RaidTrainLoc" ],
+    [ "TypeRelation", "structPokeStar_1_1DataModels_1_1TypeRelation.html", "structPokeStar_1_1DataModels_1_1TypeRelation" ],
+    [ "RegisterResult", "structPokeStar_1_1DataModels_1_1RegisterResult.html", "structPokeStar_1_1DataModels_1_1RegisterResult" ],
+    [ "Form", "structPokeStar_1_1DataModels_1_1Form.html", "structPokeStar_1_1DataModels_1_1Form" ],
+    [ "RaidSubMessage", "structPokeStar_1_1DataModels_1_1RaidSubMessage.html", "structPokeStar_1_1DataModels_1_1RaidSubMessage" ],
+    [ "DexSelectionMessage", "structPokeStar_1_1DataModels_1_1DexSelectionMessage.html", "structPokeStar_1_1DataModels_1_1DexSelectionMessage" ],
+    [ "HelpMessage", "structPokeStar_1_1DataModels_1_1HelpMessage.html", "structPokeStar_1_1DataModels_1_1HelpMessage" ]
+];

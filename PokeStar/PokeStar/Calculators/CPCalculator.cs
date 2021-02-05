@@ -34,7 +34,6 @@ namespace PokeStar.Calculators
       /// <returns>CPM for the half level</returns>
       private static double CalcHalfLevelCPM(double halfLevel)
       {
-
          double lowerCPM = discrete_cp_multiplier[(int)(halfLevel - Global.LEVEL_STEP) - 1];
          double upperCPM = discrete_cp_multiplier[(int)(halfLevel + Global.LEVEL_STEP) - 1];
 

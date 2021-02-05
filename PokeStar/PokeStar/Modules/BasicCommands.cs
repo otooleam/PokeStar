@@ -11,14 +11,26 @@ namespace PokeStar.Modules
    /// </summary>
    public class BasicCommands : ModuleBase<SocketCommandContext>
    {
+      /// <summary>
+      /// Handle ping command.
+      /// </summary>
+      /// <returns>Completed Task</returns>
       [Command("ping")]
       [Summary("Pong Pong Pong")]
       public async Task Ping() => await ResponseMessage.SendInfoMessage(Context.Channel, "Pong");
 
+      /// <summary>
+      /// Handle marco command.
+      /// </summary>
+      /// <returns>Completed Task</returns>
       [Command("marco")]
       [Summary("Play marco polo.")]
       public async Task Marco() => await ResponseMessage.SendInfoMessage(Context.Channel, "Polo!");
 
+      /// <summary>
+      /// Handle status command.
+      /// </summary>
+      /// <returns>Completed Task</returns>
       [Command("status")]
       [Summary("Get Nona's status.")]
       [RequireUserPermission(GuildPermission.Administrator)]

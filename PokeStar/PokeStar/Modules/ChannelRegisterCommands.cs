@@ -13,6 +13,11 @@ namespace PokeStar.Modules
    /// </summary>
    public class ChannelRegisterCommands : ModuleBase<SocketCommandContext>
    {
+      /// <summary>
+      /// Handle register command.
+      /// </summary>
+      /// <param name="register">(Optional) Register the channel for these commands.</param>
+      /// <returns>Completed Task.</returns>
       [Command("register")]
       [Summary("Registers a channel to run a given type of command.")]
       [Remarks("To register a channel\n" +
@@ -50,6 +55,11 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle unregister command.
+      /// </summary>
+      /// <param name="unregister">(Optional) Unregister the channel from these commands.</param>
+      /// <returns>Completed Task.</returns>
       [Command("unregister")]
       [Summary("Unregisters a channel from a given type of command.")]
       [Remarks("To register a channel\n" +

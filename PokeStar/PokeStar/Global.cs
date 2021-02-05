@@ -6,40 +6,90 @@ using Newtonsoft.Json.Linq;
 
 namespace PokeStar
 {
+   /// <summary>
+   /// Holds global variables.
+   /// </summary>
    public static class Global
    {
+      // é ********************************************************************
+      
       /// <summary>
-      /// é
+      /// Save formated Pokémon.
       /// </summary>
       private const string POKEMON = "Pokémon";
+
+      /// <summary>
+      /// Save formated PokéDex.
+      /// </summary>
       private const string POKEDEX = "PokéDex";
 
       /// <summary>
-      /// File IO
+      /// Save formated PokéBall.
+      /// </summary>
+      private const string POKEBALL = "PokéBall";
+
+      // File IO **************************************************************
+
+      /// <summary>
+      /// Path to .exe file.
       /// </summary>
       public static string PROGRAM_PATH { get; set; }
+
+      /// <summary>
+      /// Decoded ENV file.
+      /// </summary>
       public static JObject ENV_FILE { get; set; }
 
       /// <summary>
-      /// Values read only from env
+      /// Default prefix.
       /// </summary>
       public static string DEFAULT_PREFIX { get; set; }
+
+      /// <summary>
+      /// Version of Nona.
+      /// </summary>
       public static string VERSION { get; set; }
+
+      /// <summary>
+      /// Name of home server.
+      /// </summary>
       public static string HOME_SERVER { get; set; }
+
+      /// <summary>
+      /// Logging level.
+      /// </summary>
       public static LogSeverity LOG_LEVEL { get; set; }
+
+      /// <summary>
+      /// Pokémon database connection string.
+      /// </summary>
       public static string POGO_DB_CONNECTION_STRING { get; set; }
+
+      /// <summary>
+      /// Nona database connection string.
+      /// </summary>
       public static string NONA_DB_CONNECTION_STRING { get; set; }
 
       /// <summary>
-      /// Editable values from env file
+      /// Can test bot be used.
       /// </summary>
       public static bool USE_NONA_TEST { get; set; }
-      public static bool USE_EMPTY_RAID { get; set; }
 
       /// <summary>
-      /// Values for hiding help commands
+      /// Can empty raid be used.
+      /// </summary>
+      public static bool USE_EMPTY_RAID { get; set; }
+
+      // Help command hidding *************************************************
+
+      /// <summary>
+      /// List of all commands.
       /// </summary>
       public static List<CommandInfo> COMMAND_INFO { get; set; }
+
+      /// <summary>
+      /// Commands that are always hidden.
+      /// </summary>
       public static readonly List<string> HIDDEN_COMMANDS = new List<string>()
       {
          "ping",
@@ -49,11 +99,17 @@ namespace PokeStar
          "screm",
       };
 
+      /// <summary>
+      /// Commands for server admins.
+      /// </summary>
       public static readonly List<string> ADMIN_COMMANDS = new List<string>()
       {
          "status"
       };
 
+      /// <summary>
+      /// Commands for Nona admins.
+      /// </summary>
       public static readonly List<string> NONA_ADMIN_COMMANDS = new List<string>()
       {
          "updatePokemonNames",
@@ -66,12 +122,26 @@ namespace PokeStar
          "updateRocketList"
       };
 
+      // Embed colors *********************************************************
+
       /// <summary>
-      /// Embed Colors
+      /// Nona info response embed color.
       /// </summary>
       public static readonly Color EMBED_COLOR_INFO_RESPONSE      = Color.Purple;
+
+      /// <summary>
+      /// Warning response embed color.
+      /// </summary>
       public static readonly Color EMBED_COLOR_WARNING_RESPONSE   = Color.Orange;
+
+      /// <summary>
+      /// Error response embed color.
+      /// </summary>
       public static readonly Color EMBED_COLOR_ERROR_RESPONSE     = Color.Red;
+
+      /// <summary>
+      /// Help response embed color.
+      /// </summary>
       public static readonly Color EMBED_COLOR_HELP_RESPONSE      = Color.Gold;
       public static readonly Color EMBED_COLOR_RAID_RESPONSE      = Color.Blue;
       public static readonly Color EMBED_COLOR_DEX_RESPONSE       = Color.Green;
@@ -79,41 +149,70 @@ namespace PokeStar
       public static readonly Color EMBED_COLOR_GYM_RESPONSE       = Color.Magenta;
 
       /// <summary>
-      /// Text formatting
+      /// Raid response embed color.
       /// </summary>
-      public static readonly char STAB_SYMBOL = '*';
-      public static readonly char DEFAULT_FORM_SYMBOL = '*';
-      public static readonly char WEATHER_BOOST_SYMBOL = '*';
-      public static readonly char LEGACY_MOVE_SYMBOL = '!';
-      public static readonly int WILD_CP_COLUMN_LENGTH = 12;
-      public static readonly int EGG_ROW_LENGTH = 3;
+      public static readonly Color EMBED_COLOR_RAID_RESPONSE      = Color.Blue;
 
       /// <summary>
-      /// Move Category names
+      /// Dex response embed color.
       /// </summary>
-      public static readonly string FAST_MOVE_CATEGORY = "Fast";
-      public static readonly string CHARGE_MOVE_CATEGORY = "Charge";
+      public static readonly Color EMBED_COLOR_DEX_RESPONSE       = Color.Green;
 
       /// <summary>
-      /// Mega Pokémon delimeters
+      /// Game info response embed color.
       /// </summary>
-      public static readonly string MEGA_TAG = "mega";
-      public static readonly int MAX_LEN_MEGA = 3;
+      public static readonly Color EMBED_COLOR_GAME_INFO_RESPONSE = Color.Teal;
+
+      // Raid tiers ***********************************************************
 
       /// <summary>
-      /// Raid Tiers
+      /// EX raid tier value.
       /// </summary>
       public static readonly short EX_RAID_TIER        = 9;
+
+      /// <summary>
+      /// Mega raid tier value.
+      /// </summary>
       public static readonly short MEGA_RAID_TIER      = 7;
+
+      /// <summary>
+      /// Legendary raid tier value.
+      /// </summary>
       public static readonly short LEGENDARY_RAID_TIER = 5;
+
+      /// <summary>
+      /// Rare raid tier value.
+      /// </summary>
       public static readonly short RARE_RAID_TIER      = 3;
+
+      /// <summary>
+      /// Common raid tier value.
+      /// </summary>
       public static readonly short COMMON_RAID_TIER    = 1;
+
+      /// <summary>
+      /// Invalid raid tier value.
+      /// </summary>
       public static readonly short INVALID_RAID_TIER   = 0;
 
+      /// <summary>
+      /// Mega raid string.
+      /// </summary>
       public static readonly string RAID_STRING_MEGA = "Mega";
+
+      /// <summary>
+      /// EX raid string.
+      /// </summary>
       public static readonly string RAID_STRING_EX   = "EX";
+
+      /// <summary>
+      /// Normal raid string.
+      /// </summary>
       public static readonly string RAID_STRING_TIER = "Tier";
 
+      /// <summary>
+      /// Raid strings to raid values.
+      /// </summary>
       public static readonly Dictionary<string, short> RAID_TIER_STRING = new Dictionary<string, short>(StringComparer.OrdinalIgnoreCase)
       {
          ["EX"]        = EX_RAID_TIER,
@@ -133,38 +232,424 @@ namespace PokeStar
          ["1"]         = COMMON_RAID_TIER,
       };
 
+      /// <summary>
+      /// Raid train picture.
+      /// </summary>
       public static readonly string RAID_TRAIN_IMAGE_NAME = "Raid_Train.png";
 
+      // Raid limits **********************************************************
+
       /// <summary>
-      /// Egg Tiers
+      /// Raid player limit.
+      /// </summary>
+      public static readonly int LIMIT_RAID_PLAYER      = 20;
+
+      /// <summary>
+      /// Raid invite limit.
+      /// </summary>
+      public static readonly int LIMIT_RAID_INVITE      = 10;
+
+      /// <summary>
+      /// Raid group limit.
+      /// </summary>
+      public static readonly int LIMIT_RAID_GROUP       = 3;
+
+      /// <summary>
+      /// Mule mule limit.
+      /// </summary>
+      public static readonly int LIMIT_RAID_MULE_MULE   = 2;
+
+      /// <summary>
+      /// Mule invite limit.
+      /// </summary>
+      public static readonly int LIMIT_RAID_MULE_INVITE = 5;
+
+      /// <summary>
+      /// Mule group limit.
+      /// </summary>
+      public static readonly int LIMIT_RAID_MULE_GROUP  = 6;
+
+      // Raid Group bits ******************************************************
+
+      /// <summary>
+      /// Mask for attending value.
+      /// 0000 0XXX mask will clear 4th bit.
+      /// </summary>
+      public static readonly int ATTEND_MASK  = 0b00000111;
+
+      /// <summary>
+      /// Mask for remote value.
+      /// 0YYY 0000 mask will clear 8th bit.
+      /// </summary>
+      public static readonly int REMOTE_MASK  = 0b01110000;
+
+      /// <summary>
+      /// Shift for remote value.
+      /// 0YYY 0XXX where Y is the remote value and X is the attending value.
+      /// </summary>
+      public static readonly int REMOTE_SHIFT = 4;
+
+      // Bad raid values ******************************************************
+
+      /// <summary>
+      /// Do not change values.
+      /// </summary>
+      public static readonly int NO_ADD_VALUE              = -1;
+
+      /// <summary>
+      /// User not in raid.
+      /// </summary>
+      public static readonly int NOT_IN_RAID               = -1;
+
+      /// <summary>
+      /// Default raid boss name.
+      /// </summary>
+      public static readonly string DEFAULT_RAID_BOSS_NAME = "Empty";
+
+      /// <summary>
+      /// Empty embed field.
+      /// </summary>
+      public static readonly string EMPTY_FIELD            = "-----";
+
+      // Level constents ******************************************************
+
+      /// <summary>
+      /// Discrete CP multiplier.
+      /// </summary>
+      public static readonly double[] DISCRETE_CPM = {
+         0.094     , 0.16639787, 0.21573247, 0.25572005, 0.29024988,
+         0.3210876 , 0.34921268, 0.3752356 , 0.39956728, 0.4225    ,
+         0.44310755, 0.4627984 , 0.48168495, 0.49985844, 0.51739395,
+         0.5343543 , 0.5507927 , 0.5667545 , 0.5822789 , 0.5974    ,
+         0.6121573 , 0.6265671 , 0.64065295, 0.65443563, 0.667934  ,
+         0.6811649 , 0.69414365, 0.7068842 , 0.7193991 , 0.7317    ,
+         0.7377695 , 0.74378943, 0.74976104, 0.7556855 , 0.76156384,
+         0.76739717, 0.7731865 , 0.77893275, 0.784637  , 0.7903    ,
+         0.7953    , 0.8003    , 0.8053    , 0.8103    , 0.8153    ,
+         0.8203    , 0.8253    , 0.8303    , 0.8353    , 0.8403    ,
+         0.8453    , 0.8503    , 0.8553    , 0.8603    , 0.8653
+      };
+
+      /// <summary>
+      /// Step between levels.
+      /// </summary>
+      public static readonly double LEVEL_STEP  = 0.5;
+
+      /// <summary>
+      /// Max level with XL candy.
+      /// </summary>
+      public static readonly int MAX_XL_LEVEL   = 50;
+
+      /// <summary>
+      /// Max level with regular candy.
+      /// </summary>
+      public static readonly int MAX_REG_LEVEL  = 40;
+
+      /// <summary>
+      /// Min wild level.
+      /// </summary>
+      public static readonly int MIN_WILD_LEVEL = 1;
+
+      /// <summary>
+      /// Max wild level.
+      /// </summary>
+      public static readonly int MAX_WILD_LEVEL = 35;
+
+      /// <summary>
+      /// Raid level.
+      /// </summary>
+      public static readonly int RAID_LEVEL     = 20;
+
+      /// <summary>
+      /// Hatch level.
+      /// </summary>
+      public static readonly int HATCH_LEVEL    = 20;
+
+      /// <summary>
+      /// Quest level.
+      /// </summary>
+      public static readonly int QUEST_LEVEL    = 15;
+
+      /// <summary>
+      /// Weather boost bonus levels.
+      /// </summary>
+      public static readonly int WEATHER_BOOST  = 5;
+
+      /// <summary>
+      /// Buddy boost bonus levels.
+      /// </summary>
+      public static readonly int BUDDY_BOOST    = 1;
+
+      // IV constants *********************************************************
+
+      /// <summary>
+      /// Min special IV.
+      /// </summary>
+      public static readonly int MIN_SPECIAL_IV = 10;
+
+      /// <summary>
+      /// Max IV.
+      /// </summary>
+      public static readonly int MAX_IV         = 15;
+
+      // GBL League constants *************************************************
+
+      /// <summary>
+      /// Little league max CP.
+      /// </summary>
+      public static readonly int MAX_LITTLE_CP = 500;
+
+      /// <summary>
+      /// Great league max CP.
+      /// </summary>
+      public static readonly int MAX_GREAT_CP  = 1500;
+
+      /// <summary>
+      /// Ultra league max CP.
+      /// </summary>
+      public static readonly int MAX_ULTRA_CP  = 2500;
+
+      // Dex switch options ***************************************************
+
+      /// <summary>
+      /// Dex switch option number.
+      /// </summary>
+      public static readonly int DEX_SWITCH_OPTIONS = 6;
+
+      // Bad dex values *******************************************************
+
+      /// <summary>
+      /// Evolution method has been combined.
+      /// </summary>
+      public static readonly int BAD_EVOLUTION = -1;
+
+      /// <summary>
+      /// Unown Pokemon number.
+      /// </summary>
+      public static readonly int UNOWN_NUMBER = 201;
+
+      /// <summary>
+      /// Arceus Pokemon number.
+      /// </summary>
+      public static readonly int ARCEUS_NUMBER = 493;
+
+      // Catch multipliers ****************************************************
+
+      /// <summary>
+      /// PokéBall multipliers.
+      /// </summary> 
+      public static readonly Dictionary<string, double> POKE_BALL_RATE = new Dictionary<string, double>()
+      {
+         ["Pokéball"]   = 1.0,
+         ["Great Ball"] = 1.5,
+         ["Ultra Ball"] = 2.0,
+      };
+
+      /// <summary>
+      /// Berry multipliers.
+      /// </summary>
+      public static readonly Dictionary<string, double> BERRY_RATE = new Dictionary<string, double>()
+      {
+         ["None"]         = 1.0,
+         ["Razz"]         = 1.5,
+         ["Silver Pinap"] = 1.8,
+         ["Golden Razz"]  = 2.5,
+      };
+
+      /// <summary>
+      /// Throw multipliers.
+      /// </summary>
+      public static readonly Dictionary<string, double> THROW_RATE = new Dictionary<string, double>()
+      {
+         ["Regular"]  = 1.0,
+         ["Nice"]     = 1.0,
+         ["Great"]    = 1.3,
+         ["Excellent"] = 1.7,
+      };
+
+      /// <summary>
+      /// Curveball multipliers.
+      /// </summary>
+      public static readonly Dictionary<string, double> CURVEBALL_RATE = new Dictionary<string, double>()
+      {
+         ["No"]  = 1.0,
+         ["Yes"] = 1.7,
+      };
+      
+      /// <summary>
+      /// Medal multipliers.
+      /// </summary>
+      public static readonly Dictionary<string, double> MEDAL_RATE = new Dictionary<string, double>()
+      {
+         ["None"]     = 1.0,
+         ["Bronze"]   = 1.1,
+         ["Silver"]   = 1.2,
+         ["Gold"]     = 1.3,
+         ["Platinum"] = 1.4,
+      };
+
+      /// <summary>
+      /// Encounter multipliers.
+      /// </summary>
+      public static readonly Dictionary<string, double> ENCOUNTER_RATE = new Dictionary<string, double>()
+      {
+         ["Standard"] = 1.0,
+         ["Special"]  = 2.0,
+      };
+
+      // Catch ring colors ****************************************************
+
+      /// <summary>
+      /// Minimum color value.
+      /// Red - 0%.
+      /// </summary>
+      public static readonly uint MIN_CATCH_COLOR = 0xFF0000;
+
+      /// <summary>
+      /// Middle color value.
+      /// Yellow - 50%.
+      /// </summary>
+      public static readonly uint MID_CATCH_COLOR = 0xFFFF00;
+
+      /// <summary>
+      /// Maximum color value.
+      /// Green - 100%.
+      /// </summary>
+      public static readonly uint MAX_CATCH_COLOR = 0x00FF00;
+
+      // Text formating *******************************************************
+
+      /// <summary>
+      /// Character denotes STAB (Same type attack bonus).
+      /// </summary>
+      public static readonly char STAB_SYMBOL          = '*';
+
+      /// <summary>
+      /// Character denotes default form.
+      /// </summary>
+      public static readonly char DEFAULT_FORM_SYMBOL  = '*';
+
+      /// <summary>
+      /// Character denotes weather boost.
+      /// </summary>
+      public static readonly char WEATHER_BOOST_SYMBOL = '*';
+
+      /// <summary>
+      /// Character denotes legacy move.
+      /// </summary>
+      public static readonly char LEGACY_MOVE_SYMBOL   = '!';
+
+      /// <summary>
+      /// Number of wild CP per column in cp list.
+      /// </summary>
+      public static readonly int WILD_CP_COLUMN_LENGTH = 12;
+
+      /// <summary>
+      /// Number of Pokémon per row in egg list.
+      /// </summary>
+      public static readonly int EGG_ROW_LENGTH        = 3;
+
+      /// <summary>
+      /// Fast move name.
+      /// </summary>
+      public static readonly string FAST_MOVE_CATEGORY   = "Fast";
+
+      /// <summary>
+      /// Charge move name.
+      /// </summary>
+      public static readonly string CHARGE_MOVE_CATEGORY = "Charge";
+
+      /// <summary>
+      /// Mega Pokémon tag.
+      /// </summary>
+      public static readonly string MEGA_TAG  = "mega";
+
+      /// <summary>
+      /// Max values in mega Pokémon name.
+      /// </summary>
+      public static readonly int MAX_LEN_MEGA = 3;
+
+      // Delimiters ***********************************************************
+
+      /// <summary>
+      /// Nickname delimiter
+      /// </summary>
+      public static readonly char NICKNAME_DELIMITER        = '>';
+
+      /// <summary>
+      /// Missing nickname delimiter value.
+      /// </summary>
+      public static readonly int NICKNAME_DELIMITER_MISSING = -1;
+
+      /// <summary>
+      /// Pokémon Move delimiter
+      /// </summary>
+      public static readonly char POKE_MOVE_DELIMITER        = '>';
+
+      /// <summary>
+      /// Missing move delimiter value.
+      /// </summary>
+      public static readonly int POKE_MOVE_DELIMITER_MISSING = -1;
+
+      // Egg tiers ************************************************************
+
+      /// <summary>
+      /// 2KM egg value.
       /// </summary>
       public static readonly short EGG_TIER_2KM     = 2;
+
+      /// <summary>
+      /// 5KM egg value.
+      /// </summary>
       public static readonly short EGG_TIER_5KM     = 5;
+
+      /// <summary>
+      /// 10KM egg value.
+      /// </summary>
       public static readonly short EGG_TIER_10KM    = 10;
+
+      /// <summary>
+      /// 5KM adventure sync egg value.
+      /// </summary>
       public static readonly short EGG_TIER_5AS     = 25;
+
+      /// <summary>
+      /// 10KM adventure sync egg value.
+      /// </summary>
       public static readonly short EGG_TIER_10AS    = 50;
+
+      /// <summary>
+      /// 7KM egg value.
+      /// </summary>
       public static readonly short EGG_TIER_7KM     = 7;
+
+      /// <summary>
+      /// 12KM egg value.
+      /// </summary>
       public static readonly short EGG_TIER_12KM    = 12;
+
+      /// <summary>
+      /// Invalid egg value.
+      /// </summary>
       public static readonly short EGG_TIER_INVALID = 0;
 
-      public static readonly string EGG_STRING_2KM  = "2KM Eggs";
-      public static readonly string EGG_STRING_5KM  = "5KM Eggs";
-      public static readonly string EGG_STRING_10KM = "10KM Eggs";
-      public static readonly string EGG_STRING_5AS  = "5KM Eggs (25KM)";
-      public static readonly string EGG_STRING_10AS = "10KM Eggs (50KM)";
-      public static readonly string EGG_STRING_7KM  = "7KM Gift Eggs";
-      public static readonly string EGG_STRING_12KM = "12KM Strange Eggs";
-
+      /// <summary>
+      /// Silph egg strings to egg values.
+      /// </summary>
       public static readonly Dictionary<string, int> EGG_TIER_TITLE = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
       {
-         [EGG_STRING_2KM]  = EGG_TIER_2KM,
-         [EGG_STRING_5KM]  = EGG_TIER_5KM,
-         [EGG_STRING_10KM] = EGG_TIER_10KM,
-         [EGG_STRING_5AS]  = EGG_TIER_5AS,
-         [EGG_STRING_10AS] = EGG_TIER_10AS,
-         [EGG_STRING_7KM]  = EGG_TIER_7KM,
-         [EGG_STRING_12KM] = EGG_TIER_12KM,
+         ["2KM Eggs"]          = EGG_TIER_2KM,
+         ["5KM Eggs"]          = EGG_TIER_5KM,
+         ["10KM Eggs"]         = EGG_TIER_10KM,
+         ["5KM Eggs (25KM)"]   = EGG_TIER_5AS,
+         ["10KM Eggs (50KM)"]  = EGG_TIER_10AS,
+         ["7KM Gift Eggs"]     = EGG_TIER_7KM,
+         ["12KM Strange Eggs"] = EGG_TIER_12KM,
       };
+
+      /// <summary>
+      /// Egg strings to egg values.
+      /// </summary>
       public static readonly Dictionary<string, short> EGG_TIER_STRING = new Dictionary<string, short>(StringComparer.OrdinalIgnoreCase)
       {
          ["2"]     = EGG_TIER_2KM,
@@ -183,147 +668,12 @@ namespace PokeStar
          ["12 KM"] = EGG_TIER_12KM,
       };
 
+      // Channel register values **********************************************
+
       /// <summary>
-      /// Raid/Mule limits
+      /// Dex register character.
       /// </summary>
-      public static readonly int LIMIT_RAID_PLAYER      = 20;
-      public static readonly int LIMIT_RAID_INVITE      = 10;
-      public static readonly int LIMIT_RAID_GROUP       = 3;
-      public static readonly int LIMIT_RAID_MULE_MULE   = 2;
-      public static readonly int LIMIT_RAID_MULE_INVITE = 5;
-      public static readonly int LIMIT_RAID_MULE_GROUP  = 6;
 
-      /// <summary>
-      /// Level constants
-      /// </summary>
-      public static readonly double[] DISCRETE_CPM = {
-         0.094     , 0.16639787, 0.21573247, 0.25572005, 0.29024988,
-         0.3210876 , 0.34921268, 0.3752356 , 0.39956728, 0.4225    ,
-         0.44310755, 0.4627984 , 0.48168495, 0.49985844, 0.51739395,
-         0.5343543 , 0.5507927 , 0.5667545 , 0.5822789 , 0.5974    ,
-         0.6121573 , 0.6265671 , 0.64065295, 0.65443563, 0.667934  ,
-         0.6811649 , 0.69414365, 0.7068842 , 0.7193991 , 0.7317    ,
-         0.7377695 , 0.74378943, 0.74976104, 0.7556855 , 0.76156384,
-         0.76739717, 0.7731865 , 0.77893275, 0.784637  , 0.7903    ,
-         0.7953    , 0.8003    , 0.8053    , 0.8103    , 0.8153    ,
-         0.8203    , 0.8253    , 0.8303    , 0.8353    , 0.8403    ,
-         0.8453    , 0.8503    , 0.8553    , 0.8603    , 0.8653
-      };
-
-      public static readonly double LEVEL_STEP  = 0.5;
-      public static readonly int MAX_XL_LEVEL   = 50;
-      public static readonly int MAX_REG_LEVEL  = 40;
-      public static readonly int MIN_WILD_LEVEL = 1;
-      public static readonly int MAX_WILD_LEVEL = 35;
-      public static readonly int RAID_LEVEL     = 20;
-      public static readonly int HATCH_LEVEL    = 20;
-      public static readonly int QUEST_LEVEL    = 15;
-      public static readonly int WEATHER_BOOST  = 5;
-      public static readonly int BUDDY_BOOST    = 1;
-
-      /// <summary>
-      /// Catch multipliers
-      /// </summary> 
-      public static readonly Dictionary<string, double> POKE_BALL_RATE = new Dictionary<string, double>()
-      {
-         ["Pokéball"]  = 1.0,
-         ["Great Ball"] = 1.5,
-         ["Ultra Ball"] = 2.0,
-      };
-      public static readonly Dictionary<string, double> BERRY_RATE = new Dictionary<string, double>()
-      {
-         ["None"]         = 1.0,
-         ["Razz"]         = 1.5,
-         ["Silver Pinap"] = 1.8,
-         ["Golden Razz"]  = 2.5,
-      };
-      public static readonly Dictionary<string, double> THROW_RATE = new Dictionary<string, double>()
-      {
-         ["Regular"] = 1.0,
-         ["Nice"] = 1.0,
-         ["Great"] = 1.3,
-         ["Excellent"] = 1.7,
-      };
-      public static readonly Dictionary<string, double> CURVEBALL_RATE = new Dictionary<string, double>()
-      {
-         ["No"] = 1.0,
-         ["Yes"] = 1.7,
-      };
-      public static readonly Dictionary<string, double> MEDAL_RATE = new Dictionary<string, double>()
-      {
-         ["None"]     = 1.0,
-         ["Bronze"]   = 1.1,
-         ["Silver"]   = 1.2,
-         ["Gold"]     = 1.3,
-         ["Platinum"] = 1.4,
-      };
-      public static readonly Dictionary<string, double> ENCOUNTER_RATE = new Dictionary<string, double>()
-      {
-         ["Standard"] = 1.0,
-         ["Special"]  = 2.0,
-      };
-
-      /// <summary>
-      /// Catch ring colors
-      /// </summary>
-      public static readonly uint MIN_CATCH_COLOR = 0xFF0000; // RED    0%
-      public static readonly uint MID_CATCH_COLOR = 0xFFFF00; // YELLOW 50%
-      public static readonly uint MAX_CATCH_COLOR = 0x00FF00; // GREEN  100%
-
-      /// <summary>
-      /// IV constants
-      /// </summary>
-      public static readonly int MIN_SPECIAL_IV = 10;
-      public static readonly int MAX_IV         = 15;
-
-      /// <summary>
-      /// League constants
-      /// </summary>
-      public static readonly int MAX_LITTLE_CP = 500;
-      public static readonly int MAX_GREAT_CP  = 1500;
-      public static readonly int MAX_ULTRA_CP  = 2500;
-
-      /// <summary>
-      /// Evolution tree
-      /// </summary>
-      public static readonly int BAD_EVOLUTION = -1;
-
-      /// <summary>
-      /// Pokemon numbers with many forms
-      /// </summary>
-      public static readonly int UNOWN_NUMBER  = 201;
-      public static readonly int ARCEUS_NUMBER = 493;
-
-      /// <summary>
-      /// Raid Group bit values
-      /// </summary>
-      public static readonly int ATTEND_MASK  = 0b00000111; // 0000 0XXX mask will clear 4th bit
-      public static readonly int REMOTE_MASK  = 0b01110000; // 0YYY 0000 mask will clear 8th bit
-      public static readonly int REMOTE_SHIFT = 4;          // 0YYY 0XXX where Y is the remote value and X is the attending value 
-
-      /// <summary>
-      /// Bad raid values
-      /// </summary>
-      public static readonly int NO_ADD_VALUE = -1;
-      public static readonly int NOT_IN_RAID  = -1;
-      public static readonly string DEFAULT_RAID_BOSS_NAME = "Empty";
-      public static readonly string EMPTY_FIELD = "-----";
-
-      /// <summary>
-      /// Nickname delimiter
-      /// </summary>
-      public static readonly char NICKNAME_DELIMITER = '>';
-      public static readonly int NICKNAME_DELIMITER_MISSING = -1;
-
-      /// <summary>
-      /// Pokémon Move delimiter
-      /// </summary>
-      public static readonly char POKE_MOVE_DELIMITER = '>';
-      public static readonly int POKE_MOVE_DELIMITER_MISSING = -1;
-
-      /// <summary>
-      /// Channel Register values
-      /// </summary>
       public static readonly char REGISTER_STRING_ACCOUNT = 'A';
       public static readonly char REGISTER_STRING_DEX     = 'D';
       public static readonly char REGISTER_STRING_EX      = 'E';
@@ -332,6 +682,7 @@ namespace PokeStar
       public static readonly char REGISTER_STRING_RAID    = 'R';
       public static readonly char REGISTER_STRING_POI     = 'S';
       public static readonly string FULL_REGISTER_STRING  = "ADEIPRS";
+
       public static readonly Dictionary<string, string> REGISTER_STRING_TYPE = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
          [REGISTER_STRING_ACCOUNT.ToString()] = "Player Account",
@@ -342,6 +693,10 @@ namespace PokeStar
          [REGISTER_STRING_RAID.ToString()]    = "Raid",
          [REGISTER_STRING_POI.ToString()]     = "Point of Interest",
       };
+
+      /// <summary>
+      /// Register value to register character.
+      /// </summary>
       public static readonly Dictionary<string, string> REGISTER_VALIE_STRING = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
          [FULL_REGISTER_STRING] = FULL_REGISTER_STRING,
@@ -367,40 +722,97 @@ namespace PokeStar
 
       };
 
+      // Role values **********************************************************
+
       /// <summary>
-      /// Role names
+      /// Trainer role name.
       /// </summary>
       public static readonly string ROLE_TRAINER  = "Trainer";
+
+      /// <summary>
+      /// Valor role name.
+      /// </summary>
       public static readonly string ROLE_VALOR    = "Valor";
+
+      /// <summary>
+      /// Mystic role name.
+      /// </summary>
       public static readonly string ROLE_MYSTIC   = "Mystic";
+
+      /// <summary>
+      /// Instinct role value.
+      /// </summary>
       public static readonly string ROLE_INSTINCT = "Instinct";
 
       /// <summary>
-      /// Role indices
+      /// Invalid team role index.
       /// </summary>
       public static readonly int ROLE_INDEX_NO_TEAM_FOUND = -1;
+
+      /// <summary>
+      /// Valor role index.
+      /// </summary>
       public static readonly int ROLE_INDEX_VALOR         = 0;
+
+      /// <summary>
+      /// Mystic role index.
+      /// </summary>
       public static readonly int ROLE_INDEX_MYSTIC        = 1;
+
+      /// <summary>
+      /// Instinct role index.
+      /// </summary>
       public static readonly int ROLE_INDEX_INSTINCT      = 2;
 
+      // Role colors **********************************************************
+
       /// <summary>
-      /// Role colors
+      /// Trainer role color.
       /// </summary>
       public static readonly Color ROLE_COLOR_TRAINER  = new Color(185, 187, 190);
+
+      /// <summary>
+      /// Valor role color.
+      /// </summary>
       public static readonly Color ROLE_COLOR_VALOR    = new Color(153, 45, 34);
+
+      /// <summary>
+      /// Mystic role color.
+      /// </summary>
       public static readonly Color ROLE_COLOR_MYSTIC   = new Color(39, 126, 205);
+
+      /// <summary>
+      /// Instinct role color.
+      /// </summary>
       public static readonly Color ROLE_COLOR_INSTINCT = new Color(241, 196, 15);
 
-      /// <summary>
-      /// Image processing
-      /// </summary>
-      public static readonly int SCALE_WIDTH = 495;
-      public static readonly int SCALE_HEIGHT = 880;
-      public static readonly System.Drawing.Rectangle IMAGE_RECT_NICKNAME   = new System.Drawing.Rectangle(10, 120, 480, 100);
-      public static readonly System.Drawing.Rectangle IMAGE_RECT_TEAM_COLOR = new System.Drawing.Rectangle(410, 60, 10, 10);
+      // Image processing *****************************************************
 
       /// <summary>
-      /// Nona emojis
+      /// scaled image width.
+      /// </summary>
+      public static readonly int SCALE_WIDTH = 495;
+
+      /// <summary>
+      /// Scaled image height.
+      /// </summary>
+      public static readonly int SCALE_HEIGHT = 880;
+
+      /// <summary>
+      /// Rectange used to get nickname.
+      /// </summary>
+      public static readonly System.Drawing.Rectangle IMAGE_RECT_NICKNAME   = new System.Drawing.Rectangle(10, 120, 480, 100);
+
+      /// <summary>
+      /// Rectangle used to get team color.
+      /// </summary>
+      public static readonly System.Drawing.Rectangle IMAGE_RECT_TEAM_COLOR = new System.Drawing.Rectangle(410, 60, 10, 10);
+
+      // Emotes ***************************************************************
+
+      /// <summary>
+      /// Nona emotes.
+      /// Names will be switched out for values.
       /// </summary>
       public static readonly Dictionary<string, string> NONA_EMOJIS = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       { 
@@ -447,7 +859,7 @@ namespace PokeStar
       };
 
       /// <summary>
-      /// Number Emojis
+      /// Number Emote names
       /// </summary>
       public static readonly Dictionary<string, string> NUM_EMOJI_NAMES = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
@@ -463,8 +875,20 @@ namespace PokeStar
          ["number_10_emote"] = "number_10",
          ["number_11_emote"] = "number_11",
       };
+
+      /// <summary>
+      /// Max number of selections.
+      /// </summary>
       public static readonly int NUM_SELECTIONS = 10;
+
+      /// <summary>
+      /// Selection emotes.
+      /// </summary>
       public static readonly Emote[] SELECTION_EMOJIS = new Emote[NUM_SELECTIONS];
+
+      /// <summary>
+      /// All custom number emotes.
+      /// </summary>
       public static readonly List<Emote> NUM_EMOJIS = new List<Emote>();
    }
 }

@@ -16,7 +16,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="connectionString">Connections string for the NONA database.</param>
       public NONADatabaseConnector(string connectionString) : base(connectionString) { }
 
-      /// Guild Settings ******************************************************
+      // Guild Settings *******************************************************
 
       /// <summary>
       /// Gets the prefix of a guild.
@@ -144,7 +144,7 @@ namespace PokeStar.ConnectionInterface
          }
       }
 
-      /// Channel Registration ************************************************
+      // Channel Registration *************************************************
 
       /// <summary>
       /// Gets the registration for a channel.
@@ -255,7 +255,7 @@ namespace PokeStar.ConnectionInterface
          }
       }
 
-      /// Nicknames ***********************************************************
+      // Nicknames ************************************************************
 
       /// <summary>
       /// Get a Pokémon by nickname.

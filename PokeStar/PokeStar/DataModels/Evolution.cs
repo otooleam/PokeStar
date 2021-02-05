@@ -75,7 +75,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Builds the method string for the evolution.
       /// </summary>
-      /// <returns></returns>
+      /// <returns>Evolution method as a string.</returns>
       public string MethodToString()
       {
          StringBuilder sb = new StringBuilder();
