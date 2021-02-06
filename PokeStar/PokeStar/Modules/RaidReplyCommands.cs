@@ -565,7 +565,8 @@ namespace PokeStar.Modules
             }
             RestUserMessage stationMsg = await Context.Channel.SendMessageAsync(embed: BuildStationEmbed(futureRaids, train.Conductor));
             train.StationMessageId = stationMsg.Id;
-
+         }
+      }
       [Command("remove")]
       [Summary("Remove a user from a raid train.")]
       [Remarks("This should only be used to remove a user that " +

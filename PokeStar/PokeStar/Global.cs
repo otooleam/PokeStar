@@ -148,20 +148,6 @@ namespace PokeStar
       public static readonly Color EMBED_COLOR_GAME_INFO_RESPONSE = Color.Teal;
       public static readonly Color EMBED_COLOR_GYM_RESPONSE       = Color.Magenta;
 
-      /// <summary>
-      /// Raid response embed color.
-      /// </summary>
-      public static readonly Color EMBED_COLOR_RAID_RESPONSE      = Color.Blue;
-
-      /// <summary>
-      /// Dex response embed color.
-      /// </summary>
-      public static readonly Color EMBED_COLOR_DEX_RESPONSE       = Color.Green;
-
-      /// <summary>
-      /// Game info response embed color.
-      /// </summary>
-      public static readonly Color EMBED_COLOR_GAME_INFO_RESPONSE = Color.Teal;
 
       // Raid tiers ***********************************************************
 
