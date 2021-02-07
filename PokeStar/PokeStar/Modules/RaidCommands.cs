@@ -204,7 +204,7 @@ namespace PokeStar.Modules
             {
                AllBosses = allBosses
             };
-            fileName = Global.RAID_TRAIN_IMAGE_NAME;
+            fileName = RAID_TRAIN_IMAGE_NAME;
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(raid, fileName));
@@ -219,7 +219,7 @@ namespace PokeStar.Modules
             {
                AllBosses = allBosses
             };
-            fileName = Global.RAID_TRAIN_IMAGE_NAME;
+            fileName = RAID_TRAIN_IMAGE_NAME;
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(raid, fileName));
@@ -234,9 +234,12 @@ namespace PokeStar.Modules
          RemoveOldRaids();
       }
 
-
-      [Command("bosslist")]
-      [Alias("boss", "bosses", "raidboss", "raidbosses", "raidbosslist")]
+      /// <summary>
+      /// Handle boss command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("boss")]
+      [Alias("bosses", "bosslist", "raidboss", "raidbosses", "raidbosslist")]
       [Summary("Get the current list of raid bosses.")]
       [RegisterChannel('I')]
       public async Task BossList()

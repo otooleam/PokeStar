@@ -14,21 +14,7 @@ namespace PokeStar.Modules
    public class SystemEditCommands : ModuleBase<SocketCommandContext>
    {
       /// <summary>
-      /// Max number of values in nickname string.
-      /// </summary>
-      private const int NumArguments = 2;
-
-      /// <summary>
-      /// Index of values in add pokemon move string.
-      /// </summary>
-      private enum MOVE_UPDATE_INDEX
-      {
-         POKEMON,
-         MOVE,
-      }
-
-      /// <summary>
-      /// Valid editable attributes.
+      /// Valid Pokémon editable attributes.
       /// </summary>
       private readonly List<string> EditableAttributes = new List<string>()
       {
@@ -161,15 +147,15 @@ namespace PokeStar.Modules
       public async Task UpdatePokemonMove([Summary("Is the move a legacy move.")] int isLegacy,
                                           [Summary("Add a move to a Pokémon using this string.")][Remainder] string pokemonMove)
       {
-         int delimeterIndex = pokemonMove.IndexOf(Global.POKE_MOVE_DELIMITER);
+         int delimeterIndex = pokemonMove.IndexOf(Global.PARSE_DELIMITER);
 
-         if (delimeterIndex != Global.NICKNAME_DELIMITER_MISSING)
+         if (delimeterIndex != Global.DELIMITER_MISSING)
          {
-            string[] arr = pokemonMove.Split(Global.NICKNAME_DELIMITER);
-            if (arr.Length == NumArguments)
+            string[] arr = pokemonMove.Split(Global.PARSE_DELIMITER);
+            if (arr.Length == Global.DELIMITER_MISSING)
             {
-               string pokemonStr = arr[(int)MOVE_UPDATE_INDEX.POKEMON].Trim();
-               string moveStr = arr[(int)MOVE_UPDATE_INDEX.MOVE].Trim();
+               string pokemonStr = arr[Global.NEW_PARSE_VALUE].Trim();
+               string moveStr = arr[Global.OLD_PARSE_VALUE].Trim();
                Pokemon pkmn = Connections.Instance().GetPokemon(pokemonStr);
                Move move = Connections.Instance().GetMove(moveStr);
                if (pkmn == null)
@@ -193,7 +179,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "updatePokemonMove", $"Delimeter {Global.POKE_MOVE_DELIMITER} not found.");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "updatePokemonMove", $"Delimeter {Global.PARSE_DELIMITER} not found.");
          }
       }
    }

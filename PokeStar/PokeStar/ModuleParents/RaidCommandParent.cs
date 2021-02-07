@@ -18,6 +18,11 @@ namespace PokeStar.ModuleParents
    /// </summary>
    public class RaidCommandParent : ModuleBase<SocketCommandContext>
    {
+      /// <summary>
+      /// Raid Train image file name.
+      /// </summary>
+      public static readonly string RAID_TRAIN_IMAGE_NAME = "Raid_Train.png";
+
       // Message holders ******************************************************
 
       /// <summary>
@@ -306,7 +311,7 @@ namespace PokeStar.ModuleParents
 
                   if (parent is RaidTrain train)
                   {
-                     string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                     string fileName = RAID_TRAIN_IMAGE_NAME;
                      Connections.CopyFile(fileName);
                      RestUserMessage raidMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
                      raidMessages.Add(raidMsg.Id, parent);
@@ -503,7 +508,7 @@ namespace PokeStar.ModuleParents
 
                         raidMessages.Remove(message.Id);
                         message.DeleteAsync();
-                        string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                        string fileName = RAID_TRAIN_IMAGE_NAME;
                         Connections.CopyFile(fileName);
                         RestUserMessage raidMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
                         raidMessages.Add(raidMsg.Id, train);
@@ -519,7 +524,7 @@ namespace PokeStar.ModuleParents
                      {
                         if (train.RaidBossSelections.Count != 0)
                         {
-                           string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                           string fileName = RAID_TRAIN_IMAGE_NAME;
                            Connections.CopyFile(fileName);
                            RestUserMessage selectMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(train.RaidBossSelections, fileName, true));
                            subMessages.Add(selectMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.TRAIN_BOSS_SUB_MESSAGE, message.Id));
@@ -530,7 +535,7 @@ namespace PokeStar.ModuleParents
                         }
                         else
                         {
-                           string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                           string fileName = RAID_TRAIN_IMAGE_NAME;
                            Connections.CopyFile(fileName);
                            RestUserMessage selectMsg = await reaction.Channel.SendFileAsync(fileName, embed: BuildTierSelectEmbed(fileName));
                            subMessages.Add(selectMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.TRAIN_BOSS_SUB_MESSAGE, message.Id));
@@ -565,7 +570,7 @@ namespace PokeStar.ModuleParents
 
                if (raid is RaidTrain train)
                {
-                  string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                  string fileName = RAID_TRAIN_IMAGE_NAME;
                   Connections.CopyFile(fileName);
                   await msg.ModifyAsync(x =>
                   {
@@ -734,7 +739,7 @@ namespace PokeStar.ModuleParents
 
                         if (parent is RaidTrain train)
                         {
-                           string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                           string fileName = RAID_TRAIN_IMAGE_NAME;
                            Connections.CopyFile(fileName);
                            await raidMessage.ModifyAsync(x =>
                            {
@@ -851,7 +856,7 @@ namespace PokeStar.ModuleParents
 
                if (raidMessages[raidMessageId] is RaidTrain train)
                {
-                  string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                  string fileName = RAID_TRAIN_IMAGE_NAME;
                   Connections.CopyFile(fileName);
                   await raidMessage.ModifyAsync(x =>
                   {
@@ -935,7 +940,7 @@ namespace PokeStar.ModuleParents
                {
                   await message.RemoveAllReactionsAsync();
 
-                  string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                  string fileName = RAID_TRAIN_IMAGE_NAME;
                   Connections.CopyFile(fileName);
                   await ((SocketUserMessage)message).ModifyAsync(x =>
                   {
@@ -953,7 +958,7 @@ namespace PokeStar.ModuleParents
                         raid.UpdateBoss(i);
 
                         SocketUserMessage raidMessage = (SocketUserMessage)await reaction.Channel.GetMessageAsync(raidTrainMessageId);
-                        string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                        string fileName = RAID_TRAIN_IMAGE_NAME;
                         Connections.CopyFile(fileName);
                         await raidMessage.ModifyAsync(x =>
                         {
@@ -997,7 +1002,7 @@ namespace PokeStar.ModuleParents
                   SocketUserMessage msg = ((SocketUserMessage)message);
                   await msg.RemoveAllReactionsAsync();
 
-                  string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                  string fileName = RAID_TRAIN_IMAGE_NAME;
                   Connections.CopyFile(fileName);
                   await msg.ModifyAsync(x =>
                   {
@@ -1500,8 +1505,7 @@ namespace PokeStar.ModuleParents
 
       /// <summary>
       /// Builds the uninvited message.
-      /// For when the player that has invited you has 
-      /// left the raid.
+      /// For when the player that has invited others has left the raid.
       /// </summary>
       /// <param name="player">Player that has left the raid.</param>
       /// <returns>Uninvited message as a string</returns>
@@ -1510,6 +1514,12 @@ namespace PokeStar.ModuleParents
          return $"{player.Nickname ?? player.Username} has left the raid. You have been moved back to \"Need Invite\".";
       }
 
+      /// <summary>
+      /// Builds the raid train remove message.
+      /// For when the conductor removes someone from the raid train.
+      /// </summary>
+      /// <param name="conductor">Conductor of the raid train.</param>
+      /// <returns>Remove message as a string.</returns>
       protected static string BuildRaidTrainRemoveMessage(SocketGuildUser conductor)
       {
          return $"You have been removed from a raid train by {conductor.Nickname ?? conductor.Username}\n" +

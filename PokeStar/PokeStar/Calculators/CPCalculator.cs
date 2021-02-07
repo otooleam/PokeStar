@@ -1,6 +1,5 @@
-﻿using PokeStar.DataModels;
-using System;
-using System.Collections.Generic;
+﻿using System;
+using PokeStar.DataModels;
 
 namespace PokeStar.Calculators
 {

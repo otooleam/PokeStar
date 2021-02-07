@@ -4,7 +4,6 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Discord;
-using Discord.Rest;
 using Discord.Commands;
 using PokeStar.DataModels;
 using PokeStar.PreConditions;

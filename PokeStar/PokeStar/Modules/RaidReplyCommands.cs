@@ -8,9 +8,9 @@ using Discord.Commands;
 using Discord.Rest;
 using Discord.WebSocket;
 using PokeStar.DataModels;
-using PokeStar.ConnectionInterface;
 using PokeStar.PreConditions;
 using PokeStar.ModuleParents;
+using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
@@ -103,7 +103,7 @@ namespace PokeStar.Modules
 
                   if (parent is RaidTrain train)
                   {
-                     string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                     string fileName = RAID_TRAIN_IMAGE_NAME;
                      Connections.CopyFile(fileName);
                      RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
                      raidMessages.Add(raidMsg.Id, parent);
@@ -140,7 +140,7 @@ namespace PokeStar.Modules
 
                   if (parent is RaidTrain train)
                   {
-                     string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                     string fileName = RAID_TRAIN_IMAGE_NAME;
                      Connections.CopyFile(fileName);
                      RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
                      raidMessages.Add(raidMsg.Id, parent);
@@ -181,7 +181,7 @@ namespace PokeStar.Modules
             {
                if (parent is RaidTrain train)
                {
-                  string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                  string fileName = RAID_TRAIN_IMAGE_NAME;
                   Connections.CopyFile(fileName);
                   await raidMessage.ModifyAsync(x =>
                   {
@@ -281,7 +281,7 @@ namespace PokeStar.Modules
 
                if (parent is RaidTrain train)
                {
-                  string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                  string fileName = RAID_TRAIN_IMAGE_NAME;
                   Connections.CopyFile(fileName);
                   await raidMessage.ModifyAsync(x =>
                   {
@@ -340,7 +340,7 @@ namespace PokeStar.Modules
 
             if (parent is RaidTrain train)
             {
-               string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+               string fileName = RAID_TRAIN_IMAGE_NAME;
                Connections.CopyFile(fileName);
                await raidMessage.ModifyAsync(x =>
                {
@@ -394,7 +394,7 @@ namespace PokeStar.Modules
 
                if (parent is RaidTrain train)
                {
-                  string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+                  string fileName = RAID_TRAIN_IMAGE_NAME;
                   Connections.CopyFile(fileName);
                   await raidMessage.ModifyAsync(x =>
                   {
@@ -480,7 +480,7 @@ namespace PokeStar.Modules
             else
             {
                train.AddRaid(time, location);
-               string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+               string fileName = RAID_TRAIN_IMAGE_NAME;
                Connections.CopyFile(fileName);
                await raidMessage.ModifyAsync(x =>
                {
@@ -530,7 +530,7 @@ namespace PokeStar.Modules
                }
             }
 
-            string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+            string fileName = RAID_TRAIN_IMAGE_NAME;
             Connections.CopyFile(fileName);
             await raidMessage.ModifyAsync(x =>
             {
@@ -541,31 +541,11 @@ namespace PokeStar.Modules
          await Context.Message.DeleteAsync();
       }
 
-
-      [Command("station")]
-      [Alias("stations")]
-      [Summary("View a list of upcoming stations.")]
-      [Remarks("Must be a reply to a raid train message.")]
-      [RegisterChannel('R')]
-      [RaidReply()]
-      public async Task Station()
-      {
-         ulong raidMessageId = Context.Message.Reference.MessageId.Value;
-         RaidParent parent = raidMessages[raidMessageId];
-         if (!(parent is RaidTrain train))
-         {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "station", $"Command must be a reply to a raid train message.");
-         }
-         else
-         {
-            List<RaidTrainLoc> futureRaids = train.GetIncompleteRaids();
-            if (train.StationMessageId.HasValue && Context.Channel.GetCachedMessage(train.StationMessageId.Value) != null)
-            {
-               await Context.Channel.DeleteMessageAsync(train.StationMessageId.Value);
-            }
-            RestUserMessage stationMsg = await Context.Channel.SendMessageAsync(embed: BuildStationEmbed(futureRaids, train.Conductor));
-            train.StationMessageId = stationMsg.Id;
-
+      /// <summary>
+      /// Handle remove command.
+      /// </summary>
+      /// <param name="user">User to remove from raid train.</param>
+      /// <returns>Completed Task.</returns>
       [Command("remove")]
       [Summary("Remove a user from a raid train.")]
       [Remarks("This should only be used to remove a user that " +
@@ -613,13 +593,44 @@ namespace PokeStar.Modules
                }
             }
 
-            string fileName = Global.RAID_TRAIN_IMAGE_NAME;
+            string fileName = RAID_TRAIN_IMAGE_NAME;
             Connections.CopyFile(fileName);
             await raidMessage.ModifyAsync(x =>
             {
                x.Embed = BuildRaidTrainEmbed(train, fileName);
             });
             Connections.DeleteFile(fileName);
+         }
+         await Context.Message.DeleteAsync();
+      }
+
+      /// <summary>
+      /// Handle station command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("station")]
+      [Alias("stations")]
+      [Summary("View a list of upcoming stations.")]
+      [Remarks("Must be a reply to a raid train message.")]
+      [RegisterChannel('R')]
+      [RaidReply()]
+      public async Task Station()
+      {
+         ulong raidMessageId = Context.Message.Reference.MessageId.Value;
+         RaidParent parent = raidMessages[raidMessageId];
+         if (!(parent is RaidTrain train))
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "station", $"Command must be a reply to a raid train message.");
+         }
+         else
+         {
+            List<RaidTrainLoc> futureRaids = train.GetIncompleteRaids();
+            if (train.StationMessageId.HasValue && Context.Channel.GetCachedMessage(train.StationMessageId.Value) != null)
+            {
+               await Context.Channel.DeleteMessageAsync(train.StationMessageId.Value);
+            }
+            RestUserMessage stationMsg = await Context.Channel.SendMessageAsync(embed: BuildStationEmbed(futureRaids, train.Conductor));
+            train.StationMessageId = stationMsg.Id;
          }
          await Context.Message.DeleteAsync();
       }

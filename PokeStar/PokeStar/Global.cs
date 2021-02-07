@@ -16,17 +16,19 @@ namespace PokeStar
       /// <summary>
       /// Save formated Pokémon.
       /// </summary>
-      private const string POKEMON = "Pokémon";
+      private const string POKEMON  = "Pokémon";
 
       /// <summary>
       /// Save formated PokéDex.
       /// </summary>
-      private const string POKEDEX = "PokéDex";
+      private const string POKEDEX  = "PokéDex";
 
       /// <summary>
       /// Save formated PokéBall.
       /// </summary>
       private const string POKEBALL = "PokéBall";
+
+      private const string POKESTOP = "Poké Stop";
 
       // File IO **************************************************************
 
@@ -143,10 +145,6 @@ namespace PokeStar
       /// Help response embed color.
       /// </summary>
       public static readonly Color EMBED_COLOR_HELP_RESPONSE      = Color.Gold;
-      public static readonly Color EMBED_COLOR_RAID_RESPONSE      = Color.Blue;
-      public static readonly Color EMBED_COLOR_DEX_RESPONSE       = Color.Green;
-      public static readonly Color EMBED_COLOR_GAME_INFO_RESPONSE = Color.Teal;
-      public static readonly Color EMBED_COLOR_GYM_RESPONSE       = Color.Magenta;
 
       /// <summary>
       /// Raid response embed color.
@@ -162,6 +160,11 @@ namespace PokeStar
       /// Game info response embed color.
       /// </summary>
       public static readonly Color EMBED_COLOR_GAME_INFO_RESPONSE = Color.Teal;
+
+      /// <summary>
+      /// POI response embed color.
+      /// </summary>
+      public static readonly Color EMBED_COLOR_POI_RESPONSE       = Color.Magenta;
 
       // Raid tiers ***********************************************************
 
@@ -231,11 +234,6 @@ namespace PokeStar
          ["C"]         = COMMON_RAID_TIER,
          ["1"]         = COMMON_RAID_TIER,
       };
-
-      /// <summary>
-      /// Raid train picture.
-      /// </summary>
-      public static readonly string RAID_TRAIN_IMAGE_NAME = "Raid_Train.png";
 
       // Raid limits **********************************************************
 
@@ -426,7 +424,7 @@ namespace PokeStar
       /// <summary>
       /// Unown Pokemon number.
       /// </summary>
-      public static readonly int UNOWN_NUMBER = 201;
+      public static readonly int UNOWN_NUMBER  = 201;
 
       /// <summary>
       /// Arceus Pokemon number.
@@ -461,9 +459,9 @@ namespace PokeStar
       /// </summary>
       public static readonly Dictionary<string, double> THROW_RATE = new Dictionary<string, double>()
       {
-         ["Regular"]  = 1.0,
-         ["Nice"]     = 1.0,
-         ["Great"]    = 1.3,
+         ["Regular"]   = 1.0,
+         ["Nice"]      = 1.0,
+         ["Great"]     = 1.3,
          ["Excellent"] = 1.7,
       };
 
@@ -522,32 +520,32 @@ namespace PokeStar
       /// <summary>
       /// Character denotes STAB (Same type attack bonus).
       /// </summary>
-      public static readonly char STAB_SYMBOL          = '*';
+      public static readonly char STAB_SYMBOL            = '*';
 
       /// <summary>
       /// Character denotes default form.
       /// </summary>
-      public static readonly char DEFAULT_FORM_SYMBOL  = '*';
+      public static readonly char DEFAULT_FORM_SYMBOL    = '*';
 
       /// <summary>
       /// Character denotes weather boost.
       /// </summary>
-      public static readonly char WEATHER_BOOST_SYMBOL = '*';
+      public static readonly char WEATHER_BOOST_SYMBOL   = '*';
 
       /// <summary>
       /// Character denotes legacy move.
       /// </summary>
-      public static readonly char LEGACY_MOVE_SYMBOL   = '!';
+      public static readonly char LEGACY_MOVE_SYMBOL     = '!';
 
       /// <summary>
       /// Number of wild CP per column in cp list.
       /// </summary>
-      public static readonly int WILD_CP_COLUMN_LENGTH = 12;
+      public static readonly int WILD_CP_COLUMN_LENGTH   = 12;
 
       /// <summary>
       /// Number of Pokémon per row in egg list.
       /// </summary>
-      public static readonly int EGG_ROW_LENGTH        = 3;
+      public static readonly int EGG_ROW_LENGTH          = 3;
 
       /// <summary>
       /// Fast move name.
@@ -562,34 +560,39 @@ namespace PokeStar
       /// <summary>
       /// Mega Pokémon tag.
       /// </summary>
-      public static readonly string MEGA_TAG  = "mega";
+      public static readonly string MEGA_TAG             = "mega";
 
       /// <summary>
       /// Max values in mega Pokémon name.
       /// </summary>
-      public static readonly int MAX_LEN_MEGA = 3;
+      public static readonly int MAX_LEN_MEGA            = 3;
 
-      // Delimiters ***********************************************************
-
-      /// <summary>
-      /// Nickname delimiter
-      /// </summary>
-      public static readonly char NICKNAME_DELIMITER        = '>';
+      // Parsers **************************************************************
 
       /// <summary>
-      /// Missing nickname delimiter value.
+      /// Number of expected parsing arguments.
       /// </summary>
-      public static readonly int NICKNAME_DELIMITER_MISSING = -1;
+      public static readonly int NUM_PARSE_ARGS          = 2;
 
       /// <summary>
-      /// Pokémon Move delimiter
+      /// New parse value location.
       /// </summary>
-      public static readonly char POKE_MOVE_DELIMITER        = '>';
+      public static readonly int NEW_PARSE_VALUE         = 0;
 
       /// <summary>
-      /// Missing move delimiter value.
+      /// Old parse value location.
       /// </summary>
-      public static readonly int POKE_MOVE_DELIMITER_MISSING = -1;
+      public static readonly int OLD_PARSE_VALUE         = 1;
+
+      /// <summary>
+      /// Delimiter for parsing multi input string.
+      /// </summary>
+      public static readonly char PARSE_DELIMITER        = '>';
+
+      /// <summary>
+      /// Missing delimiter value.
+      /// </summary>
+      public static readonly int DELIMITER_MISSING = -1;
 
       // Egg tiers ************************************************************
 
@@ -671,18 +674,48 @@ namespace PokeStar
       // Channel register values **********************************************
 
       /// <summary>
+      /// User account register character.
+      /// </summary>
+      public static readonly char REGISTER_STRING_ACCOUNT = 'A';
+
+      /// <summary>
       /// Dex register character.
       /// </summary>
+      public static readonly char REGISTER_STRING_DEX = 'D';
 
-      public static readonly char REGISTER_STRING_ACCOUNT = 'A';
-      public static readonly char REGISTER_STRING_DEX     = 'D';
-      public static readonly char REGISTER_STRING_EX      = 'E';
-      public static readonly char REGISTER_STRING_INFO    = 'I';
-      public static readonly char REGISTER_STRING_ROLE    = 'P';
-      public static readonly char REGISTER_STRING_RAID    = 'R';
-      public static readonly char REGISTER_STRING_POI     = 'S';
-      public static readonly string FULL_REGISTER_STRING  = "ADEIPRS";
+      /// <summary>
+      /// EX raid register character.
+      /// </summary>
+      public static readonly char REGISTER_STRING_EX = 'E';
 
+      /// <summary>
+      /// Information register character.
+      /// </summary>
+      public static readonly char REGISTER_STRING_INFO = 'I';
+
+      /// <summary>
+      /// Role register character.
+      /// </summary>
+      public static readonly char REGISTER_STRING_ROLE = 'P';
+
+      /// <summary>
+      /// Raid register character.
+      /// </summary>
+      public static readonly char REGISTER_STRING_RAID = 'R';
+
+      /// <summary>
+      /// Point of interest register character.
+      /// </summary>
+      public static readonly char REGISTER_STRING_POI = 'S';
+
+      /// <summary>
+      /// Full register string.
+      /// </summary>
+      public static readonly string FULL_REGISTER_STRING = "ADEIPRS";
+
+      /// <summary>
+      /// Register character to register string.
+      /// </summary>
       public static readonly Dictionary<string, string> REGISTER_STRING_TYPE = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
          [REGISTER_STRING_ACCOUNT.ToString()] = "Player Account",

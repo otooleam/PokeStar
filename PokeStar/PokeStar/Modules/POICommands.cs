@@ -13,19 +13,39 @@ using Discord.WebSocket;
 
 namespace PokeStar.Modules
 {
+   /// <summary>
+   /// Handles poi commands.
+   /// </summary>
    public class POICommands : ModuleBase<SocketCommandContext>
    {
-      private const int NumArguments = 2;
-      private const int IndexNickname = 0;
-      private const int IndexName = 1;
-
+      /// <summary>
+      /// Gym image file name.
+      /// </summary>
       private const string GYM_IMAGE = "gym.png";
+
+      /// <summary>
+      /// Poké Stop image file name.
+      /// </summary>
       private const string STOP_IMAGE = "pokestop.png";
+
+      /// <summary>
+      /// Unknown Point of Interest image file name.
+      /// </summary>
       private const string UNKNOWN_POI_IMAGE = "unknown_stop.png";
 
+      /// <summary>
+      /// Google map url header.
+      /// </summary>
       private static readonly string GOOGLE_MAP = $"http://www.google.com/maps/place/";
+
+      /// <summary>
+      /// Apple map url header.
+      /// </summary>
       private static readonly string APPLE_MAP = $"http://maps.apple.com/?daddr=";
 
+      /// <summary>
+      /// Valid Point of Interest editable attributes.
+      /// </summary>
       private readonly List<string> EditableAttributes = new List<string>()
       {
          "GYM",
@@ -33,8 +53,16 @@ namespace PokeStar.Modules
          "EX"
       };
 
+      /// <summary>
+      /// Saved poi selection messages.
+      /// </summary>
       protected static readonly Dictionary<ulong, List<string>> poiMessages = new Dictionary<ulong, List<string>>();
 
+      /// <summary>
+      /// Handle poi command.
+      /// </summary>
+      /// <param name="poi">Get information for this Point of Interest.</param>
+      /// <returns>Completed Task.</returns>
       [Command("poi")]
       [Alias("gym", "stop", "pokestop")]
       [Summary("Get information on a point of interest.")]
@@ -76,6 +104,14 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle addPOI command.
+      /// </summary>
+      /// <param name="latitude">Latitude of the Point of Interest.</param>
+      /// <param name="longitude">Longitude of the Point of Interest.</param>
+      /// <param name="isGym">Is the Point of Interest a Gym.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      /// <returns>Completed Task.</returns>
       [Command("addPOI")]
       [Summary("Add a new Point of Interest.")]
       [RegisterChannel('S')]
@@ -96,6 +132,14 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle addSponsoredPOI command.
+      /// </summary>
+      /// <param name="latitude">Latitude of the Point of Interest.</param>
+      /// <param name="longitude">Longitude of the Point of Interest.</param>
+      /// <param name="isGym">Is the Point of Interest a Gym.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      /// <returns>Completed Task.</returns>
       [Command("addSponsoredPOI")]
       [Summary("Add a new sponsored Point of Interest.")]
       [RegisterChannel('S')]
@@ -116,6 +160,13 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle addExGym command.
+      /// </summary>
+      /// <param name="latitude">Latitude of the Point of Interest.</param>
+      /// <param name="longitude">Longitude of the Point of Interest.</param>
+      /// <param name="name">Name of the Point of Interest.</param>
+      /// <returns>Completed Task.</returns>
       [Command("addExGym")]
       [Summary("Add a new EX Gym.")]
       [RegisterChannel('S')]
@@ -135,6 +186,13 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle updatePOI command.
+      /// </summary>
+      /// <param name="attribute">Update this attribute.</param>
+      /// <param name="value">Update the attribute with this value.</param>
+      /// <param name="poi">Update attribute of this Point of Interest.</param>
+      /// <returns>Completed Task.</returns>
       [Command("updatePOI")]
       [Summary("Edit an attribute of a Point of Interest.")]
       [Remarks("Valid attributes to edit are gym, sponsored, and ex." +
@@ -189,6 +247,11 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle removePOI command.
+      /// </summary>
+      /// <param name="poi">Point of Interest to remove.</param>
+      /// <returns>Completed Task.</returns>
       [Command("removePOI")]
       [Summary("Remove a Point of Interest.")]
       [RegisterChannel('S')]
@@ -218,6 +281,11 @@ namespace PokeStar.Modules
          }
       }
 
+      /// <summary>
+      /// Handle editPOINickname command.
+      /// </summary>
+      /// <param name="nicknameString">Update the nickname of a Point of Interest using this string.</param>
+      /// <returns>Completed Task.</returns>
       [Command("editPOINickname")]
       [Alias("editPOINicknames")]
       [Summary("Edit Point of Interest nicknames.")]
@@ -232,9 +300,9 @@ namespace PokeStar.Modules
       public async Task EditNickname([Summary("Update the nickname of a Point of Interest using this string.")][Remainder] string nicknameString)
       {
          ulong guild = Context.Guild.Id;
-         int delimeterIndex = nicknameString.IndexOf(Global.NICKNAME_DELIMITER);
+         int delimeterIndex = nicknameString.IndexOf(Global.PARSE_DELIMITER);
 
-         if (delimeterIndex == Global.NICKNAME_DELIMITER_MISSING)
+         if (delimeterIndex == Global.DELIMITER_MISSING)
          {
             string trim = nicknameString.Trim();
             string name = Connections.Instance().GetPOIWithNickname(guild, trim);
@@ -250,30 +318,30 @@ namespace PokeStar.Modules
          }
          else
          {
-            string[] arr = nicknameString.Split(Global.NICKNAME_DELIMITER);
-            if (arr.Length == NumArguments)
+            string[] arr = nicknameString.Split(Global.PARSE_DELIMITER);
+            if (arr.Length == Global.NUM_PARSE_ARGS)
             {
-               string newNickname = arr[IndexNickname].Trim();
-               string other = arr[IndexName].Trim();
-               POI poi = Connections.Instance().GetPOI(guild, other);
+               string newValue = arr[Global.NEW_PARSE_VALUE].Trim();
+               string oldValue = arr[Global.OLD_PARSE_VALUE].Trim();
+               POI poi = Connections.Instance().GetPOI(guild, oldValue);
 
                if (poi == null)
                {
-                  poi = Connections.Instance().GetPOI(guild, Connections.Instance().GetPOIWithNickname(guild, other));
+                  poi = Connections.Instance().GetPOI(guild, Connections.Instance().GetPOIWithNickname(guild, oldValue));
                   if (poi == null)
                   {
-                     await ResponseMessage.SendErrorMessage(Context.Channel, "editPOINickname", $"{other} is not a registered nickname.");
+                     await ResponseMessage.SendErrorMessage(Context.Channel, "editPOINickname", $"{oldValue} is not a registered nickname.");
                   }
                   else
                   {
-                     Connections.Instance().UpdatePOINickname(guild, other, newNickname);
-                     await ResponseMessage.SendInfoMessage(Context.Channel, $"{newNickname} has replaced {other} as a valid nickname for {poi.Name}.");
+                     Connections.Instance().UpdatePOINickname(guild, oldValue, newValue);
+                     await ResponseMessage.SendInfoMessage(Context.Channel, $"{newValue} has replaced {oldValue} as a valid nickname for {poi.Name}.");
                   }
                }
                else
                {
-                  Connections.Instance().AddPOINickname(guild, newNickname, poi.Name);
-                  await ResponseMessage.SendInfoMessage(Context.Channel, $"{newNickname} is now a valid nickname for {poi.Name}.");
+                  Connections.Instance().AddPOINickname(guild, newValue, poi.Name);
+                  await ResponseMessage.SendInfoMessage(Context.Channel, $"{newValue} is now a valid nickname for {poi.Name}.");
                }
             }
             else
@@ -282,29 +350,6 @@ namespace PokeStar.Modules
             }
          }
       }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
       /// <summary>
       /// Checks if a message is a poi select message.
@@ -357,7 +402,7 @@ namespace PokeStar.Modules
          string sponsored = poi.IsSponsored ? "Sponsored" : "";
          embed.WithTitle($"{sponsored} {title}: {poi.Name}");
          embed.WithThumbnailUrl($"attachment://{fileName}");
-         embed.WithColor(Global.EMBED_COLOR_GYM_RESPONSE);
+         embed.WithColor(Global.EMBED_COLOR_POI_RESPONSE);
          embed.AddField($"**Google Maps**", $"{GOOGLE_MAP}{poi.Latitude},{poi.Longitude}", true);
          embed.AddField($"**Apple Maps**", $"{APPLE_MAP}{poi.Latitude},{poi.Longitude}", true);
          if (poi.Nicknames.Count != 0)
@@ -387,7 +432,7 @@ namespace PokeStar.Modules
          }
 
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithColor(Global.EMBED_COLOR_GYM_RESPONSE);
+         embed.WithColor(Global.EMBED_COLOR_POI_RESPONSE);
          embed.WithTitle("Do you mean...?");
          embed.WithDescription(sb.ToString());
          embed.WithThumbnailUrl($"attachment://{fileName}");

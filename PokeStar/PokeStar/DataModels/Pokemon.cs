@@ -256,7 +256,7 @@ namespace PokeStar.DataModels
       public DateTime CreatedAt { get; private set; }
 
       /// <summary>
-      /// Has the data
+      /// Has the data been read to this Pokémon.
       /// </summary>
       public bool[] CompleteDataLookUp = new bool[Global.DEX_SWITCH_OPTIONS];
 

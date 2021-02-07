@@ -8,9 +8,13 @@ namespace PokeStar.DataModels
    public class Rocket
    {
       /// <summary>
-      /// 
+      /// Title of a rocket leader.
       /// </summary>
       private readonly string LEADER_TITLE = "Leader";
+
+      /// <summary>
+      /// Title of a rocket grunt.
+      /// </summary>
       private readonly string GRUNT_TITLE = "Grunt";
 
       /// <summary>

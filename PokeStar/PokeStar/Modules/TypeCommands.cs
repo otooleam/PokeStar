@@ -87,7 +87,7 @@ namespace PokeStar.Modules
                List<string> weather = Connections.Instance().GetWeather(types);
 
                EmbedBuilder embed = new EmbedBuilder();
-               string fileName = BLANK_IMAGE;
+               string fileName = GENERIC_IMAGE;
                embed.WithTitle($"Type {title.ToUpper()}");
                embed.WithDescription(description);
                embed.WithThumbnailUrl($"attachment://{fileName}");

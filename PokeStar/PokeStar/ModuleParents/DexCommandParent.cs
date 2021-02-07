@@ -24,9 +24,9 @@ namespace PokeStar.ModuleParents
       protected static readonly string POKEDEX_SELECTION_IMAGE = "quest_pokemon.png";
 
       /// <summary>
-      /// Image file for embeds without images.
+      /// Generic dex image file name.
       /// </summary>
-      protected static readonly string BLANK_IMAGE = "battle.png";
+      protected static readonly string GENERIC_IMAGE = "battle.png";
 
       // Message holders ******************************************************
 
@@ -275,7 +275,7 @@ namespace PokeStar.ModuleParents
                else if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.MOVE_MESSAGE)
                {
                   Move pkmnMove = Connections.Instance().GetMove(dexMessage.Selections[i]);
-                  string fileName = BLANK_IMAGE;
+                  string fileName = GENERIC_IMAGE;
                   Connections.CopyFile(fileName);
                   await reaction.Channel.SendFileAsync(fileName, embed: BuildMoveEmbed(pkmnMove, fileName));
                   Connections.DeleteFile(fileName);

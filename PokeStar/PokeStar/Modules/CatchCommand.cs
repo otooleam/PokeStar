@@ -17,7 +17,7 @@ namespace PokeStar.Modules
    public class CatchCommand : DexCommandParent
    {
       /// <summary>
-      /// Handle catch command
+      /// Handle catch command.
       /// </summary>
       /// <param name="pokemon">Simulate catching this Pokémon.</param>
       /// <returns>Completed Task.</returns>

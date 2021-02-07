@@ -32,7 +32,7 @@ namespace PokeStar.Modules
          {
             List<string> moveNames = Connections.Instance().SearchMove(move);
 
-            string fileName = BLANK_IMAGE;
+            string fileName = GENERIC_IMAGE;
             Connections.CopyFile(fileName);
             RestUserMessage dexMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildDexSelectEmbed(moveNames, fileName));
             dexSelectMessages.Add(dexMessage.Id, new DexSelectionMessage((int)DEX_MESSAGE_TYPES.MOVE_MESSAGE, moveNames));
@@ -41,7 +41,7 @@ namespace PokeStar.Modules
          }
          else
          {
-            string fileName = BLANK_IMAGE;
+            string fileName = GENERIC_IMAGE;
             Connections.CopyFile(fileName);
             await Context.Channel.SendFileAsync(fileName, embed: BuildMoveEmbed(pkmnMove, fileName));
             Connections.DeleteFile(fileName);
@@ -79,7 +79,7 @@ namespace PokeStar.Modules
                   sbCharge.AppendLine(move);
                }
 
-               string fileName = BLANK_IMAGE;
+               string fileName = GENERIC_IMAGE;
                EmbedBuilder embed = new EmbedBuilder();
                embed.WithTitle($"{type.ToUpper()} moves");
                embed.WithDescription(Global.NONA_EMOJIS[$"{type}_emote"]);
@@ -103,7 +103,7 @@ namespace PokeStar.Modules
                   sb.AppendLine(move);
                }
 
-               string fileName = BLANK_IMAGE;
+               string fileName = GENERIC_IMAGE;
                EmbedBuilder embed = new EmbedBuilder();
                embed.AddField($"{type.ToUpper()} {category.ToUpper()} Moves", sb.ToString());
                embed.WithDescription(Global.NONA_EMOJIS[$"{type}_emote"]);

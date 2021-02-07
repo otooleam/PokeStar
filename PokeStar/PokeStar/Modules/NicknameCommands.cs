@@ -1,8 +1,6 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
-using Discord;
-using Discord.Rest;
 using Discord.Commands;
 using PokeStar.ConnectionInterface;
 using PokeStar.DataModels;
@@ -17,15 +15,14 @@ namespace PokeStar.Modules
    public class NicknameCommands : DexCommandParent
    {
       /// <summary>
-      /// Max number of values in nickname string.
+      /// Handle editNickname command.
       /// </summary>
-      private const int NumArguments = 2;
-
-
+      /// <param name="nicknameString">Update the nickname of a Pokémon using this string.</param>
+      /// <returns>Completed Task.</returns>
       [Command("editNickname")]
       [Alias("editNicknames")]
       [Summary("Edit Pokémon nicknames.")]
-      [Remarks("This command is used for adding, updating, and removing Pokémon nicknames.\n" +
+      [Remarks("This command is used for adding, updating, and removing nicknames.\n" +
                "To add or update a nickname a special character (>) is used.\n" +
                "\nFor each option format the nicknameString as following:\n" +
                "Add Nickname..............nickname > Pokémon name\n" +
@@ -36,44 +33,31 @@ namespace PokeStar.Modules
       public async Task EditNickname([Summary("Update the nickname of a Pokémon using this string.")][Remainder] string nicknameString)
       {
          ulong guild = Context.Guild.Id;
-         int delimeterIndex = nicknameString.IndexOf(Global.NICKNAME_DELIMITER);
+         int delimeterIndex = nicknameString.IndexOf(Global.PARSE_DELIMITER);
 
-         if (delimeterIndex == Global.NICKNAME_DELIMITER_MISSING)
+         if (delimeterIndex == Global.DELIMITER_MISSING)
          {
-            string trim = nicknameString.Trim();
-            string name = Connections.Instance().GetPokemonWithNickname(guild, trim);
-            if (name == null)
-            {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "editNickname", $"The nickname {trim} is not registered to a Pokémon.");
-            }
-            else
-            {
-               Connections.Instance().DeleteNickname(guild, trim);
-               await ResponseMessage.SendInfoMessage(Context.Channel, $"Removed {trim} from {name}.");
-            }
-
+            await ResponseMessage.SendErrorMessage(Context.Channel, "editNickname", $"No nicknam delimiter (>) found.");
          }
          else
          {
-            string[] arr = nicknameString.Split(Global.NICKNAME_DELIMITER);
-            if (arr.Length == NumArguments)
+            string[] arr = nicknameString.Split(Global.PARSE_DELIMITER);
+            if (arr.Length == Global.NUM_PARSE_ARGS)
             {
-               string newValue = arr[(int)NICKNAME_INDEX.NEW_VALUE].Trim();
-               string oldValue = arr[(int)NICKNAME_INDEX.OLD_VALUE].Trim();
+               string newValue = arr[Global.NEW_PARSE_VALUE].Trim();
+               string oldValue = arr[Global.OLD_PARSE_VALUE].Trim();
 
                if (string.IsNullOrEmpty(newValue))
                {
-
-                  pokemon = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(guild, other));
-                  if (pokemon == null)
+                  string name = Connections.Instance().GetPokemonWithNickname(guild, newValue);
+                  if (name == null)
                   {
-                     await ResponseMessage.SendErrorMessage(Context.Channel, "editNickname", $"{other} is not a registered nickname.");
+                     await ResponseMessage.SendErrorMessage(Context.Channel, "editNickname", $"The nickname {newValue} is not registered with a Pokémon.");
                   }
                   else
                   {
-                     Connections.Instance().UpdateNickname(guild, other, newNickname);
-                     await ResponseMessage.SendInfoMessage(Context.Channel, $"{newNickname} has replaced {other} as a valid nickname for {pokemon.Name}.");
-
+                     Connections.Instance().DeleteNickname(guild, newValue);
+                     await ResponseMessage.SendInfoMessage(Context.Channel, $"Removed {newValue} from {name}.");
                   }
                }
                else
@@ -84,7 +68,7 @@ namespace PokeStar.Modules
                   {
                      if (Connections.Instance().GetPokemonWithNickname(guild, oldValue) == null)
                      {
-                        await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"{oldValue} is not a registered nickname.");
+                        await ResponseMessage.SendErrorMessage(Context.Channel, "editNickname", $"{oldValue} is not a registered nickname.");
                      }
                      else
                      {
@@ -102,13 +86,16 @@ namespace PokeStar.Modules
             }
             else
             {
-
-               await ResponseMessage.SendErrorMessage(Context.Channel, "editNickname", $"Too many delimiters found.");
+               await ResponseMessage.SendErrorMessage(Context.Channel, "editNickname", $"Too many delimiters (>) found.");
             }
          }
       }
 
-
+      /// <summary>
+      /// Handle nickname command.
+      /// </summary>
+      /// <param name="pokemon">Get the nicknames for this Pokémon.</param>
+      /// <returns>Completed Task.</returns>
       [Command("nickname")]
       [Alias("nicknames")]
       [Summary("Gets nicknames for a given Pokémon.")]
