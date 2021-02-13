@@ -38,7 +38,8 @@ namespace PokeStar.Modules
                              [Summary("Where the raid will be.")][Remainder] string location)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-         List<string> potentials = Connections.GetBossList(calcTier);
+         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         List<string> potentials = calcTier == Global.INVALID_RAID_TIER ? new List<string>() : allBosses[calcTier];
          Raid raid;
          string fileName;
          if (potentials.Count > 1)
@@ -46,7 +47,7 @@ namespace PokeStar.Modules
             fileName = $"Egg{calcTier}.png";
             raid = new Raid(calcTier, time, location)
             {
-               RaidBossSelections = potentials
+               AllBosses = allBosses
             };
 
             Connections.CopyFile(fileName);
@@ -58,8 +59,11 @@ namespace PokeStar.Modules
          else if (potentials.Count == 1)
          {
             string boss = potentials.First();
-            raid = new Raid(calcTier, time, location, boss);
-            fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+            raid = new Raid(calcTier, time, location, boss)
+            {
+               AllBosses = allBosses
+            };
+            fileName = Connections.GetPokemonPicture(raid.GetCurrentBoss());
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
@@ -70,8 +74,11 @@ namespace PokeStar.Modules
          else if (Global.USE_EMPTY_RAID)
          {
             string boss = Global.DEFAULT_RAID_BOSS_NAME;
-            raid = new Raid(calcTier, time, location, boss);
-            fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+            raid = new Raid(calcTier, time, location, boss)
+            {
+               AllBosses = allBosses
+            };
+            fileName = Connections.GetPokemonPicture(raid.GetCurrentBoss());
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
@@ -108,7 +115,8 @@ namespace PokeStar.Modules
                                  [Summary("Where the raid will be.")][Remainder] string location)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-         List<string> potentials = Connections.GetBossList(calcTier);
+         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         List<string> potentials = calcTier == Global.INVALID_RAID_TIER ? new List<string>() : allBosses[calcTier];
          RaidMule raid;
          string fileName;
          if (potentials.Count > 1)
@@ -116,7 +124,7 @@ namespace PokeStar.Modules
             fileName = $"Egg{calcTier}.png";
             raid = new RaidMule(calcTier, time, location)
             {
-               RaidBossSelections = potentials
+               AllBosses = allBosses
             };
 
             Connections.CopyFile(fileName);
@@ -128,8 +136,11 @@ namespace PokeStar.Modules
          else if (potentials.Count == 1)
          {
             string boss = potentials.First();
-            raid = new RaidMule(calcTier, time, location, boss);
-            fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+            raid = new RaidMule(calcTier, time, location, boss)
+            {
+               AllBosses = allBosses
+            };
+            fileName = Connections.GetPokemonPicture(raid.GetCurrentBoss());
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(raid, fileName));
@@ -140,8 +151,11 @@ namespace PokeStar.Modules
          else if (Global.USE_EMPTY_RAID)
          {
             string boss = Global.DEFAULT_RAID_BOSS_NAME;
-            raid = new RaidMule(calcTier, time, location, boss);
-            fileName = Connections.GetPokemonPicture(raid.Boss.Name);
+            raid = new RaidMule(calcTier, time, location, boss)
+            {
+               AllBosses = allBosses
+            };
+            fileName = Connections.GetPokemonPicture(raid.GetCurrentBoss());
 
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(raid, fileName));
@@ -164,7 +178,7 @@ namespace PokeStar.Modules
       /// <param name="location">Where the raid will be.</param>
       /// <returns>Completed Task.</returns>
       [Command("train")]
-      [Alias("raidtrain")]
+      [Alias("raidTrain")]
       [Summary("Creates a new raid train coordination message.")]
       [Remarks("Valid Tier values:\n" +
          "0 (raid with no boss assigned)\n" +
@@ -174,20 +188,19 @@ namespace PokeStar.Modules
          "7, mega, M\n")]
       [RegisterChannel('R')]
       public async Task RaidTrain([Summary("Tier of the raids.")] string tier,
-                           [Summary("Time the train will start.")] string time,
-                           [Summary("Where the train will start.")][Remainder] string location)
+                                  [Summary("Time the train will start.")] string time,
+                                  [Summary("Where the train will start.")][Remainder] string location)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
          Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
          List<string> potentials = calcTier == Global.INVALID_RAID_TIER ? new List<string>() : allBosses[calcTier];
-         RaidTrain raid;
+         Raid raid;
          string fileName;
          if (potentials.Count > 1)
          {
             fileName = $"Egg{calcTier}.png";
-            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location)
+            raid = new Raid(calcTier, time, location, (SocketGuildUser)Context.User)
             {
-               RaidBossSelections = potentials,
                AllBosses = allBosses
             };
 
@@ -200,7 +213,7 @@ namespace PokeStar.Modules
          else if (potentials.Count == 1)
          {
             string boss = potentials.First();
-            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location, boss)
+            raid = new Raid(calcTier, time, location, (SocketGuildUser)Context.User, boss)
             {
                AllBosses = allBosses
             };
@@ -215,7 +228,7 @@ namespace PokeStar.Modules
          else if (Global.USE_EMPTY_RAID)
          {
             string boss = Global.DEFAULT_RAID_BOSS_NAME;
-            raid = new RaidTrain((SocketGuildUser)Context.User, calcTier, time, location, boss)
+            raid = new Raid(calcTier, time, location, (SocketGuildUser)Context.User, boss)
             {
                AllBosses = allBosses
             };
@@ -235,6 +248,83 @@ namespace PokeStar.Modules
       }
 
       /// <summary>
+      /// Handle muletrain command.
+      /// </summary>
+      /// <param name="tier">Tier of the raid.</param>
+      /// <param name="time">Time the raid will start.</param>
+      /// <param name="location">Where the raid will be.</param>
+      /// <returns>Completed Task.</returns>
+      [Command("muletrain")]
+      [Alias("raidMuleTrain")]
+      [Summary("Creates a new raid train coordination message.")]
+      [Remarks("Valid Tier values:\n" +
+         "0 (raid with no boss assigned)\n" +
+         "1, common, C\n" +
+         "3, rare, R\n" +
+         "5, legendary, L\n" +
+         "7, mega, M\n")]
+      [RegisterChannel('R')]
+      public async Task RaidMuleTrain([Summary("Tier of the raids.")] string tier,
+                                      [Summary("Time the train will start.")] string time,
+                                      [Summary("Where the train will start.")][Remainder] string location)
+      {
+         short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
+         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         List<string> potentials = calcTier == Global.INVALID_RAID_TIER ? new List<string>() : allBosses[calcTier];
+         RaidMule raid;
+         string fileName;
+         if (potentials.Count > 1)
+         {
+            fileName = $"Egg{calcTier}.png";
+            raid = new RaidMule(calcTier, time, location, (SocketGuildUser)Context.User)
+            {
+               AllBosses = allBosses
+            };
+
+            Connections.CopyFile(fileName);
+            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+            raidMessages.Add(selectMsg.Id, raid);
+            Connections.DeleteFile(fileName);
+            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
+         }
+         else if (potentials.Count == 1)
+         {
+            string boss = potentials.First();
+            raid = new RaidMule(calcTier, time, location, (SocketGuildUser)Context.User, boss)
+            {
+               AllBosses = allBosses
+            };
+            fileName = RAID_TRAIN_IMAGE_NAME;
+
+            Connections.CopyFile(fileName);
+            RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidMuleTrainEmbed(raid, fileName));
+            raidMessages.Add(raidMsg.Id, raid);
+            Connections.DeleteFile(fileName);
+            SetEmojis(raidMsg, muleEmojis.Concat(trainEmojis).ToArray());
+         }
+         else if (Global.USE_EMPTY_RAID)
+         {
+            string boss = Global.DEFAULT_RAID_BOSS_NAME;
+            raid = new RaidMule(calcTier, time, location, (SocketGuildUser)Context.User, boss)
+            {
+               AllBosses = allBosses
+            };
+            fileName = RAID_TRAIN_IMAGE_NAME;
+
+            Connections.CopyFile(fileName);
+            RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidMuleTrainEmbed(raid, fileName));
+            raidMessages.Add(raidMsg.Id, raid);
+            Connections.DeleteFile(fileName);
+            SetEmojis(raidMsg, muleEmojis.Concat(trainEmojis).ToArray());
+         }
+         else
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "muleTrain", $"No raid bosses found for tier {tier}");
+         }
+         RemoveOldRaids();
+      }
+
+      /// <summary>
       /// Handle boss command.
       /// </summary>
       /// <returns>Completed Task.</returns>
@@ -244,20 +334,16 @@ namespace PokeStar.Modules
       [RegisterChannel('I')]
       public async Task BossList()
       {
-         List<string> exBosses = Connections.GetBossList(Global.EX_RAID_TIER);
-         List<string> megaBosses = Connections.GetBossList(Global.MEGA_RAID_TIER);
-         List<string> legendaryBosses = Connections.GetBossList(Global.LEGENDARY_RAID_TIER);
-         List<string> rareBosses = Connections.GetBossList(Global.RARE_RAID_TIER);
-         List<string> commonBosses = Connections.GetBossList(Global.COMMON_RAID_TIER);
+         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Global.EMBED_COLOR_GAME_INFO_RESPONSE);
          embed.WithTitle("Current Raid Bosses:");
-         embed.AddField($"EX Raids {BuildRaidTitle(Global.EX_RAID_TIER)}", BuildRaidBossListString(exBosses), true);
-         embed.AddField($"Mega Raids {BuildRaidTitle(Global.MEGA_RAID_TIER)}", BuildRaidBossListString(megaBosses), true);
-         embed.AddField($"Tier 5 Raids {BuildRaidTitle(Global.LEGENDARY_RAID_TIER)}", BuildRaidBossListString(legendaryBosses), true);
-         embed.AddField($"Tier 3 Raids {BuildRaidTitle(Global.RARE_RAID_TIER)}", BuildRaidBossListString(rareBosses), true);
-         embed.AddField($"Tier 1 Raids {BuildRaidTitle(Global.COMMON_RAID_TIER)}", BuildRaidBossListString(commonBosses), true);
+         embed.AddField($"EX Raids {BuildRaidTitle(Global.EX_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.EX_RAID_TIER]), true);
+         embed.AddField($"Mega Raids {BuildRaidTitle(Global.MEGA_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.MEGA_RAID_TIER]), true);
+         embed.AddField($"Tier 5 Raids {BuildRaidTitle(Global.LEGENDARY_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.LEGENDARY_RAID_TIER]), true);
+         embed.AddField($"Tier 3 Raids {BuildRaidTitle(Global.RARE_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.RARE_RAID_TIER]), true);
+         embed.AddField($"Tier 1 Raids {BuildRaidTitle(Global.COMMON_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.COMMON_RAID_TIER]), true);
 
          await Context.Channel.SendMessageAsync(embed: embed.Build());
       }

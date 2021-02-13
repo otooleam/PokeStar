@@ -37,139 +37,45 @@ namespace PokeStar.Modules
          SocketUserMessage raidMessage = (SocketUserMessage)await Context.Channel.GetMessageAsync(raidMessageId);
          RaidParent parent = raidMessages[raidMessageId];
 
-         if (parent is RaidTrain initTrain && !Context.Message.Author.Equals(initTrain.Conductor))
+         if (!parent.IsSingleStop() && !Context.Message.Author.Equals(parent.Conductor))
          {
             await ResponseMessage.SendErrorMessage(raidMessage.Channel, "edit", $"Command can only be run by the current conductor.");
          }
          else
          {
-            ulong code = raidMessage.Id;
             ISocketMessageChannel channel = raidMessage.Channel;
-            bool editComplete = false;
-            bool simpleEdit = false;
+            bool needsEdit = false;
             if (attribute.Equals("time", StringComparison.OrdinalIgnoreCase))
             {
-               if (parent is RaidTrain train)
-               {
-                  train.UpdateRaidInformation(value, null);
-               }
-               else
-               {
-                  parent.Time = value;
-               }
-               simpleEdit = true;
+               parent.UpdateRaidInformation(value, null);
+               needsEdit = true;
             }
             else if (attribute.Equals("location", StringComparison.OrdinalIgnoreCase) || attribute.Equals("loc", StringComparison.OrdinalIgnoreCase))
             {
-               if (parent is RaidTrain train)
-               {
-                  train.UpdateRaidInformation(null, value);
-               }
-               else
-               {
-                  parent.Location = value;
-               }
-               simpleEdit = true;
+               parent.UpdateRaidInformation(null, value);
+               needsEdit = true;
             }
             else if (attribute.Equals("tier", StringComparison.OrdinalIgnoreCase) || attribute.Equals("boss", StringComparison.OrdinalIgnoreCase))
             {
                short calcTier = Global.RAID_TIER_STRING.ContainsKey(value) ? Global.RAID_TIER_STRING[value] : Global.INVALID_RAID_TIER;
-               Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
-               List<string> potentials = calcTier == Global.INVALID_RAID_TIER ? new List<string>() : allBosses[calcTier];
 
-               if (potentials.Count > 1)
+               if (calcTier == Global.INVALID_RAID_TIER)
                {
-                  parent.Tier = calcTier;
-                  parent.SetBoss(null);
-                  parent.RaidBossSelections = potentials;
-                  string fileName = $"Egg{calcTier}.png";
-                  await raidMessage.DeleteAsync();
-                  raidMessages.Remove(code);
-
-                  Connections.CopyFile(fileName);
-                  RestUserMessage selectMsg = await channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
-                  raidMessages.Add(selectMsg.Id, parent);
-                  Connections.DeleteFile(fileName);
-                  selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
-                  editComplete = true;
-               }
-               else if (potentials.Count == 1)
-               {
-                  parent.Tier = calcTier;
-                  parent.SetBoss(potentials.First());
-                  IEmote[] prevReactions = raidMessage.Reactions.Keys.ToArray();
-                  await raidMessage.DeleteAsync();
-                  raidMessages.Remove(code);
-
-                  if (parent is RaidTrain train)
-                  {
-                     string fileName = RAID_TRAIN_IMAGE_NAME;
-                     Connections.CopyFile(fileName);
-                     RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
-                     raidMessages.Add(raidMsg.Id, parent);
-                     Connections.DeleteFile(fileName);
-                     raidMsg.AddReactionsAsync(prevReactions);
-                  }
-                  else if (parent is Raid raid)
-                  {
-                     string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                     Connections.CopyFile(fileName);
-                     RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
-                     raidMessages.Add(raidMsg.Id, parent);
-                     Connections.DeleteFile(fileName);
-                     raidMsg.AddReactionsAsync(prevReactions);
-                  }
-                  else if (parent is RaidMule mule)
-                  {
-                     string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                     Connections.CopyFile(fileName);
-                     RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(mule, fileName));
-                     raidMessages.Add(raidMsg.Id, parent);
-                     Connections.DeleteFile(fileName);
-                     raidMsg.AddReactionsAsync(prevReactions);
-                  }
-                  editComplete = true;
-               }
-               else if (Global.USE_EMPTY_RAID)
-               {
-                  parent.Tier = calcTier;
-                  parent.SetBoss(Global.DEFAULT_RAID_BOSS_NAME);
-                  IEmote[] prevReactions = raidMessage.Reactions.Keys.ToArray();
-                  await raidMessage.DeleteAsync();
-                  raidMessages.Remove(code);
-
-                  if (parent is RaidTrain train)
-                  {
-                     string fileName = RAID_TRAIN_IMAGE_NAME;
-                     Connections.CopyFile(fileName);
-                     RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(train, fileName));
-                     raidMessages.Add(raidMsg.Id, parent);
-                     Connections.DeleteFile(fileName);
-                     raidMsg.AddReactionsAsync(prevReactions);
-                  }
-                  else if (parent is Raid raid)
-                  {
-                     string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                     Connections.CopyFile(fileName);
-                     RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
-                     raidMessages.Add(raidMsg.Id, parent);
-                     Connections.DeleteFile(fileName);
-                     raidMsg.AddReactionsAsync(prevReactions);
-                  }
-                  else if (parent is RaidMule mule)
-                  {
-                     string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                     Connections.CopyFile(fileName);
-                     RestUserMessage raidMsg = await channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(mule, fileName));
-                     raidMessages.Add(raidMsg.Id, parent);
-                     Connections.DeleteFile(fileName);
-                     raidMsg.AddReactionsAsync(prevReactions);
-                  }
-                  editComplete = true;
+                  await ResponseMessage.SendErrorMessage(channel, "edit", $"No raid bosses found for tier {value}.");
                }
                else
                {
-                  await ResponseMessage.SendErrorMessage(channel, "edit", $"No raid bosses found for tier {value}.");
+                  SocketGuildUser author = (SocketGuildUser)Context.Message.Author;
+                  if (parent.IsSingleStop())
+                  {
+                     parent.BossEditingPlayer = author;
+                  }
+                  parent.SelectionTier = calcTier;
+                  RestUserMessage bossMsg = await Context.Channel.SendMessageAsync(text: $"{author.Mention}",
+                     embed: BuildBossSelectEmbed(parent.AllBosses[calcTier], null, true));
+                  subMessages.Add(bossMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.EDIT_BOSS_SUB_MESSAGE, raidMessage.Id));
+                  IEmote[] emotes = Global.SELECTION_EMOJIS.Take(parent.AllBosses[calcTier].Count).ToArray();
+                  bossMsg.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
                }
             }
             else
@@ -177,42 +83,9 @@ namespace PokeStar.Modules
                await ResponseMessage.SendErrorMessage(channel, "edit", "Please enter a valid field to edit.");
             }
 
-            if (simpleEdit)
+            if (needsEdit)
             {
-               if (parent is RaidTrain train)
-               {
-                  string fileName = RAID_TRAIN_IMAGE_NAME;
-                  Connections.CopyFile(fileName);
-                  await raidMessage.ModifyAsync(x =>
-                  {
-                     x.Embed = BuildRaidTrainEmbed(train, fileName);
-                  });
-                  Connections.DeleteFile(fileName);
-               }
-               else if (parent is Raid raid)
-               {
-                  string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                  Connections.CopyFile(fileName);
-                  await raidMessage.ModifyAsync(x =>
-                  {
-                     x.Embed = BuildRaidEmbed(raid, fileName);
-                  });
-                  Connections.DeleteFile(fileName);
-               }
-               else if (parent is RaidMule mule)
-               {
-                  string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                  Connections.CopyFile(fileName);
-                  await raidMessage.ModifyAsync(x =>
-                  {
-                     x.Embed = BuildRaidMuleEmbed(mule, fileName);
-                  });
-                  Connections.DeleteFile(fileName);
-               }
-            }
-
-            if (simpleEdit || editComplete)
-            {
+               await ModifyMessage(raidMessage, parent);
                await Context.Channel.SendMessageAsync(BuildEditPingList(parent.GetAllUsers().ToImmutableList(), (SocketGuildUser)Context.Message.Author, attribute, value));
             }
          }
@@ -278,37 +151,7 @@ namespace PokeStar.Modules
                {
                   await ResponseMessage.SendWarningMessage(Context.Channel, "invite", "Some users where not found to be invited");
                }
-
-               if (parent is RaidTrain train)
-               {
-                  string fileName = RAID_TRAIN_IMAGE_NAME;
-                  Connections.CopyFile(fileName);
-                  await raidMessage.ModifyAsync(x =>
-                  {
-                     x.Embed = BuildRaidTrainEmbed(train, fileName);
-                  });
-                  Connections.DeleteFile(fileName);
-               }
-               else if (parent is Raid raid)
-               {
-                  string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                  Connections.CopyFile(fileName);
-                  await raidMessage.ModifyAsync(x =>
-                  {
-                     x.Embed = BuildRaidEmbed(raid, fileName);
-                  });
-                  Connections.DeleteFile(fileName);
-               }
-               else if (parent is RaidMule mule)
-               {
-                  string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                  Connections.CopyFile(fileName);
-                  await raidMessage.ModifyAsync(x =>
-                  {
-                     x.Embed = BuildRaidMuleEmbed(mule, fileName);
-                  });
-                  Connections.DeleteFile(fileName);
-               }
+               await ModifyMessage(raidMessage, parent);
                parent.InvitingPlayer = null;
             }
          }
@@ -330,35 +173,10 @@ namespace PokeStar.Modules
          ulong raidMessageId = Context.Message.Reference.MessageId.Value;
          SocketUserMessage raidMessage = (SocketUserMessage)await Context.Channel.GetMessageAsync(raidMessageId);
          RaidParent parent = raidMessages[raidMessageId];
-         if (!(parent is Raid raid))
-         {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "request", $"Command must be a reply to a raid or raid train message.");
-         }
-         else
-         {
-            raid.RequestInvite((SocketGuildUser)Context.Message.Author);
 
-            if (parent is RaidTrain train)
-            {
-               string fileName = RAID_TRAIN_IMAGE_NAME;
-               Connections.CopyFile(fileName);
-               await raidMessage.ModifyAsync(x =>
-               {
-                  x.Embed = BuildRaidTrainEmbed(train, fileName);
-               });
-               Connections.DeleteFile(fileName);
-            }
-            else
-            {
-               string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-               Connections.CopyFile(fileName);
-               await raidMessage.ModifyAsync(x =>
-               {
-                  x.Embed = BuildRaidEmbed(raid, fileName);
-               });
-               Connections.DeleteFile(fileName);
-            }
-         }
+         parent.RequestInvite((SocketGuildUser)Context.Message.Author);
+         await ModifyMessage(raidMessage, parent);
+
          await Context.Message.DeleteAsync();
       }
 
@@ -381,38 +199,15 @@ namespace PokeStar.Modules
          {
             await ResponseMessage.SendErrorMessage(Context.Channel, "remote", $"Command must be a reply to a raid or raid train message.");
          }
+         else if (groupSize < 0 || groupSize > 6)
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "remote", "Value must be a number between 0 and 6");
+         }
          else
          {
-            if (groupSize < 0 || groupSize > 6)
-            {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "remote", "Value must be a number between 0 and 6");
-            }
-            else
-            {
-               SocketGuildUser author = (SocketGuildUser)Context.Message.Author;
-               raid.AddPlayer(author, groupSize, author);
-
-               if (parent is RaidTrain train)
-               {
-                  string fileName = RAID_TRAIN_IMAGE_NAME;
-                  Connections.CopyFile(fileName);
-                  await raidMessage.ModifyAsync(x =>
-                  {
-                     x.Embed = BuildRaidTrainEmbed(train, fileName);
-                  });
-                  Connections.DeleteFile(fileName);
-               }
-               else
-               {
-                  string fileName = Connections.GetPokemonPicture(parent.Boss.Name);
-                  Connections.CopyFile(fileName);
-                  await raidMessage.ModifyAsync(x =>
-                  {
-                     x.Embed = BuildRaidEmbed(raid, fileName);
-                  });
-                  Connections.DeleteFile(fileName);
-               }
-            }
+            SocketGuildUser author = (SocketGuildUser)Context.Message.Author;
+            raid.AddPlayer(author, groupSize, author);
+            await ModifyMessage(raidMessage, parent);
          }
          await Context.Message.DeleteAsync();
       }
@@ -433,18 +228,15 @@ namespace PokeStar.Modules
          RaidParent parent = raidMessages[Context.Message.Reference.MessageId.Value];
          if (!(parent is RaidMule mule))
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "ready", $"Command must be a reply to a raid mule message.");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "ready", $"Command must be a reply to a raid mule or raid mule train message.");
+         }
+         else if (mule.GetTotalGroups() > groupNum || groupNum <= 0)
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "ready", $"{groupNum} is not a valid raid group number.");
          }
          else
          {
-            if (mule.GetTotalGroups() > groupNum || groupNum <= 0)
-            {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "ready", $"{groupNum} is not a valid raid group number.");
-            }
-            else
-            {
-               await Context.Channel.SendMessageAsync($"{BuildRaidReadyPingList(mule.GetGroup(groupNum - 1).GetPingList(), mule.Location, groupNum, false)}");
-            }
+            await Context.Channel.SendMessageAsync($"{BuildRaidReadyPingList(mule.GetGroup(groupNum - 1).GetPingList(), mule.GetCurrentLocation(), groupNum, false)}");
          }
          await Context.Message.DeleteAsync();
       }
@@ -467,27 +259,18 @@ namespace PokeStar.Modules
          ulong raidMessageId = Context.Message.Reference.MessageId.Value;
          SocketUserMessage raidMessage = (SocketUserMessage)await Context.Channel.GetMessageAsync(raidMessageId);
          RaidParent parent = raidMessages[raidMessageId];
-         if (!(parent is RaidTrain train))
+         if (parent.IsSingleStop())
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "add", $"Command must be a reply to a raid train message.");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "add", $"Command must be a reply to a raid train or raid mule train message.");
+         }
+         else if (!Context.Message.Author.Equals(parent.Conductor))
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "add", $"Command can only be run by the current conductor.");
          }
          else
          {
-            if (!Context.Message.Author.Equals(train.Conductor))
-            {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "add", $"Command can only be run by the current conductor.");
-            }
-            else
-            {
-               train.AddRaid(time, location);
-               string fileName = RAID_TRAIN_IMAGE_NAME;
-               Connections.CopyFile(fileName);
-               await raidMessage.ModifyAsync(x =>
-               {
-                  x.Embed = BuildRaidTrainEmbed(train, fileName);
-               });
-               Connections.DeleteFile(fileName);
-            }
+            parent.AddRaid(time, location);
+            await ModifyMessage(raidMessage, parent);
          }
          await Context.Message.DeleteAsync();
       }
@@ -508,35 +291,22 @@ namespace PokeStar.Modules
          ulong raidMessageId = Context.Message.Reference.MessageId.Value;
          SocketUserMessage raidMessage = (SocketUserMessage)await Context.Channel.GetMessageAsync(raidMessageId);
          RaidParent parent = raidMessages[raidMessageId];
-         if (!(parent is RaidTrain train))
+         if (parent.IsSingleStop())
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "conductor", $"Command must be a reply to a raid train message.");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "conductor", $"Command must be a reply to a raid train or raid mule train message.");
+         }
+         else if (!Context.Message.Author.Equals(parent.Conductor))
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "conductor", $"Command can only be run by the current conductor.");
+         }
+         else if (parent.IsInRaid((SocketGuildUser)conductor, false) == Global.NOT_IN_RAID)
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "conductor", $"New conductor must be in the train.");
          }
          else
          {
-            if (!Context.Message.Author.Equals(train.Conductor))
-            {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "conductor", $"Command can only be run by the current conductor.");
-            }
-            else
-            {
-               if (train.IsInRaid((SocketGuildUser)conductor, false) == Global.NOT_IN_RAID)
-               {
-                  await ResponseMessage.SendErrorMessage(Context.Channel, "conductor", $"New conductor must be in the raid train.");
-               }
-               else
-               {
-                  train.Conductor = (SocketGuildUser)conductor;
-               }
-            }
-
-            string fileName = RAID_TRAIN_IMAGE_NAME;
-            Connections.CopyFile(fileName);
-            await raidMessage.ModifyAsync(x =>
-            {
-               x.Embed = BuildRaidTrainEmbed(train, fileName);
-            });
-            Connections.DeleteFile(fileName);
+            parent.Conductor = (SocketGuildUser)conductor;
+            await ModifyMessage(raidMessage, parent);
          }
          await Context.Message.DeleteAsync();
       }
@@ -559,47 +329,35 @@ namespace PokeStar.Modules
          ulong raidMessageId = Context.Message.Reference.MessageId.Value;
          SocketUserMessage raidMessage = (SocketUserMessage)await Context.Channel.GetMessageAsync(raidMessageId);
          RaidParent parent = raidMessages[raidMessageId];
-         if (!(parent is RaidTrain train))
+         if (parent.IsSingleStop())
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"Command must be a reply to a raid train message.");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"Command must be a reply to a raid train or raid mule train message.");
+         }
+         else if (!Context.Message.Author.Equals(parent.Conductor))
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"Command can only be run by the current conductor.");
+         }
+         else if (parent.IsInRaid((SocketGuildUser)user, false) == Global.NOT_IN_RAID)
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"The user is not in the train.");
          }
          else
          {
-            if (!Context.Message.Author.Equals(train.Conductor))
+            RaidRemoveResult returnValue = parent.RemovePlayer((SocketGuildUser)user);
+
+            foreach (SocketGuildUser invite in returnValue.Users)
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"Command can only be run by the current conductor.");
-            }
-            else
-            {
-               if (train.IsInRaid((SocketGuildUser)user, false) == Global.NOT_IN_RAID)
-               {
-                  await ResponseMessage.SendErrorMessage(Context.Channel, "remove", $"The user is not in the raid train.");
-               }
-               else
-               {
-                  RaidRemoveResult returnValue = parent.RemovePlayer((SocketGuildUser)user);
-
-                  foreach (SocketGuildUser invite in returnValue.Users)
-                  {
-                     await invite.SendMessageAsync(BuildUnInvitedMessage((SocketGuildUser)user));
-                  }
-
-                  await user.SendMessageAsync(BuildRaidTrainRemoveMessage((SocketGuildUser)Context.Message.Author));
-
-                  if (returnValue.Group != Global.NOT_IN_RAID)
-                  {
-                     await Context.Channel.SendMessageAsync(BuildRaidReadyPingList(parent.GetGroup(returnValue.Group).GetPingList(), train.GetCurrentLocation(), returnValue.Group + 1, true));
-                  }
-               }
+               await invite.SendMessageAsync(BuildUnInvitedMessage((SocketGuildUser)user));
             }
 
-            string fileName = RAID_TRAIN_IMAGE_NAME;
-            Connections.CopyFile(fileName);
-            await raidMessage.ModifyAsync(x =>
+            await user.SendMessageAsync(BuildRaidTrainRemoveMessage((SocketGuildUser)Context.Message.Author));
+
+            if (returnValue.Group != Global.NOT_IN_RAID)
             {
-               x.Embed = BuildRaidTrainEmbed(train, fileName);
-            });
-            Connections.DeleteFile(fileName);
+               await Context.Channel.SendMessageAsync(BuildRaidReadyPingList(parent.GetGroup(returnValue.Group).GetPingList(), parent.GetCurrentLocation(), returnValue.Group + 1, true));
+            }
+
+            await ModifyMessage(raidMessage, parent);
          }
          await Context.Message.DeleteAsync();
       }
@@ -618,19 +376,19 @@ namespace PokeStar.Modules
       {
          ulong raidMessageId = Context.Message.Reference.MessageId.Value;
          RaidParent parent = raidMessages[raidMessageId];
-         if (!(parent is RaidTrain train))
+         if (parent.IsSingleStop())
          {
-            await ResponseMessage.SendErrorMessage(Context.Channel, "station", $"Command must be a reply to a raid train message.");
+            await ResponseMessage.SendErrorMessage(Context.Channel, "station", $"Command must be a reply to a raid train or raid mule train message.");
          }
          else
          {
-            List<RaidTrainLoc> futureRaids = train.GetIncompleteRaids();
-            if (train.StationMessageId.HasValue && Context.Channel.GetCachedMessage(train.StationMessageId.Value) != null)
+            List<RaidTrainLoc> futureRaids = parent.GetIncompleteRaids();
+            if (parent.StationMessageId.HasValue && Context.Channel.GetCachedMessage(parent.StationMessageId.Value) != null)
             {
-               await Context.Channel.DeleteMessageAsync(train.StationMessageId.Value);
+               await Context.Channel.DeleteMessageAsync(parent.StationMessageId.Value);
             }
-            RestUserMessage stationMsg = await Context.Channel.SendMessageAsync(embed: BuildStationEmbed(futureRaids, train.Conductor));
-            train.StationMessageId = stationMsg.Id;
+            RestUserMessage stationMsg = await Context.Channel.SendMessageAsync(embed: BuildStationEmbed(futureRaids, parent.Conductor));
+            parent.StationMessageId = stationMsg.Id;
          }
          await Context.Message.DeleteAsync();
       }
