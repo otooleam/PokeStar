@@ -84,7 +84,7 @@ namespace PokeStar
          await client.StartAsync();
          await client.SetGameAsync($".help | v{Global.VERSION}");
 
-         Global.COMMAND_INFO = commands.Commands.ToList();
+         Global.COMMAND_INFO = commands.Commands.ToList().OrderBy(c => c.Name).ToList();
 
          // Block this task until the program is closed.
          await Task.Delay(-1);
