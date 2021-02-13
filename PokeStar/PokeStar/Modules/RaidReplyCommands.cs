@@ -392,5 +392,50 @@ namespace PokeStar.Modules
          }
          await Context.Message.DeleteAsync();
       }
+
+      /// <summary>
+      /// Handle upgrade command.
+      /// </summary>
+      /// <param name="conductor">(Optional) User to make the conductor.</param>
+      /// <returns>Completed Task.</returns>
+      [Command("upgrade")]
+      [Summary("Upgrade a raid or raid mule to a raid train or raid mule train respectively.")]
+      [Remarks("Must be a reply to a raid message.")]
+      [RegisterChannel('R')]
+      [RaidReply()]
+      public async Task Upgrade([Summary("(Optional) User to make new conductor.")] IGuildUser conductor = null)
+      {
+         ulong raidMessageId = Context.Message.Reference.MessageId.Value;
+         RaidParent parent = raidMessages[raidMessageId];
+         SocketGuildUser newConductor = conductor == null ? (SocketGuildUser)Context.Message.Author : (SocketGuildUser)conductor;
+
+         if (!parent.IsSingleStop())
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "upgrade", $"Command must be a reply to a raid or raid mule message.");
+         }
+         else
+         {
+            parent.Conductor = newConductor;
+            Context.Channel.DeleteMessageAsync(raidMessageId);
+            raidMessages.Remove(raidMessageId);
+
+            string fileName = RAID_TRAIN_IMAGE_NAME;
+            Connections.CopyFile(fileName);
+            if (parent is Raid raid)
+            {
+               RestUserMessage raidMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidTrainEmbed(raid, fileName));
+               raidMessages.Add(raidMessage.Id, raid);
+               SetEmojis(raidMessage, raidEmojis.Concat(trainEmojis).ToArray());
+            }
+            else if (parent is RaidMule mule)
+            {
+               RestUserMessage raidMessage = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidMuleTrainEmbed(mule, fileName));
+               raidMessages.Add(raidMessage.Id, mule);
+               SetEmojis(raidMessage, muleEmojis.Concat(trainEmojis).ToArray());
+            }
+            Connections.DeleteFile(fileName);
+         }
+         await Context.Message.DeleteAsync();
+      }
    }
 }
