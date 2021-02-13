@@ -32,17 +32,6 @@ namespace PokeStar.ConnectionInterface
       private const string RocketLeaderHTMLPattern = "//*[@class='lineupGroup specialGroup']";
 
       /// <summary>
-      /// Gets a list of current raid bosses for a given tier.
-      /// </summary>
-      /// <param name="tier">Tier of bosses to get.</param>
-      /// <returns>List of current raid bosses for the tier.</returns>
-      public static List<string> GetRaidBossesTier(int tier)
-      {
-         Dictionary<int, List<string>> bossList = GetRaidBosses();
-         return bossList.ContainsKey(tier) ? bossList[tier] : new List<string>();
-      }
-
-      /// <summary>
       /// Gets a list of all current raid bosses.
       /// The list is dependent on the current raid bosses on 
       /// The Silph Road website. A change in the website's format
