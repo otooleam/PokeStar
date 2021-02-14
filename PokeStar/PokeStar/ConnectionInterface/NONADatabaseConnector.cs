@@ -582,7 +582,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="nickname">Nickname of the Point of Interest.</param>
       public void AddPOINickname(ulong guild, string poiName, string nickname)
       {
-         string queryString = $@"INSERT INTO poi (guild, name, nickname)
+         string queryString = $@"INSERT INTO poi_nickname (guild, name, nickname)
                                  VALUES ({guild}, '{poiName}', '{nickname}')";
 
          using (SqlConnection conn = GetConnection())
@@ -601,7 +601,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="originalNickname">Old nickname.</param>
       public void UpdatePOINickname(ulong guild, string newNickname, string originalNickname)
       {
-         string queryString = $@"UPDATE poi 
+         string queryString = $@"UPDATE poi_nickname 
                                  SET nickname = '{newNickname}'
                                  WHERE guild={guild}
                                  AND nickname = '{originalNickname}';";
@@ -621,7 +621,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="nickname">Nickname of a Pokémon.</param>
       public void DeletePOINickname(ulong guild, string nickname)
       {
-         string queryString = $@"DELETE FROM poi
+         string queryString = $@"DELETE FROM poi_nickname
                                  WHERE guild={guild}
                                  AND nickname='{nickname}';";
 
