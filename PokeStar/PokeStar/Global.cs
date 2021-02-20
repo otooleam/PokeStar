@@ -197,6 +197,16 @@ namespace PokeStar
       public static readonly short COMMON_RAID_TIER    = 1;
 
       /// <summary>
+      /// Tier 4 raid value.
+      /// </summary>
+      public static readonly short TIER_4_RAID_TIER    = 4;
+
+      /// <summary>
+      /// Tier 2 raid value.
+      /// </summary>
+      public static readonly short TIER_2_RAID_TIER    = 2;
+
+      /// <summary>
       /// Invalid raid tier value.
       /// </summary>
       public static readonly short INVALID_RAID_TIER   = 0;
@@ -236,6 +246,8 @@ namespace PokeStar
          ["COMMON"]    = COMMON_RAID_TIER,
          ["C"]         = COMMON_RAID_TIER,
          ["1"]         = COMMON_RAID_TIER,
+         ["4"]         = TIER_4_RAID_TIER,
+         ["2"]         = TIER_2_RAID_TIER,
       };
 
       // Raid limits **********************************************************

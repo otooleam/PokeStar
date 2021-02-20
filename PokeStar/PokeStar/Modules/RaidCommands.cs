@@ -29,7 +29,9 @@ namespace PokeStar.Modules
       [Remarks("Valid Tier values:\n" +
          "0 (raid with no boss assigned)\n" +
          "1, common, C\n" +
+         "2\n" +
          "3, rare, R\n" +
+         "4\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
       [RegisterChannel('R')]
@@ -39,7 +41,7 @@ namespace PokeStar.Modules
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
          Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
-         List<string> potentials = calcTier == Global.INVALID_RAID_TIER ? new List<string>() : allBosses[calcTier];
+         List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          Raid raid;
          string fileName;
          if (potentials.Count > 1)
@@ -106,7 +108,9 @@ namespace PokeStar.Modules
       [Remarks("Valid Tier values:\n" +
          "0 (raid with no boss assigned)\n" +
          "1, common, C\n" +
+         "2\n" +
          "3, rare, R\n" +
+         "4\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
       [RegisterChannel('R')]
@@ -116,7 +120,7 @@ namespace PokeStar.Modules
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
          Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
-         List<string> potentials = calcTier == Global.INVALID_RAID_TIER ? new List<string>() : allBosses[calcTier];
+         List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          RaidMule raid;
          string fileName;
          if (potentials.Count > 1)
@@ -183,7 +187,9 @@ namespace PokeStar.Modules
       [Remarks("Valid Tier values:\n" +
          "0 (raid with no boss assigned)\n" +
          "1, common, C\n" +
+         "2\n" +
          "3, rare, R\n" +
+         "4\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
       [RegisterChannel('R')]
@@ -193,7 +199,7 @@ namespace PokeStar.Modules
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
          Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
-         List<string> potentials = calcTier == Global.INVALID_RAID_TIER ? new List<string>() : allBosses[calcTier];
+         List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          Raid raid;
          string fileName;
          if (potentials.Count > 1)
@@ -258,9 +264,11 @@ namespace PokeStar.Modules
       [Alias("raidMuleTrain")]
       [Summary("Creates a new raid train coordination message.")]
       [Remarks("Valid Tier values:\n" +
-         "0 (raid with no boss assigned)\n" +
+         "0 (raid with no boss assigned)\n" + 
          "1, common, C\n" +
+         "2\n" +
          "3, rare, R\n" +
+         "4\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
       [RegisterChannel('R')]
@@ -270,7 +278,7 @@ namespace PokeStar.Modules
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
          Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
-         List<string> potentials = calcTier == Global.INVALID_RAID_TIER ? new List<string>() : allBosses[calcTier];
+         List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          RaidMule raid;
          string fileName;
          if (potentials.Count > 1)

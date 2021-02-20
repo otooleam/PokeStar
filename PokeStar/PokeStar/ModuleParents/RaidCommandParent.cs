@@ -1134,7 +1134,7 @@ namespace PokeStar.ModuleParents
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
          embed.WithTitle($"Boss Selection");
-         if (string.IsNullOrEmpty(fileName))
+         if (!string.IsNullOrEmpty(fileName))
          {
             embed.WithThumbnailUrl($"attachment://{fileName}");
          }
