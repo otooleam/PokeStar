@@ -79,6 +79,7 @@ namespace PokeStar.ConnectionInterface
       /// <returns>Pokémon picture file name.</returns>
       public static string GetPokemonPicture(string pokemonName)
       {
+         int x = pokemonName.IndexOf('`');
          pokemonName = pokemonName.Replace(" ", "_");
          pokemonName = pokemonName.Replace(".", "");
          pokemonName = pokemonName.Replace("%", "");
@@ -235,14 +236,14 @@ namespace PokeStar.ConnectionInterface
             pokemon.Weakness = typeRelations.Weak.Keys.ToList();
             pokemon.Resistance = typeRelations.Strong.Keys.ToList();
             pokemon.Weather = GetWeather(pokemon.Type);
-            pokemon.FastMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.FAST_MOVE_CATEGORY);
-            pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(pokemon.Name, Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
-            pokemon.Counter = POGODBConnector.GetCounters(pokemon.Name);
+            pokemon.FastMove = POGODBConnector.GetPokemonMoves(ReformatName(pokemon.Name), Global.FAST_MOVE_CATEGORY);
+            pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(ReformatName(pokemon.Name), Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
+            pokemon.Counter = POGODBConnector.GetCounters(ReformatName(pokemon.Name));
 
             foreach (Counter counter in pokemon.Counter)
             {
-               counter.FastAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.FastAttack.Name);
-               counter.ChargeAttack = POGODBConnector.GetPokemonMove(counter.Name, counter.ChargeAttack.Name);
+               counter.FastAttack = POGODBConnector.GetPokemonMove(ReformatName(counter.Name), counter.FastAttack.Name);
+               counter.ChargeAttack = POGODBConnector.GetPokemonMove(ReformatName(counter.Name), counter.ChargeAttack.Name);
             }
 
             pokemon.CPMax = CPCalculator.CalcCPPerLevel(

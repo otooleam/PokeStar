@@ -281,6 +281,12 @@ namespace PokeStar.ConnectionInterface
          {
             return "Shock Drive Genesect";
          }
+         else if (name.IndexOf('’') != -1)
+         {
+            return name.Replace('’', '\'');
+         }
+
+
          return name;
       }
    }
