@@ -247,6 +247,7 @@ namespace PokeStar
          ["C"]         = COMMON_RAID_TIER,
          ["1"]         = COMMON_RAID_TIER,
          ["4"]         = TIER_4_RAID_TIER,
+         ["SNORLAX"]   = TIER_4_RAID_TIER,
          ["2"]         = TIER_2_RAID_TIER,
       };
 

@@ -31,7 +31,7 @@ namespace PokeStar.Modules
          "1, common, C\n" +
          "2\n" +
          "3, rare, R\n" +
-         "4\n" +
+         "4, Snorlax\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
       [RegisterChannel('R')]
@@ -110,7 +110,7 @@ namespace PokeStar.Modules
          "1, common, C\n" +
          "2\n" +
          "3, rare, R\n" +
-         "4\n" +
+         "4, Snorlax\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
       [RegisterChannel('R')]
@@ -189,7 +189,7 @@ namespace PokeStar.Modules
          "1, common, C\n" +
          "2\n" +
          "3, rare, R\n" +
-         "4\n" +
+         "4, Snorlax\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
       [RegisterChannel('R')]
@@ -268,7 +268,7 @@ namespace PokeStar.Modules
          "1, common, C\n" +
          "2\n" +
          "3, rare, R\n" +
-         "4\n" +
+         "4, Snorlax\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
       [RegisterChannel('R')]
