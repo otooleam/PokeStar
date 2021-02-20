@@ -21,8 +21,8 @@ namespace PokeStar.Modules
       /// <param name="tier">(Optional) Get information for this Egg tier.</param>
       /// <returns>Completed task.</returns>
       [Command("egg")]
-      [Summary("Gets lists of Pokémon currently in eggs.\n" +
-               "Leave blank for a list of valid egg tiers.")]
+      [Summary("Gets lists of Pokémon currently in eggs.")]
+      [Remarks("Leave blank for a list of valid egg tiers.")]
       [RegisterChannel('I')]
       public async Task Egg([Summary("(Optional) Get information for this Egg tier.")][Remainder]string tier = null)
       {

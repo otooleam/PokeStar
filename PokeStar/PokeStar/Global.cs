@@ -28,6 +28,9 @@ namespace PokeStar
       /// </summary>
       private const string POKEBALL = "PokéBall";
 
+      /// <summary>
+      /// Save formated Poké Stop.
+      /// </summary>
       private const string POKESTOP = "Poké Stop";
 
       // File IO **************************************************************

@@ -25,8 +25,22 @@ namespace PokeStar.DataModels
       /// <param name="tier">Tier of the raid.</param>
       /// <param name="time">When the raid starts.</param>
       /// <param name="location">Where the raid is.</param>
+      /// <param name="conductor">Conductor of the mule train.</param>
       /// <param name="boss">Name of the raid boss.</param>
-      public RaidMule(short tier, string time, string location, string boss = null) : 
+      public RaidMule(short tier, string time, string location, SocketGuildUser conductor, string boss = null) : 
+         base(Global.LIMIT_RAID_MULE_GROUP, Global.LIMIT_RAID_MULE_INVITE, Global.LIMIT_RAID_MULE_INVITE, tier, time, location, conductor, boss)
+      {
+         Mules = new RaidGroup(Global.LIMIT_RAID_MULE_MULE, 0);
+      }
+
+      /// <summary>
+      /// Creates a new raid.
+      /// </summary>
+      /// <param name="tier">Tier of the raid.</param>
+      /// <param name="time">When the raid starts.</param>
+      /// <param name="location">Where the raid is.</param>
+      /// <param name="boss">Name of the raid boss.</param>
+      public RaidMule(short tier, string time, string location, string boss = null) :
          base(Global.LIMIT_RAID_MULE_GROUP, Global.LIMIT_RAID_MULE_INVITE, Global.LIMIT_RAID_MULE_INVITE, tier, time, location, boss)
       {
          Mules = new RaidGroup(Global.LIMIT_RAID_MULE_MULE, 0);

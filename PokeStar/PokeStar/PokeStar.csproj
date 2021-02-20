@@ -203,7 +203,6 @@
     <Compile Include="DataModels\POI.cs" />
     <Compile Include="DataModels\LeagueIV.cs" />
     <Compile Include="DataModels\Move.cs" />
-    <Compile Include="DataModels\RaidTrain.cs" />
     <Compile Include="DataModels\ResponseMessage.cs" />
     <Compile Include="DataModels\PokemonMove.cs" />
     <Compile Include="DataModels\Pokemon.cs" />

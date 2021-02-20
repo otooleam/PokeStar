@@ -3,7 +3,6 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Collections.Immutable;
 using Discord.WebSocket;
-using PokeStar.ConnectionInterface;
 
 namespace PokeStar.DataModels
 {
@@ -12,6 +11,16 @@ namespace PokeStar.DataModels
    /// </summary>
    public abstract class RaidParent
    {
+      /// <summary>
+      /// Index of the current location.
+      /// </summary>
+      private int CurrentLocation;
+
+      /// <summary>
+      /// List of all locations the train will visit.
+      /// </summary>
+      private readonly List<RaidTrainLoc> Locations;
+
       /// <summary>
       /// Maximum number of raid groups.
       /// </summary>
@@ -33,14 +42,14 @@ namespace PokeStar.DataModels
       protected const int InviteListNumber = 101;
 
       /// <summary>
-      /// When the raid starts.
+      /// List of raid groups in the raid.
       /// </summary>
-      public string Time { get; set; }
+      protected List<RaidGroup> Groups { get; private set; }
 
       /// <summary>
-      /// Where the raid is.
+      /// List of players looking for an invite to the raid.
       /// </summary>
-      public string Location { get; set; }
+      protected List<SocketGuildUser> Invite { get; private set; }
 
       /// <summary>
       /// Tier of the raid.
@@ -48,15 +57,20 @@ namespace PokeStar.DataModels
       public short Tier { get; set; }
 
       /// <summary>
-      /// Raid boss that the raid is for.
+      /// Tier of the raid for boss selection.
       /// </summary>
-      public Pokemon Boss { get; protected set; }
+      public short SelectionTier { get; set; }
 
       /// <summary>
-      /// List of possible raid bosses.
-      /// Only used if no raid boss is selected.
+      /// Id of the current station message.
+      /// Only 1 should exist at a time.
       /// </summary>
-      public List<string> RaidBossSelections { get; set; }
+      public ulong? StationMessageId { get; set; } = null;
+
+      /// <summary>
+      /// Current page of Invite Embed.
+      /// </summary>
+      public int InvitePage { get; protected set; }
 
       /// <summary>
       /// When the raid was created at.
@@ -69,22 +83,57 @@ namespace PokeStar.DataModels
       public SocketGuildUser InvitingPlayer { get; set; }
 
       /// <summary>
-      /// Current page of Invite Embed.
+      /// Player in charge of the train.
       /// </summary>
-      public int InvitePage { get; protected set; }
+      public SocketGuildUser Conductor { get; set; }
 
       /// <summary>
-      /// List of raid groups in the raid.
+      /// Player editing the boss of the raid.
+      /// Only used for single stop raids.
       /// </summary>
-      protected List<RaidGroup> Groups { get; set; }
+      public SocketGuildUser BossEditingPlayer { get; set; }
 
       /// <summary>
-      /// List of players looking for an invite to the raid.
+      /// List of all current raid bosses.
       /// </summary>
-      protected List<SocketGuildUser> Invite { get; set; }
+      public Dictionary<int, List<string>> AllBosses { get; set; }
 
       /// <summary>
       /// Creates a new RaidParent.
+      /// </summary>
+      /// <param name="groupLimit">Max number of groups.</param>
+      /// <param name="playerLimit">Max number of players per group.</param>
+      /// <param name="inviteLimit">Max number of invites per group.</param>
+      /// <param name="tier">Tier of the raid.</param>
+      /// <param name="time">When the raid starts.</param>
+      /// <param name="location">Where the raid is.</param>
+      /// <param name="conductor">Conductor of the raid train.</param>
+      /// <param name="boss">Name of the raid boss.</param>
+      public RaidParent(int groupLimit, int playerLimit, int inviteLimit, short tier, string time, string location, SocketGuildUser conductor, string boss = null)
+      {
+         RaidGroupLimit = groupLimit;
+         PlayerLimit = playerLimit;
+         InviteLimit = inviteLimit;
+         Tier = tier;
+         SelectionTier = tier;
+         Conductor = conductor;
+
+         Locations = new List<RaidTrainLoc>
+         {
+            new RaidTrainLoc(time, location, boss)
+         };
+         Groups = new List<RaidGroup>
+         {
+            new RaidGroup(PlayerLimit, InviteLimit)
+         };
+         Invite = new List<SocketGuildUser>();
+         CurrentLocation = 0;
+         CreatedAt = DateTime.Now;
+         InvitingPlayer = null;
+      }
+
+      /// <summary>
+      /// Creates a new single stop RaidParent.
       /// </summary>
       /// <param name="groupLimit">Max number of groups.</param>
       /// <param name="playerLimit">Max number of players per group.</param>
@@ -99,26 +148,21 @@ namespace PokeStar.DataModels
          PlayerLimit = playerLimit;
          InviteLimit = inviteLimit;
          Tier = tier;
-         Time = time;
-         Location = location;
-         SetBoss(boss);
+         SelectionTier = tier;
+
+         Locations = new List<RaidTrainLoc>
+         {
+            new RaidTrainLoc(time, location, boss)
+         };
          Groups = new List<RaidGroup>
          {
             new RaidGroup(PlayerLimit, InviteLimit)
          };
          Invite = new List<SocketGuildUser>();
-         RaidBossSelections = new List<string>();
+         CurrentLocation = 0;
          CreatedAt = DateTime.Now;
          InvitingPlayer = null;
-      }
-
-      /// <summary>
-      /// Sets the boss of the raid.
-      /// </summary>
-      /// <param name="bossName">Name of the raid boss.</param>
-      public virtual void SetBoss(string bossName)
-      {
-         Boss = string.IsNullOrEmpty(bossName) ? null : bossName.Equals(Global.DEFAULT_RAID_BOSS_NAME, StringComparison.OrdinalIgnoreCase) ? new Pokemon() :  Connections.Instance().GetPokemon(bossName);
+         Conductor = null;
       }
 
       /// <summary>
@@ -237,6 +281,155 @@ namespace PokeStar.DataModels
       public abstract int IsInRaid(SocketGuildUser player, bool checkInvite = true);
 
       /// <summary>
+      /// Is the RaidParent a single stop.
+      /// </summary>
+      /// <returns>True if the parent can only have one stop.</returns>
+      public bool IsSingleStop()
+      {
+         return Conductor == null;
+      }
+
+      /// <summary>
+      /// Check if the current location is the first location.
+      /// </summary>
+      /// <returns>True if first location, otherwise false.</returns>
+      public bool IsFirstLocation()
+      {
+         return CurrentLocation == 0;
+      }
+
+      /// <summary>
+      /// Gets the name of the current gym count over the total count.
+      /// </summary>
+      /// <returns>Current raid count as a string.</returns>
+      public string GetCurrentRaidCount()
+      {
+         return $"{CurrentLocation + 1} / {Locations.Count}";
+      }
+
+      /// <summary>
+      /// Gets the time for the current raid.
+      /// </summary>
+      /// <returns>Time of the current raid.</returns>
+      public string GetCurrentTime()
+      {
+         return Locations.ElementAt(CurrentLocation).Time;
+      }
+
+      /// <summary>
+      /// Gets the location for the current raid.
+      /// </summary>
+      /// <returns>Location of the current raid.</returns>
+      public string GetCurrentLocation()
+      {
+         return $"{Locations.ElementAt(CurrentLocation).Location}";
+      }
+
+      /// <summary>
+      /// Gets the name of the current raid boss.
+      /// </summary>
+      /// <returns>Name of the current raid boss.</returns>
+      public string GetCurrentBoss()
+      {
+         return Locations.ElementAt(CurrentLocation).BossName;
+      }
+
+      /// <summary>
+      /// Gets the information for the next raid.
+      /// </summary>
+      /// <returns>Information for the next raid.</returns>
+      public string GetNextRaid()
+      {
+         return (CurrentLocation + 1 == Locations.Count) ? Global.EMPTY_FIELD : $"{Locations.ElementAt(CurrentLocation + 1).Time} at {Locations.ElementAt(CurrentLocation + 1).Location} ({Locations.ElementAt(CurrentLocation + 1).BossName})";
+      }
+
+      /// <summary>
+      /// Gets information for all raids that are not finished.
+      /// </summary>
+      /// <returns>List of all incomplete raids.</returns>
+      public List<RaidTrainLoc> GetIncompleteRaids()
+      {
+         return Locations.GetRange(CurrentLocation, Locations.Count - CurrentLocation);
+      }
+
+      /// <summary>
+      /// Adds a raid to the list of locations.
+      /// </summary>
+      /// <param name="time">Time of the raid.</param>
+      /// <param name="location">Location of the raid.</param>
+      public void AddRaid(string time, string location)
+      {
+         if (!Locations.Any(raidTrainLoc => raidTrainLoc.Location.Equals(location, StringComparison.OrdinalIgnoreCase)))
+         {
+            Locations.Add(new RaidTrainLoc(time, location, Locations.Last().BossName));
+         }
+      }
+
+      /// <summary>
+      /// Update information for a location.
+      /// </summary>
+      /// <param name="time">New time of the raid.</param>
+      /// <param name="location">New location of the raid.</param>
+      public void UpdateRaidInformation(string time = null, string location = null)
+      {
+         if (time != null)
+         {
+            Locations[CurrentLocation] = new RaidTrainLoc(time, Locations[CurrentLocation].Location, Locations[CurrentLocation].BossName);
+         }
+         if (location != null)
+         {
+            Locations[CurrentLocation] = new RaidTrainLoc(Locations[CurrentLocation].Time, location, Locations[CurrentLocation].BossName);
+         }
+      }
+
+      /// <summary>
+      /// Update the name of the boss at the current location.
+      /// Selection tier should be updated first to ensure correct
+      /// raid boss is selected.
+      /// </summary>
+      /// <param name="index">Index of the new boss in the tier list.</param>
+      public void UpdateBoss(int index)
+      {
+         string bossName = AllBosses[SelectionTier].ElementAt(index);
+         Locations[CurrentLocation] = new RaidTrainLoc(Locations[CurrentLocation].Time, Locations[CurrentLocation].Location, bossName);
+         Tier = SelectionTier;
+      }
+
+      /// <summary>
+      /// Counts forward to the next location.
+      /// If the count can be moved all players are reset to attending.
+      /// </summary>
+      /// <returns>True if the location changed, otherwise false.</returns>
+      public bool NextLocation()
+      {
+         int OldLocation = CurrentLocation;
+         if (CurrentLocation < Locations.Count - 1)
+         {
+            CurrentLocation++;
+         }
+         if (OldLocation != CurrentLocation)
+         {
+            foreach (RaidGroup group in Groups)
+            {
+               group.ResetReady();
+            }
+            return true;
+         }
+         return false;
+      }
+
+      /// <summary>
+      /// Counts back to the previous location.
+      /// </summary>
+      /// <returns>True if the location changed, otherwise false.</returns>
+      public bool PreviousLocation()
+      {
+         int OldLocation = CurrentLocation;
+         CurrentLocation = Math.Max(--CurrentLocation, 0);
+         return OldLocation != CurrentLocation;
+      }
+
+      /// <summary>
       /// Finds the smallest group.
       /// </summary>
       /// <returns>Group number of the smallest group.</returns>
@@ -262,7 +455,7 @@ namespace PokeStar.DataModels
       protected void CheckMergeGroups()
       {
          foreach (RaidGroup group in Groups)
-         { 
+         {
             foreach (RaidGroup check in Groups)
             {
                group.MergeGroup(check);

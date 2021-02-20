@@ -89,16 +89,6 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets a list of current raid bosses for a given tier.
-      /// </summary>
-      /// <param name="tier">Tier of bosses.</param>
-      /// <returns>List of current raid bosses for the tier.</returns>
-      public static List<string> GetBossList(int tier)
-      {
-         return SilphData.GetRaidBossesTier(tier);
-      }
-
-      /// <summary>
       /// Get the full list of raid bosses.
       /// </summary>
       /// <returns>List of raid bosses sorted by tier.</returns>

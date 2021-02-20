@@ -15,8 +15,19 @@ namespace PokeStar.DataModels
       /// <param name="tier">Tier of the raid.</param>
       /// <param name="time">When the raid starts.</param>
       /// <param name="location">Where the raid is.</param>
+      /// <param name="conductor">Conductor of the raid train.</param>
       /// <param name="boss">Name of the raid boss.</param>
-      public Raid(short tier, string time, string location, string boss = null) : 
+      public Raid(short tier, string time, string location, SocketGuildUser conductor, string boss = null) : 
+         base(Global.LIMIT_RAID_GROUP, Global.LIMIT_RAID_PLAYER, Global.LIMIT_RAID_INVITE, tier, time, location, conductor, boss) { }
+
+      /// <summary>
+      /// Creates a new single stop raid.
+      /// </summary>
+      /// <param name="tier">Tier of the raid.</param>
+      /// <param name="time">When the raid starts.</param>
+      /// <param name="location">Where the raid is.</param>
+      /// <param name="boss">Name of the raid boss.</param>
+      public Raid(short tier, string time, string location, string boss = null) :
          base(Global.LIMIT_RAID_GROUP, Global.LIMIT_RAID_PLAYER, Global.LIMIT_RAID_INVITE, tier, time, location, boss) { }
 
       /// <summary>
@@ -220,6 +231,21 @@ namespace PokeStar.DataModels
             return (group.MarkPlayerReady(player) && group.AllPlayersReady()) ? groupNum : Global.NOT_IN_RAID;
          }
          return Global.NOT_IN_RAID;
+      }
+
+      /// <summary>
+      /// Checks if all participants in the raid are ready.
+      /// Checks all raid groups.
+      /// </summary>
+      /// <returns>True if all players in all raid groups are ready, otherwise false.</returns>
+      public bool AllReady()
+      {
+         bool allReady = true;
+         foreach (RaidGroup group in Groups)
+         {
+            allReady = allReady && group.AllPlayersReady();
+         }
+         return allReady;
       }
    }
 }
