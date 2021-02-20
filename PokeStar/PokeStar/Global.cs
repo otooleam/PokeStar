@@ -187,24 +187,24 @@ namespace PokeStar
       public static readonly short LEGENDARY_RAID_TIER = 5;
 
       /// <summary>
+      /// Premium raid tier value.
+      /// </summary>
+      public static readonly short PREMIUM_RAID_TIER   = 4;
+
+      /// <summary>
       /// Rare raid tier value.
       /// </summary>
       public static readonly short RARE_RAID_TIER      = 3;
 
       /// <summary>
+      /// Uncommon raid tier value.
+      /// </summary>
+      public static readonly short UNCOMMON_RAID_TIER  = 2;
+
+      /// <summary>
       /// Common raid tier value.
       /// </summary>
       public static readonly short COMMON_RAID_TIER    = 1;
-
-      /// <summary>
-      /// Tier 4 raid value.
-      /// </summary>
-      public static readonly short TIER_4_RAID_TIER    = 4;
-
-      /// <summary>
-      /// Tier 2 raid value.
-      /// </summary>
-      public static readonly short TIER_2_RAID_TIER    = 2;
 
       /// <summary>
       /// Invalid raid tier value.
@@ -240,15 +240,19 @@ namespace PokeStar
          ["LEGENDARY"] = LEGENDARY_RAID_TIER,
          ["L"]         = LEGENDARY_RAID_TIER,
          ["5"]         = LEGENDARY_RAID_TIER,
+         ["PREMIUM"]   = PREMIUM_RAID_TIER,
+         ["P"]         = PREMIUM_RAID_TIER,
+         ["4"]         = PREMIUM_RAID_TIER,
+         ["SNORLAX"]   = PREMIUM_RAID_TIER,
          ["RARE"]      = RARE_RAID_TIER,
          ["R"]         = RARE_RAID_TIER,
          ["3"]         = RARE_RAID_TIER,
+         ["UNCOMMON"]  = UNCOMMON_RAID_TIER,
+         ["U"]         = UNCOMMON_RAID_TIER,
+         ["2"]         = UNCOMMON_RAID_TIER,
          ["COMMON"]    = COMMON_RAID_TIER,
          ["C"]         = COMMON_RAID_TIER,
          ["1"]         = COMMON_RAID_TIER,
-         ["4"]         = TIER_4_RAID_TIER,
-         ["SNORLAX"]   = TIER_4_RAID_TIER,
-         ["2"]         = TIER_2_RAID_TIER,
       };
 
       // Raid limits **********************************************************

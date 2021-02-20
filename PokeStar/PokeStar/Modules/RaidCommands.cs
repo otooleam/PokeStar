@@ -29,9 +29,9 @@ namespace PokeStar.Modules
       [Remarks("Valid Tier values:\n" +
          "0 (raid with no boss assigned)\n" +
          "1, common, C\n" +
-         "2\n" +
+         "2, uncommon, U\n" +
          "3, rare, R\n" +
-         "4, Snorlax\n" +
+         "4, premium, p\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
       [RegisterChannel('R')]
@@ -108,9 +108,9 @@ namespace PokeStar.Modules
       [Remarks("Valid Tier values:\n" +
          "0 (raid with no boss assigned)\n" +
          "1, common, C\n" +
-         "2\n" +
+         "2, uncommon, U\n" +
          "3, rare, R\n" +
-         "4, Snorlax\n" +
+         "4, premium, p\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
       [RegisterChannel('R')]
@@ -187,9 +187,9 @@ namespace PokeStar.Modules
       [Remarks("Valid Tier values:\n" +
          "0 (raid with no boss assigned)\n" +
          "1, common, C\n" +
-         "2\n" +
+         "2, uncommon, U\n" +
          "3, rare, R\n" +
-         "4, Snorlax\n" +
+         "4, premium, p\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
       [RegisterChannel('R')]
@@ -264,11 +264,11 @@ namespace PokeStar.Modules
       [Alias("raidMuleTrain")]
       [Summary("Creates a new raid train coordination message.")]
       [Remarks("Valid Tier values:\n" +
-         "0 (raid with no boss assigned)\n" + 
+         "0 (raid with no boss assigned)\n" +
          "1, common, C\n" +
-         "2\n" +
+         "2, uncommon, U\n" +
          "3, rare, R\n" +
-         "4, Snorlax\n" +
+         "4, premium, p\n" +
          "5, legendary, L\n" +
          "7, mega, M\n")]
       [RegisterChannel('R')]
@@ -347,11 +347,34 @@ namespace PokeStar.Modules
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Global.EMBED_COLOR_GAME_INFO_RESPONSE);
          embed.WithTitle("Current Raid Bosses:");
-         embed.AddField($"EX Raids {BuildRaidTitle(Global.EX_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.EX_RAID_TIER]), true);
-         embed.AddField($"Mega Raids {BuildRaidTitle(Global.MEGA_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.MEGA_RAID_TIER]), true);
-         embed.AddField($"Tier 5 Raids {BuildRaidTitle(Global.LEGENDARY_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.LEGENDARY_RAID_TIER]), true);
-         embed.AddField($"Tier 3 Raids {BuildRaidTitle(Global.RARE_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.RARE_RAID_TIER]), true);
-         embed.AddField($"Tier 1 Raids {BuildRaidTitle(Global.COMMON_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.COMMON_RAID_TIER]), true);
+         if (allBosses.ContainsKey(Global.EX_RAID_TIER))
+         {
+            embed.AddField($"EX Raids {BuildRaidTitle(Global.EX_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.EX_RAID_TIER]), true);
+         }
+         if (allBosses.ContainsKey(Global.MEGA_RAID_TIER))
+         {
+            embed.AddField($"Mega Raids {BuildRaidTitle(Global.MEGA_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.MEGA_RAID_TIER]), true);
+         }
+         if (allBosses.ContainsKey(Global.LEGENDARY_RAID_TIER))
+         {
+            embed.AddField($"Tier 5 Raids {BuildRaidTitle(Global.LEGENDARY_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.LEGENDARY_RAID_TIER]), true);
+         }
+         if (allBosses.ContainsKey(Global.PREMIUM_RAID_TIER))
+         {
+            embed.AddField($"Tier 4 Raids {BuildRaidTitle(Global.PREMIUM_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.PREMIUM_RAID_TIER]), true);
+         }
+         if (allBosses.ContainsKey(Global.RARE_RAID_TIER))
+         {
+            embed.AddField($"Tier 3 Raids {BuildRaidTitle(Global.RARE_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.RARE_RAID_TIER]), true);
+         }
+         if (allBosses.ContainsKey(Global.UNCOMMON_RAID_TIER))
+         {
+            embed.AddField($"Tier 2 Raids {BuildRaidTitle(Global.UNCOMMON_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.UNCOMMON_RAID_TIER]), true);
+         }
+         if (allBosses.ContainsKey(Global.COMMON_RAID_TIER))
+         {
+            embed.AddField($"Tier 1 Raids {BuildRaidTitle(Global.COMMON_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.COMMON_RAID_TIER]), true);
+         }
 
          await Context.Channel.SendMessageAsync(embed: embed.Build());
       }
