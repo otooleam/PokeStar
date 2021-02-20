@@ -413,7 +413,7 @@ namespace PokeStar.ConnectionInterface
                      PvPPower = Convert.ToInt32(reader["pvp_power"]),
                      PvPEnergy = Convert.ToInt32(reader["pvp_energy"]),
                      PvPTurns = Convert.ToInt32(reader["pvp_turns"]),
-                     Cooldown = Convert.ToInt32(reader["pvp_turns"]),
+                     Cooldown = Convert.ToInt32(reader["cooldown"]),
                      DamageWindowStart = Convert.ToInt32(reader["damage_window_start"]),
                      DamageWindowEnd = Convert.ToInt32(reader["damage_window_end"])
                   };
