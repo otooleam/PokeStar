@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Discord;
@@ -31,7 +32,7 @@ namespace PokeStar.Modules
          {
             List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
 
-            if (pokemonWithNumber.Count == 0)
+            if (pokemonWithNumber.Count == 0 || pokemonNum == 0)
             {
                await ResponseMessage.SendErrorMessage(Context.Channel, "catch", $"Pokémon with number {pokemonNum} cannot be found.");
             }
@@ -60,11 +61,11 @@ namespace PokeStar.Modules
          {
             string name = GetPokemonName(pokemon);
             Pokemon pkmn = Connections.Instance().GetPokemon(name);
-            if (pkmn == null)
+            if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
             {
                pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
 
-               if (pkmn == null)
+               if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
                {
                   List<string> pokemonNames = Connections.Instance().SearchPokemon(name);
 

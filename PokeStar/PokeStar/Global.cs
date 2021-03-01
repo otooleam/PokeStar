@@ -451,6 +451,18 @@ namespace PokeStar
       /// </summary>
       public static readonly int ARCEUS_NUMBER = 493;
 
+      // Training dummy Pokémon ***********************************************
+
+      /// <summary>
+      /// Dummy Pokémon number.
+      /// </summary>
+      public static int DUMMY_POKE_NUM     = 0;
+
+      /// <summary>
+      /// Dummy Pokémon name.
+      /// </summary>
+      public static string DUMMY_POKE_NAME = "MissingNo";
+
       // Catch multipliers ****************************************************
 
       /// <summary>
@@ -580,7 +592,12 @@ namespace PokeStar
       /// <summary>
       /// Mega Pokémon tag.
       /// </summary>
-      public static readonly string MEGA_TAG             = "mega";
+      public static readonly string MEGA_TAG             = "Mega";
+
+      /// <summary>
+      /// Shadow Pokémon tag.
+      /// </summary>
+      public static readonly string SHADOW_TAG           = "Shadow";
 
       /// <summary>
       /// Max values in mega Pokémon name.

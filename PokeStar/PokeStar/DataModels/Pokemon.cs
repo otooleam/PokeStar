@@ -479,22 +479,42 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Gets the top counters of the Pokémon as a string.
+      /// Gets the top regular counters of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokémon counters as a string.</returns>
+      /// <returns>Pokémon regular counters as a string.</returns>
       public string CounterToString()
       {
          if (Counter.Count == 0)
          {
             return "No Counters Listed.";
          }
-         string str = "";
+         StringBuilder sb = new StringBuilder();
          int num = 1;
-         foreach (Counter counter in Counter)
+         foreach (Counter counter in Counter.Take(Counter.Count / 2).ToList())
          {
-            str += $"#{num++} {counter}\n";
+            sb.AppendLine($"#{num++} {counter}");
          }
-         return str;
+         return sb.ToString();
+      }
+
+      /// <summary>
+      /// Gets the top special counters of the Pokémon as a string.
+      /// Special counters are Mega and Shadow Pokémon.
+      /// </summary>
+      /// <returns>Pokémon special counters as a string.</returns>
+      public string SpecialCounterToString()
+      {
+         if (Counter.Count == 0)
+         {
+            return "No Counters Listed.";
+         }
+         StringBuilder sb = new StringBuilder();
+         int num = 1;
+         foreach (Counter counter in Counter.Skip(Counter.Count / 2).ToList())
+         {
+            sb.AppendLine($"#{num++} {counter}");
+         }
+         return sb.ToString();
       }
 
       /// <summary>

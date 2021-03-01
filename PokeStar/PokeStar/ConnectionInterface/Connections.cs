@@ -238,13 +238,6 @@ namespace PokeStar.ConnectionInterface
             pokemon.Weather = GetWeather(pokemon.Type);
             pokemon.FastMove = POGODBConnector.GetPokemonMoves(ReformatName(pokemon.Name), Global.FAST_MOVE_CATEGORY);
             pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(ReformatName(pokemon.Name), Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
-            pokemon.Counter = POGODBConnector.GetCounters(ReformatName(pokemon.Name));
-
-            foreach (Counter counter in pokemon.Counter)
-            {
-               counter.FastAttack = POGODBConnector.GetPokemonMove(ReformatName(counter.Name), counter.FastAttack.Name);
-               counter.ChargeAttack = POGODBConnector.GetPokemonMove(ReformatName(counter.Name), counter.ChargeAttack.Name);
-            }
 
             pokemon.CPMax = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
@@ -356,6 +349,23 @@ namespace PokeStar.ConnectionInterface
                   pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                   Global.MAX_LITTLE_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
             }
+         }
+      }
+
+      /// <summary>
+      /// Calculates the counters of a Pokémon.
+      /// </summary>
+      /// <param name="pokemon"></param>
+      public void GetPokemonCounter(ref Pokemon pokemon)
+      {
+         pokemon.Counter = new List<Counter>();
+         pokemon.Counter.AddRange(POGODBConnector.GetCounters(ReformatName(pokemon.Name), false));
+         pokemon.Counter.AddRange(POGODBConnector.GetCounters(ReformatName(pokemon.Name), true));
+
+         foreach (Counter counter in pokemon.Counter)
+         {
+            counter.FastAttack = POGODBConnector.GetPokemonMove(ReformatName(counter.Name.Replace($"{Global.SHADOW_TAG} ", string.Empty)), counter.FastAttack.Name);
+            counter.ChargeAttack = POGODBConnector.GetPokemonMove(ReformatName(counter.Name.Replace($"{Global.SHADOW_TAG} ", string.Empty)), counter.ChargeAttack.Name);
          }
       }
 
@@ -481,8 +491,7 @@ namespace PokeStar.ConnectionInterface
       /// <returns>Name formated for the POGO database</returns>
       private static string ReformatName(string originalName)
       {
-         int index = originalName.IndexOf('\'');
-         return index == -1 ? originalName : originalName.Insert(index, "\'");
+         return originalName.Replace("\'", "\'\'");
       }
 
       /// <summary>

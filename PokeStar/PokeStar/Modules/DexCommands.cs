@@ -35,7 +35,7 @@ namespace PokeStar.Modules
          {
             List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
 
-            if (pokemonWithNumber.Count == 0)
+            if (pokemonWithNumber.Count == 0 || pokemonNum == Global.DUMMY_POKE_NUM)
             {
                await ResponseMessage.SendErrorMessage(Context.Channel, "dex", $"Pokémon with number {pokemonNum} cannot be found.");
             }
@@ -59,11 +59,11 @@ namespace PokeStar.Modules
          {
             string name = GetPokemonName(pokemon);
             Pokemon pkmn = Connections.Instance().GetPokemon(name);
-            if (pkmn == null)
+            if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
             {
                pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
 
-               if (pkmn == null)
+               if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
                {
                   await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, Connections.Instance().SearchPokemon(name), Context.Channel);
                }
@@ -100,7 +100,7 @@ namespace PokeStar.Modules
          {
             List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
 
-            if (pokemonWithNumber.Count == 0)
+            if (pokemonWithNumber.Count == 0 || pokemonNum == Global.DUMMY_POKE_NUM)
             {
                await ResponseMessage.SendErrorMessage(Context.Channel, "cp", $"Pokémon with number {pokemonNum} cannot be found.");
             }
@@ -120,11 +120,11 @@ namespace PokeStar.Modules
          {
             string name = GetPokemonName(pokemon);
             Pokemon pkmn = Connections.Instance().GetPokemon(name);
-            if (pkmn == null)
+            if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
             {
                pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
 
-               if (pkmn == null)
+               if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
                {
                   await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, Connections.Instance().SearchPokemon(name), Context.Channel);
                }
@@ -140,6 +140,130 @@ namespace PokeStar.Modules
                Connections.GetPokemonCP(ref pkmn);
                pkmn.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.CP_MESSAGE] = true;
                await SendDexMessage(pkmn, BuildCPEmbed, Context.Channel, true);
+            }
+         }
+      }
+
+      /// <summary>
+      /// Handle evo command.
+      /// </summary>
+      /// <param name="pokemon">Get evolution family for this Pokémon.</param>
+      /// <returns>Completed Task.</returns>
+      [Command("evo")]
+      [Alias("evolution", "evolve")]
+      [Summary("Gets the evolution family for a given Pokémon.")]
+      [Remarks("Can search by Pokémon name or by number." +
+               "Tags can be used to search for specific forms.")]
+      [RegisterChannel('D')]
+      public async Task Evolution([Summary("Get evolution family for this Pokémon.")][Remainder] string pokemon)
+      {
+         bool isNumber = int.TryParse(pokemon, out int pokemonNum);
+         if (isNumber)
+         {
+            List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
+
+            if (pokemonWithNumber.Count == 0 || pokemonNum == Global.DUMMY_POKE_NUM)
+            {
+               await ResponseMessage.SendErrorMessage(Context.Channel, "evo", $"Pokémon with number {pokemonNum} cannot be found.");
+            }
+            else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER && pokemonNum != Global.ARCEUS_NUMBER)
+            {
+               await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.EVO_MESSAGE, pokemonWithNumber, Context.Channel);
+            }
+            else
+            {
+               Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber.First());
+               pkmn.Evolutions = GenerateEvoDict(pkmn.Name);
+               pkmn.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = true;
+               await SendDexMessage(pkmn, BuildEvoEmbed, Context.Channel, true);
+            }
+         }
+         else
+         {
+            string name = GetPokemonName(pokemon);
+            Pokemon pkmn = Connections.Instance().GetPokemon(name);
+            if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
+            {
+               pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
+
+               if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
+               {
+                  await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.EVO_MESSAGE, Connections.Instance().SearchPokemon(name), Context.Channel);
+               }
+               else
+               {
+                  pkmn.Evolutions = GenerateEvoDict(pkmn.Name);
+                  pkmn.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = true;
+                  await SendDexMessage(pkmn, BuildEvoEmbed, Context.Channel, true);
+               }
+            }
+            else
+            {
+               pkmn.Evolutions = GenerateEvoDict(pkmn.Name);
+               pkmn.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = true;
+               await SendDexMessage(pkmn, BuildEvoEmbed, Context.Channel, true);
+            }
+         }
+      }
+
+      /// <summary>
+      /// Handle counter command.
+      /// </summary>
+      /// <param name="pokemon">Get counters for this Pokémon.</param>
+      /// <returns>Completed Task.</returns>
+      [Command("counter")]
+      [Alias("counters")]
+      [Summary("Gets top counters for a given Pokémon.")]
+      [Remarks("Can search by Pokémon name or by number." +
+               "Tags can be used to search for specific forms.")]
+      [RegisterChannel('D')]
+      public async Task Counter([Summary("Get counters for this Pokémon.")][Remainder] string pokemon)
+      {
+         bool isNumber = int.TryParse(pokemon, out int pokemonNum);
+         if (isNumber)
+         {
+            List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
+
+            if (pokemonWithNumber.Count == 0 || pokemonNum == Global.DUMMY_POKE_NUM)
+            {
+               await ResponseMessage.SendErrorMessage(Context.Channel, "counter", $"Pokémon with number {pokemonNum} cannot be found.");
+            }
+            else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER && pokemonNum != Global.ARCEUS_NUMBER)
+            {
+               await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.COUNTER_MESSAGE, pokemonWithNumber, Context.Channel);
+            }
+            else
+            {
+               Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber.First());
+               Connections.Instance().GetPokemonCounter(ref pkmn);
+               pkmn.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.COUNTER_MESSAGE] = true;
+               await SendDexMessage(pkmn, BuildCounterEmbed, Context.Channel, true);
+            }
+         }
+         else
+         {
+            string name = GetPokemonName(pokemon);
+            Pokemon pkmn = Connections.Instance().GetPokemon(name);
+            if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
+            {
+               pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
+
+               if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
+               {
+                  await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.COUNTER_MESSAGE, Connections.Instance().SearchPokemon(name), Context.Channel);
+               }
+               else
+               {
+                  Connections.Instance().GetPokemonCounter(ref pkmn);
+                  pkmn.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.COUNTER_MESSAGE] = true;
+                  await SendDexMessage(pkmn, BuildCounterEmbed, Context.Channel, true);
+               }
+            }
+            else
+            {
+               Connections.Instance().GetPokemonCounter(ref pkmn);
+               pkmn.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.COUNTER_MESSAGE] = true;
+               await SendDexMessage(pkmn, BuildCounterEmbed, Context.Channel, true);
             }
          }
       }
@@ -162,7 +286,7 @@ namespace PokeStar.Modules
          {
             List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
 
-            if (pokemonWithNumber.Count == 0)
+            if (pokemonWithNumber.Count == 0 || pokemonNum == Global.DUMMY_POKE_NUM)
             {
                await ResponseMessage.SendErrorMessage(Context.Channel, "pvp", $"Pokémon with number {pokemonNum} cannot be found.");
             }
@@ -182,11 +306,11 @@ namespace PokeStar.Modules
          {
             string name = GetPokemonName(pokemon);
             Pokemon pkmn = Connections.Instance().GetPokemon(name);
-            if (pkmn == null)
+            if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
             {
                pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
 
-               if (pkmn == null)
+               if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
                {
                   await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.PVP_MESSAGE, Connections.Instance().SearchPokemon(name), Context.Channel);
                }
@@ -213,7 +337,9 @@ namespace PokeStar.Modules
       /// <returns>Completed Task.</returns>
       [Command("form")]
       [Summary("Gets all forms for a given Pokémon.")]
-      [Remarks("Leave blank to get a list of all Pokémon with forms.\n" +
+      [Remarks("Can search by Pokémon name or by number." +
+               "Tags can be used to search for specific forms.\n" +
+               "Leave blank to get a list of all Pokémon with forms.\n" +
                "Send \"Alias\" to get variations for form names.")]
       [RegisterChannel('D')]
       public async Task Form([Summary("(Optional) Get form information for this Pokémon.")][Remainder] string pokemon = null)
@@ -263,7 +389,7 @@ namespace PokeStar.Modules
             {
                List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
 
-               if (pokemonWithNumber.Count == 0)
+               if (pokemonWithNumber.Count == 0 || pokemonNum == Global.DUMMY_POKE_NUM)
                {
                   await ResponseMessage.SendErrorMessage(Context.Channel, "form", $"Pokémon with number {pokemonNum} cannot be found.");
                }
@@ -289,11 +415,11 @@ namespace PokeStar.Modules
             {
                string name = GetPokemonName(pokemon);
                Pokemon pkmn = Connections.Instance().GetPokemon(name);
-               if (pkmn == null)
+               if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
                {
                   pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
 
-                  if (pkmn == null)
+                  if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
                   {
                      await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.FORM_MESSAGE, Connections.Instance().SearchPokemon(name), Context.Channel);
                   }
@@ -330,66 +456,6 @@ namespace PokeStar.Modules
                   pkmn.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.FORM_MESSAGE] = true;
                   await SendDexMessage(pkmn, BuildFormEmbed, Context.Channel, true);
                }
-            }
-         }
-      }
-
-      /// <summary>
-      /// Handle evo command.
-      /// </summary>
-      /// <param name="pokemon">Get evolution family for this Pokémon.</param>
-      /// <returns>Completed Task.</returns>
-      [Command("evo")]
-      [Alias("evolution", "evolve")]
-      [Summary("Gets the evolution family for a given Pokémon.")]
-      [RegisterChannel('D')]
-      public async Task Evolution([Summary("Get evolution family for this Pokémon.")][Remainder] string pokemon)
-      {
-         bool isNumber = int.TryParse(pokemon, out int pokemonNum);
-         if (isNumber)
-         {
-            List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
-
-            if (pokemonWithNumber.Count == 0)
-            {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "evo", $"Pokémon with number {pokemonNum} cannot be found.");
-            }
-            else if (pokemonWithNumber.Count > 1 && pokemonNum != Global.UNOWN_NUMBER && pokemonNum != Global.ARCEUS_NUMBER)
-            {
-               await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.EVO_MESSAGE, pokemonWithNumber, Context.Channel);
-            }
-            else
-            {
-               Pokemon pkmn = Connections.Instance().GetPokemon(pokemonWithNumber.First());
-               pkmn.Evolutions = GenerateEvoDict(pkmn.Name);
-               pkmn.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = true;
-               await SendDexMessage(pkmn, BuildEvoEmbed, Context.Channel, true);
-            }
-         }
-         else
-         {
-            string name = GetPokemonName(pokemon);
-            Pokemon pkmn = Connections.Instance().GetPokemon(name);
-            if (pkmn == null)
-            {
-               pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
-
-               if (pkmn == null)
-               {
-                  await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.EVO_MESSAGE, Connections.Instance().SearchPokemon(name), Context.Channel);
-               }
-               else
-               {
-                  pkmn.Evolutions = GenerateEvoDict(pkmn.Name);
-                  pkmn.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = true;
-                  await SendDexMessage(pkmn, BuildEvoEmbed, Context.Channel, true);
-               }
-            }
-            else
-            {
-               pkmn.Evolutions = GenerateEvoDict(pkmn.Name);
-               pkmn.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = true;
-               await SendDexMessage(pkmn, BuildEvoEmbed, Context.Channel, true);
             }
          }
       }
