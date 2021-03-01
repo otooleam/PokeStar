@@ -629,7 +629,7 @@ namespace PokeStar
       /// <summary>
       /// Missing delimiter value.
       /// </summary>
-      public static readonly int DELIMITER_MISSING = -1;
+      public static readonly int DELIMITER_MISSING       = -1;
 
       // Egg tiers ************************************************************
 

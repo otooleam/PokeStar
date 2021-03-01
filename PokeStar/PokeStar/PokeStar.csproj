@@ -222,6 +222,7 @@
     <Compile Include="Modules\CatchReplyCommands.cs" />
     <Compile Include="Modules\ChannelRegisterCommands.cs" />
     <Compile Include="Modules\DexCommands.cs" />
+    <Compile Include="Modules\DexUpdateCommands.cs" />
     <Compile Include="Modules\EggCommands.cs" />
     <Compile Include="Modules\POICommands.cs" />
     <Compile Include="Modules\HelpCommands.cs" />
