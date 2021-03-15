@@ -11,7 +11,7 @@ namespace PokeStar.Calculators
       /// <summary>
       /// Coefficient for type effectivness.
       /// </summary>
-      private const double TypeCoefficient = 1.6;
+      private const double TYPE_COEFFICIENT = 1.6;
 
       /// <summary>
       /// Calculate the type effectivness from the multipler.
@@ -20,10 +20,10 @@ namespace PokeStar.Calculators
       /// <returns>Effectivness of the type.</returns>
       public static double CalcTypeEffectivness(int multiplier)
       {
-         double effectivness = TypeCoefficient;
+         double effectivness = TYPE_COEFFICIENT;
          for (int i = 1; i < Math.Abs(multiplier); i++)
          {
-            effectivness *= TypeCoefficient;
+            effectivness *= TYPE_COEFFICIENT;
          }
          if (multiplier < 0)
          {
