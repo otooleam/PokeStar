@@ -122,7 +122,7 @@ namespace PokeStar.ModuleParents
          "are the number of Trainers in a group that are raiding in person.",
          "means you are ready for the raid to begin. Nona will notify everyone when all trainers are ready.",
          "means you and/or a group will be either doing the raid remotely; or you need another trainer to send you an invite to raid. *",
-         "means you want to invite a trainer who is asking for an invite. The trainer will be counted in the raid as raiding remotly. Nona will notify the person you plan to invite. *",
+         "means you want to invite a trainer who is asking for an invite. The trainer will be counted in the raid as raiding remotely. Nona will notify the person you plan to invite. *",
          "means you want to remove yourself from the raid. Nona will notify anyone you were planning to invite."
       };
 
