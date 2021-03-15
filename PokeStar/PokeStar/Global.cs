@@ -100,7 +100,6 @@ namespace PokeStar
       {
          "ping",
          "marco",
-         "help",
          "rave",
          "screm",
       };
