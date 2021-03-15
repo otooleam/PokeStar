@@ -281,6 +281,30 @@ namespace PokeStar.ConnectionInterface
          {
             return "Shock Drive Genesect";
          }
+         else if (name.Equals("LANDORUS (INCARNATE FORME)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Incarnate Landorus";
+         }
+         else if (name.Equals("LANDORUS (THERIAN FORME)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Therian Landorus";
+         }
+         else if (name.Equals("TORNADUS (INCARNATE FORME)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Incarnate Tornadus";
+         }
+         else if (name.Equals("TORNADUS (THERIAN FORME)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Therian Tornadus";
+         }
+         else if (name.Equals("THUNDURUS (INCARNATE FORME)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Incarnate Thundurus";
+         }
+         else if (name.Equals("THUNDERUS (THERIAN FORME)", StringComparison.OrdinalIgnoreCase))
+         {
+            return "Therian Thundurus";
+         }
          else if (name.IndexOf('’') != -1)
          {
             return name.Replace('’', '\'');
