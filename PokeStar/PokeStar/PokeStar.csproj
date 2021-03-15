@@ -192,6 +192,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Calculators\CatchCalculator.cs" />
+    <Compile Include="Calculators\CounterCalculator.cs" />
     <Compile Include="Calculators\CPCalculator.cs" />
     <Compile Include="Calculators\TypeCalculator.cs" />
     <Compile Include="ConnectionInterface\DatabaseConnector.cs" />
@@ -204,7 +205,6 @@
     <Compile Include="DataModels\LeagueIV.cs" />
     <Compile Include="DataModels\Move.cs" />
     <Compile Include="DataModels\ResponseMessage.cs" />
-    <Compile Include="DataModels\PokemonMove.cs" />
     <Compile Include="DataModels\Pokemon.cs" />
     <Compile Include="DataModels\RaidGroup.cs" />
     <Compile Include="DataModels\RaidMule.cs" />

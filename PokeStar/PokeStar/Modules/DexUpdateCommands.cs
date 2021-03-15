@@ -1,26 +1,42 @@
 ﻿using System;
+using System.Linq;
+using System.Text;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using PokeStar.DataModels;
+using PokeStar.Calculators;
 using PokeStar.ModuleParents;
 using PokeStar.PreConditions;
 using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
 {
-   class DexUpdateCommands : DexCommandParent
+   /// <summary>
+   /// Handles dex update commands.
+   /// </summary>
+   public class DexUpdateCommands : DexCommandParent
    {
       /// <summary>
       /// Valid Pokémon editable attributes.
       /// </summary>
-      private readonly List<string> EditableAttributes = new List<string>()
+      private readonly Dictionary<string, string> EditableAttributes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
-         "SHINY",
-         "SHADOW",
-         "OBTAINABLE"
+         ["SHINY"] = "IsShiny",
+         ["SHADOW"] = "IsShadow",
+         ["OBTAINABLE"] = "IsReleased"
       };
+
+      /// <summary>
+      /// Counter timer in seconds.
+      /// </summary>
+      private readonly int COUNTER_UPDATE_TIMER = 3;
+
+      /// <summary>
+      /// Is a counter update currently running.
+      /// </summary>
+      private static bool runningCounterSim = false;
 
       /// <summary>
       /// Handle updatePokemon command.
@@ -39,20 +55,31 @@ namespace PokeStar.Modules
                                       [Summary("Update the attribute with this value.")] int value,
                                       [Summary("Update attribute of this Pokémon.")][Remainder] string pokemon)
       {
-         if (!EditableAttributes.Contains(attribute.ToUpper()))
+         if (!EditableAttributes.ContainsKey(attribute.ToUpper()))
          {
             await ResponseMessage.SendErrorMessage(Context.Channel, "updatePokemon", $"{attribute} is not a valid attribute to change.");
          }
          else
          {
-            Pokemon pkmn = Connections.Instance().GetPokemon(pokemon);
+            string name = GetPokemonName(pokemon);
+            Pokemon pkmn = Connections.Instance().GetPokemon(name);
             if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
             {
-               await ResponseMessage.SendErrorMessage(Context.Channel, "updatePokemon", $"Pokémon {pokemon} does not exist.");
+               pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
+
+               if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
+               {
+                  await ResponseMessage.SendErrorMessage(Context.Channel, "updatePokemon", $"Pokémon {pokemon} does not exist.");
+               }
+               else
+               {
+                  Connections.Instance().UpdatePokemon(pkmn.Name, EditableAttributes[attribute], value);
+                  await ResponseMessage.SendInfoMessage(Context.Channel, $"{attribute} has been set to {value} for {pkmn.Name}. Run .dex {pkmn.Name} to ensure value is set correctly.");
+               }
             }
             else
             {
-               Connections.Instance().UpdatePokemon(pkmn.Name, attribute, value);
+               Connections.Instance().UpdatePokemon(pkmn.Name, EditableAttributes[attribute], value);
                await ResponseMessage.SendInfoMessage(Context.Channel, $"{attribute} has been set to {value} for {pkmn.Name}. Run .dex {pkmn.Name} to ensure value is set correctly.");
             }
          }
@@ -68,7 +95,9 @@ namespace PokeStar.Modules
       [Summary("Add a move to a Pokémon.")]
       [Remarks("IsLegacy can only be set to either 1(true) or 0(false)" +
                "To add a move a special character (>) is used.\n" +
-               "\nFormat pokemonMove as following:\n" +
+               "If the Pokémon already has the move, " +
+               "the legacy status will be updated.\n" +
+               "Format pokemonMove as following:\n" +
                "Pokémon name > Move name")]
       [RequireUserPermission(GuildPermission.Administrator)]
       [NonaAdmin()]
@@ -88,7 +117,13 @@ namespace PokeStar.Modules
             {
                string pokemonStr = arr[Global.NEW_PARSE_VALUE].Trim();
                string moveStr = arr[Global.OLD_PARSE_VALUE].Trim();
-               Pokemon pkmn = Connections.Instance().GetPokemon(pokemonStr);
+
+               string name = GetPokemonName(pokemonStr);
+               Pokemon pkmn = Connections.Instance().GetPokemon(name);
+               if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
+               {
+                  pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
+               }
                Move move = Connections.Instance().GetMove(moveStr);
                if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
                {
@@ -98,10 +133,20 @@ namespace PokeStar.Modules
                {
                   await ResponseMessage.SendErrorMessage(Context.Channel, "updatePokemonMove", $"Move {moveStr} does not exist.");
                }
+               else if (move.Name.Equals(Global.SHADOW_MOVES.ElementAt(Global.SHADOW_INDEX).Name, StringComparison.OrdinalIgnoreCase) ||
+                        move.Name.Equals(Global.SHADOW_MOVES.ElementAt(Global.PURIFIED_INDEX).Name, StringComparison.OrdinalIgnoreCase))
+               {
+                  await ResponseMessage.SendErrorMessage(Context.Channel, "updatePokemonMove", $"Cannot assign {move.Name} to {pkmn.Name}.");
+               }
                else
                {
-                  Connections.Instance().UpdatePokemonMove(pkmn.Name, move.Name, isLegacy);
-                  await ResponseMessage.SendInfoMessage(Context.Channel, $"{pkmn.Name} now has the move {move.Name}. Run .dex {pkmn.Name} to ensure value is set correctly.");
+                  bool moveAssigned = Connections.Instance().PokemonHasMove(pkmn.Name, move.Name);
+
+                  Connections.Instance().UpdatePokemonMove(pkmn.Name, move.Name, isLegacy, moveAssigned);
+
+                  string message = moveAssigned ? $"Legacy status for {move.Name} on {pkmn.Name}. Run .dex {pkmn.Name} to ensure value is set correctly." : $"{pkmn.Name} now has the move {move.Name}. Run .dex {pkmn.Name} to ensure value is set correctly.";
+
+                  await ResponseMessage.SendInfoMessage(Context.Channel, message);
                }
             }
             else
@@ -109,6 +154,112 @@ namespace PokeStar.Modules
                await ResponseMessage.SendErrorMessage(Context.Channel, "updatePokemonMove", $"Too many delimiters found.");
             }
          }
+      }
+
+
+      /// <summary>
+      /// Handle updateCounters command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("updateCounters")]
+      [Alias("updateCounter", "updatePokemonCounters", "updatePokemonCounter")]
+      [Summary("Update counters for Pokémon as necessary.")]
+      [Remarks("This command might take some time to run.")]
+      [RequireUserPermission(GuildPermission.Administrator)]
+      [NonaAdmin()]
+      public async Task UpdateCounters()
+      {
+         if (!runningCounterSim)
+         {
+            runningCounterSim = true;
+
+            DateTime start = DateTime.Now;
+            DateTime timer = new DateTime(start.Ticks);
+
+            IUserMessage message = await ResponseMessage.SendInfoMessage(Context.Channel, "Starting Pokémon counter recalculations...");
+
+            List<Tuple<Pokemon, bool>> allPokemon = Connections.Instance().GetPokemonForSim();
+            List<string> updates = new List<string>();
+
+            int count = 0;
+            foreach (Tuple<Pokemon, bool> pokemon in allPokemon)
+            {
+               if (!pokemon.Item2)
+               {
+                  Tuple<List<Counter>, List<Counter>> result = CounterCalculator.RunSim(pokemon, allPokemon);
+
+                  Pokemon currentCounters = new Pokemon
+                  {
+                     Name = pokemon.Item1.Name
+                  };
+                  Connections.Instance().GetPokemonCounter(ref currentCounters);
+
+                  if (CheckChange(result.Item1, currentCounters.Counter.Take(currentCounters.Counter.Count / 2).ToList()) ||
+                      CheckChange(result.Item2, currentCounters.Counter.Skip(currentCounters.Counter.Count / 2).ToList()))
+                  {
+                     Connections.Instance().UpdateCounters(pokemon.Item1.Name, result.Item1, result.Item2);
+                     updates.Add(pokemon.Item1.Name);
+                  }
+               }
+               count++;
+               if ((DateTime.Now - timer).TotalSeconds >= COUNTER_UPDATE_TIMER)
+               {
+                  timer = DateTime.Now;
+                  await ResponseMessage.ModifyInfoMessage(message, $"Completed {count} / {allPokemon.Count} Pokémon counter recalculations...");
+               }
+            }
+
+            StringBuilder sb = new StringBuilder();
+            foreach (string name in updates)
+            {
+               sb.AppendLine(name);
+            }
+
+            string results = updates.Count == 0 ? "No updates were necessary." : $"The following have been updated:\n{sb}";
+
+            await ResponseMessage.ModifyInfoMessage(message, $"Counters successfully updated.\n" +
+                                                             $"Time elapsed: {(DateTime.Now - start).TotalSeconds} seconds.\n" +
+                                                             $"{results}");
+            runningCounterSim = false;
+         }
+         else
+         {
+            await ResponseMessage.SendWarningMessage(Context.Channel, "updateCounters", $"Counters are already being recalculated.");
+         }
+      }
+
+      /// <summary>
+      /// Checks if any of the counters have changed.
+      /// </summary>
+      /// <param name="newCounters">List of potential new counters.</param>
+      /// <param name="oldCounters">List of current counters.</param>
+      /// <returns>True if any counter is different or if there is a length error, otherwise false.</returns>
+      private static bool CheckChange(List<Counter> newCounters, List<Counter> oldCounters)
+      {
+         if (newCounters.Count == 0 || oldCounters.Count == 0 || oldCounters.Count != newCounters.Count)
+         {
+            return true;
+         }
+
+         for (int i = 0; i < oldCounters.Count; i++)
+         {
+            Counter counter = oldCounters.ElementAt(i);
+
+            int index = counter.Name.IndexOf(' ');
+            string name = counter.Name;
+            if (index != -1 && counter.Name.Substring(0, index).Equals(Global.SHADOW_TAG, StringComparison.OrdinalIgnoreCase))
+            {
+               name = counter.Name.Substring(index);
+            }
+            counter.Name = name.Trim();
+
+            if (!newCounters.ElementAt(i).Equals(oldCounters.ElementAt(i)))
+            {
+               return true;
+            }
+         }
+
+         return false;
       }
    }
 }

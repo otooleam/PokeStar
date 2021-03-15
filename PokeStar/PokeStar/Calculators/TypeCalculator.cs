@@ -1,4 +1,5 @@
 ﻿using System;
+using PokeStar.DataModels;
 
 namespace PokeStar.Calculators
 {
@@ -29,6 +30,28 @@ namespace PokeStar.Calculators
             effectivness = 1.0 / effectivness;
          }
          return effectivness;
+      }
+
+      /// <summary>
+      /// Gets multiplier for specific type from relations.
+      /// </summary>
+      /// <param name="types">Type relations.</param>
+      /// <param name="type">Type to find.</param>
+      /// <returns>Multiplier of the type relationship.</returns>
+      public static double GetMultiplier(TypeRelation types, string type)
+      {
+         if (types.Strong.ContainsKey(type))
+         {
+            return types.Strong[type];
+         }
+         else if (types.Weak.ContainsKey(type))
+         {
+            return types.Weak[type];
+         }
+         else
+         {
+            return 1.0;
+         }
       }
    }
 }

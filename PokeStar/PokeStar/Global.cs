@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Newtonsoft.Json.Linq;
+using PokeStar.DataModels;
 
 namespace PokeStar
 {
@@ -434,6 +435,25 @@ namespace PokeStar
       /// </summary>
       public static readonly int DEX_SWITCH_OPTIONS = 6;
 
+      // Shadow moves *********************************************************
+
+      public static readonly int SHADOW_INDEX   = 0;
+      public static readonly int PURIFIED_INDEX = 1;
+
+      public static readonly List<Move> SHADOW_MOVES = new List<Move>()
+      {
+         new Move()
+         {
+            Name = "Frustration",
+            Type = "Normal"
+         },
+         new Move()
+         {
+            Name = "Return",
+            Type = "Normal"
+         },
+      };
+
       // Bad dex values *******************************************************
 
       /// <summary>
@@ -718,37 +738,37 @@ namespace PokeStar
       /// <summary>
       /// Dex register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_DEX = 'D';
+      public static readonly char REGISTER_STRING_DEX     = 'D';
 
       /// <summary>
       /// EX raid register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_EX = 'E';
+      public static readonly char REGISTER_STRING_EX      = 'E';
 
       /// <summary>
       /// Information register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_INFO = 'I';
+      public static readonly char REGISTER_STRING_INFO    = 'I';
 
       /// <summary>
       /// Role register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_ROLE = 'P';
+      public static readonly char REGISTER_STRING_ROLE    = 'P';
 
       /// <summary>
       /// Raid register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_RAID = 'R';
+      public static readonly char REGISTER_STRING_RAID    = 'R';
 
       /// <summary>
       /// Point of interest register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_POI = 'S';
+      public static readonly char REGISTER_STRING_POI     = 'S';
 
       /// <summary>
       /// Full register string.
       /// </summary>
-      public static readonly string FULL_REGISTER_STRING = "ADEIPRS";
+      public static readonly string FULL_REGISTER_STRING  = "ADEIPRS";
 
       /// <summary>
       /// Register character to register string.

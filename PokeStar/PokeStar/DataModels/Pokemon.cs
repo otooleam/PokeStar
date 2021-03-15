@@ -61,9 +61,9 @@ namespace PokeStar.DataModels
       public List<string> Resistance { get; set; }
 
       /// <summary>
-      /// Is the Pokémon obtainable.
+      /// Is the Pokémon released.
       /// </summary>
-      public bool Obtainable { get; set; }
+      public bool Released { get; set; }
 
       /// <summary>
       /// Is the Pokémon shinyable.
@@ -128,12 +128,12 @@ namespace PokeStar.DataModels
       /// <summary>
       /// List of the Pokémon's fast moves.
       /// </summary>
-      public List<PokemonMove> FastMove { get; set; }
+      public List<Move> FastMove { get; set; }
 
       /// <summary>
       /// List of the Pokémon's charge moves.
       /// </summary>
-      public List<PokemonMove> ChargeMove { get; set; }
+      public List<Move> ChargeMove { get; set; }
 
       /// <summary>
       /// List of counters of the Pokémon.
@@ -286,7 +286,7 @@ namespace PokeStar.DataModels
       public string StatusToString()
       {
          StringBuilder sb = new StringBuilder();
-         sb.AppendLine($"**Can be Obtained:** {(Obtainable ? "Yes" : "No")}");
+         sb.AppendLine($"**Can be Obtained:** {(Released ? "Yes" : "No")}");
          sb.AppendLine($"**Can be Shiny:** {(Shiny ? "Yes" : "No")}");
          sb.AppendLine($"**Can be Shadow:** {(Shadow ? "Yes" : "No")}");
          return sb.ToString();
@@ -428,15 +428,15 @@ namespace PokeStar.DataModels
          }
 
          StringBuilder sb = new StringBuilder();
-         foreach (PokemonMove fastMove in FastMove)
+         foreach (Move fastMove in FastMove)
          {
-            if (Name.Equals("Mew"))
+            if (Name.Equals("Mew", StringComparison.OrdinalIgnoreCase))
             {
                sb.Append($"{fastMove.Name} ({fastMove.Type})");
             }
             else
             {
-               sb.Append(fastMove.ToString());
+               sb.Append(fastMove.PokemonMoveToString());
             }
             if (Type.Contains(fastMove.Type))
             {
@@ -459,15 +459,15 @@ namespace PokeStar.DataModels
          }
 
          StringBuilder sb = new StringBuilder();
-         foreach (PokemonMove chargeMove in ChargeMove)
+         foreach (Move chargeMove in ChargeMove)
          {
-            if (Name.Equals("Mew"))
+            if (Name.Equals("Mew", StringComparison.OrdinalIgnoreCase))
             {
                sb.Append($"{chargeMove.Name} ({chargeMove.Type})");
             }
             else
             {
-               sb.Append(chargeMove.ToString());
+               sb.Append(chargeMove.PokemonMoveToString());
             }
             if (Type.Contains(chargeMove.Type))
             {

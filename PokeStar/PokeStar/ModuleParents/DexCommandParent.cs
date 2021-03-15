@@ -461,7 +461,7 @@ namespace PokeStar.ModuleParents
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine("**Catch Emoji Help:**");
-            for(int i = 0; i < catchEmojisDesc.Length; i++)
+            for (int i = 0; i < catchEmojisDesc.Length; i++)
             {
                sb.AppendLine($"{catchEmojis[i]} {catchEmojisDesc[i]}");
             }
@@ -585,7 +585,7 @@ namespace PokeStar.ModuleParents
       protected static Embed BuildCounterEmbed(Pokemon pokemon, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithTitle($@"Top counters for {pokemon.Name}");
+         embed.WithTitle(pokemon.Number == Global.DUMMY_POKE_NUM ? $@"Top general DPS Pokémon" : $@"Top counters for {pokemon.Name}");
          embed.WithThumbnailUrl($"attachment://{fileName}");
          embed.AddField("Normal Counters", pokemon.CounterToString());
          embed.AddField("Special Counters", pokemon.SpecialCounterToString());
@@ -697,7 +697,13 @@ namespace PokeStar.ModuleParents
          embed.AddField("PvE Energy", move.EnergyToString(move.PvEEnergy), true);
          embed.AddField("PvE Cooldown", $"{move.Cooldown} ms", true);
          embed.AddField("PvE Damage Window", move.DamageWindowString(), true);
-         embed.AddField("Number of Pokémon that can learn this move", move.PokemonWithMove.Count, false);
+
+         if (move.BuffChance != 0)
+         {
+            embed.AddField("PvP Buff:", move.BuffString(), false);
+         }
+
+         embed.AddField("Number of Pokémon that can learn this move", move.PokemonWithMove, false);
          embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          return embed.Build();
       }
@@ -1120,7 +1126,7 @@ namespace PokeStar.ModuleParents
       /// </summary>
       /// <param name="relations">Dictionary of type relations for the type(s).</param>
       /// <returns>Type relations for type(s) as a string.</returns>
-      protected static string FormatTypeList(Dictionary<string, int> relations)
+      protected static string FormatTypeList(Dictionary<string, double> relations)
       {
          if (relations.Count == 0)
          {
@@ -1128,9 +1134,9 @@ namespace PokeStar.ModuleParents
          }
 
          string relationString = "";
-         foreach (KeyValuePair<string, int> relation in relations)
+         foreach (KeyValuePair<string, double> relation in relations)
          {
-            double multiplier = TypeCalculator.CalcTypeEffectivness(relation.Value) * 100.0;
+            double multiplier = relation.Value * 100.0;
             string typeEmote = Global.NONA_EMOJIS[$"{relation.Key.ToUpper()}_EMOTE"];
             relationString += $"{typeEmote} {relation.Key}: {multiplier}%\n";
          }

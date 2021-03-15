@@ -72,19 +72,19 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Types the type is strong against.
       /// </summary>
-      public Dictionary<string, int> Strong { get; }
+      public Dictionary<string, double> Strong { get; }
 
       /// <summary>
       /// Types the type is weak against.
       /// </summary>
-      public Dictionary<string, int> Weak { get; }
+      public Dictionary<string, double> Weak { get; }
 
       /// <summary>
       /// Creates a new TypeRelation.
       /// </summary>
       /// <param name="strong">Types the type is strong against.</param>
       /// <param name="weak">Types the type is weak against.</param>
-      public TypeRelation(Dictionary<string, int> strong, Dictionary<string, int> weak)
+      public TypeRelation(Dictionary<string, double> strong, Dictionary<string, double> weak)
       {
          Strong = strong;
          Weak = weak;
@@ -144,6 +144,77 @@ namespace PokeStar.DataModels
          FormList = fromList;
          DefaultForm = defaultForm;
       }
+   }
+
+   /// <summary>
+   /// Pokémon used to run counter sims.
+   /// </summary>
+   public struct SimPokemon
+   {
+      /// <summary>
+      /// Number of the Pokémon.
+      /// </summary>
+      public int Number { get; set; }
+
+      /// <summary>
+      /// Name of the Pokémon.
+      /// </summary>
+      public string Name { get; set; }
+
+      /// <summary>
+      /// Fast move to use.
+      /// </summary>
+      public Move Fast { get; set; }
+
+      /// <summary>
+      /// Charge move to use.
+      /// </summary>
+      public Move Charge { get; set; }
+
+      /// <summary>
+      /// Effectiveness of the fast move.
+      /// </summary>
+      public double FastEffect { get; set; }
+
+      /// <summary>
+      /// Effectiveness of the charge move.
+      /// </summary>
+      public double ChargeEffect { get; set; }
+
+      /// <summary>
+      /// STAB modifier of the fast move.
+      /// </summary>
+      public double FastStab { get; set; }
+
+      /// <summary>
+      /// STAB modifier of the charge move.
+      /// </summary>
+      public double ChargeStab { get; set; }
+
+      /// <summary>
+      /// Shadow attack modifier.
+      /// </summary>
+      public double StadowAtkMul { get; set; }
+
+      /// <summary>
+      /// Shadow defense modifier.
+      /// </summary>
+      public double StadowDefMul { get; set; }
+
+      /// <summary>
+      /// Calculated attack stat.
+      /// </summary>
+      public int AtkStat { get; set; }
+
+      /// <summary>
+      /// Calculated defense stat.
+      /// </summary>
+      public int DefStat { get; set; }
+
+      /// <summary>
+      /// Calculated stamina stat.
+      /// </summary>
+      public int StamStat { get; set; }
    }
 
    /// <summary>

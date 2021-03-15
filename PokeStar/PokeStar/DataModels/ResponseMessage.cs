@@ -19,11 +19,10 @@ namespace PokeStar.DataModels
       /// </summary>
       /// <param name="channel">Channel to send message to.</param>
       /// <param name="message">Message to send.</param>
-      /// <returns>Task Complete.</returns>
-      public static async Task<Task> SendInfoMessage(IMessageChannel channel, string message)
+      /// <returns>The sent message.</returns>
+      public static async Task<IUserMessage> SendInfoMessage(IMessageChannel channel, string message)
       {
-         await channel.SendMessageAsync(embed: BuildInfoEmbed(message));
-         return Task.CompletedTask;
+         return await channel.SendMessageAsync(embed: BuildInfoEmbed(message));
       }
 
       /// <summary>
@@ -32,11 +31,10 @@ namespace PokeStar.DataModels
       /// <param name="channel">Channel to send message to.</param>
       /// <param name="command">Command that was executing.</param>
       /// <param name="message">Message to send.</param>
-      /// <returns>Task Complete.</returns>
-      public static async Task<Task> SendWarningMessage(IMessageChannel channel, string command, string message)
+      /// <returns>The sent message.</returns>
+      public static async Task<IUserMessage> SendWarningMessage(IMessageChannel channel, string command, string message)
       {
-         await channel.SendMessageAsync(embed: BuildWarningEmbed(command, message));
-         return Task.CompletedTask;
+         return await channel.SendMessageAsync(embed: BuildWarningEmbed(command, message));
       }
 
       /// <summary>
@@ -46,12 +44,27 @@ namespace PokeStar.DataModels
       /// <param name="channel">Channel to send message to.</param>
       /// <param name="command">Command that was executing.</param>
       /// <param name="message">Message to send.</param>
-      /// <returns>Task Complete.</returns>
-      public static async Task<Task> SendErrorMessage(IMessageChannel channel, string command, string message)
+      /// <returns>The sent message.</returns>
+      public static async Task<IUserMessage> SendErrorMessage(IMessageChannel channel, string command, string message)
       {
          Connections.CopyFile(ERROR_IMAGE);
-         await channel.SendFileAsync(ERROR_IMAGE, embed: BuildErrorEmbed(command, message));
+         IUserMessage msg = await channel.SendFileAsync(ERROR_IMAGE, embed: BuildErrorEmbed(command, message));
          Connections.DeleteFile(ERROR_IMAGE);
+         return msg;
+      }
+
+      /// <summary>
+      /// Modify an info message.
+      /// </summary>
+      /// <param name="msg">Message to modify.</param>
+      /// <param name="message">Message to send.</param>
+      /// <returns>Completed Task.</returns>
+      public static async Task<Task> ModifyInfoMessage(IUserMessage msg, string message)
+      {
+         await msg.ModifyAsync(x =>
+         {
+            x.Embed = BuildInfoEmbed(message);
+         });
          return Task.CompletedTask;
       }
 

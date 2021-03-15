@@ -475,6 +475,17 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Checks if the Pokémon already has a move.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="moveName">Name of the Move.</param>
+      /// <returns>True if the Pokémon has the Move, otherwise false.</returns>
+      public bool PokemonHasMove(string pokemonName, string moveName)
+      {
+         return POGODBConnector.GetPokemonMove(pokemonName, moveName) != null;
+      }
+
+      /// <summary>
       /// Gets all Pokémon that have a given number.
       /// </summary>
       /// <param name="pokemonNumber">Number of the Pokémon</param>
@@ -482,6 +493,42 @@ namespace PokeStar.ConnectionInterface
       public List<string> GetPokemonByNumber(int pokemonNumber)
       {
          return POGODBConnector.GetPokemonByNumber(pokemonNumber);
+      }
+
+      /// <summary>
+      /// Gets list of Pokémon to use in counter sims.
+      /// </summary>
+      /// <returns>List of Pokémon to use.</returns>
+      public List<Tuple<Pokemon, bool>> GetPokemonForSim()
+      {
+         List<Tuple<Pokemon, bool>> simPokemon = POGODBConnector.GetSimPokemon();
+
+         foreach (Tuple<Pokemon, bool> poke in simPokemon)
+         {
+            string name = poke.Item1.Name.Replace("\'", "\'\'");
+
+            List<Move> initFastMove = POGODBConnector.GetPokemonMoves(name, "Fast", poke.Item1.Shadow, poke.Item2);
+            List<Move> initChargeMove = POGODBConnector.GetPokemonMoves(name, "Charge", poke.Item1.Shadow, poke.Item2);
+
+            poke.Item1.FastMove = new List<Move>();
+            poke.Item1.ChargeMove = new List<Move>();
+
+            foreach (Move fast in initFastMove)
+            {
+               Move fullFast = POGODBConnector.GetMove(fast.Name);
+               fullFast.IsLegacy = fast.IsLegacy;
+               poke.Item1.FastMove.Add(fullFast);
+            }
+
+            foreach (Move charge in initChargeMove)
+            {
+               Move fullCharge = POGODBConnector.GetMove(charge.Name);
+               fullCharge.IsLegacy = charge.IsLegacy;
+               poke.Item1.ChargeMove.Add(fullCharge);
+            }
+         }
+
+         return simPokemon;
       }
 
       /// <summary>
@@ -504,8 +551,8 @@ namespace PokeStar.ConnectionInterface
       {
          Dictionary<string, int> allRelations = POGODBConnector.GetTypeDefenseRelations(types);
          return new TypeRelation(
-            allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value),
-            allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value)
+            allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => TypeCalculator.CalcTypeEffectivness(v.Value)),
+            allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => TypeCalculator.CalcTypeEffectivness(v.Value))
          );
       }
 
@@ -519,8 +566,8 @@ namespace PokeStar.ConnectionInterface
       {
          Dictionary<string, int> allRelations = POGODBConnector.GetTypeAttackRelations(type);
          return new TypeRelation(
-            allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value),
-            allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value)
+            allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => TypeCalculator.CalcTypeEffectivness(v.Value)),
+            allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => TypeCalculator.CalcTypeEffectivness(v.Value))
          );
       }
 
@@ -552,9 +599,39 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="moveName">Name of the move.</param>
       /// <param name="isLegacy">Is the move a legacy move.</param>
-      public void UpdatePokemonMove(string pokemonName, string moveName, int isLegacy)
+      public void UpdatePokemonMove(string pokemonName, string moveName, int isLegacy, bool moveAssigned)
       {
-         POGODBConnector.SetPokemonMove(ReformatName(pokemonName), moveName, isLegacy);
+         if (moveAssigned)
+         {
+            POGODBConnector.UpdatePokemonMove(ReformatName(pokemonName), moveName, isLegacy);
+         }
+         else
+         {
+            POGODBConnector.SetPokemonMove(ReformatName(pokemonName), moveName, isLegacy);
+         }
+      }
+
+      /// <summary>
+      /// Updates counters for a Pokémon.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="counters">List of normal counters.</param>
+      /// <param name="specialCounters">List of special counters.</param>
+      public void UpdateCounters(string pokemonName, List<Counter> counters, List<Counter> specialCounters)
+      {
+         string name = ReformatName(pokemonName);
+
+         POGODBConnector.ClearPokemonCounters(name);
+
+         foreach (Counter counter in counters)
+         {
+            POGODBConnector.AddCounter(name, ReformatName(counter.Name), ReformatName(counter.FastAttack.Name), ReformatName(counter.ChargeAttack.Name), counter.Rating, false);
+         }
+
+         foreach (Counter counter in specialCounters)
+         {
+            POGODBConnector.AddCounter(name, ReformatName(counter.Name), ReformatName(counter.FastAttack.Name), ReformatName(counter.ChargeAttack.Name), counter.Rating, true);
+         }
       }
 
       /// <summary>

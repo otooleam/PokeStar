@@ -1,4 +1,5 @@
-﻿
+﻿using System;
+
 namespace PokeStar.DataModels
 {
    /// <summary>
@@ -14,12 +15,12 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Recommended Fast move.
       /// </summary>
-      public PokemonMove FastAttack { get; set; }
+      public Move FastAttack { get; set; }
 
       /// <summary>
       /// Recommended charge move.
       /// </summary>
-      public PokemonMove ChargeAttack { get; set; }
+      public Move ChargeAttack { get; set; }
 
       /// <summary>
       /// Rating of the Pokémon.
@@ -27,12 +28,34 @@ namespace PokeStar.DataModels
       public double Rating { get; set; }
 
       /// <summary>
+      /// Checks if two counters are the same.
+      /// </summary>
+      /// <param name="counter">Counter to check against.</param>
+      /// <returns>True if the counters are the same, otherwise false.</returns>
+      public bool Equals(Counter counter)
+      {
+         return counter != null && counter.Name.Equals(Name, StringComparison.OrdinalIgnoreCase) &&
+            counter.FastAttack.Name.Equals(FastAttack.Name, StringComparison.OrdinalIgnoreCase) &&
+            counter.ChargeAttack.Name.Equals(ChargeAttack.Name, StringComparison.OrdinalIgnoreCase);
+      }
+
+      /// <summary>
+      /// Checks if this is equal to an object.
+      /// </summary>
+      /// <param name="obj">Object to check against.</param>
+      /// <returns>True if the object is equal, otherwise false.</returns>
+      public override bool Equals(object obj)
+      {
+         return obj != null && obj is Counter && Equals(obj as Counter);
+      }
+
+      /// <summary>
       /// Gets the counter as a string.
       /// </summary>
       /// <returns>Counter as a string.</returns>
       public override string ToString()
       {
-         return $@"**{Name}**: {FastAttack} / {ChargeAttack}";
+         return $@"**{Name}**: {FastAttack.PokemonMoveToString()} / {ChargeAttack.PokemonMoveToString()}";
       }
    }
 }
