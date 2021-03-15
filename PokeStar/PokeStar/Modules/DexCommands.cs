@@ -126,7 +126,7 @@ namespace PokeStar.Modules
 
                if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
                {
-                  await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.DEX_MESSAGE, Connections.Instance().SearchPokemon(name), Context.Channel);
+                  await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.CP_MESSAGE, Connections.Instance().SearchPokemon(name), Context.Channel);
                }
                else
                {
@@ -274,7 +274,7 @@ namespace PokeStar.Modules
       /// <param name="pokemon">Get PvP IVs for this Pokémon.</param>
       /// <returns>Completed Task.</returns>
       [Command("pvp")]
-      [Alias("pvpiv")]
+      [Alias("pvpiv", "iv")]
       [Summary("Gets rank 1 PvP IV values for a given Pokémon.")]
       [Remarks("Can search by Pokémon name or by number." +
                "Tags can be used to search for specific forms.")]
@@ -458,6 +458,24 @@ namespace PokeStar.Modules
                }
             }
          }
+      }
+
+      /// <summary>
+      /// Handle dps command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("dps")]
+      [Summary("Gets Pokémon with top general DPS.")]
+      [Remarks("DPS: Damage Per Second")]
+      [RegisterChannel('D')]
+      public async Task DPS()
+      {
+         string fileName = GENERIC_IMAGE;
+         Pokemon pokemon = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonByNumber(Global.DUMMY_POKE_NUM).First());
+         Connections.Instance().GetPokemonCounter(ref pokemon);
+         Connections.CopyFile(fileName);
+         await Context.Channel.SendFileAsync(fileName, embed: BuildCounterEmbed(pokemon, fileName));
+         Connections.DeleteFile(fileName);
       }
    }
 }
