@@ -66,94 +66,105 @@ namespace PokeStar.Calculators
       /// </summary>
       /// <param name="boss">Boss to fight against.</param>
       /// <param name="raiders">Raiders used to attack the boss.</param>
-      /// <returns>Tuple where item1 is the list of normal counters and itme2 is the list of special counters.</returns>
-      public static Tuple<List<Counter>, List<Counter>> RunSim(Tuple<Pokemon, bool> boss, List<Tuple<Pokemon, bool>> raiders)
+      /// <returns>Counter calculation results.</returns>
+      public static CounterCalcResults RunSim(Pokemon boss, List<Pokemon> raiders)
       {
-         Tuple<List<Counter>, List<Counter>> fullCounters = new Tuple<List<Counter>, List<Counter>>(new List<Counter>(), new List<Counter>());
+         CounterCalcResults results = new CounterCalcResults();
 
          for (int mode = 0; mode < 2; mode++)
          {
             List<Counter> counters = new List<Counter>();
-            TypeRelation bossTypes = Connections.Instance().GetTypeDefenseRelations(boss.Item1.Type);
-            foreach (Tuple<Pokemon, bool> raider in raiders)
+            TypeRelation bossTypes = Connections.Instance().GetTypeDefenseRelations(boss.Type);
+            foreach (Pokemon raider in raiders)
             {
-               if (raider.Item1.Released &&
-                  (mode == REGULAR_COUNTER_INDEX && !raider.Item2 && !raider.Item1.Name.Contains("Mega ") ||
-                  (mode == SPECIAL_COUNTER_INDEX && (raider.Item2 || raider.Item1.Name.Contains("Mega "))))
+               if (raider.Released &&
+                  (mode == REGULAR_COUNTER_INDEX && !raider.Name.Contains("Mega ") ||
+                  (mode == SPECIAL_COUNTER_INDEX && (raider.Shadow || raider.Name.Contains("Mega "))))
                )
                {
                   List<Counter> allCounters = new List<Counter>();
-                  TypeRelation raiderTypes = Connections.Instance().GetTypeDefenseRelations(raider.Item1.Type);
-                  foreach (Move raiderFast in raider.Item1.FastMove)
+                  TypeRelation raiderTypes = Connections.Instance().GetTypeDefenseRelations(raider.Type);
+                  foreach (Move raiderFast in raider.FastMove)
                   {
-                     foreach (Move raiderCharge in raider.Item1.ChargeMove)
+                     foreach (Move raiderCharge in raider.ChargeMove)
                      {
-                        SimPokemon raiderSim = new SimPokemon
+                        if ((!raiderCharge.Name.Equals(Global.SHADOW_MOVES.ElementAt(Global.PURIFIED_INDEX).Name, StringComparison.OrdinalIgnoreCase) &&
+                             !raiderCharge.Name.Equals(Global.SHADOW_MOVES.ElementAt(Global.SHADOW_INDEX).Name, StringComparison.OrdinalIgnoreCase)) ||
+                            (raiderCharge.Name.Equals(Global.SHADOW_MOVES.ElementAt(Global.PURIFIED_INDEX).Name, StringComparison.OrdinalIgnoreCase) && mode == REGULAR_COUNTER_INDEX) ||
+                            (raiderCharge.Name.Equals(Global.SHADOW_MOVES.ElementAt(Global.SHADOW_INDEX).Name, StringComparison.OrdinalIgnoreCase) && mode == SPECIAL_COUNTER_INDEX))
                         {
-                           Number = raider.Item1.Number,
-                           Name = raider.Item1.Name,
-                           Fast = raiderFast,
-                           Charge = raiderCharge,
-                           FastEffect = TypeCalculator.GetMultiplier(bossTypes, raiderFast.Type),
-                           ChargeEffect = TypeCalculator.GetMultiplier(bossTypes, raiderCharge.Type),
-                           FastStab = raider.Item1.Type.Contains(raiderFast.Type) ? STAB_MULTIPLIER : 1.0,
-                           ChargeStab = raider.Item1.Type.Contains(raiderCharge.Type) ? STAB_MULTIPLIER : 1.0,
-                           StadowAtkMul = raider.Item2 ? SHADOW_ATK_MUL : 1.0,
-                           StadowDefMul = raider.Item2 ? SHADOW_DEF_MUL : 1.0,
-                           AtkStat = (int)((raider.Item1.Attack + Global.MAX_IV) * Global.DISCRETE_CPM[Global.MAX_REG_LEVEL - 1]),
-                           DefStat = (int)((raider.Item1.Defense + Global.MAX_IV) * Global.DISCRETE_CPM[Global.MAX_REG_LEVEL - 1]),
-                           StamStat = (int)((raider.Item1.Stamina + Global.MAX_IV) * Global.DISCRETE_CPM[Global.MAX_REG_LEVEL - 1])
-                        };
 
-                        SimPokemon bossSim = new SimPokemon
-                        {
-                           Number = boss.Item1.Number,
-                           Name = boss.Item1.Name,
-                           StadowAtkMul = 1.0,
-                           StadowDefMul = 1.0,
-                           AtkStat = (int)((boss.Item1.Attack + Global.MAX_IV) * Global.DISCRETE_CPM[Global.MAX_REG_LEVEL - 1]),
-                           DefStat = (int)((boss.Item1.Defense + Global.MAX_IV) * Global.DISCRETE_CPM[Global.MAX_REG_LEVEL - 1]),
-                           StamStat = (int)((boss.Item1.Stamina + Global.MAX_IV) * Global.DISCRETE_CPM[Global.MAX_REG_LEVEL - 1])
-                        };
-
-                        double x = 0.0;
-                        double y = 0.0;
-                        double moveSets = 1;
-
-                        List<Move> bossFastMoves = boss.Item1.FastMove.Where(m => !m.IsLegacy).ToList();
-                        List<Move> bossChargeMoves = boss.Item1.ChargeMove.Where(m => !m.IsLegacy).ToList();
-
-                        if (boss.Item1.Defense == 0 || bossFastMoves.Count + bossChargeMoves.Count == 0)
-                        {
-                           if (boss.Item1.Defense == 0)
+                           SimPokemon raiderSim = new SimPokemon
                            {
-                              bossSim.DefStat = DEFAULT_DEF;
-                           }
-                           x = (0.5 * raiderSim.Fast.PvEEnergy) + (0.5 * raiderSim.Charge.PvEEnergy);
-                           y = DEFAULT_DPS / (double)raiderSim.DefStat;
-                        }
-                        else
-                        {
-                           moveSets = boss.Item1.FastMove.Count * boss.Item1.ChargeMove.Count;
-                           foreach (Move bossFast in bossFastMoves)
+                              Number = raider.Number,
+                              Name = raider.Name,
+                              Fast = raiderFast,
+                              Charge = raiderCharge,
+                              FastEffect = TypeCalculator.GetMultiplier(bossTypes, raiderFast.Type),
+                              ChargeEffect = TypeCalculator.GetMultiplier(bossTypes, raiderCharge.Type),
+                              FastStab = raider.Type.Contains(raiderFast.Type) ? STAB_MULTIPLIER : 1.0,
+                              ChargeStab = raider.Type.Contains(raiderCharge.Type) ? STAB_MULTIPLIER : 1.0,
+                              StadowAtkMul = mode == SPECIAL_COUNTER_INDEX && raider.Shadow ? SHADOW_ATK_MUL : 1.0,
+                              StadowDefMul = mode == SPECIAL_COUNTER_INDEX && raider.Shadow ? SHADOW_DEF_MUL : 1.0,
+                              AtkStat = (int)((raider.Attack + Global.MAX_IV) * Global.DISCRETE_CPM[Global.MAX_REG_LEVEL - 1]),
+                              DefStat = (int)((raider.Defense + Global.MAX_IV) * Global.DISCRETE_CPM[Global.MAX_REG_LEVEL - 1]),
+                              StamStat = (int)((raider.Stamina + Global.MAX_IV) * Global.DISCRETE_CPM[Global.MAX_REG_LEVEL - 1])
+                           };
+
+                           SimPokemon bossSim = new SimPokemon
                            {
-                              bossSim.Fast = bossFast;
-                              bossSim.FastEffect = TypeCalculator.GetMultiplier(raiderTypes, bossFast.Type);
-                              bossSim.FastStab = boss.Item1.Type.Contains(bossFast.Type) ? STAB_MULTIPLIER : 1.0;
-                              foreach (Move bossCharge in bossChargeMoves)
+                              Number = boss.Number,
+                              Name = boss.Name,
+                              StadowAtkMul = 1.0,
+                              StadowDefMul = 1.0,
+                              AtkStat = (int)((boss.Attack + Global.MAX_IV) * Global.DISCRETE_CPM[Global.MAX_REG_LEVEL - 1]),
+                              DefStat = (int)((boss.Defense + Global.MAX_IV) * Global.DISCRETE_CPM[Global.MAX_REG_LEVEL - 1]),
+                              StamStat = (int)((boss.Stamina + Global.MAX_IV) * Global.DISCRETE_CPM[Global.MAX_REG_LEVEL - 1])
+                           };
+
+                           double x = 0.0;
+                           double y = 0.0;
+                           double moveSets = 1;
+
+                           List<Move> bossFastMoves = boss.FastMove.Where(m => !m.IsLegacy).ToList();
+                           List<Move> bossChargeMoves = boss.ChargeMove.Where(m => !m.IsLegacy).ToList();
+
+                           if (boss.Defense == 0 || bossFastMoves.Count + bossChargeMoves.Count == 0)
+                           {
+                              if (boss.Defense == 0)
                               {
-                                 bossSim.Charge = bossCharge;
-                                 bossSim.ChargeEffect = TypeCalculator.GetMultiplier(raiderTypes, bossCharge.Type);
-                                 bossSim.ChargeStab = boss.Item1.Type.Contains(bossCharge.Type) ? STAB_MULTIPLIER : 1.0;
+                                 bossSim.DefStat = DEFAULT_DEF;
+                              }
+                              x = (0.5 * raiderSim.Fast.PvEEnergy) + (0.5 * raiderSim.Charge.PvEEnergy);
+                              y = DEFAULT_DPS / (double)raiderSim.DefStat;
+                           }
+                           else
+                           {
+                              moveSets = boss.FastMove.Count * boss.ChargeMove.Count;
+                              foreach (Move bossFast in bossFastMoves)
+                              {
+                                 bossSim.Fast = bossFast;
+                                 bossSim.FastEffect = TypeCalculator.GetMultiplier(raiderTypes, bossFast.Type);
+                                 bossSim.FastStab = boss.Type.Contains(bossFast.Type) ? STAB_MULTIPLIER : 1.0;
+                                 foreach (Move bossCharge in bossChargeMoves)
+                                 {
+                                    if (!bossCharge.Name.Equals(Global.SHADOW_MOVES.ElementAt(Global.PURIFIED_INDEX).Name, StringComparison.OrdinalIgnoreCase) &&
+                                        !bossCharge.Name.Equals(Global.SHADOW_MOVES.ElementAt(Global.SHADOW_INDEX).Name, StringComparison.OrdinalIgnoreCase))
+                                    {
+                                       bossSim.Charge = bossCharge;
+                                       bossSim.ChargeEffect = TypeCalculator.GetMultiplier(raiderTypes, bossCharge.Type);
+                                       bossSim.ChargeStab = boss.Type.Contains(bossCharge.Type) ? STAB_MULTIPLIER : 1.0;
 
-                                 Tuple<double, double> inputs = CalcDPSInput(bossSim, raiderSim);
-                                 x += inputs.Item1;
-                                 y += inputs.Item2;
+                                       DPSInput inputs = CalcDPSInput(bossSim, raiderSim);
+                                       x += inputs.X;
+                                       y += inputs.Y;
+                                    }
+                                 }
                               }
                            }
-                        }
 
-                        allCounters.Add(CalcDps(bossSim, raiderSim, x / moveSets, y / moveSets));
+                           allCounters.Add(CalcDps(bossSim, raiderSim, x / moveSets, y / moveSets));
+                        }
                      }
                   }
                   if (allCounters.Count != 0)
@@ -165,14 +176,14 @@ namespace PokeStar.Calculators
 
             if (mode == REGULAR_COUNTER_INDEX)
             {
-               fullCounters.Item1.AddRange(counters.OrderByDescending(x => x.Rating).ThenBy(x => x.Name).Take(RESULTS).ToList());
+               results.Regular = counters.OrderByDescending(x => x.Rating).ThenBy(x => x.Name).Take(RESULTS).ToList();
             }
             else
             {
-               fullCounters.Item2.AddRange(counters.OrderByDescending(x => x.Rating).ThenBy(x => x.Name).Take(RESULTS).ToList());
+               results.Special = counters.OrderByDescending(x => x.Rating).ThenBy(x => x.Name).Take(RESULTS).ToList();
             }
          }
-         return fullCounters;
+         return results;
       }
 
       /// <summary>
@@ -225,8 +236,8 @@ namespace PokeStar.Calculators
       /// </summary>
       /// <param name="boss">Boss simulation Pokémon.</param>
       /// <param name="raider">Raider simulation Pokémon.</param>
-      /// <returns>Tuple where item1 is the extra energy (x) and item2 is the boss DPS (y).</returns>
-      private static Tuple<double, double> CalcDPSInput(SimPokemon boss, SimPokemon raider)
+      /// <returns>Input values for DPS calculation.</returns>
+      private static DPSInput CalcDPSInput(SimPokemon boss, SimPokemon raider)
       {
          double FDmg = CalcDamage(raider, boss, true);
          double CDmg = CalcDamage(raider, boss, false);
@@ -236,7 +247,7 @@ namespace PokeStar.Calculators
          double CDur = boss.Charge.Cooldown / 1000.0;
          double n = Math.Max(1.0, 3.0 * CE / 100.0);
 
-         return new Tuple<double, double>(
+         return new DPSInput (
             (raider.Charge.PvEEnergy * 0.5) + (raider.Fast.PvEEnergy * 0.5) + (0.5 * (((n * FDmg) + CDmg) / (n + 1))),
             ((n * FDmg) + CDmg) / ((n * (FDur + 2.0)) + (CDur + 2.0))
          );

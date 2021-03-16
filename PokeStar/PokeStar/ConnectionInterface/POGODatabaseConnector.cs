@@ -71,12 +71,12 @@ namespace PokeStar.ConnectionInterface
       /// Gets list of Pokémon to use in counter sims.
       /// </summary>
       /// <returns>List of Pokémon to use.</returns>
-      public List<Tuple<Pokemon, bool>> GetSimPokemon()
+      public List<Pokemon> GetSimPokemon()
       {
-         List<Tuple<Pokemon, bool>> pokemon = new List<Tuple<Pokemon, bool>>();
+         List<Pokemon> pokemon = new List<Pokemon>();
          using (SqlConnection conn = GetConnection())
          {
-            string queryString = $@"SELECT * 
+            string queryString = $@"SELECT Number, Name, Type1, Type2, Attack, Defense, Stamina, IsShadow, IsReleased 
                                     FROM Pokemon
                                     ORDER BY Number;";
             conn.Open();
@@ -94,31 +94,12 @@ namespace PokeStar.ConnectionInterface
                      Shadow = Convert.ToInt32(reader["IsShadow"]) == 1,
                      Released = Convert.ToInt32(reader["IsReleased"]) == 1,
                   };
-                  pkmn.Type.Add(Convert.ToString(reader["type1"]));
-                  if (reader["type2"].GetType() != typeof(DBNull))
+                  pkmn.Type.Add(Convert.ToString(reader["Type1"]));
+                  if (reader["Type2"].GetType() != typeof(DBNull))
                   {
-                     pkmn.Type.Add(Convert.ToString(reader["type2"]));
+                     pkmn.Type.Add(Convert.ToString(reader["Type2"]));
                   }
-                  pokemon.Add(new Tuple<Pokemon, bool>(pkmn, pkmn.Shadow));
-                  if (pkmn.Shadow)
-                  {
-                     pkmn = new Pokemon
-                     {
-                        Number = Convert.ToInt32(reader["Number"]),
-                        Name = Convert.ToString(reader["Name"]),
-                        Attack = Convert.ToInt32(reader["Attack"]),
-                        Defense = Convert.ToInt32(reader["Defense"]),
-                        Stamina = Convert.ToInt32(reader["Stamina"]),
-                        Shadow = Convert.ToInt32(reader["IsShadow"]) == 1,
-                        Released = Convert.ToInt32(reader["IsReleased"]) == 1,
-                     };
-                     pkmn.Type.Add(Convert.ToString(reader["type1"]));
-                     if (reader["type2"].GetType() != typeof(DBNull))
-                     {
-                        pkmn.Type.Add(Convert.ToString(reader["type2"]));
-                     }
-                     pokemon.Add(new Tuple<Pokemon, bool>(pkmn, !pkmn.Shadow));
-                  }
+                  pokemon.Add(pkmn);
                }
             }
             conn.Close();
@@ -307,9 +288,8 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="category">Category of moves.</param>
       /// <param name="shadowable">Is the Pokémon shadowable.</param>
-      /// <param name="isShadow">Is the Pokémon a shadow Pokémon.</param>
       /// <returns>List of moves of the Pokémon.</returns>
-      public List<Move> GetPokemonMoves(string pokemonName, string category, bool shadowable = false, bool? isShadow = null)
+      public List<Move> GetPokemonMoves(string pokemonName, string category, bool shadowable = false)
       {
          List<Move> moves = new List<Move>();
 
@@ -337,21 +317,9 @@ namespace PokeStar.ConnectionInterface
             }
             conn.Close();
          }
-         if (shadowable && category.Equals(Global.CHARGE_MOVE_CATEGORY, StringComparison.OrdinalIgnoreCase) && !isShadow.HasValue)
+         if (shadowable && category.Equals(Global.CHARGE_MOVE_CATEGORY, StringComparison.OrdinalIgnoreCase))
          {
             moves.AddRange(Global.SHADOW_MOVES);
-         }
-         else if (shadowable && category.Equals(Global.CHARGE_MOVE_CATEGORY, StringComparison.OrdinalIgnoreCase) && isShadow.HasValue && isShadow.Value)
-         {
-            Move moveToAdd = Global.SHADOW_MOVES.ElementAt(Global.SHADOW_INDEX);
-            moveToAdd.IsLegacy = true;
-            moves.Add(moveToAdd);
-         }
-         else if (shadowable && category.Equals(Global.CHARGE_MOVE_CATEGORY, StringComparison.OrdinalIgnoreCase) && isShadow.HasValue && !isShadow.Value)
-         {
-            Move moveToAdd = Global.SHADOW_MOVES.ElementAt(Global.PURIFIED_INDEX);
-            moveToAdd.IsLegacy = true;
-            moves.Add(moveToAdd);
          }
          return moves;
       }

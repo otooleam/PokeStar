@@ -499,32 +499,32 @@ namespace PokeStar.ConnectionInterface
       /// Gets list of Pokémon to use in counter sims.
       /// </summary>
       /// <returns>List of Pokémon to use.</returns>
-      public List<Tuple<Pokemon, bool>> GetPokemonForSim()
+      public List<Pokemon> GetPokemonForSim()
       {
-         List<Tuple<Pokemon, bool>> simPokemon = POGODBConnector.GetSimPokemon();
+         List<Pokemon> simPokemon = POGODBConnector.GetSimPokemon();
 
-         foreach (Tuple<Pokemon, bool> poke in simPokemon)
+         foreach (Pokemon poke in simPokemon)
          {
-            string name = poke.Item1.Name.Replace("\'", "\'\'");
+            string name = poke.Name.Replace("\'", "\'\'");
 
-            List<Move> initFastMove = POGODBConnector.GetPokemonMoves(name, "Fast", poke.Item1.Shadow, poke.Item2);
-            List<Move> initChargeMove = POGODBConnector.GetPokemonMoves(name, "Charge", poke.Item1.Shadow, poke.Item2);
+            List<Move> initFastMove = POGODBConnector.GetPokemonMoves(name, "Fast", poke.Shadow);
+            List<Move> initChargeMove = POGODBConnector.GetPokemonMoves(name, "Charge", poke.Shadow);
 
-            poke.Item1.FastMove = new List<Move>();
-            poke.Item1.ChargeMove = new List<Move>();
+            poke.FastMove = new List<Move>();
+            poke.ChargeMove = new List<Move>();
 
             foreach (Move fast in initFastMove)
             {
                Move fullFast = POGODBConnector.GetMove(fast.Name);
                fullFast.IsLegacy = fast.IsLegacy;
-               poke.Item1.FastMove.Add(fullFast);
+               poke.FastMove.Add(fullFast);
             }
 
             foreach (Move charge in initChargeMove)
             {
                Move fullCharge = POGODBConnector.GetMove(charge.Name);
                fullCharge.IsLegacy = charge.IsLegacy;
-               poke.Item1.ChargeMove.Add(fullCharge);
+               poke.ChargeMove.Add(fullCharge);
             }
          }
 

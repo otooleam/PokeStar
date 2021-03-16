@@ -218,6 +218,50 @@ namespace PokeStar.DataModels
    }
 
    /// <summary>
+   /// Results for counter calculations.
+   /// </summary>
+   public struct CounterCalcResults
+   {
+      /// <summary>
+      /// List of regular counters.
+      /// </summary>
+      public List<Counter> Regular { get; set; }
+
+      /// <summary>
+      /// List of special counters.
+      /// Special counters are shadow and mega Pokémon.
+      /// </summary>
+      public List<Counter> Special { get; set; }
+   }
+
+   /// <summary>
+   /// Inputs for DPS calculations.
+   /// </summary>
+   public struct DPSInput
+   {
+      /// <summary>
+      /// Energy left over after the battle.
+      /// </summary>
+      public double X { get; }
+
+      /// <summary>
+      /// DPS of the boss Pokémon.
+      /// </summary>
+      public double Y { get; }
+
+      /// <summary>
+      /// Creates a new DPSInput.
+      /// </summary>
+      /// <param name="x">Energy left over after the battle.</param>
+      /// <param name="y">DPS of the boss Pokémon.</param>
+      public DPSInput(double x, double y)
+      {
+         X = x;
+         Y = y;
+      }
+   }
+
+   /// <summary>
    /// Raid sub message.
    /// </summary>
    public struct RaidSubMessage

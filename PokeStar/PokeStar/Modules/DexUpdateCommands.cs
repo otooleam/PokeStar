@@ -178,28 +178,25 @@ namespace PokeStar.Modules
 
             IUserMessage message = await ResponseMessage.SendInfoMessage(Context.Channel, "Starting Pokémon counter recalculations...");
 
-            List<Tuple<Pokemon, bool>> allPokemon = Connections.Instance().GetPokemonForSim();
+            List<Pokemon> allPokemon = Connections.Instance().GetPokemonForSim();
             List<string> updates = new List<string>();
 
             int count = 0;
-            foreach (Tuple<Pokemon, bool> pokemon in allPokemon)
+            foreach (Pokemon pokemon in allPokemon)
             {
-               if (!pokemon.Item2)
+               CounterCalcResults result = CounterCalculator.RunSim(pokemon, allPokemon);
+
+               Pokemon currentCounters = new Pokemon
                {
-                  Tuple<List<Counter>, List<Counter>> result = CounterCalculator.RunSim(pokemon, allPokemon);
+                  Name = pokemon.Name
+               };
+               Connections.Instance().GetPokemonCounter(ref currentCounters);
 
-                  Pokemon currentCounters = new Pokemon
-                  {
-                     Name = pokemon.Item1.Name
-                  };
-                  Connections.Instance().GetPokemonCounter(ref currentCounters);
-
-                  if (CheckChange(result.Item1, currentCounters.Counter.Take(currentCounters.Counter.Count / 2).ToList()) ||
-                      CheckChange(result.Item2, currentCounters.Counter.Skip(currentCounters.Counter.Count / 2).ToList()))
-                  {
-                     Connections.Instance().UpdateCounters(pokemon.Item1.Name, result.Item1, result.Item2);
-                     updates.Add(pokemon.Item1.Name);
-                  }
+               if (CheckChange(result.Regular, currentCounters.Counter.Take(currentCounters.Counter.Count / 2).ToList()) ||
+                   CheckChange(result.Special, currentCounters.Counter.Skip(currentCounters.Counter.Count / 2).ToList()))
+               {
+                  Connections.Instance().UpdateCounters(pokemon.Name, result.Regular, result.Special);
+                  updates.Add(pokemon.Name);
                }
                count++;
                if ((DateTime.Now - timer).TotalSeconds >= COUNTER_UPDATE_TIMER)
