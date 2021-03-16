@@ -56,8 +56,8 @@ namespace PokeStar.Modules
          }
          else
          {
-            short calcTier = Global.EGG_TIER_STRING.ContainsKey(tier) ? Global.EGG_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-            if (calcTier == Global.INVALID_RAID_TIER)
+            short calcTier = Global.EGG_TIER_STRING.ContainsKey(tier) ? Global.EGG_TIER_STRING[tier] : Global.EGG_TIER_INVALID;
+            if (calcTier == Global.EGG_TIER_INVALID)
             {
                await ResponseMessage.SendErrorMessage(Context.Channel, "egg", $"{tier} is not a valid egg tier.");
             }
