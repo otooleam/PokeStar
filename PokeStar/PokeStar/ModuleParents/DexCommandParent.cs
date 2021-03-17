@@ -538,15 +538,18 @@ namespace PokeStar.ModuleParents
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithTitle($@"Max CP values for {pokemon.Name}");
          embed.WithThumbnailUrl($"attachment://{fileName}");
-         embed.AddField($"Max Half Level CP (Level 40)", pokemon.CPMaxHalf, true);
-         embed.AddField($"Max CP (Level 50)", pokemon.CPMax, true);
-         embed.AddField($"Max Buddy CP (Level 51)", pokemon.CPBestBuddy, true);
-         embed.AddField($"Raid CP (Level 20)", pokemon.RaidCPToString(), true);
-         embed.AddField($"Hatch CP (Level 20)", pokemon.HatchCPToString(), true);
-         embed.AddField($"Quest CP (Level 15)", pokemon.QuestCPToString(), true);
-         embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
+         embed.AddField($"Max Half Level CP (Level {Global.MAX_REG_LEVEL})", pokemon.CPMaxHalf, true);
+         embed.AddField($"Max CP (Level {Global.MAX_XL_LEVEL})", pokemon.CPMax, true);
+         embed.AddField($"Max Buddy CP (Level {Global.MAX_XL_LEVEL + Global.BUDDY_BOOST})", pokemon.CPBestBuddy, true);
+         embed.AddField($"Raid CP (Level {Global.RAID_LEVEL})", pokemon.RaidCPToString(), true);
+         embed.AddField($"Hatch CP (Level {Global.HATCH_LEVEL})", pokemon.HatchCPToString(), true);
+         embed.AddField($"Quest CP (Level {Global.QUEST_LEVEL})", pokemon.QuestCPToString(), true);
+         embed.AddField($"Shadow CP (Level {Global.SHADOW_LEVEL})", pokemon.ShadowCPToString(), false);
+         embed.AddField($"Wild CP (Level {Global.MIN_WILD_LEVEL}-{Global.MAX_WILD_LEVEL})", pokemon.WildCPToString(), false);
+
          embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
-         embed.WithFooter($"{Global.WEATHER_BOOST_SYMBOL} denotes Weather Boosted CP");
+         embed.WithFooter($"{Global.WEATHER_BOOST_SYMBOL} denotes Weather Boosted CP\n" +
+                          $"Weather boosted level is {Global.WEATHER_BOOST} levels over base level.");
          return embed.Build();
       }
 

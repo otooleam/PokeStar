@@ -247,7 +247,7 @@ namespace PokeStar.ConnectionInterface
 
       /// <summary>
       /// Calculates all of the relevant CP valus of a Pokémon. This
-      /// includes the raid, quest, hatch, and wild perfect IV values.
+      /// includes the raid, quest, hatch, shadow, and wild perfect IV values.
       /// </summary>
       /// <param name="pokemon">Reference to a Pokémon.</param>
       public static void GetPokemonCP(ref Pokemon pokemon)
@@ -304,6 +304,15 @@ namespace PokeStar.ConnectionInterface
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.HATCH_LEVEL);
 
+            pokemon.CPShadow = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.SHADOW_LEVEL);
+
+            pokemon.CPShadowBoosted = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV,
+               Global.SHADOW_LEVEL + Global.WEATHER_BOOST);
+
             for (int level = Global.MIN_WILD_LEVEL; level <= Global.MAX_WILD_LEVEL; level++)
             {
                pokemon.CPWild.Add(CPCalculator.CalcCPPerLevel(
@@ -323,19 +332,19 @@ namespace PokeStar.ConnectionInterface
          if (pokemon != null)
          {
             pokemon.GreatIVs = CPCalculator.CalcPvPIVsPerLeague(
-               pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                Global.MAX_GREAT_CP, Global.MAX_REG_LEVEL + Global.BUDDY_BOOST);
 
             pokemon.UltraIVs = CPCalculator.CalcPvPIVsPerLeague(
-               pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                Global.MAX_ULTRA_CP, Global.MAX_REG_LEVEL + Global.BUDDY_BOOST);
 
             pokemon.GreatXLIVs = CPCalculator.CalcPvPIVsPerLeague(
-               pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                Global.MAX_GREAT_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
 
             pokemon.UltraXLIVs = CPCalculator.CalcPvPIVsPerLeague(
-               pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                Global.MAX_ULTRA_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
 
             pokemon.CanBeLittleLeague = CanBeLittleLeague(ReformatName(pokemon.Name));

@@ -196,6 +196,16 @@ namespace PokeStar.DataModels
       public int CPHatchMax { get; set; }
 
       /// <summary>
+      /// CP of the Pokémon as a shadow.
+      /// </summary>
+      public int CPShadow { get; set; }
+
+      /// <summary>
+      /// Weather boosted CP of the Pokémonas a shadow.
+      /// </summary>
+      public int CPShadowBoosted { get; set; }
+
+      /// <summary>
       /// List of maximum wild CP of the Pokémon.
       /// </summary>
       public List<int> CPWild { get; } = new List<int>();
@@ -522,7 +532,7 @@ namespace PokeStar.DataModels
       /// Includes min and max CPs and weather boosted
       /// min and max CPs.
       /// </summary>
-      /// <returns>Pokémon raid CPas a string.</returns>
+      /// <returns>Pokémon raid CPs as a string.</returns>
       public string RaidCPToString()
       {
          return $"{CPRaidMin} - {CPRaidMax}\n{CPRaidBoostedMin}{Global.WEATHER_BOOST_SYMBOL} - {CPRaidBoostedMax}{Global.WEATHER_BOOST_SYMBOL}";
@@ -544,6 +554,16 @@ namespace PokeStar.DataModels
       public string HatchCPToString()
       {
          return $"{CPHatchMin} - {CPHatchMax}";
+      }
+
+      /// <summary>
+      /// Gets CPs of the Pokémon as a shadow as a string.
+      /// Includes normal and weather boosted CPs.
+      /// </summary>
+      /// <returns>Pokémon shadow CPs as a string.</returns>
+      public string ShadowCPToString()
+      {
+         return $"{CPShadow}, {CPShadowBoosted}{Global.WEATHER_BOOST_SYMBOL}";
       }
 
       /// <summary>
