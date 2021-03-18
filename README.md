@@ -8,11 +8,13 @@ To invite Nona to your server, invite it from [here](https://discord.com/api/oau
    * Standard raids
    * Invite only raids (raid mule)
    * Raid trains
+   * Invite only raid trains (raid mule train)
 * Pokémon lookup by name or number
    * Pokédex information
    * CP information
-   * PvP information
    * Evolution information
+   * Counter information
+   * PvP information
    * Catch information and simulation.
 * Basic Role Management
 * Type relations
@@ -21,12 +23,11 @@ To invite Nona to your server, invite it from [here](https://discord.com/api/oau
    * Move type information
 * Current raid boss list *
 * Current Egg pool list *
-
+* Gym/Pokéstop location tracking
 
 ### Future Features:
 * Support for EX-Raids
 * Player Accounts
-* Gym/Pokéstop location tracking
 * Raid image processing
 
 ### Current Issues:
