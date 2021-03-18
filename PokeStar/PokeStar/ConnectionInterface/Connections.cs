@@ -514,7 +514,7 @@ namespace PokeStar.ConnectionInterface
 
          foreach (Pokemon poke in simPokemon)
          {
-            string name = poke.Name.Replace("\'", "\'\'");
+            string name = ReformatName(poke.Name);
 
             List<Move> initFastMove = POGODBConnector.GetPokemonMoves(name, "Fast", poke.Shadow);
             List<Move> initChargeMove = POGODBConnector.GetPokemonMoves(name, "Charge", poke.Shadow);
