@@ -34,23 +34,7 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Array of modifer indices.
       /// </summary>
-      private readonly int[] Modifiers = new int[(int)Enum.GetValues(typeof(MODIFIER_INDEX)).Cast<MODIFIER_INDEX>().Max() + 1];
-
-      /// <summary>
-      /// Dictionary of modifer values.
-      /// Key is modifier name, value is max modifier value.
-      /// </summary>
-      private readonly Dictionary<string, int> ModifierStats = new Dictionary<string, int>()
-      {
-         ["Pokémon Level"]  = Global.MAX_WILD_LEVEL - 1,
-         ["Pokéball Type"]  = Global.POKE_BALL_RATE.Count - 1,
-         ["Berry Type"]     = Global.BERRY_RATE.Count - 1,
-         ["Throw Type"]     = Global.THROW_RATE.Count - 1,
-         ["Curveball"]      = Global.CURVEBALL_RATE.Count - 1,
-         ["Medal 1 Bonus"]  = Global.MEDAL_RATE.Count - 1,
-         ["Medal 2 Bonus"]  = Global.MEDAL_RATE.Count - 1,
-         ["Encounter Type"] = Global.ENCOUNTER_RATE.Count - 1,
-      };
+      private readonly int[] Modifiers = new int[Global.MODIFIER_STATS.Count];
 
       /// <summary>
       /// Modifer list index.
@@ -85,7 +69,7 @@ namespace PokeStar.DataModels
       /// <returns>Name of the current modifier.</returns>
       public string GetCurrentModifier()
       {
-         return ModifierStats.Keys.ElementAt(CurrentModifier);
+         return Global.MODIFIER_STATS.Keys.ElementAt(CurrentModifier);
       }
 
       /// <summary>
@@ -218,7 +202,7 @@ namespace PokeStar.DataModels
       /// </summary>
       public void IncrementModifierValue()
       {
-         if (Modifiers[CurrentModifier] == ModifierStats.Values.ElementAt(CurrentModifier))
+         if (Modifiers[CurrentModifier] == Global.MODIFIER_STATS.Values.ElementAt(CurrentModifier))
          {
             Modifiers[CurrentModifier] = 0;
          }
@@ -241,7 +225,7 @@ namespace PokeStar.DataModels
       {
          if (Modifiers[CurrentModifier] == 0)
          {
-            Modifiers[CurrentModifier] = ModifierStats.Values.ElementAt(CurrentModifier);
+            Modifiers[CurrentModifier] = Global.MODIFIER_STATS.Values.ElementAt(CurrentModifier);
          }
          else
          {

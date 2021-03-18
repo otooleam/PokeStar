@@ -389,6 +389,11 @@ namespace PokeStar
       public static readonly int QUEST_LEVEL    = 15;
 
       /// <summary>
+      /// Shadow level.
+      /// </summary>
+      public static readonly int SHADOW_LEVEL   = 8;
+
+      /// <summary>
       /// Weather boost bonus levels.
       /// </summary>
       public static readonly int WEATHER_BOOST  = 5;
@@ -426,6 +431,13 @@ namespace PokeStar
       /// Ultra league max CP.
       /// </summary>
       public static readonly int MAX_ULTRA_CP  = 2500;
+
+      // Type Calculator ******************************************************
+
+      /// <summary>
+      /// Coefficient for type effectivness.
+      /// </summary>
+      public const double TYPE_COEFFICIENT = 1.6;
 
       // Dex switch options ***************************************************
 
@@ -544,6 +556,22 @@ namespace PokeStar
       {
          ["Standard"] = 1.0,
          ["Special"]  = 2.0,
+      };
+
+      /// <summary>
+      /// Dictionary of modifer values.
+      /// Key is modifier name, value is max modifier value.
+      /// </summary>
+      public static readonly Dictionary<string, int> MODIFIER_STATS = new Dictionary<string, int>()
+      {
+         ["Pokémon Level"]  = MAX_WILD_LEVEL - 1,
+         ["Pokéball Type"]  = POKE_BALL_RATE.Count - 1,
+         ["Berry Type"]     = BERRY_RATE.Count - 1,
+         ["Throw Type"]     = THROW_RATE.Count - 1,
+         ["Curveball"]      = CURVEBALL_RATE.Count - 1,
+         ["Medal 1 Bonus"]  = MEDAL_RATE.Count - 1,
+         ["Medal 2 Bonus"]  = MEDAL_RATE.Count - 1,
+         ["Encounter Type"] = ENCOUNTER_RATE.Count - 1,
       };
 
       // Catch ring colors ****************************************************
@@ -816,22 +844,22 @@ namespace PokeStar
       /// <summary>
       /// Trainer role name.
       /// </summary>
-      public static readonly string ROLE_TRAINER  = "Trainer";
+      public static readonly string ROLE_TRAINER          = "Trainer";
 
       /// <summary>
       /// Valor role name.
       /// </summary>
-      public static readonly string ROLE_VALOR    = "Valor";
+      public static readonly string ROLE_VALOR            = "Valor";
 
       /// <summary>
       /// Mystic role name.
       /// </summary>
-      public static readonly string ROLE_MYSTIC   = "Mystic";
+      public static readonly string ROLE_MYSTIC           = "Mystic";
 
       /// <summary>
       /// Instinct role value.
       /// </summary>
-      public static readonly string ROLE_INSTINCT = "Instinct";
+      public static readonly string ROLE_INSTINCT         = "Instinct";
 
       /// <summary>
       /// Invalid team role index.
@@ -878,7 +906,7 @@ namespace PokeStar
       // Image processing *****************************************************
 
       /// <summary>
-      /// scaled image width.
+      /// Scaled image width.
       /// </summary>
       public static readonly int SCALE_WIDTH = 495;
 
