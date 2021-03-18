@@ -87,7 +87,6 @@ namespace PokeStar.DataModels
       /// <param name="command">Command that was executing.</param>
       /// <param name="message">Message to send.</param>
       /// <returns>Embed for a warning message.</returns>
-
       private static Embed BuildWarningEmbed(string command, string message)
       {
          EmbedBuilder embed = new EmbedBuilder();
