@@ -34,6 +34,11 @@ namespace PokeStar.Modules
       private readonly int COUNTER_UPDATE_TIMER = 3;
 
       /// <summary>
+      /// Pokémon to display per update message.
+      /// </summary>
+      private readonly int COUNTER_DISPLAY_COUNT = 25;
+
+      /// <summary>
       /// Is a counter update currently running.
       /// </summary>
       private static bool runningCounterSim = false;
@@ -206,17 +211,32 @@ namespace PokeStar.Modules
                }
             }
 
+            double time = Math.Round((DateTime.Now - start).TotalMinutes, 2);
+
+            bool sendInitMessage = true;
+            string initString = $"Counters successfully updated.\nTime elapsed: {time} Minutes.\n";
+            count = 0;
+            updates.Add(string.Empty);
             StringBuilder sb = new StringBuilder();
             foreach (string name in updates)
             {
                sb.AppendLine(name);
+               count++;
+
+               if (count % COUNTER_DISPLAY_COUNT == 0 || count == updates.Count)
+               {
+                  if (sendInitMessage)
+                  {
+                     await ResponseMessage.ModifyInfoMessage(message, initString + (updates.Count == 1 ? "No updates were necessary." : $"The following have been updated ({updates.Count - 1}):\n{sb}"));
+                     sendInitMessage = false;
+                  }
+                  else
+                  {
+                     await ResponseMessage.SendInfoMessage(Context.Channel, sb.ToString());
+                  }
+                  sb.Clear();
+               }
             }
-
-            string results = updates.Count == 0 ? "No updates were necessary." : $"The following have been updated:\n{sb}";
-
-            await ResponseMessage.ModifyInfoMessage(message, $"Counters successfully updated.\n" +
-                                                             $"Time elapsed: {(DateTime.Now - start).TotalSeconds} seconds.\n" +
-                                                             $"{results}");
             runningCounterSim = false;
          }
          else
