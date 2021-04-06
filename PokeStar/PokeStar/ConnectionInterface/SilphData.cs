@@ -301,7 +301,7 @@ namespace PokeStar.ConnectionInterface
          {
             return "Incarnate Thundurus";
          }
-         else if (name.Equals("THUNDERUS (THERIAN FORME)", StringComparison.OrdinalIgnoreCase))
+         else if (name.Equals("THUNDURUS (THERIAN FORME)", StringComparison.OrdinalIgnoreCase))
          {
             return "Therian Thundurus";
          }
@@ -309,7 +309,6 @@ namespace PokeStar.ConnectionInterface
          {
             return name.Replace('’', '\'');
          }
-
 
          return name;
       }
