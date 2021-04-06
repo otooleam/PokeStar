@@ -31,6 +31,8 @@ namespace PokeStar.ConnectionInterface
       private const string RocketHTMLPattern = "//*[@class='lineupGroup normalGroup']";
       private const string RocketLeaderHTMLPattern = "//*[@class='lineupGroup specialGroup']";
 
+      private const int SILPH_GUILD_NUM = 0;
+
       /// <summary>
       /// Gets a list of all current raid bosses.
       /// The list is dependent on the current raid bosses on 
@@ -245,72 +247,8 @@ namespace PokeStar.ConnectionInterface
       /// <returns>Name formated for the database.</returns>
       private static string ReformatName(string name)
       {
-         if (name.Equals("GIRATINA (ORIGIN FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Origin Form Giratina";
-         }
-         else if (name.Equals("GIRATINA (ALTERED FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Altered Form Giratina";
-         }
-         else if (name.Equals("BURMY (PLANT CLOAK)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Plant Cloak Burmy";
-         }
-         else if (name.Equals("BURMY (TRASH CLOAK)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Trash Cloak Burmy";
-         }
-         else if (name.Equals("BURMY (SANDY CLOAK)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Sand Cloak Burmy";
-         }
-         else if (name.Equals("GENESECT (BURN DRIVE)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Burn Drive Genesect";
-         }
-         else if (name.Equals("GENESECT (CHILL DRIVE)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Chill Drive Genesect";
-         }
-         else if (name.Equals("GENESECT (DOUSE DRIVE)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Douse Drive Genesect";
-         }
-         else if (name.Equals("GENESECT (SHOCK DRIVE)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Shock Drive Genesect";
-         }
-         else if (name.Equals("LANDORUS (INCARNATE FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Incarnate Landorus";
-         }
-         else if (name.Equals("LANDORUS (THERIAN FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Therian Landorus";
-         }
-         else if (name.Equals("TORNADUS (INCARNATE FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Incarnate Tornadus";
-         }
-         else if (name.Equals("TORNADUS (THERIAN FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Therian Tornadus";
-         }
-         else if (name.Equals("THUNDURUS (INCARNATE FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Incarnate Thundurus";
-         }
-         else if (name.Equals("THUNDURUS (THERIAN FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Therian Thundurus";
-         }
-         else if (name.IndexOf('’') != -1)
-         {
-            return name.Replace('’', '\'');
-         }
-
-         return name;
+         string silphName = name.IndexOf('’') != -1 ? name.Replace('’', '\'') : name;
+         return Connections.Instance().GetPokemonWithNickname(SILPH_GUILD_NUM, silphName) ?? name;
       }
    }
 }

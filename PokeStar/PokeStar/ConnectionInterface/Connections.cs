@@ -32,13 +32,8 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       private Connections()
       {
-
          POGODBConnector = new POGODatabaseConnector(Global.POGO_DB_CONNECTION_STRING);
          NONADBConnector = new NONADatabaseConnector(Global.NONA_DB_CONNECTION_STRING);
-         UpdatePokemonNameList();
-         UpdateMoveNameList();
-         UpdateEggList();
-         UpdateRocketList();
       }
 
       /// <summary>
@@ -50,6 +45,10 @@ namespace PokeStar.ConnectionInterface
          if (connections == null)
          {
             connections = new Connections();
+            connections.UpdatePokemonNameList();
+            connections.UpdateMoveNameList();
+            connections.UpdateEggList();
+            connections.UpdateRocketList();
          }
          return connections;
       }
@@ -79,7 +78,7 @@ namespace PokeStar.ConnectionInterface
       /// <returns>Pokémon picture file name.</returns>
       public static string GetPokemonPicture(string pokemonName)
       {
-         int x = pokemonName.IndexOf('`');
+         pokemonName = pokemonName.Replace("`", "");
          pokemonName = pokemonName.Replace(" ", "_");
          pokemonName = pokemonName.Replace(".", "");
          pokemonName = pokemonName.Replace("%", "");
