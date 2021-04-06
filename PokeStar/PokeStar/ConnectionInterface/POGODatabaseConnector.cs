@@ -574,9 +574,9 @@ namespace PokeStar.ConnectionInterface
       {
          List<string> formList = new List<string>();
          string default_form = null;
-         string queryString = $@"SELECT tag, IsDefault
+         string queryString = $@"SELECT Tag, IsDefault
                                  FROM Form 
-                                 WHERE Pokemon='{pokemonName}';";
+                                 WHERE Base='{pokemonName}';";
 
          using (SqlConnection conn = GetConnection())
          {
