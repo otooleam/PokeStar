@@ -13,7 +13,6 @@ namespace PokeStar.Modules
    /// </summary>
    public class RocketCommands: ModuleBase<SocketCommandContext>
    {
-      /*
       /// <summary>
       /// Handle rocket command.
       /// </summary>
@@ -85,6 +84,5 @@ namespace PokeStar.Modules
          Connections.Instance().UpdateEggList();
          await ResponseMessage.SendInfoMessage(Context.Channel, $"Egg list has been updated.");
       }
-      /**/
    }
 }

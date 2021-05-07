@@ -161,25 +161,30 @@ namespace PokeStar.ConnectionInterface
          foreach (HtmlNode col in rockets)
          {
             int slot = 0;
-            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim()) &&
+                                                                  x.Trim().IndexOf('%') == -1 &&
+                                                                  x.Trim().IndexOf(':') == -1 &&
+                                                                  x.Trim().IndexOf('/') == -1
+                                                                  ).ToArray();
             Rocket rocket = new Rocket();
             string type = "";
 
             for (int i = 0; i < words.Length; i++)
             {
-               string line = words[i].Trim();
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
                int numIndex = line.IndexOf('#');
                if (numIndex != -1)
                {
                   if (slot == 0)
                   {
-                     type = words[i - 1].Trim();
-                     StringBuilder sb = new StringBuilder();
+                     type = words[i - 1];
+
+                     StringBuilder phrase = new StringBuilder();
                      for (int j = 0; j < i - 1; j++)
                      {
-                        sb.AppendLine(words[j]);
+                        phrase.AppendLine(words[j]);
                      }
-                     rocket.SetGrunt(type, sb.ToString());
+                     rocket.SetGrunt(type, phrase.ToString());
                   }
 
                   slot = Convert.ToInt32(line.Substring(numIndex + 1));
@@ -215,7 +220,11 @@ namespace PokeStar.ConnectionInterface
          foreach (HtmlNode col in leaders)
          {
             int slot = 0;
-            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim()) &&
+                                                                  x.Trim().IndexOf('%') == -1 &&
+                                                                  x.Trim().IndexOf(':') == -1 &&
+                                                                  x.Trim().IndexOf('/') == -1
+                                                                  ).ToArray();
             Rocket rocket = new Rocket();
             rocket.SetLeader(words[0].Trim());
 

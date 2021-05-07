@@ -159,7 +159,7 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       public void UpdateRocketList()
       {
-         // Rockets = SilphData.GetRockets().Union(SilphData.GetRocketLeaders()).ToDictionary(k => k.Key, v => v.Value, StringComparer.OrdinalIgnoreCase);
+         Rockets = SilphData.GetRockets().Union(SilphData.GetRocketLeaders()).ToDictionary(k => k.Key, v => v.Value, StringComparer.OrdinalIgnoreCase);
       }
 
       /// <summary>
