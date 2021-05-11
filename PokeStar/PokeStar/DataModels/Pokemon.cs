@@ -303,6 +303,15 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
+      /// Gets the shiny status of the Pokémon as a string.
+      /// </summary>
+      /// <returns>Pokémon shiny status as a string.</returns>
+      public string ShinyToString()
+      {
+         return Shiny ? "Yes" : "No";
+      }
+
+      /// <summary>
       /// Gets the details of the Pokémon as a string.
       /// Details include but are not limited to region, 
       /// category, buddy distance, and second move data.
@@ -429,8 +438,9 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the fast moves of the Pokémon as a string.
       /// </summary>
+      /// <param name="showLegacyMoves">Include legacy moves in the string.</param>
       /// <returns>Pokémon fast moves as a string.</returns>
-      public string FastMoveToString()
+      public string FastMoveToString(bool showLegacyMoves = true)
       {
          if (FastMove.Count == 0)
          {
@@ -440,19 +450,22 @@ namespace PokeStar.DataModels
          StringBuilder sb = new StringBuilder();
          foreach (Move fastMove in FastMove)
          {
-            if (Name.Equals("Mew", StringComparison.OrdinalIgnoreCase))
+            if (showLegacyMoves || !fastMove.IsLegacy)
             {
-               sb.Append($"{fastMove.Name} ({fastMove.Type})");
+               if (Name.Equals("Mew", StringComparison.OrdinalIgnoreCase))
+               {
+                  sb.Append($"{fastMove.Name} ({fastMove.Type})");
+               }
+               else
+               {
+                  sb.Append(fastMove.PokemonMoveToString());
+               }
+               if (Type.Contains(fastMove.Type))
+               {
+                  sb.Append($" {Global.STAB_SYMBOL}");
+               }
+               sb.AppendLine();
             }
-            else
-            {
-               sb.Append(fastMove.PokemonMoveToString());
-            }
-            if (Type.Contains(fastMove.Type))
-            {
-               sb.Append($" {Global.STAB_SYMBOL}");
-            }
-            sb.AppendLine();
          }
          return sb.ToString();
       }
@@ -460,8 +473,9 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the charge moves of the Pokémon as a string.
       /// </summary>
+      /// <param name="showLegacyMoves">Include legacy moves in the string.</param>
       /// <returns>Pokémon charge moves as a string.</returns>
-      public string ChargeMoveToString()
+      public string ChargeMoveToString(bool showLegacyMoves = true)
       {
          if (ChargeMove.Count == 0)
          {
@@ -471,19 +485,22 @@ namespace PokeStar.DataModels
          StringBuilder sb = new StringBuilder();
          foreach (Move chargeMove in ChargeMove)
          {
-            if (Name.Equals("Mew", StringComparison.OrdinalIgnoreCase))
+            if (showLegacyMoves || !chargeMove.IsLegacy)
             {
-               sb.Append($"{chargeMove.Name} ({chargeMove.Type})");
+               if (Name.Equals("Mew", StringComparison.OrdinalIgnoreCase))
+               {
+                  sb.Append($"{chargeMove.Name} ({chargeMove.Type})");
+               }
+               else
+               {
+                  sb.Append(chargeMove.PokemonMoveToString());
+               }
+               if (Type.Contains(chargeMove.Type))
+               {
+                  sb.Append($" {Global.STAB_SYMBOL}");
+               }
+               sb.AppendLine();
             }
-            else
-            {
-               sb.Append(chargeMove.PokemonMoveToString());
-            }
-            if (Type.Contains(chargeMove.Type))
-            {
-               sb.Append($" {Global.STAB_SYMBOL}");
-            }
-            sb.AppendLine();
          }
          return sb.ToString();
       }

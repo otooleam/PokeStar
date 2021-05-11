@@ -223,6 +223,17 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Gets needed information for a raid boss.
+      /// </summary>
+      /// <param name="pokemon">Reference to a Pokémon.</param>
+      public void GetRaidBoss(ref Pokemon pokemon)
+      {
+         GetPokemonStats(ref pokemon);
+         GetPokemonCP(ref pokemon);
+         GetPokemonCounter(ref pokemon);
+      }
+
+      /// <summary>
       /// Calculates all of the relevant Stats of a Pokémon. This
       /// includes the Forms, Moves, League IVs, Type interactions, and weather boosts.
       /// </summary>

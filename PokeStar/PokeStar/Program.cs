@@ -200,6 +200,10 @@ namespace PokeStar
             {
                await RaidCommandParent.RaidSubMessageReactionHandle(message, reaction);
             }
+            else if (RaidCommandParent.IsRaidGuideMessage(message.Id))
+            {
+               await RaidCommandParent.RaidGuideMessageReactionHandle(message, reaction);
+            }
             else if (DexCommandParent.IsDexSelectMessage(message.Id))
             {
                await DexCommandParent.DexSelectMessageReactionHandle(message, reaction, guild);

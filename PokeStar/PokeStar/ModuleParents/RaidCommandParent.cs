@@ -40,6 +40,12 @@ namespace PokeStar.ModuleParents
       /// </summary>
       protected static readonly Dictionary<ulong, RaidSubMessage> subMessages = new Dictionary<ulong, RaidSubMessage>();
 
+      /// <summary>
+      /// Saved raid guide messages.
+      /// Elements are removed upon usage.
+      /// </summary>
+      protected static readonly Dictionary<ulong, List<string>> guideMessages = new Dictionary<ulong, List<string>>();
+
       // Emotes ***************************************************************
 
       /// <summary>
@@ -289,6 +295,16 @@ namespace PokeStar.ModuleParents
          return subMessages.ContainsKey(id);
       }
 
+      /// <summary>
+      /// Checks if a message is a raid guide message.
+      /// </summary>
+      /// <param name="id">Id of the message.</param>
+      /// <returns>True if the message is a raid guide message, otherwise false.</returns>
+      public static bool IsRaidGuideMessage(ulong id)
+      {
+         return guideMessages.ContainsKey(id);
+      }
+
       // Message reaction handlers ********************************************
 
       /// <summary>
@@ -394,6 +410,34 @@ namespace PokeStar.ModuleParents
          else if (subMessageType == (int)SUB_MESSAGE_TYPES.EDIT_BOSS_SUB_MESSAGE)
          {
             await BossEditSelectionReactionHandle(message, reaction);
+         }
+      }
+
+      /// <summary>
+      /// Handles a reaction on a raid guide message.
+      /// </summary>
+      /// <param name="message">Message that was reacted on.</param>
+      /// <param name="reaction">Reaction that was sent.</param>
+      /// <returns>Completed Task.</returns>
+      public static async Task RaidGuideMessageReactionHandle(IMessage message, SocketReaction reaction)
+      {
+         List<string> potentials = guideMessages[message.Id];
+
+         for (int i = 0; i < potentials.Count; i++)
+         {
+            if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[i]))
+            {
+               guideMessages.Remove(message.Id);
+               message.DeleteAsync();
+
+               Pokemon pkmn = Connections.Instance().GetPokemon(potentials[i]);
+               Connections.Instance().GetRaidBoss(ref pkmn);
+
+               string fileName = Connections.GetPokemonPicture(pkmn.Name);
+               Connections.CopyFile(fileName);
+               await reaction.Channel.SendFileAsync(fileName, embed: BuildRaidGuideEmbed(pkmn, fileName));
+               Connections.DeleteFile(fileName);
+            }
          }
       }
 
@@ -1276,6 +1320,34 @@ namespace PokeStar.ModuleParents
          embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
          embed.WithTitle($"{player} - Raid Mule Ready");
          embed.AddField("Please Select Which Group is Ready.", sb.ToString());
+         return embed.Build();
+      }
+
+      /// <summary>
+      /// Builds a raid guide embed.
+      /// </summary>
+      /// <param name="pokemon">Raid Boss to display</param>
+      /// <param name="fileName">Name of image file.</param>
+      /// <returns>Embed for viewing a Raid Boss.</returns>
+      protected static Embed BuildRaidGuideEmbed(Pokemon pokemon, string fileName)
+      {
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithTitle($@"#{pokemon.Number} {pokemon.Name}");
+         embed.WithThumbnailUrl($"attachment://{fileName}");
+         embed.AddField("Type", pokemon.TypeToString(), true);
+         embed.AddField("Weather Boosts", pokemon.WeatherToString(), true);
+         embed.AddField($"Raid CP (Level {Global.RAID_LEVEL})", pokemon.RaidCPToString(), true);
+         embed.AddField("Resistances", pokemon.ResistanceToString(), true);
+         embed.AddField("Weaknesses", pokemon.WeaknessToString(), true);
+         embed.AddField("Shiniable", pokemon.ShinyToString(), true);
+
+         embed.AddField("Fast Moves", pokemon.FastMoveToString(false), true);
+         embed.AddField("Charge Moves", pokemon.ChargeMoveToString(false), true);
+         embed.AddField("Normal Counters", pokemon.CounterToString());
+         embed.AddField("Special Counters", pokemon.SpecialCounterToString());
+
+         embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
+         embed.WithFooter($"{Global.STAB_SYMBOL} denotes STAB move {Global.LEGACY_MOVE_SYMBOL} denotes Legacy move");
          return embed.Build();
       }
 
