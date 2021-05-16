@@ -36,10 +36,10 @@ namespace PokeStar.Modules
       /// <returns>Completed Task.</returns>
       [Command("sink")]
       [Alias("ship", "niantic")]
-      [Summary("AAAHHHHHHHHHHHHHHH!")]
+      [Summary("Typical")]
       public async Task Sink()
       {
-         await ReplyAsync(Global.NONA_EMOJIS["scream_emote"]);
+         await ReplyAsync(Global.NONA_EMOJIS["sink_emote"]);
       }
    }
 }

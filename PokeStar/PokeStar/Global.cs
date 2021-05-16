@@ -973,6 +973,7 @@ namespace PokeStar
 
          ["rave_emote"]          = "ravewizard",
          ["scream_emote"]        = "rowletscrem",
+         ["sink_emote"]          = "sink",
       };
 
       /// <summary>
