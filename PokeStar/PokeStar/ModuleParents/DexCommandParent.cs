@@ -986,6 +986,25 @@ namespace PokeStar.ModuleParents
             return $"Douse Drive {pokemonName}";
          else if (form.Equals("-shock", StringComparison.OrdinalIgnoreCase))
             return $"Shock Drive {pokemonName}";
+         // Furfrou
+         else if (form.Equals("-heart", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Heart Trim";
+         else if (form.Equals("-star", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Star Trim";
+         else if (form.Equals("-diamond", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Diamond Trim";
+         else if (form.Equals("-debutante", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Debutante Trim";
+         else if (form.Equals("-matron", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Matron Trim";
+         else if (form.Equals("-dandy", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Dandy Trim";
+         else if (form.Equals("-reine", StringComparison.OrdinalIgnoreCase) || form.Equals("-la-reine", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} La Reine Trim";
+         else if (form.Equals("-kabuki", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Kabuki Trim";
+         else if (form.Equals("-pharaoh", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Pharaoh Trim";
          // Aegislash
          else if (form.Equals("-blade", StringComparison.OrdinalIgnoreCase) || (string.IsNullOrWhiteSpace(form) && pokemonName.Equals("aegislash", StringComparison.OrdinalIgnoreCase)))
             return $"{pokemonName} Blade Form";
