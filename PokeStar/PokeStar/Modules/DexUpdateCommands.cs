@@ -23,8 +23,8 @@ namespace PokeStar.Modules
       /// </summary>
       private readonly Dictionary<string, string> EditableAttributes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
-         ["SHINY"] = "IsShiny",
-         ["SHADOW"] = "IsShadow",
+         ["SHINY"]      = "IsShiny",
+         ["SHADOW"]     = "IsShadow",
          ["OBTAINABLE"] = "IsReleased"
       };
 

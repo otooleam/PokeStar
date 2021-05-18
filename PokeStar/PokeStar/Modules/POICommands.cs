@@ -46,11 +46,11 @@ namespace PokeStar.Modules
       /// <summary>
       /// Valid Point of Interest editable attributes.
       /// </summary>
-      private readonly List<string> EditableAttributes = new List<string>()
+      private readonly Dictionary<string, string> EditableAttributes = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
-         "GYM",
-         "SPONSORED",
-         "EX"
+         ["GYM"]       = "IsGym",
+         ["SPONSORED"] = "IsSponsored",
+         ["EX"]        = "IsEx"
       };
 
       /// <summary>
@@ -202,7 +202,7 @@ namespace PokeStar.Modules
                                   [Summary("Update the attribute with this value.")] int value,
                                   [Summary("Update attribute of this Point of Interest.")][Remainder] string poi)
       {
-         if (EditableAttributes.Contains(attribute.ToUpper()))
+         if (EditableAttributes.ContainsKey(attribute.ToUpper()))
          {
             ulong guild = Context.Guild.Id;
             POI pkmnPOI = Connections.Instance().GetPOI(guild, poi);
@@ -223,7 +223,7 @@ namespace PokeStar.Modules
                   }
                   else
                   {
-                     Connections.Instance().UpdatePOI(guild, pkmnPOI.Name, attribute, value);
+                     Connections.Instance().UpdatePOI(guild, pkmnPOI.Name, EditableAttributes[attribute], value);
                      await ResponseMessage.SendInfoMessage(Context.Channel, $"{attribute} has been set to {value} for {pkmnPOI.Name}. Run .poi {pkmnPOI.Name} to ensure value is set correctly.");
                   }
                }
@@ -236,7 +236,7 @@ namespace PokeStar.Modules
                }
                else
                {
-                  Connections.Instance().UpdatePOI(guild, pkmnPOI.Name, attribute, value);
+                  Connections.Instance().UpdatePOI(guild, pkmnPOI.Name, EditableAttributes[attribute], value);
                   await ResponseMessage.SendInfoMessage(Context.Channel, $"{attribute} has been set to {value} for {pkmnPOI.Name}. Run .poi {pkmnPOI.Name} to ensure value is set correctly.");
                }
             }
