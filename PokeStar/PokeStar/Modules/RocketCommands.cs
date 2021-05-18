@@ -76,13 +76,14 @@ namespace PokeStar.Modules
       /// </summary>
       /// <returns>Completed Task.</returns>
       [Command("updateRocketList")]
+      [Alias("updateRockets")]
       [Summary("Updates the saved list of Rocket Grunts from The Silph Road.")]
       [RequireUserPermission(GuildPermission.Administrator)]
       [NonaAdmin()]
       public async Task UpdateRocketList()
       {
-         Connections.Instance().UpdateEggList();
-         await ResponseMessage.SendInfoMessage(Context.Channel, $"Egg list has been updated.");
+         Connections.Instance().UpdateRocketList();
+         await ResponseMessage.SendInfoMessage(Context.Channel, $"Rocket list has been updated.");
       }
    }
 }

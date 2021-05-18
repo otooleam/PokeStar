@@ -96,6 +96,7 @@ namespace PokeStar.Modules
       /// </summary>
       /// <returns>Completed Task.</returns>
       [Command("updateEggList")]
+      [Alias("updateEggs")]
       [Summary("Updates the saved list of Pokémon in eggs from The Silph Road.")]
       [RequireUserPermission(GuildPermission.Administrator)]
       [NonaAdmin()]
