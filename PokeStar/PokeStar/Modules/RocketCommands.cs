@@ -66,6 +66,8 @@ namespace PokeStar.Modules
                   embed.AddField($"Slot #{i + 1}:", sb.ToString(), true);
                }
 
+               embed.WithFooter($"{Global.ROCKET_CATCH_SYMBOL} denotes the Pokémon is catchable.\n {Global.UNVERIFIED_SYMBOL} denotes Pokémon is not fully verified.");
+
                await ReplyAsync(embed: embed.Build());
             }
          }

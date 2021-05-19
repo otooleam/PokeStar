@@ -1062,7 +1062,8 @@ namespace PokeStar.ModuleParents
             embed.AddField($"**{groupPrefix}Attending**", $"{BuildTotalList(attendList, invitedAttendList)}");
          }
          embed.AddField($"**Need Invite:**", $"{BuildRequestInviteList(raid.GetReadonlyInviteList())}");
-         embed.WithFooter($"Note: the max number of members in a raid is {Global.LIMIT_RAID_PLAYER}, and the max number of invites is {Global.LIMIT_RAID_INVITE}.");
+         embed.WithFooter($"The max number of members in a raid is {Global.LIMIT_RAID_PLAYER}, and the max number of remote raiders is {Global.LIMIT_RAID_INVITE}.\n" + 
+                           "Remote raiders include both remotes and invites.");
          return embed.Build();
       }
 
@@ -1347,7 +1348,7 @@ namespace PokeStar.ModuleParents
          embed.AddField("Special Counters", pokemon.SpecialCounterToString());
 
          embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
-         embed.WithFooter($"{Global.STAB_SYMBOL} denotes STAB move {Global.LEGACY_MOVE_SYMBOL} denotes Legacy move");
+         embed.WithFooter($"{Global.STAB_SYMBOL} denotes STAB move.\n {Global.LEGACY_MOVE_SYMBOL} denotes Legacy move.");
          return embed.Build();
       }
 

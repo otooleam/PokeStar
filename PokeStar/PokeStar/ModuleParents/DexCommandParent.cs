@@ -523,7 +523,7 @@ namespace PokeStar.ModuleParents
             embed.AddField("Regions", pokemon.RegionalToString(), true);
          }
          embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
-         embed.WithFooter($"{Global.STAB_SYMBOL} denotes STAB move {Global.LEGACY_MOVE_SYMBOL} denotes Legacy move");
+         embed.WithFooter($"{Global.STAB_SYMBOL} denotes STAB move.\n {Global.LEGACY_MOVE_SYMBOL} denotes Legacy move.");
          return embed.Build();
       }
 
@@ -548,7 +548,7 @@ namespace PokeStar.ModuleParents
          embed.AddField($"Wild CP (Level {Global.MIN_WILD_LEVEL}-{Global.MAX_WILD_LEVEL})", pokemon.WildCPToString(), false);
 
          embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
-         embed.WithFooter($"{Global.WEATHER_BOOST_SYMBOL} denotes Weather Boosted CP\n" +
+         embed.WithFooter($"{Global.WEATHER_BOOST_SYMBOL} denotes Weather Boosted CP.\n" +
                           $"Weather boosted level is {Global.WEATHER_BOOST} levels over base level.");
          return embed.Build();
       }
