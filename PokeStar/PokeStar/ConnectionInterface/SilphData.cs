@@ -113,7 +113,7 @@ namespace PokeStar.ConnectionInterface
       public static Dictionary<int, List<string>> GetEggs()
       {
          int eggCategory = 0;
-         int pokemonNameOffset = 0;
+         string poke = "";
          HtmlWeb web = new HtmlWeb();
          HtmlDocument doc = web.Load(EggUrl);
          HtmlNodeCollection eggs = doc.DocumentNode.SelectNodes(EggHTMLPattern);
@@ -122,24 +122,29 @@ namespace PokeStar.ConnectionInterface
 
          foreach (HtmlNode col in eggs)
          {
-            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
-            foreach (string word in words)
+            string[] words = col.InnerHtml.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            for (int i = 0; i < words.Length; i++)
             {
-               pokemonNameOffset--;
-               string line = word.Trim();
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
                if (line.Contains("KM"))
                {
-                  eggCategory = Global.EGG_TIER_TITLE[line];
+                  eggCategory = Global.EGG_TIER_TITLE[Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()];
                   eggList.Add(eggCategory, new List<string>());
                }
-               else if (line.IndexOf('#') != -1)
+               else if (line.Contains("<img class=\"regionalIcon\""))
                {
-                  pokemonNameOffset = 2;
+                  poke += Global.EGG_REGIONAL_SYMBOL;
                }
-               else if (pokemonNameOffset == 0)
+               else if (line.StartsWith("<p class=\"speciesName\">", StringComparison.OrdinalIgnoreCase))
                {
-                  eggList[eggCategory].Add(ReformatName(line));
+                  poke += Global.POKEMON_FOUND_SYMBOL;
                }
+               else if (poke.EndsWith(Global.POKEMON_FOUND_SYMBOL.ToString()))
+               {
+                  eggList[eggCategory].Add(ReformatName(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()) + poke.TrimEnd(Global.POKEMON_FOUND_SYMBOL));
+                  poke = "";
+               }
+
             }
          }
          return eggList;
@@ -188,7 +193,7 @@ namespace PokeStar.ConnectionInterface
                }
                else if (line.StartsWith("<p class=\"speciesName\">", StringComparison.OrdinalIgnoreCase))
                {
-                  rocket.Slots[slot].Add(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty) + poke);
+                  rocket.Slots[slot].Add(ReformatName(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty)) + poke);
                   poke = "";
                }
                else if (line.StartsWith("<img class=\"pokeballIcon", StringComparison.OrdinalIgnoreCase))
@@ -248,7 +253,7 @@ namespace PokeStar.ConnectionInterface
                }
                else if (line.StartsWith("<p class=\"speciesName\">", StringComparison.OrdinalIgnoreCase))
                {
-                  rocket.Slots[slot].Add(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty) + poke);
+                  rocket.Slots[slot].Add(ReformatName(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty)) + poke);
                   poke = "";
                }
                else if (line.StartsWith("<img class=\"pokeballIcon", StringComparison.OrdinalIgnoreCase))

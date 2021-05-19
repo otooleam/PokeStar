@@ -85,6 +85,7 @@ namespace PokeStar.Modules
                EmbedBuilder embed = new EmbedBuilder();
                embed.WithColor(Global.EMBED_COLOR_GAME_INFO_RESPONSE);
                embed.AddField(title, sb.ToString());
+               embed.WithFooter($"{Global.EGG_REGIONAL_SYMBOL} denotes the Pokémon is region locked.");
 
                await ReplyAsync(embed: embed.Build());
             }
