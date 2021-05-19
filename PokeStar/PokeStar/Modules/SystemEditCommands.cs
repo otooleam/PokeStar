@@ -47,6 +47,8 @@ namespace PokeStar.Modules
       /// <returns>Completed Task.</returns>
       [Command("updateMoveNames")]
       [Summary("Updates the saved list of Move names from the database.")]
+      [RequireUserPermission(GuildPermission.Administrator)]
+      [NonaAdmin()]
       public async Task UpdateMoveNames()
       {
          Connections.Instance().UpdateMoveNameList();
