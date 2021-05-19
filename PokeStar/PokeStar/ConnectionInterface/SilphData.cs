@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using PokeStar.DataModels;
 
@@ -30,6 +30,8 @@ namespace PokeStar.ConnectionInterface
       private static Uri RocketUrl { get; } = new Uri("https://thesilphroad.com/rocket-invasions");
       private const string RocketHTMLPattern = "//*[@class='lineupGroup normalGroup']";
       private const string RocketLeaderHTMLPattern = "//*[@class='lineupGroup specialGroup']";
+
+      private const string HTML_TAG_PATTERN = "<.*?>";
 
       private const int SILPH_GUILD_NUM = 0;
 
@@ -160,41 +162,47 @@ namespace PokeStar.ConnectionInterface
 
          foreach (HtmlNode col in rockets)
          {
-            int slot = 0;
-            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim()) &&
-                                                                  x.Trim().IndexOf('%') == -1 &&
-                                                                  x.Trim().IndexOf(':') == -1 &&
-                                                                  x.Trim().IndexOf('/') == -1
-                                                                  ).ToArray();
+            int slot = -1;
+            string[] words = col.InnerHtml.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
             Rocket rocket = new Rocket();
             string type = "";
+            string phrase = "";
+            string poke = "";
 
             for (int i = 0; i < words.Length; i++)
             {
                string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
-               int numIndex = line.IndexOf('#');
-               if (numIndex != -1)
+
+               if (line.StartsWith("<p class=\"quote\">", StringComparison.OrdinalIgnoreCase) || !string.IsNullOrEmpty(phrase))
                {
-                  if (slot == 0)
-                  {
-                     type = words[i - 1];
-
-                     StringBuilder phrase = new StringBuilder();
-                     for (int j = 0; j < i - 1; j++)
-                     {
-                        phrase.AppendLine(words[j]);
-                     }
-                     rocket.SetGrunt(type, phrase.ToString());
-                  }
-
-                  slot = Convert.ToInt32(line.Substring(numIndex + 1));
+                  phrase += Regex.Replace(line, HTML_TAG_PATTERN, string.Empty) + '\n';
                }
-               else if (slot != 0)
+               else if (line.StartsWith("<h3", StringComparison.OrdinalIgnoreCase))
                {
-                  if (line.Length != 1 && line.IndexOf('%') == -1 && line.IndexOf('/') == -1)
-                  {
-                     rocket.Slots[slot - 1].Add(line);
-                  }
+                  type = Regex.Replace(line, HTML_TAG_PATTERN, string.Empty);
+                  rocket.SetGrunt(type);
+               }
+               else if (line.StartsWith("<div class=\"lineupSlot\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  slot++;
+               }
+               else if (line.StartsWith("<p class=\"speciesName\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  rocket.Slots[slot].Add(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty) + poke);
+                  poke = "";
+               }
+               else if (line.StartsWith("<img class=\"pokeballIcon", StringComparison.OrdinalIgnoreCase))
+               {
+                  poke = Global.ROCKET_CATCH_SYMBOL + poke;
+               }
+               else if (line.StartsWith("<span class=\"unverifiedIcon\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  poke += Global.UNVERIFIED_SYMBOL;
+               }
+               if (!string.IsNullOrEmpty(phrase) && line.EndsWith("</p>", StringComparison.OrdinalIgnoreCase))
+               {
+                  rocket.Phrase = phrase;
+                  phrase = "";
                }
             }
             rocketList.Add(type, rocket);
@@ -219,29 +227,37 @@ namespace PokeStar.ConnectionInterface
 
          foreach (HtmlNode col in leaders)
          {
-            int slot = 0;
-            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim()) &&
-                                                                  x.Trim().IndexOf('%') == -1 &&
-                                                                  x.Trim().IndexOf(':') == -1 &&
-                                                                  x.Trim().IndexOf('/') == -1
-                                                                  ).ToArray();
+            int slot = -1;
+            string[] words = col.InnerHtml.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
             Rocket rocket = new Rocket();
-            rocket.SetLeader(words[0].Trim());
+            string name = "";
+            string poke = "";
 
-            foreach (string word in words)
+            for (int i = 0; i < words.Length; i++)
             {
-               string line = word.Trim();
-               int numIndex = line.IndexOf('#');
-               if (numIndex != -1)
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
+
+               if (line.StartsWith("<h3", StringComparison.OrdinalIgnoreCase))
                {
-                  slot = Convert.ToInt32(line.Substring(numIndex + 1));
+                  name = Regex.Replace(line, HTML_TAG_PATTERN, string.Empty);
+                  rocket.SetLeader(name);
                }
-               else if (slot != 0)
+               else if (line.StartsWith("<div class=\"lineupSlot\">", StringComparison.OrdinalIgnoreCase))
                {
-                  if (line.Length != 1 && line.IndexOf('%') == -1 && line.IndexOf('/') == -1)
-                  {
-                     rocket.Slots[slot - 1].Add(line);
-                  }
+                  slot++;
+               }
+               else if (line.StartsWith("<p class=\"speciesName\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  rocket.Slots[slot].Add(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty) + poke);
+                  poke = "";
+               }
+               else if (line.StartsWith("<img class=\"pokeballIcon", StringComparison.OrdinalIgnoreCase))
+               {
+                  poke = Global.ROCKET_CATCH_SYMBOL + poke;
+               }
+               else if (line.StartsWith("<span class=\"unverifiedIcon\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  poke += Global.UNVERIFIED_SYMBOL;
                }
             }
             leaderList.Add(rocket.Name, rocket);
