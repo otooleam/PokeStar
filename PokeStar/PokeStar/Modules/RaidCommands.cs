@@ -354,7 +354,6 @@ namespace PokeStar.Modules
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
          Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
          List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
-         RaidParent raid;
          string fileName;
          if (potentials.Count > 1)
          {
@@ -390,7 +389,7 @@ namespace PokeStar.Modules
       [Alias("bosses", "bosslist", "raidboss", "raidbosses", "raidbosslist")]
       [Summary("Get the current list of raid bosses.")]
       [RegisterChannel('I')]
-      public async Task BossList()
+      public async Task Boss()
       {
          Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
 
@@ -425,6 +424,33 @@ namespace PokeStar.Modules
          {
             embed.AddField($"Tier 1 Raids {BuildRaidTitle(Global.COMMON_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.COMMON_RAID_TIER]), true);
          }
+
+         await Context.Channel.SendMessageAsync(embed: embed.Build());
+      }
+
+      /// <summary>
+      /// Handle difficulty command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("difficulty")]
+      [Alias("raiddifficulty", "bossdifficulty", "raidbossdifficulty")]
+      [Summary("Get the raid difficulty definitions.")]
+      [RegisterChannel('I')]
+      public async Task Difficulty()
+      {
+         Dictionary<string, string> table = Connections.GetRaidDifficultyTable();
+
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithColor(Global.EMBED_COLOR_GAME_INFO_RESPONSE);
+         embed.WithTitle("Raid Boss Difficulty Scale:");
+
+         for (int i = 0; i < table.Count - 1; i++)
+         {
+            KeyValuePair<string, string> difficulty = table.ElementAt(i);
+            embed.AddField(difficulty.Key, difficulty.Value);
+         }
+
+         embed.WithFooter(table.ElementAt(table.Count - 1).Value);
 
          await Context.Channel.SendMessageAsync(embed: embed.Build());
       }

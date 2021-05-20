@@ -1344,6 +1344,12 @@ namespace PokeStar.ModuleParents
 
          embed.AddField("Fast Moves", pokemon.FastMoveToString(false), true);
          embed.AddField("Charge Moves", pokemon.ChargeMoveToString(false), true);
+
+         if (pokemon.Difficulty != null)
+         {
+            embed.AddField("Difficulty", pokemon.DifficultyToString(), true);
+         }
+
          embed.AddField("Normal Counters", pokemon.CounterToString());
          embed.AddField("Special Counters", pokemon.SpecialCounterToString());
 

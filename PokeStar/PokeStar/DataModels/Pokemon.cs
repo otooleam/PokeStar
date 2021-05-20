@@ -261,6 +261,12 @@ namespace PokeStar.DataModels
       public Dictionary<string, string> Evolutions { get; set; }
 
       /// <summary>
+      /// Difficulty of fighting the Pokémon as a raid boss.
+      /// Only used for raid boss guide.
+      /// </summary>
+      public Dictionary<string, string> Difficulty { get; set; } = null;
+
+      /// <summary>
       /// When the Pokémon was created.
       /// </summary>
       public DateTime CreatedAt { get; private set; }
@@ -603,6 +609,20 @@ namespace PokeStar.DataModels
             sb.Append($"**{column1level}** {(i < 10 ? "--" : "-")} {CPWild[column1level - 1]} . ");
             sb.Append($"**{column2level}** - {CPWild[column2level - 1]}");
             sb.AppendLine($"{(column3level <= Global.MAX_WILD_LEVEL ? $" . **{column3level}** - {CPWild[column3level - 1]}{(column3level > maxNonBoostedLevel ? Global.WEATHER_BOOST_SYMBOL.ToString() : "")}" : "")}");
+         }
+         return sb.ToString();
+      }
+
+      /// <summary>
+      /// Gets difficulty as a raid boss as a string
+      /// </summary>
+      /// <returns>Raid boss difficulty as a string.</returns>
+      public string DifficultyToString()
+      {
+         StringBuilder sb = new StringBuilder();
+         foreach(KeyValuePair<string, string> party in Difficulty)
+         {
+            sb.AppendLine($"{party.Key}: {party.Value}");
          }
          return sb.ToString();
       }

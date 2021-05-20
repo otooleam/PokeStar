@@ -102,6 +102,7 @@ namespace PokeStar
          "marco",
          "rave",
          "screm",
+         "sink",
       };
 
       /// <summary>
@@ -109,7 +110,7 @@ namespace PokeStar
       /// </summary>
       public static readonly List<string> ADMIN_COMMANDS = new List<string>()
       {
-         "status"
+         "status",
       };
 
       /// <summary>
@@ -124,7 +125,7 @@ namespace PokeStar
          "updatePokemon",
          "updatePokemonMove",
          "updateEggList",
-         "updateRocketList"
+         "updateRocketList",
       };
 
       // Embed colors *********************************************************
@@ -225,6 +226,19 @@ namespace PokeStar
       /// Normal raid string.
       /// </summary>
       public static readonly string RAID_STRING_TIER = "Tier";
+
+      /// <summary>
+      /// Silph raid strings to raid values.
+      /// </summary>
+      public static readonly Dictionary<string, int> RAID_TIER_TITLE = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+      {
+         ["Mega Raids"] = MEGA_RAID_TIER,
+         ["Tier 5"]     = LEGENDARY_RAID_TIER,
+         ["Tier 4"]     = PREMIUM_RAID_TIER,
+         ["Tier 3"]     = RARE_RAID_TIER,
+         ["Tier 2"]     = UNCOMMON_RAID_TIER,
+         ["Tier 1"]     = COMMON_RAID_TIER,
+      };
 
       /// <summary>
       /// Raid strings to raid values.
@@ -612,9 +626,24 @@ namespace PokeStar
       public static readonly char WEATHER_BOOST_SYMBOL   = '*';
 
       /// <summary>
+      /// Character denotes Pokémon can be caught from a rocket encounter.
+      /// </summary>
+      public static readonly char ROCKET_CATCH_SYMBOL    = '*';
+
+      /// <summary>
+      /// Character denotes Pokémon can only be found in eggs from a specific region.
+      /// </summary>
+      public static readonly char EGG_REGIONAL_SYMBOL    = '*';
+
+      /// <summary>
       /// Character denotes legacy move.
       /// </summary>
       public static readonly char LEGACY_MOVE_SYMBOL     = '!';
+
+      /// <summary>
+      /// Character denotes value read from the Silph Road is unverified.
+      /// </summary>
+      public static readonly char UNVERIFIED_SYMBOL      = '?';
 
       /// <summary>
       /// Number of wild CP per column in cp list.

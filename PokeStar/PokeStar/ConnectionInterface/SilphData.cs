@@ -17,6 +17,7 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       private static Uri RaidBossUrl { get; } = new Uri("https://thesilphroad.com/raid-bosses");
       private const string RaidBossHTMLPattern = "//*[@class='raid-boss-tiers-wrap']";
+      private const string DifficultyHTMLPattern = "//*[@class='difficultyTable table table-condensed']";
 
       /// <summary>
       /// Values used to scrape egg pools.
@@ -80,6 +81,76 @@ namespace PokeStar.ConnectionInterface
             }
          }
          return raidBossList;
+      }
+
+      /// <summary>
+      /// Gets the difficulty of a raid boss.
+      /// </summary>
+      /// <param name="bossName">Name of the raid boss.</param>
+      /// <returns>List of difficulty per raid party size.</returns>
+      public static Dictionary<string, int> GetRaidBossDifficulty(string bossName)
+      {
+         bool bossFound = false;
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(RaidBossUrl);
+         HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(RaidBossHTMLPattern);
+
+         Dictionary<string, int> difficulty = new Dictionary<string, int>();
+
+         foreach (HtmlNode col in bosses)
+         {
+            string[] words = col.InnerHtml.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            for (int i = 0; i < words.Length; i++)
+            {
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
+               if (line.StartsWith("<div class=\"boss-name\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  bossFound = bossName.Equals(ReformatName(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()), StringComparison.OrdinalIgnoreCase);
+               }
+               else if (bossFound && line.StartsWith("<div class=\"hexagon difficulty", StringComparison.OrdinalIgnoreCase))
+               {
+                  difficulty.Add(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim(),
+                                 int.Parse(line.Remove(0, "<div class=\"hexagon difficulty".Length)[0].ToString())
+                                 );
+               }
+            }
+         }
+         return difficulty;
+      }
+
+      /// <summary>
+      /// Gets definitions for raid boss difficulty.
+      /// </summary>
+      /// <returns>Dictionary where name is key and description is value.</returns>
+      public static Dictionary<string, string> GetRaidBossDifficultyTable()
+      {
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(RaidBossUrl);
+         HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(DifficultyHTMLPattern);
+
+         Dictionary<string, string> difficulty = new Dictionary<string, string>();
+
+         foreach (HtmlNode col in bosses)
+         {
+            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            for (int i = 0; i < words.Length -1; i++)
+            {
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
+               if (i % 2 == 0)
+               {
+                  difficulty.Add(line.Trim(), "");
+               }
+               else
+               {
+                  int starIndex = line.IndexOf('*');
+                  difficulty[difficulty.Last().Key] = starIndex == -1 || starIndex == line.Length - 1 ? line.Trim() : line.Remove(starIndex + 1).Trim();
+               }
+            }
+            string note = words[words.Length - 1];
+            difficulty.Add("Note", "*No Weather or Friendship boosts required.");
+
+         }
+         return difficulty;
       }
 
       /// <summary>

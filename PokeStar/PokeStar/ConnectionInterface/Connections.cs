@@ -98,6 +98,15 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Gets raid difficulty table.
+      /// </summary>
+      /// <returns>List of difficulties and definitions.</returns>
+      public static Dictionary<string, string> GetRaidDifficultyTable()
+      {
+         return SilphData.GetRaidBossDifficultyTable();
+      }
+
+      /// <summary>
       /// Gets a list of current eggs for a given tier.
       /// </summary>
       /// <param name="tier">Tier of eggs.</param>
@@ -231,6 +240,14 @@ namespace PokeStar.ConnectionInterface
          GetPokemonStats(ref pokemon);
          GetPokemonCP(ref pokemon);
          GetPokemonCounter(ref pokemon);
+         Dictionary<string, int> difficulty = SilphData.GetRaidBossDifficulty(pokemon.Name);
+         Dictionary<string, string> definition = SilphData.GetRaidBossDifficultyTable();
+         pokemon.Difficulty = new Dictionary<string, string>();
+
+         foreach(KeyValuePair<string, int> party in difficulty)
+         {
+            pokemon.Difficulty.Add(party.Key, definition.ElementAt(party.Value).Key);
+         }
       }
 
       /// <summary>
