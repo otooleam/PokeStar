@@ -16,7 +16,7 @@ namespace PokeStar.ConnectionInterface
       /// Values used to scrape raid bosses.
       /// </summary>
       private static Uri RaidBossUrl { get; } = new Uri("https://thesilphroad.com/raid-bosses");
-      private const string RaidBossHTMLPattern = "//*[@class = 'col-md-4']";
+      private const string RaidBossHTMLPattern = "//*[@class='raid-boss-tiers-wrap']";
 
       /// <summary>
       /// Values used to scrape egg pools.
@@ -31,6 +31,9 @@ namespace PokeStar.ConnectionInterface
       private const string RocketHTMLPattern = "//*[@class='lineupGroup normalGroup']";
       private const string RocketLeaderHTMLPattern = "//*[@class='lineupGroup specialGroup']";
 
+      /// <summary>
+      /// Value used to remove HTML tags.
+      /// </summary>
       private const string HTML_TAG_PATTERN = "<.*?>";
 
       private const int SILPH_GUILD_NUM = 0;
@@ -44,59 +47,35 @@ namespace PokeStar.ConnectionInterface
       /// <returns>Dictionary of current raid bosses.</returns>
       public static Dictionary<int, List<string>> GetRaidBosses()
       {
-         int tier = -1;
-         bool tierStart = false;
-         bool nextInTier = false;
-         bool megaTierStarted = false;
+         int tier = int.MinValue;
          HtmlWeb web = new HtmlWeb();
          HtmlDocument doc = web.Load(RaidBossUrl);
          HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(RaidBossHTMLPattern);
 
          Dictionary<int, List<string>> raidBossList = new Dictionary<int, List<string>>();
+
          foreach (HtmlNode col in bosses)
          {
-            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
-            foreach (string word in words)
+            string[] words = col.InnerHtml.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            for (int i = 0; i < words.Length; i++)
             {
-               string line = word.Trim();
-               int firstSpace = line.IndexOf(' ');
-               string checkTier = firstSpace != -1 ? line.Substring(0, firstSpace) : "";
-
-               if (checkTier.Equals(Global.RAID_STRING_MEGA, StringComparison.OrdinalIgnoreCase) && !megaTierStarted)
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
+               if (line.Contains("<div class=\"raid-boss-tier-wrap\">"))
                {
-                  tier = Global.MEGA_RAID_TIER;
+                  tier = -1;
+               }
+               else if (tier == -1)
+               {
+                  tier = 0;
+               }
+               else if (tier == 0)
+               {
+                  tier = Global.RAID_TIER_TITLE[Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()];
                   raidBossList.Add(tier, new List<string>());
-                  tierStart = true;
-                  nextInTier = false;
-                  megaTierStarted = true;
                }
-               else if (checkTier.Equals(Global.RAID_STRING_EX, StringComparison.OrdinalIgnoreCase))
+               else if (line.StartsWith("<div class=\"boss-name\">", StringComparison.OrdinalIgnoreCase))
                {
-                  tier = Global.EX_RAID_TIER;
-                  raidBossList.Add(tier, new List<string>());
-                  tierStart = true;
-                  nextInTier = false;
-               }
-               else if (checkTier.Equals(Global.RAID_STRING_TIER, StringComparison.OrdinalIgnoreCase))
-               {
-                  tier = Convert.ToInt32(line.Trim().Substring(Global.RAID_STRING_TIER.Length));
-                  raidBossList.Add(tier, new List<string>());
-                  tierStart = true;
-                  nextInTier = false;
-               }
-               else if (line.Equals("8+", StringComparison.OrdinalIgnoreCase))
-               {
-                  nextInTier = true;
-               }
-               else if (tierStart)
-               {
-                  raidBossList[tier].Add(ReformatName(line));
-                  tierStart = false;
-               }
-               else if (nextInTier)
-               {
-                  raidBossList[tier].Add(ReformatName(line));
-                  nextInTier = false;
+                  raidBossList[tier].Add(ReformatName(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()));
                }
             }
          }
@@ -114,6 +93,7 @@ namespace PokeStar.ConnectionInterface
       {
          int eggCategory = 0;
          string poke = "";
+         bool pokemonFound = false;
          HtmlWeb web = new HtmlWeb();
          HtmlDocument doc = web.Load(EggUrl);
          HtmlNodeCollection eggs = doc.DocumentNode.SelectNodes(EggHTMLPattern);
@@ -137,12 +117,13 @@ namespace PokeStar.ConnectionInterface
                }
                else if (line.StartsWith("<p class=\"speciesName\">", StringComparison.OrdinalIgnoreCase))
                {
-                  poke += Global.POKEMON_FOUND_SYMBOL;
+                  pokemonFound = true;
                }
-               else if (poke.EndsWith(Global.POKEMON_FOUND_SYMBOL.ToString()))
+               else if (pokemonFound)
                {
-                  eggList[eggCategory].Add(ReformatName(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()) + poke.TrimEnd(Global.POKEMON_FOUND_SYMBOL));
+                  eggList[eggCategory].Add(ReformatName(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()) + poke);
                   poke = "";
+                  pokemonFound = false;
                }
 
             }
