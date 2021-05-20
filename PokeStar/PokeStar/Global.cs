@@ -62,6 +62,12 @@ namespace PokeStar
       public static string HOME_SERVER { get; set; }
 
       /// <summary>
+      /// Name of emote server.
+      /// Used for generating raid emotes.
+      /// </summary>
+      public static string EMOTE_SERVER { get; set; }
+
+      /// <summary>
       /// Logging level.
       /// </summary>
       public static LogSeverity LOG_LEVEL { get; set; }
@@ -126,6 +132,7 @@ namespace PokeStar
          "updatePokemonMove",
          "updateEggList",
          "updateRocketList",
+         "updateReactions",
       };
 
       // Embed colors *********************************************************
@@ -789,55 +796,61 @@ namespace PokeStar
       /// <summary>
       /// User account register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_ACCOUNT = 'A';
+      public static readonly char REGISTER_STRING_ACCOUNT      = 'A';
 
       /// <summary>
       /// Dex register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_DEX     = 'D';
+      public static readonly char REGISTER_STRING_DEX          = 'D';
 
       /// <summary>
       /// EX raid register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_EX      = 'E';
+      public static readonly char REGISTER_STRING_EX           = 'E';
 
       /// <summary>
       /// Information register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_INFO    = 'I';
+      public static readonly char REGISTER_STRING_INFO         = 'I';
+
+      /// <summary>
+      /// Raid Notification register character.
+      /// </summary>
+      public static readonly char REGISTER_STRING_NOTIFICATION = 'N';
 
       /// <summary>
       /// Role register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_ROLE    = 'P';
+      public static readonly char REGISTER_STRING_ROLE         = 'P';
 
       /// <summary>
       /// Raid register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_RAID    = 'R';
+      public static readonly char REGISTER_STRING_RAID         = 'R';
 
       /// <summary>
       /// Point of interest register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_POI     = 'S';
+      public static readonly char REGISTER_STRING_POI          = 'S';
 
       /// <summary>
       /// Full register string.
       /// </summary>
-      public static readonly string FULL_REGISTER_STRING  = "ADEIPRS";
+      public static readonly string FULL_REGISTER_STRING       = "ADEIPRS";
 
       /// <summary>
       /// Register character to register string.
       /// </summary>
       public static readonly Dictionary<string, string> REGISTER_STRING_TYPE = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
-         [REGISTER_STRING_ACCOUNT.ToString()] = "Player Account",
-         [REGISTER_STRING_DEX.ToString()]     = "PokéDex",
-         [REGISTER_STRING_EX.ToString()]      = "EX Raid",
-         [REGISTER_STRING_INFO.ToString()]    = "Information",
-         [REGISTER_STRING_ROLE.ToString()]    = "Player Role",
-         [REGISTER_STRING_RAID.ToString()]    = "Raid",
-         [REGISTER_STRING_POI.ToString()]     = "Point of Interest",
+         [REGISTER_STRING_ACCOUNT.ToString()]      = "Player Account",
+         [REGISTER_STRING_DEX.ToString()]          = "PokéDex",
+         [REGISTER_STRING_EX.ToString()]           = "EX Raid",
+         [REGISTER_STRING_INFO.ToString()]         = "Information",
+         [REGISTER_STRING_NOTIFICATION.ToString()] = "Raid Notifications",
+         [REGISTER_STRING_ROLE.ToString()]         = "Player Role",
+         [REGISTER_STRING_RAID.ToString()]         = "Raid",
+         [REGISTER_STRING_POI.ToString()]          = "Point of Interest",
       };
 
       /// <summary>
@@ -856,6 +869,9 @@ namespace PokeStar
          ["INFORMATION"]        = REGISTER_STRING_INFO.ToString(),
          ["INFO"]               = REGISTER_STRING_INFO.ToString(),
          ["I"]                  = REGISTER_STRING_INFO.ToString(),
+         ["REACT"]              = REGISTER_STRING_NOTIFICATION.ToString(),
+         ["NOTIFICATION"]       = REGISTER_STRING_NOTIFICATION.ToString(),
+         ["N"]                  = REGISTER_STRING_NOTIFICATION.ToString(),
          ["ROLE"]               = REGISTER_STRING_ROLE.ToString(),
          ["P"]                  = REGISTER_STRING_ROLE.ToString(),
          ["RAID"]               = REGISTER_STRING_RAID.ToString(),

@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Collections.Generic;
+using Discord;
+using Discord.WebSocket;
 using DuoVia.FuzzyStrings;
 using PokeStar.DataModels;
 using PokeStar.Calculators;
@@ -21,6 +24,7 @@ namespace PokeStar.ConnectionInterface
 
       private List<string> PokemonNames;
       private List<string> MoveNames;
+      private Dictionary<int, List<string>> RaidBosses;
       private Dictionary<int, List<string>> Eggs;
       private Dictionary<string, Rocket> Rockets;
 
@@ -47,6 +51,7 @@ namespace PokeStar.ConnectionInterface
             connections = new Connections();
             connections.UpdatePokemonNameList();
             connections.UpdateMoveNameList();
+            connections.UpdateRaidBossList();
             connections.UpdateEggList();
             connections.UpdateRocketList();
          }
@@ -89,21 +94,21 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Get the full list of raid bosses.
-      /// </summary>
-      /// <returns>List of raid bosses sorted by tier.</returns>
-      public static Dictionary<int, List<string>> GetFullBossList()
-      {
-         return SilphData.GetRaidBosses();
-      }
-
-      /// <summary>
       /// Gets raid difficulty table.
       /// </summary>
       /// <returns>List of difficulties and definitions.</returns>
       public static Dictionary<string, string> GetRaidDifficultyTable()
       {
          return SilphData.GetRaidBossDifficultyTable();
+      }
+
+      /// <summary>
+      /// Get the full list of raid bosses.
+      /// </summary>
+      /// <returns>List of raid bosses sorted by tier.</returns>
+      public Dictionary<int, List<string>> GetFullBossList()
+      {
+         return RaidBosses;
       }
 
       /// <summary>
@@ -154,8 +159,15 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Updates the list of raidbosses.
+      /// </summary>
+      public void UpdateRaidBossList()
+      {
+         RaidBosses = SilphData.GetRaidBosses();
+      }
+
+      /// <summary>
       /// Updates the list of eggs.
-      /// Only needs to be ran when egg pool has changed.
       /// </summary>
       public void UpdateEggList()
       {
@@ -164,11 +176,153 @@ namespace PokeStar.ConnectionInterface
 
       /// <summary>
       /// Updates the list of current Team Rockets.
-      /// Only needs to be ran when rocket line ups has changed.
       /// </summary>
       public void UpdateRocketList()
       {
          Rockets = SilphData.GetRockets().Union(SilphData.GetRocketLeaders()).ToDictionary(k => k.Key, v => v.Value, StringComparer.OrdinalIgnoreCase);
+      }
+
+      /// <summary>
+      /// Runs updates to the system read from the Silph road.
+      /// </summary>
+      /// <param name="guilds">List of guilds the bot is currently in.</param>
+      /// <returns>Completed Task.</returns>
+      public async Task RunSilphUpdate(List<SocketGuild> guilds)
+      {
+         UpdatePokemonNameList();
+         UpdateMoveNameList();
+         UpdateEggList();
+         UpdateRocketList();
+
+         Dictionary<int, List<string>> newBosses = SilphData.GetRaidBosses();
+
+         bool bossesChanged = RaidBosses.Keys.Count != newBosses.Keys.Count || !RaidBosses.Keys.All(newBosses.Keys.Contains);
+
+         foreach (int tier in RaidBosses.Keys)
+         {
+            bossesChanged = bossesChanged || RaidBosses[tier].Count != newBosses[tier].Count || !RaidBosses[tier].All(newBosses[tier].Contains);
+         }
+
+         if (bossesChanged)
+         {
+            if (SilphData.GetRaidBossesConfirmed())
+            {
+               UpdateRaidBossList();
+               SocketGuild emoteServer = guilds.FirstOrDefault(x => x.Name.Equals(Global.EMOTE_SERVER, StringComparison.OrdinalIgnoreCase));
+               GuildEmote[] previousEmotes = emoteServer.Emotes.ToArray();
+
+               foreach (GuildEmote emote in emoteServer.Emotes)
+               {
+                  await emoteServer.DeleteEmoteAsync(emote);
+               }
+
+               foreach (KeyValuePair<int, List<string>> tier in RaidBosses)
+               {
+                  foreach (string boss in tier.Value)
+                  {
+                     string fileName = GetPokemonPicture(boss);
+                     CopyFile(fileName);
+                     Image img = new Image(fileName);
+                     await emoteServer.CreateEmoteAsync(fileName.Remove(fileName.Length - 4), img);
+                     img.Dispose();
+                     DeleteFile(fileName);
+                  }
+               }
+
+               Dictionary<ulong, ulong> channels = Instance().GetNotificationChannels();
+
+               foreach (KeyValuePair<ulong, ulong> chan in channels)
+               {
+                  SocketGuild guild = guilds.FirstOrDefault(x => x.Id == chan.Key);
+                  ISocketMessageChannel channel = (ISocketMessageChannel)guild.Channels.FirstOrDefault(x => x.Id == chan.Value);
+                  await ClearNotifyMessage(guild, channel.Id, previousEmotes.ToArray());
+                  await SetNotifyMessage(guild, channel, emoteServer.Emotes.ToArray());
+               }
+            }
+         }
+      }
+
+      /// <summary>
+      /// Checks if a message is a raid notification message.
+      /// </summary>
+      /// <param name="id">Id of the message.</param>
+      /// <returns>True if the message is a raid notification message, otherwise false.</returns>
+      public static bool IsNotifyMessage(ulong id)
+      {
+         return Connections.Instance().CheckNotificationMessage(id);
+      }
+
+      /// <summary>
+      /// Handles a reaction on a raid notification message.
+      /// </summary>
+      /// <param name="message">Message that was reacted on.</param>
+      /// <param name="reaction">Reaction that was sent.</param>
+      /// <param name="guild">Guild the reaction was made in.</param>
+      /// <returns>Completed Task.</returns>
+      public static async Task NotifyMessageReactionHandle(IMessage message, SocketReaction reaction, SocketGuild guild)
+      {
+         SocketRole role = guild.Roles.FirstOrDefault(x => x.Name.Equals(reaction.Emote.Name, StringComparison.OrdinalIgnoreCase));
+
+         if (role != null)
+         {
+            SocketGuildUser user = guild.Users.FirstOrDefault(x => x.Id == reaction.User.Value.Id);
+
+            SocketRole currentRole = user.Roles.FirstOrDefault(x => x.Name.Equals(reaction.Emote.Name, StringComparison.OrdinalIgnoreCase));
+
+            if (currentRole == null)
+            {
+               await user.AddRoleAsync(role);
+            }
+            else
+            {
+               await user.RemoveRoleAsync(role);
+            }
+         }
+
+         await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
+      }
+
+      /// <summary>
+      /// Sets values for a raid notification message.
+      /// </summary>
+      /// <param name="guild">Guild to set notify message.</param>
+      /// <param name="channel">Registered channel.</param>
+      /// <param name="emotes">Emotes to represent roles.</param>
+      /// <returns></returns>
+      public static async Task SetNotifyMessage(SocketGuild guild, ISocketMessageChannel channel, Emote[] emotes)
+      {
+         foreach (GuildEmote emote in emotes)
+         {
+            await guild.CreateRoleAsync(emote.Name, null, null, false, true, null);
+         }
+
+         IUserMessage message = await ResponseMessage.SendInfoMessage(channel,
+            "React to this message to be notified when a specific raid is called.\n" +
+            "When the raid bosses change your role will be removed and you will have to re-select desired bosses.\n" +
+            "If you no longer wish to be notified for a boss, re-react for the desired boss.");
+         await message.AddReactionsAsync(emotes);
+
+         Connections.Instance().UpdateNotificationMessage(guild.Id, channel.Id, message.Id);
+      }
+
+      /// <summary>
+      /// Clears values for a raid notification message.
+      /// </summary>
+      /// <param name="guild">Guild to clear notify message.</param>
+      /// <param name="channel">Id of registered channel.</param>
+      /// <param name="emotes">Emotes that represent roles.</param>
+      /// <returns></returns>
+      public static async Task ClearNotifyMessage(SocketGuild guild, ulong channel, Emote[] emotes)
+      {
+         foreach (GuildEmote emote in emotes)
+         {
+            SocketRole role = guild.Roles.FirstOrDefault(x => x.Name.Equals(emote.Name, StringComparison.OrdinalIgnoreCase));
+            if (role != null)
+            {
+               await role.DeleteAsync();
+            }
+         }
+         Instance().ClearNotificationMessage(guild.Id, channel);
       }
 
       /// <summary>
@@ -244,7 +398,7 @@ namespace PokeStar.ConnectionInterface
          Dictionary<string, string> definition = SilphData.GetRaidBossDifficultyTable();
          pokemon.Difficulty = new Dictionary<string, string>();
 
-         foreach(KeyValuePair<string, int> party in difficulty)
+         foreach (KeyValuePair<string, int> party in difficulty)
          {
             pokemon.Difficulty.Add(party.Key, definition.ElementAt(party.Value).Key);
          }
@@ -739,6 +893,25 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Checks if guild has a channel registered for raid notifications.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <returns>True if registered channel exists, otherwise false.</returns>
+      public bool CheckNotificationRegister(ulong guild)
+      {
+         return NONADBConnector.CheckNotificationRegister(guild);
+      }
+
+      /// <summary>
+      /// Get all channels registerd for raid notifications.
+      /// </summary>
+      /// <returns>Dictionary of channels where key is the guild id and value is channel id.</returns>
+      public Dictionary<ulong, ulong> GetNotificationChannels()
+      {
+         return NONADBConnector.GetNotificationChannels();
+      }
+
+      /// <summary>
       /// Updates the registration of a channel.
       /// </summary>
       /// <param name="guild">Id of the guild.</param>
@@ -754,6 +927,37 @@ namespace PokeStar.ConnectionInterface
          {
             NONADBConnector.UpdateRegistration(guild, channel, register);
          }
+      }
+
+      /// <summary>
+      /// Checks if guild has a channel registered for raid notifications.
+      /// </summary>
+      /// <param name="message">Id of the message.</param>
+      /// <returns>True if message is a raid notification message, otherwise false.</returns>
+      public bool CheckNotificationMessage(ulong message)
+      {
+         return NONADBConnector.CheckNotificationMessage(message);
+      }
+
+      /// <summary>
+      /// Updates the notification message for a channel.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="channel">Id of the channel.</param>
+      /// <param name="message">Id of the message</param>
+      public void UpdateNotificationMessage(ulong guild, ulong channel, ulong message)
+      {
+         NONADBConnector.UpdateNotificationMessage(guild, channel, message);
+      }
+
+      /// <summary>
+      /// Clears the notification message for a channel.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="channel">Id of the channel.</param>
+      public void ClearNotificationMessage(ulong guild, ulong channel)
+      {
+         NONADBConnector.UpdateNotificationMessage(guild, channel, null);
       }
 
       /// <summary>

@@ -84,6 +84,31 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Checks if the raid bosses have all been confirmed.
+      /// </summary>
+      /// <returns>True if all bosses are confirmed, otherwise false.</returns>
+      public static bool GetRaidBossesConfirmed()
+      {
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(RaidBossUrl);
+         HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(RaidBossHTMLPattern);
+
+         foreach (HtmlNode col in bosses)
+         {
+            string[] words = col.InnerHtml.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            for (int i = 0; i < words.Length; i++)
+            {
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
+               if (line.StartsWith("<div class=\"pokemonOption notSighted\"", StringComparison.OrdinalIgnoreCase))
+               {
+                  return false;
+               }
+            }
+         }
+         return true;
+      }
+
+      /// <summary>
       /// Gets the difficulty of a raid boss.
       /// </summary>
       /// <param name="bossName">Name of the raid boss.</param>
@@ -182,9 +207,14 @@ namespace PokeStar.ConnectionInterface
                   eggCategory = Global.EGG_TIER_TITLE[Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()];
                   eggList.Add(eggCategory, new List<string>());
                }
+               else if (line.StartsWith("<div class=\"speciesWrap unconfirmed", StringComparison.OrdinalIgnoreCase) ||
+                        line.StartsWith("<div class=\"speciesWrap regional unconfirmed", StringComparison.OrdinalIgnoreCase))
+               {
+                  poke += Global.UNVERIFIED_SYMBOL;
+               }
                else if (line.Contains("<img class=\"regionalIcon\""))
                {
-                  poke += Global.EGG_REGIONAL_SYMBOL;
+                  poke = $"\\{Global.EGG_REGIONAL_SYMBOL}{poke}";
                }
                else if (line.StartsWith("<p class=\"speciesName\">", StringComparison.OrdinalIgnoreCase))
                {
@@ -196,7 +226,6 @@ namespace PokeStar.ConnectionInterface
                   poke = "";
                   pokemonFound = false;
                }
-
             }
          }
          return eggList;

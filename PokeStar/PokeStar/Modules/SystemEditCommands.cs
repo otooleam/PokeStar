@@ -28,34 +28,6 @@ namespace PokeStar.Modules
       }
 
       /// <summary>
-      /// Handle updatePokemonNames command.
-      /// </summary>
-      /// <returns>Completed Task.</returns>
-      [Command("updatePokemonNames")]
-      [Summary("Updates the saved list of Pokémon names from the database.")]
-      [RequireUserPermission(GuildPermission.Administrator)]
-      [NonaAdmin()]
-      public async Task UpdatePokemonNames()
-      {
-         Connections.Instance().UpdatePokemonNameList();
-         await ResponseMessage.SendInfoMessage(Context.Channel, $"Pokémon name list has been updated.");
-      }
-
-      /// <summary>
-      /// Handle updateMoveNames command.
-      /// </summary>
-      /// <returns>Completed Task.</returns>
-      [Command("updateMoveNames")]
-      [Summary("Updates the saved list of Move names from the database.")]
-      [RequireUserPermission(GuildPermission.Administrator)]
-      [NonaAdmin()]
-      public async Task UpdateMoveNames()
-      {
-         Connections.Instance().UpdateMoveNameList();
-         await ResponseMessage.SendInfoMessage(Context.Channel, $"Move name list has been updated.");
-      }
-
-      /// <summary>
       /// Handle toggleUseEmptyRaid command.
       /// </summary>
       /// <returns>Completed Task.</returns>

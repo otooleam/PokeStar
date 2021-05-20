@@ -85,26 +85,12 @@ namespace PokeStar.Modules
                EmbedBuilder embed = new EmbedBuilder();
                embed.WithColor(Global.EMBED_COLOR_GAME_INFO_RESPONSE);
                embed.AddField(title, sb.ToString());
-               embed.WithFooter($"{Global.EGG_REGIONAL_SYMBOL} denotes the Pokémon is region locked.");
+               embed.WithFooter($"{Global.EGG_REGIONAL_SYMBOL} denotes the Pokémon is region locked.\n" +
+                                $"{Global.UNVERIFIED_SYMBOL} denotes Pokémon is not fully verified.");
 
                await ReplyAsync(embed: embed.Build());
             }
          }
-      }
-
-      /// <summary>
-      /// Handle updateEggList command.
-      /// </summary>
-      /// <returns>Completed Task.</returns>
-      [Command("updateEggList")]
-      [Alias("updateEggs")]
-      [Summary("Updates the saved list of Pokémon in eggs from The Silph Road.")]
-      [RequireUserPermission(GuildPermission.Administrator)]
-      [NonaAdmin()]
-      public async Task UpdateEggList()
-      {
-         Connections.Instance().UpdateEggList();
-         await ResponseMessage.SendInfoMessage(Context.Channel, $"Egg list has been updated.");
       }
    }
 }

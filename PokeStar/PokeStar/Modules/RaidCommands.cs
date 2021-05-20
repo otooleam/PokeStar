@@ -40,7 +40,7 @@ namespace PokeStar.Modules
                              [Summary("Where the raid will be.")][Remainder] string location)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         Dictionary<int, List<string>> allBosses = Connections.Instance().GetFullBossList();
          List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          Raid raid;
          string fileName;
@@ -119,7 +119,7 @@ namespace PokeStar.Modules
                                  [Summary("Where the raid will be.")][Remainder] string location)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         Dictionary<int, List<string>> allBosses = Connections.Instance().GetFullBossList();
          List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          RaidMule raid;
          string fileName;
@@ -198,7 +198,7 @@ namespace PokeStar.Modules
                                   [Summary("Where the train will start.")][Remainder] string location)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         Dictionary<int, List<string>> allBosses = Connections.Instance().GetFullBossList();
          List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          Raid raid;
          string fileName;
@@ -277,7 +277,7 @@ namespace PokeStar.Modules
                                       [Summary("Where the train will start.")][Remainder] string location)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         Dictionary<int, List<string>> allBosses = Connections.Instance().GetFullBossList();
          List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          RaidMule raid;
          string fileName;
@@ -352,7 +352,7 @@ namespace PokeStar.Modules
       public async Task RaidGuide([Summary("Tier of the raid boss.")] string tier)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         Dictionary<int, List<string>> allBosses = Connections.Instance().GetFullBossList();
          List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          string fileName;
          if (potentials.Count > 1)
@@ -391,7 +391,7 @@ namespace PokeStar.Modules
       [RegisterChannel('I')]
       public async Task Boss()
       {
-         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         Dictionary<int, List<string>> allBosses = Connections.Instance().GetFullBossList();
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Global.EMBED_COLOR_GAME_INFO_RESPONSE);
