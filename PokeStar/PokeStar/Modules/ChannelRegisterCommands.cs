@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
@@ -54,13 +55,18 @@ namespace PokeStar.Modules
             }
             else
             {
-               registration = result.Value.RegistrationString;
-               Connections.Instance().UpdateRegistration(guild, channel, registration);
-               await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
+               Connections.Instance().UpdateRegistration(guild, channel, result.Value.RegistrationString);
+               await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(result.Value.RegistrationString)}");
 
                if (result.Value.CheckSetupComplete && !Connections.Instance().GetSetupComplete(guild))
                {
                   await ResponseMessage.SendWarningMessage(Context.Channel, "register", "Please run the .setup command to ensure required roles have been setup.");
+               }
+
+               if (result.Value.RegistrationString.Contains(Global.REGISTER_STRING_NOTIFICATION.ToString()) && registration == null)
+               {
+                  await Connections.SetNotifyMessage(Context.Guild, Context.Channel,
+                     Context.Client.Guilds.FirstOrDefault(x => x.Name.Equals(Global.EMOTE_SERVER, StringComparison.OrdinalIgnoreCase)).Emotes.ToArray());
                }
             }
          }
@@ -95,6 +101,7 @@ namespace PokeStar.Modules
          ulong channel = Context.Channel.Id;
 
          string registration = Connections.Instance().GetRegistration(guild, channel);
+         bool notify = registration.Contains(Global.REGISTER_STRING_NOTIFICATION.ToString());
 
          if (registration != null)
          {
@@ -107,11 +114,21 @@ namespace PokeStar.Modules
             {
                Connections.Instance().DeleteRegistration(guild, channel);
                await ResponseMessage.SendInfoMessage(Context.Channel, $"Removed all registrations from this channel.");
+               if (notify)
+               {
+                  await Connections.ClearNotifyMessage(Context.Guild, Context.Channel.Id,
+                     Context.Client.Guilds.FirstOrDefault(x => x.Name.Equals(Global.EMOTE_SERVER, StringComparison.OrdinalIgnoreCase)).Emotes.ToArray());
+               }
             }
             else
             {
                Connections.Instance().UpdateRegistration(guild, channel, registration);
                await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
+               if (notify)
+               {
+                  await Connections.ClearNotifyMessage(Context.Guild, Context.Channel.Id,
+                     Context.Client.Guilds.FirstOrDefault(x => x.Name.Equals(Global.EMOTE_SERVER, StringComparison.OrdinalIgnoreCase)).Emotes.ToArray());
+               }
             }
          }
          else
