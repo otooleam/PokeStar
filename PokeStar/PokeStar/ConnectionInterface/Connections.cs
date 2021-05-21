@@ -300,7 +300,7 @@ namespace PokeStar.ConnectionInterface
             "React to this message to be notified when a specific raid is called.\n" +
             "When the raid bosses change your role will be removed and you will have to re-select desired bosses.\n" +
             "If you no longer wish to be notified for a boss, re-react for the desired boss.");
-         await message.AddReactionsAsync(emotes);
+         message.AddReactionsAsync(emotes);
 
          Connections.Instance().UpdateNotificationMessage(guild.Id, channel.Id, message.Id);
       }
