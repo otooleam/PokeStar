@@ -29,5 +29,17 @@ namespace PokeStar.Modules
       {
          await ReplyAsync(Global.NONA_EMOJIS["scream_emote"]);
       }
+
+      /// <summary>
+      /// Handle sink command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("sink")]
+      [Alias("ship", "niantic")]
+      [Summary("Typical")]
+      public async Task Sink()
+      {
+         await ReplyAsync(Global.NONA_EMOJIS["sink_emote"]);
+      }
    }
 }

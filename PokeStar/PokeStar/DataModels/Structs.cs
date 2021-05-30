@@ -72,19 +72,19 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Types the type is strong against.
       /// </summary>
-      public Dictionary<string, int> Strong { get; }
+      public Dictionary<string, double> Strong { get; }
 
       /// <summary>
       /// Types the type is weak against.
       /// </summary>
-      public Dictionary<string, int> Weak { get; }
+      public Dictionary<string, double> Weak { get; }
 
       /// <summary>
       /// Creates a new TypeRelation.
       /// </summary>
       /// <param name="strong">Types the type is strong against.</param>
       /// <param name="weak">Types the type is weak against.</param>
-      public TypeRelation(Dictionary<string, int> strong, Dictionary<string, int> weak)
+      public TypeRelation(Dictionary<string, double> strong, Dictionary<string, double> weak)
       {
          Strong = strong;
          Weak = weak;
@@ -143,6 +143,121 @@ namespace PokeStar.DataModels
       {
          FormList = fromList;
          DefaultForm = defaultForm;
+      }
+   }
+
+   /// <summary>
+   /// Pokémon used to run counter sims.
+   /// </summary>
+   public struct SimPokemon
+   {
+      /// <summary>
+      /// Number of the Pokémon.
+      /// </summary>
+      public int Number { get; set; }
+
+      /// <summary>
+      /// Name of the Pokémon.
+      /// </summary>
+      public string Name { get; set; }
+
+      /// <summary>
+      /// Fast move to use.
+      /// </summary>
+      public Move Fast { get; set; }
+
+      /// <summary>
+      /// Charge move to use.
+      /// </summary>
+      public Move Charge { get; set; }
+
+      /// <summary>
+      /// Effectiveness of the fast move.
+      /// </summary>
+      public double FastEffect { get; set; }
+
+      /// <summary>
+      /// Effectiveness of the charge move.
+      /// </summary>
+      public double ChargeEffect { get; set; }
+
+      /// <summary>
+      /// STAB modifier of the fast move.
+      /// </summary>
+      public double FastStab { get; set; }
+
+      /// <summary>
+      /// STAB modifier of the charge move.
+      /// </summary>
+      public double ChargeStab { get; set; }
+
+      /// <summary>
+      /// Shadow attack modifier.
+      /// </summary>
+      public double StadowAtkMul { get; set; }
+
+      /// <summary>
+      /// Shadow defense modifier.
+      /// </summary>
+      public double StadowDefMul { get; set; }
+
+      /// <summary>
+      /// Calculated attack stat.
+      /// </summary>
+      public int AtkStat { get; set; }
+
+      /// <summary>
+      /// Calculated defense stat.
+      /// </summary>
+      public int DefStat { get; set; }
+
+      /// <summary>
+      /// Calculated stamina stat.
+      /// </summary>
+      public int StamStat { get; set; }
+   }
+
+   /// <summary>
+   /// Results for counter calculations.
+   /// </summary>
+   public struct CounterCalcResults
+   {
+      /// <summary>
+      /// List of regular counters.
+      /// </summary>
+      public List<Counter> Regular { get; set; }
+
+      /// <summary>
+      /// List of special counters.
+      /// Special counters are shadow and mega Pokémon.
+      /// </summary>
+      public List<Counter> Special { get; set; }
+   }
+
+   /// <summary>
+   /// Inputs for DPS calculations.
+   /// </summary>
+   public struct DPSInput
+   {
+      /// <summary>
+      /// Energy left over after the battle.
+      /// </summary>
+      public double X { get; }
+
+      /// <summary>
+      /// DPS of the boss Pokémon.
+      /// </summary>
+      public double Y { get; }
+
+      /// <summary>
+      /// Creates a new DPSInput.
+      /// </summary>
+      /// <param name="x">Energy left over after the battle.</param>
+      /// <param name="y">DPS of the boss Pokémon.</param>
+      public DPSInput(double x, double y)
+      {
+         X = x;
+         Y = y;
       }
    }
 

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
 using Newtonsoft.Json.Linq;
+using PokeStar.DataModels;
 
 namespace PokeStar
 {
@@ -61,6 +62,12 @@ namespace PokeStar
       public static string HOME_SERVER { get; set; }
 
       /// <summary>
+      /// Name of emote server.
+      /// Used for generating raid emotes.
+      /// </summary>
+      public static string EMOTE_SERVER { get; set; }
+
+      /// <summary>
       /// Logging level.
       /// </summary>
       public static LogSeverity LOG_LEVEL { get; set; }
@@ -99,9 +106,9 @@ namespace PokeStar
       {
          "ping",
          "marco",
-         "help",
          "rave",
          "screm",
+         "sink",
       };
 
       /// <summary>
@@ -109,7 +116,7 @@ namespace PokeStar
       /// </summary>
       public static readonly List<string> ADMIN_COMMANDS = new List<string>()
       {
-         "status"
+         "status",
       };
 
       /// <summary>
@@ -124,7 +131,8 @@ namespace PokeStar
          "updatePokemon",
          "updatePokemonMove",
          "updateEggList",
-         "updateRocketList"
+         "updateRocketList",
+         "updateReactions",
       };
 
       // Embed colors *********************************************************
@@ -225,6 +233,19 @@ namespace PokeStar
       /// Normal raid string.
       /// </summary>
       public static readonly string RAID_STRING_TIER = "Tier";
+
+      /// <summary>
+      /// Silph raid strings to raid values.
+      /// </summary>
+      public static readonly Dictionary<string, int> RAID_TIER_TITLE = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase)
+      {
+         ["Mega Raids"] = MEGA_RAID_TIER,
+         ["Tier 5"]     = LEGENDARY_RAID_TIER,
+         ["Tier 4"]     = PREMIUM_RAID_TIER,
+         ["Tier 3"]     = RARE_RAID_TIER,
+         ["Tier 2"]     = UNCOMMON_RAID_TIER,
+         ["Tier 1"]     = COMMON_RAID_TIER,
+      };
 
       /// <summary>
       /// Raid strings to raid values.
@@ -389,6 +410,11 @@ namespace PokeStar
       public static readonly int QUEST_LEVEL    = 15;
 
       /// <summary>
+      /// Shadow level.
+      /// </summary>
+      public static readonly int SHADOW_LEVEL   = 8;
+
+      /// <summary>
       /// Weather boost bonus levels.
       /// </summary>
       public static readonly int WEATHER_BOOST  = 5;
@@ -427,12 +453,38 @@ namespace PokeStar
       /// </summary>
       public static readonly int MAX_ULTRA_CP  = 2500;
 
+      // Type Calculator ******************************************************
+
+      /// <summary>
+      /// Coefficient for type effectivness.
+      /// </summary>
+      public const double TYPE_COEFFICIENT = 1.6;
+
       // Dex switch options ***************************************************
 
       /// <summary>
       /// Dex switch option number.
       /// </summary>
       public static readonly int DEX_SWITCH_OPTIONS = 6;
+
+      // Shadow moves *********************************************************
+
+      public static readonly int SHADOW_INDEX   = 0;
+      public static readonly int PURIFIED_INDEX = 1;
+
+      public static readonly List<Move> SHADOW_MOVES = new List<Move>()
+      {
+         new Move()
+         {
+            Name = "Frustration",
+            Type = "Normal"
+         },
+         new Move()
+         {
+            Name = "Return",
+            Type = "Normal"
+         },
+      };
 
       // Bad dex values *******************************************************
 
@@ -450,6 +502,18 @@ namespace PokeStar
       /// Arceus Pokemon number.
       /// </summary>
       public static readonly int ARCEUS_NUMBER = 493;
+
+      // Training dummy Pokémon ***********************************************
+
+      /// <summary>
+      /// Dummy Pokémon number.
+      /// </summary>
+      public static int DUMMY_POKE_NUM     = 0;
+
+      /// <summary>
+      /// Dummy Pokémon name.
+      /// </summary>
+      public static string DUMMY_POKE_NAME = "MissingNo";
 
       // Catch multipliers ****************************************************
 
@@ -515,6 +579,22 @@ namespace PokeStar
          ["Special"]  = 2.0,
       };
 
+      /// <summary>
+      /// Dictionary of modifer values.
+      /// Key is modifier name, value is max modifier value.
+      /// </summary>
+      public static readonly Dictionary<string, int> MODIFIER_STATS = new Dictionary<string, int>()
+      {
+         ["Pokémon Level"]  = MAX_WILD_LEVEL - 1,
+         ["Pokéball Type"]  = POKE_BALL_RATE.Count - 1,
+         ["Berry Type"]     = BERRY_RATE.Count - 1,
+         ["Throw Type"]     = THROW_RATE.Count - 1,
+         ["Curveball"]      = CURVEBALL_RATE.Count - 1,
+         ["Medal 1 Bonus"]  = MEDAL_RATE.Count - 1,
+         ["Medal 2 Bonus"]  = MEDAL_RATE.Count - 1,
+         ["Encounter Type"] = ENCOUNTER_RATE.Count - 1,
+      };
+
       // Catch ring colors ****************************************************
 
       /// <summary>
@@ -553,9 +633,24 @@ namespace PokeStar
       public static readonly char WEATHER_BOOST_SYMBOL   = '*';
 
       /// <summary>
+      /// Character denotes Pokémon can be caught from a rocket encounter.
+      /// </summary>
+      public static readonly char ROCKET_CATCH_SYMBOL    = '*';
+
+      /// <summary>
+      /// Character denotes Pokémon can only be found in eggs from a specific region.
+      /// </summary>
+      public static readonly char EGG_REGIONAL_SYMBOL    = '*';
+
+      /// <summary>
       /// Character denotes legacy move.
       /// </summary>
       public static readonly char LEGACY_MOVE_SYMBOL     = '!';
+
+      /// <summary>
+      /// Character denotes value read from the Silph Road is unverified.
+      /// </summary>
+      public static readonly char UNVERIFIED_SYMBOL      = '?';
 
       /// <summary>
       /// Number of wild CP per column in cp list.
@@ -580,7 +675,12 @@ namespace PokeStar
       /// <summary>
       /// Mega Pokémon tag.
       /// </summary>
-      public static readonly string MEGA_TAG             = "mega";
+      public static readonly string MEGA_TAG             = "Mega";
+
+      /// <summary>
+      /// Shadow Pokémon tag.
+      /// </summary>
+      public static readonly string SHADOW_TAG           = "Shadow";
 
       /// <summary>
       /// Max values in mega Pokémon name.
@@ -612,7 +712,7 @@ namespace PokeStar
       /// <summary>
       /// Missing delimiter value.
       /// </summary>
-      public static readonly int DELIMITER_MISSING = -1;
+      public static readonly int DELIMITER_MISSING       = -1;
 
       // Egg tiers ************************************************************
 
@@ -696,55 +796,61 @@ namespace PokeStar
       /// <summary>
       /// User account register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_ACCOUNT = 'A';
+      public static readonly char REGISTER_STRING_ACCOUNT      = 'A';
 
       /// <summary>
       /// Dex register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_DEX = 'D';
+      public static readonly char REGISTER_STRING_DEX          = 'D';
 
       /// <summary>
       /// EX raid register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_EX = 'E';
+      public static readonly char REGISTER_STRING_EX           = 'E';
 
       /// <summary>
       /// Information register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_INFO = 'I';
+      public static readonly char REGISTER_STRING_INFO         = 'I';
+
+      /// <summary>
+      /// Raid Notification register character.
+      /// </summary>
+      public static readonly char REGISTER_STRING_NOTIFICATION = 'N';
 
       /// <summary>
       /// Role register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_ROLE = 'P';
+      public static readonly char REGISTER_STRING_ROLE         = 'P';
 
       /// <summary>
       /// Raid register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_RAID = 'R';
+      public static readonly char REGISTER_STRING_RAID         = 'R';
 
       /// <summary>
       /// Point of interest register character.
       /// </summary>
-      public static readonly char REGISTER_STRING_POI = 'S';
+      public static readonly char REGISTER_STRING_POI          = 'S';
 
       /// <summary>
       /// Full register string.
       /// </summary>
-      public static readonly string FULL_REGISTER_STRING = "ADEIPRS";
+      public static readonly string FULL_REGISTER_STRING       = "ADEIPRS";
 
       /// <summary>
       /// Register character to register string.
       /// </summary>
       public static readonly Dictionary<string, string> REGISTER_STRING_TYPE = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
       {
-         [REGISTER_STRING_ACCOUNT.ToString()] = "Player Account",
-         [REGISTER_STRING_DEX.ToString()]     = "PokéDex",
-         [REGISTER_STRING_EX.ToString()]      = "EX Raid",
-         [REGISTER_STRING_INFO.ToString()]    = "Information",
-         [REGISTER_STRING_ROLE.ToString()]    = "Player Role",
-         [REGISTER_STRING_RAID.ToString()]    = "Raid",
-         [REGISTER_STRING_POI.ToString()]     = "Point of Interest",
+         [REGISTER_STRING_ACCOUNT.ToString()]      = "Player Account",
+         [REGISTER_STRING_DEX.ToString()]          = "PokéDex",
+         [REGISTER_STRING_EX.ToString()]           = "EX Raid",
+         [REGISTER_STRING_INFO.ToString()]         = "Information",
+         [REGISTER_STRING_NOTIFICATION.ToString()] = "Raid Notifications",
+         [REGISTER_STRING_ROLE.ToString()]         = "Player Role",
+         [REGISTER_STRING_RAID.ToString()]         = "Raid",
+         [REGISTER_STRING_POI.ToString()]          = "Point of Interest",
       };
 
       /// <summary>
@@ -763,6 +869,9 @@ namespace PokeStar
          ["INFORMATION"]        = REGISTER_STRING_INFO.ToString(),
          ["INFO"]               = REGISTER_STRING_INFO.ToString(),
          ["I"]                  = REGISTER_STRING_INFO.ToString(),
+         ["REACT"]              = REGISTER_STRING_NOTIFICATION.ToString(),
+         ["NOTIFICATION"]       = REGISTER_STRING_NOTIFICATION.ToString(),
+         ["N"]                  = REGISTER_STRING_NOTIFICATION.ToString(),
          ["ROLE"]               = REGISTER_STRING_ROLE.ToString(),
          ["P"]                  = REGISTER_STRING_ROLE.ToString(),
          ["RAID"]               = REGISTER_STRING_RAID.ToString(),
@@ -780,22 +889,22 @@ namespace PokeStar
       /// <summary>
       /// Trainer role name.
       /// </summary>
-      public static readonly string ROLE_TRAINER  = "Trainer";
+      public static readonly string ROLE_TRAINER          = "Trainer";
 
       /// <summary>
       /// Valor role name.
       /// </summary>
-      public static readonly string ROLE_VALOR    = "Valor";
+      public static readonly string ROLE_VALOR            = "Valor";
 
       /// <summary>
       /// Mystic role name.
       /// </summary>
-      public static readonly string ROLE_MYSTIC   = "Mystic";
+      public static readonly string ROLE_MYSTIC           = "Mystic";
 
       /// <summary>
       /// Instinct role value.
       /// </summary>
-      public static readonly string ROLE_INSTINCT = "Instinct";
+      public static readonly string ROLE_INSTINCT         = "Instinct";
 
       /// <summary>
       /// Invalid team role index.
@@ -842,7 +951,7 @@ namespace PokeStar
       // Image processing *****************************************************
 
       /// <summary>
-      /// scaled image width.
+      /// Scaled image width.
       /// </summary>
       public static readonly int SCALE_WIDTH = 495;
 
@@ -909,6 +1018,7 @@ namespace PokeStar
 
          ["rave_emote"]          = "ravewizard",
          ["scream_emote"]        = "rowletscrem",
+         ["sink_emote"]          = "sink",
       };
 
       /// <summary>

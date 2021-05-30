@@ -57,6 +57,7 @@ namespace PokeStar.ModuleParents
          new Emoji("4️⃣"),
          new Emoji("5️⃣"),
          new Emoji("6️⃣"),
+         new Emoji("7️⃣"),
          new Emoji("❓"),
       };
 
@@ -76,9 +77,10 @@ namespace PokeStar.ModuleParents
       private static readonly string[] dexEmojisDesc = {
          "means switch to the Main dex page.",
          "means switch to the CP page.",
+         "means switch to the Evolution page.",
+         "means switch to the Counter page.",
          "means switch to the PvP IV page.",
          "means switch to the Form page.",
-         "means switch to the Evolution page.",
          "means switch to the Nickname page.",
       };
 
@@ -117,6 +119,16 @@ namespace PokeStar.ModuleParents
          CP_MESSAGE,
 
          /// <summary>
+         /// Evo message type.
+         /// </summary>
+         EVO_MESSAGE,
+
+         /// <summary>
+         /// Counter message type.
+         /// </summary>
+         COUNTER_MESSAGE,
+
+         /// <summary>
          /// PvP message type.
          /// </summary>
          PVP_MESSAGE,
@@ -125,11 +137,6 @@ namespace PokeStar.ModuleParents
          /// Form message type.
          /// </summary>
          FORM_MESSAGE,
-
-         /// <summary>
-         /// Evo message type.
-         /// </summary>
-         EVO_MESSAGE,
 
          /// <summary>
          /// Nickname message type.
@@ -154,9 +161,10 @@ namespace PokeStar.ModuleParents
       {
          DEX_MESSAGE,
          CP_MESSAGE,
+         EVO_MESSAGE,
+         COUNTER_MESSAGE,
          PVP_MESSAGE,
          FORM_MESSAGE,
-         EVO_MESSAGE,
          NICKNAME_MESSAGE,
          HELP,
       }
@@ -235,6 +243,20 @@ namespace PokeStar.ModuleParents
                   pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.CP_MESSAGE] = true;
                   await SendDexMessage(pokemon, BuildCPEmbed, reaction.Channel, true);
                }
+               else if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.COUNTER_MESSAGE)
+               {
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Selections[i]);
+                  Connections.Instance().GetPokemonCounter(ref pokemon);
+                  pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.COUNTER_MESSAGE] = true;
+                  await SendDexMessage(pokemon, BuildCounterEmbed, reaction.Channel, true);
+               }
+               else if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.EVO_MESSAGE)
+               {
+                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Selections[i]);
+                  pokemon.Evolutions = GenerateEvoDict(pokemon.Name);
+                  pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = true;
+                  await SendDexMessage(pokemon, BuildEvoEmbed, reaction.Channel, true);
+               }
                else if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.PVP_MESSAGE)
                {
                   Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Selections[i]);
@@ -258,13 +280,6 @@ namespace PokeStar.ModuleParents
                   }
                   pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.FORM_MESSAGE] = true;
                   await SendDexMessage(pokemon, BuildFormEmbed, reaction.Channel, true);
-               }
-               else if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.EVO_MESSAGE)
-               {
-                  Pokemon pokemon = Connections.Instance().GetPokemon(dexMessage.Selections[i]);
-                  pokemon.Evolutions = GenerateEvoDict(pokemon.Name);
-                  pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = true;
-                  await SendDexMessage(pokemon, BuildEvoEmbed, reaction.Channel, true);
                }
                else if (dexMessage.Type == (int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE)
                {
@@ -346,6 +361,31 @@ namespace PokeStar.ModuleParents
                x.Embed = BuildCPEmbed(pokemon, fileName);
             });
          }
+
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_EMOJI_INDEX.EVO_MESSAGE]))
+         {
+            if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE])
+            {
+               pokemon.Evolutions = GenerateEvoDict(pokemon.Name);
+               pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = true;
+            }
+            await msg.ModifyAsync(x =>
+            {
+               x.Embed = BuildEvoEmbed(pokemon, fileName);
+            });
+         }
+         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_EMOJI_INDEX.COUNTER_MESSAGE]))
+         {
+            if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.COUNTER_MESSAGE])
+            {
+               Connections.Instance().GetPokemonCounter(ref pokemon);
+               pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.COUNTER_MESSAGE] = true;
+            }
+            await msg.ModifyAsync(x =>
+            {
+               x.Embed = BuildCounterEmbed(pokemon, fileName);
+            });
+         }
          else if (reaction.Emote.Equals(dexEmojis[(int)DEX_EMOJI_INDEX.PVP_MESSAGE]))
          {
             if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.PVP_MESSAGE])
@@ -378,18 +418,6 @@ namespace PokeStar.ModuleParents
             await msg.ModifyAsync(x =>
             {
                x.Embed = BuildFormEmbed(pokemon, fileName);
-            });
-         }
-         else if (reaction.Emote.Equals(dexEmojis[(int)DEX_EMOJI_INDEX.EVO_MESSAGE]))
-         {
-            if (!pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE])
-            {
-               pokemon.Evolutions = GenerateEvoDict(pokemon.Name);
-               pokemon.CompleteDataLookUp[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = true;
-            }
-            await msg.ModifyAsync(x =>
-            {
-               x.Embed = BuildEvoEmbed(pokemon, fileName);
             });
          }
          else if (reaction.Emote.Equals(dexEmojis[(int)DEX_EMOJI_INDEX.NICKNAME_MESSAGE]))
@@ -433,7 +461,7 @@ namespace PokeStar.ModuleParents
             StringBuilder sb = new StringBuilder();
 
             sb.AppendLine("**Catch Emoji Help:**");
-            for(int i = 0; i < catchEmojisDesc.Length; i++)
+            for (int i = 0; i < catchEmojisDesc.Length; i++)
             {
                sb.AppendLine($"{catchEmojis[i]} {catchEmojisDesc[i]}");
             }
@@ -490,13 +518,12 @@ namespace PokeStar.ModuleParents
          embed.AddField("Fast Moves", pokemon.FastMoveToString(), true);
          embed.AddField("Charge Moves", pokemon.ChargeMoveToString(), true);
          embed.AddField("Details", pokemon.DetailsToString(), true);
-         embed.AddField("Counters", pokemon.CounterToString(), false);
          if (pokemon.IsRegional())
          {
             embed.AddField("Regions", pokemon.RegionalToString(), true);
          }
          embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
-         embed.WithFooter($"{Global.STAB_SYMBOL} denotes STAB move {Global.LEGACY_MOVE_SYMBOL} denotes Legacy move");
+         embed.WithFooter($"{Global.STAB_SYMBOL} denotes STAB move.\n {Global.LEGACY_MOVE_SYMBOL} denotes Legacy move.");
          return embed.Build();
       }
 
@@ -509,18 +536,64 @@ namespace PokeStar.ModuleParents
       protected static Embed BuildCPEmbed(Pokemon pokemon, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
-         embed.WithDescription($"Max CP values for {pokemon.Name}");
+         embed.WithTitle($@"Max CP values for {pokemon.Name}");
          embed.WithThumbnailUrl($"attachment://{fileName}");
-         embed.AddField($"Max Half Level CP (Level 40)", pokemon.CPMaxHalf, true);
-         embed.AddField($"Max CP (Level 50)", pokemon.CPMax, true);
-         embed.AddField($"Max Buddy CP (Level 51)", pokemon.CPBestBuddy, true);
-         embed.AddField($"Raid CP (Level 20)", pokemon.RaidCPToString(), true);
-         embed.AddField($"Hatch CP (Level 20)", pokemon.HatchCPToString(), true);
-         embed.AddField($"Quest CP (Level 15)", pokemon.QuestCPToString(), true);
-         embed.AddField("Wild CP (Level 1-35)", pokemon.WildCPToString(), false);
+         embed.AddField($"Max Half Level CP (Level {Global.MAX_REG_LEVEL})", pokemon.CPMaxHalf, true);
+         embed.AddField($"Max CP (Level {Global.MAX_XL_LEVEL})", pokemon.CPMax, true);
+         embed.AddField($"Max Buddy CP (Level {Global.MAX_XL_LEVEL + Global.BUDDY_BOOST})", pokemon.CPBestBuddy, true);
+         embed.AddField($"Raid CP (Level {Global.RAID_LEVEL})", pokemon.RaidCPToString(), true);
+         embed.AddField($"Hatch CP (Level {Global.HATCH_LEVEL})", pokemon.HatchCPToString(), true);
+         embed.AddField($"Quest CP (Level {Global.QUEST_LEVEL})", pokemon.QuestCPToString(), true);
+         embed.AddField($"Shadow CP (Level {Global.SHADOW_LEVEL})", pokemon.ShadowCPToString(), false);
+         embed.AddField($"Wild CP (Level {Global.MIN_WILD_LEVEL}-{Global.MAX_WILD_LEVEL})", pokemon.WildCPToString(), false);
+
          embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
-         embed.WithFooter($"{Global.WEATHER_BOOST_SYMBOL} denotes Weather Boosted CP");
+         embed.WithFooter($"{Global.WEATHER_BOOST_SYMBOL} denotes Weather Boosted CP.\n" +
+                          $"Weather boosted level is {Global.WEATHER_BOOST} levels over base level.");
+         return embed.Build();
+      }
+
+      /// <summary>
+      /// Builds an evolution embed.
+      /// </summary>
+      /// <param name="pokemon">Pokémon to display.</param>
+      /// <param name="fileName">Name of image file.</param>
+      /// <returns>Embed for viewing a Pokémon's evolution family.</returns>
+      protected static Embed BuildEvoEmbed(Pokemon pokemon, string fileName)
+      {
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithTitle($"Evolution Family for {pokemon.Name}");
+         embed.WithThumbnailUrl($"attachment://{fileName}");
+         embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
+         if (pokemon.Evolutions.Count == 1)
+         {
+            embed.WithDescription("This Pokémon does not evolve in to or from any other Pokémon.");
+         }
+         else
+         {
+            foreach (KeyValuePair<string, string> pkmn in pokemon.Evolutions)
+            {
+               embed.AddField($"{pkmn.Key}", pkmn.Value);
+            }
+         }
+         return embed.Build();
+      }
+
+      /// <summary>
+      /// Builds a counter embed.
+      /// </summary>
+      /// <param name="pokemon">Pokémon to display.</param>
+      /// <param name="fileName">Name of image file.</param>
+      /// <returns>Embed for viewing a Pokémon's counters.</returns>
+      protected static Embed BuildCounterEmbed(Pokemon pokemon, string fileName)
+      {
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithTitle(pokemon.Number == Global.DUMMY_POKE_NUM ? $@"Top general DPS Pokémon" : $@"Top counters for {pokemon.Name}");
+         embed.WithThumbnailUrl($"attachment://{fileName}");
+         embed.AddField("Normal Counters", pokemon.CounterToString());
+         embed.AddField("Special Counters", pokemon.SpecialCounterToString());
+         embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
+         embed.WithFooter($"Special Counters inclued top Mega and Shadow counters.");
          return embed.Build();
       }
 
@@ -533,8 +606,7 @@ namespace PokeStar.ModuleParents
       protected static Embed BuildPvPEmbed(Pokemon pokemon, string fileName)
       {
          EmbedBuilder embed = new EmbedBuilder();
-         embed.WithTitle($@"#{pokemon.Number} {pokemon.Name} CP");
-         embed.WithDescription($"Max PvP IV values for {pokemon.Name}");
+         embed.WithTitle($@"Max PvP IV values for {pokemon.Name}");
          embed.WithThumbnailUrl($"attachment://{fileName}");
          if (pokemon.CanBeLittleLeague)
          {
@@ -576,32 +648,6 @@ namespace PokeStar.ModuleParents
             }
          }
          embed.AddField($"Forms for {pokemon.Name}", sb.ToString(), false);
-         return embed.Build();
-      }
-
-      /// <summary>
-      /// Builds an evolution embed.
-      /// </summary>
-      /// <param name="pokemon">Pokémon to display.</param>
-      /// <param name="fileName">Name of image file.</param>
-      /// <returns>Embed for viewing a Pokémon's evolution family.</returns>
-      protected static Embed BuildEvoEmbed(Pokemon pokemon, string fileName)
-      {
-         EmbedBuilder embed = new EmbedBuilder();
-         embed.WithTitle($"Evolution Family for {pokemon.Name}");
-         embed.WithThumbnailUrl($"attachment://{fileName}");
-         embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
-         if (pokemon.Evolutions.Count == 1)
-         {
-            embed.WithDescription("This Pokémon does not evolve in to or from any other Pokémon.");
-         }
-         else
-         {
-            foreach (KeyValuePair<string, string> pkmn in pokemon.Evolutions)
-            {
-               embed.AddField($"{pkmn.Key}", pkmn.Value);
-            }
-         }
          return embed.Build();
       }
 
@@ -654,7 +700,13 @@ namespace PokeStar.ModuleParents
          embed.AddField("PvE Energy", move.EnergyToString(move.PvEEnergy), true);
          embed.AddField("PvE Cooldown", $"{move.Cooldown} ms", true);
          embed.AddField("PvE Damage Window", move.DamageWindowString(), true);
-         embed.AddField("Number of Pokémon that can learn this move", move.PokemonWithMove.Count, false);
+
+         if (move.BuffChance != 0)
+         {
+            embed.AddField("PvP Buff:", move.BuffString(), false);
+         }
+
+         embed.AddField("Number of Pokémon that can learn this move", move.PokemonWithMove, false);
          embed.WithColor(Global.EMBED_COLOR_DEX_RESPONSE);
          return embed.Build();
       }
@@ -934,6 +986,25 @@ namespace PokeStar.ModuleParents
             return $"Douse Drive {pokemonName}";
          else if (form.Equals("-shock", StringComparison.OrdinalIgnoreCase))
             return $"Shock Drive {pokemonName}";
+         // Furfrou
+         else if (form.Equals("-heart", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Heart Trim";
+         else if (form.Equals("-star", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Star Trim";
+         else if (form.Equals("-diamond", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Diamond Trim";
+         else if (form.Equals("-debutante", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Debutante Trim";
+         else if (form.Equals("-matron", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Matron Trim";
+         else if (form.Equals("-dandy", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Dandy Trim";
+         else if (form.Equals("-reine", StringComparison.OrdinalIgnoreCase) || form.Equals("-la-reine", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} La Reine Trim";
+         else if (form.Equals("-kabuki", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Kabuki Trim";
+         else if (form.Equals("-pharaoh", StringComparison.OrdinalIgnoreCase))
+            return $"{pokemonName} Pharaoh Trim";
          // Aegislash
          else if (form.Equals("-blade", StringComparison.OrdinalIgnoreCase) || (string.IsNullOrWhiteSpace(form) && pokemonName.Equals("aegislash", StringComparison.OrdinalIgnoreCase)))
             return $"{pokemonName} Blade Form";
@@ -1077,7 +1148,7 @@ namespace PokeStar.ModuleParents
       /// </summary>
       /// <param name="relations">Dictionary of type relations for the type(s).</param>
       /// <returns>Type relations for type(s) as a string.</returns>
-      protected static string FormatTypeList(Dictionary<string, int> relations)
+      protected static string FormatTypeList(Dictionary<string, double> relations)
       {
          if (relations.Count == 0)
          {
@@ -1085,9 +1156,9 @@ namespace PokeStar.ModuleParents
          }
 
          string relationString = "";
-         foreach (KeyValuePair<string, int> relation in relations)
+         foreach (KeyValuePair<string, double> relation in relations)
          {
-            double multiplier = TypeCalculator.CalcTypeEffectivness(relation.Value) * 100.0;
+            double multiplier = relation.Value * 100.0;
             string typeEmote = Global.NONA_EMOJIS[$"{relation.Key.ToUpper()}_EMOTE"];
             relationString += $"{typeEmote} {relation.Key}: {multiplier}%\n";
          }
@@ -1153,9 +1224,10 @@ namespace PokeStar.ModuleParents
       {
          dexEmojis[(int)DEX_MESSAGE_TYPES.DEX_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.DEX_MESSAGE];
          dexEmojis[(int)DEX_MESSAGE_TYPES.CP_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.CP_MESSAGE];
+         dexEmojis[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE];
+         dexEmojis[(int)DEX_MESSAGE_TYPES.COUNTER_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.COUNTER_MESSAGE];
          dexEmojis[(int)DEX_MESSAGE_TYPES.PVP_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.PVP_MESSAGE];
          dexEmojis[(int)DEX_MESSAGE_TYPES.FORM_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.FORM_MESSAGE];
-         dexEmojis[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.EVO_MESSAGE];
          dexEmojis[(int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE] = Global.NUM_EMOJIS[(int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE];
       }
 

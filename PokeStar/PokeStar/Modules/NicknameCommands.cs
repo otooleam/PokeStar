@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using Discord.Commands;
@@ -64,7 +65,7 @@ namespace PokeStar.Modules
                {
                   Pokemon pokemon = Connections.Instance().GetPokemon(GetPokemonName(oldValue));
 
-                  if (pokemon == null)
+                  if (pokemon == null || pokemon.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
                   {
                      if (Connections.Instance().GetPokemonWithNickname(guild, oldValue) == null)
                      {
@@ -109,7 +110,7 @@ namespace PokeStar.Modules
          {
             List<string> pokemonWithNumber = Connections.Instance().GetPokemonByNumber(pokemonNum);
 
-            if (pokemonWithNumber.Count == 0)
+            if (pokemonWithNumber.Count == 0 || pokemonNum == Global.DUMMY_POKE_NUM)
             {
                await ResponseMessage.SendErrorMessage(Context.Channel, "nickname", $"Pokémon with number {pokemonNum} cannot be found.");
             }
@@ -132,11 +133,11 @@ namespace PokeStar.Modules
          {
             string name = GetPokemonName(pokemon);
             Pokemon pkmn = Connections.Instance().GetPokemon(name);
-            if (pkmn == null)
+            if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
             {
                pkmn = Connections.Instance().GetPokemon(Connections.Instance().GetPokemonWithNickname(Context.Guild.Id, name));
 
-               if (pkmn == null)
+               if (pkmn == null || pkmn.Name.Equals(Global.DUMMY_POKE_NAME, StringComparison.OrdinalIgnoreCase))
                {
                   await SendDexSelectionMessage((int)DEX_MESSAGE_TYPES.NICKNAME_MESSAGE, Connections.Instance().SearchPokemon(name), Context.Channel);
                }

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
-using System.Text;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using HtmlAgilityPack;
 using PokeStar.DataModels;
 
@@ -16,7 +16,8 @@ namespace PokeStar.ConnectionInterface
       /// Values used to scrape raid bosses.
       /// </summary>
       private static Uri RaidBossUrl { get; } = new Uri("https://thesilphroad.com/raid-bosses");
-      private const string RaidBossHTMLPattern = "//*[@class = 'col-md-4']";
+      private const string RaidBossHTMLPattern = "//*[@class='raid-boss-tiers-wrap']";
+      private const string DifficultyHTMLPattern = "//*[@class='difficultyTable table table-condensed']";
 
       /// <summary>
       /// Values used to scrape egg pools.
@@ -32,6 +33,13 @@ namespace PokeStar.ConnectionInterface
       private const string RocketLeaderHTMLPattern = "//*[@class='lineupGroup specialGroup']";
 
       /// <summary>
+      /// Value used to remove HTML tags.
+      /// </summary>
+      private const string HTML_TAG_PATTERN = "<.*?>";
+
+      private const int SILPH_GUILD_NUM = 0;
+
+      /// <summary>
       /// Gets a list of all current raid bosses.
       /// The list is dependent on the current raid bosses on 
       /// The Silph Road website. A change in the website's format
@@ -40,63 +48,134 @@ namespace PokeStar.ConnectionInterface
       /// <returns>Dictionary of current raid bosses.</returns>
       public static Dictionary<int, List<string>> GetRaidBosses()
       {
-         int tier = -1;
-         bool tierStart = false;
-         bool nextInTier = false;
-         bool megaTierStarted = false;
+         int tier = int.MinValue;
          HtmlWeb web = new HtmlWeb();
          HtmlDocument doc = web.Load(RaidBossUrl);
          HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(RaidBossHTMLPattern);
 
          Dictionary<int, List<string>> raidBossList = new Dictionary<int, List<string>>();
+
          foreach (HtmlNode col in bosses)
          {
-            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
-            foreach (string word in words)
+            string[] words = col.InnerHtml.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            for (int i = 0; i < words.Length; i++)
             {
-               string line = word.Trim();
-               int firstSpace = line.IndexOf(' ');
-               string checkTier = firstSpace != -1 ? line.Substring(0, firstSpace) : "";
-
-               if (checkTier.Equals(Global.RAID_STRING_MEGA, StringComparison.OrdinalIgnoreCase) && !megaTierStarted)
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
+               if (line.Contains("<div class=\"raid-boss-tier-wrap\">"))
                {
-                  tier = Global.MEGA_RAID_TIER;
+                  tier = -1;
+               }
+               else if (tier == -1)
+               {
+                  tier = 0;
+               }
+               else if (tier == 0)
+               {
+                  tier = Global.RAID_TIER_TITLE[Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()];
                   raidBossList.Add(tier, new List<string>());
-                  tierStart = true;
-                  nextInTier = false;
-                  megaTierStarted = true;
                }
-               else if (checkTier.Equals(Global.RAID_STRING_EX, StringComparison.OrdinalIgnoreCase))
+               else if (line.StartsWith("<div class=\"boss-name\">", StringComparison.OrdinalIgnoreCase))
                {
-                  tier = Global.EX_RAID_TIER;
-                  raidBossList.Add(tier, new List<string>());
-                  tierStart = true;
-                  nextInTier = false;
-               }
-               else if (checkTier.Equals(Global.RAID_STRING_TIER, StringComparison.OrdinalIgnoreCase))
-               {
-                  tier = Convert.ToInt32(line.Trim().Substring(Global.RAID_STRING_TIER.Length));
-                  raidBossList.Add(tier, new List<string>());
-                  tierStart = true;
-                  nextInTier = false;
-               }
-               else if (line.Equals("8+", StringComparison.OrdinalIgnoreCase))
-               {
-                  nextInTier = true;
-               }
-               else if (tierStart)
-               {
-                  raidBossList[tier].Add(ReformatName(line));
-                  tierStart = false;
-               }
-               else if (nextInTier)
-               {
-                  raidBossList[tier].Add(ReformatName(line));
-                  nextInTier = false;
+                  raidBossList[tier].Add(ReformatName(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()));
                }
             }
          }
          return raidBossList;
+      }
+
+      /// <summary>
+      /// Checks if the raid bosses have all been confirmed.
+      /// </summary>
+      /// <returns>True if all bosses are confirmed, otherwise false.</returns>
+      public static bool GetRaidBossesConfirmed()
+      {
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(RaidBossUrl);
+         HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(RaidBossHTMLPattern);
+
+         foreach (HtmlNode col in bosses)
+         {
+            string[] words = col.InnerHtml.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            for (int i = 0; i < words.Length; i++)
+            {
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
+               if (line.StartsWith("<div class=\"pokemonOption notSighted\"", StringComparison.OrdinalIgnoreCase))
+               {
+                  return false;
+               }
+            }
+         }
+         return true;
+      }
+
+      /// <summary>
+      /// Gets the difficulty of a raid boss.
+      /// </summary>
+      /// <param name="bossName">Name of the raid boss.</param>
+      /// <returns>List of difficulty per raid party size.</returns>
+      public static Dictionary<string, int> GetRaidBossDifficulty(string bossName)
+      {
+         bool bossFound = false;
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(RaidBossUrl);
+         HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(RaidBossHTMLPattern);
+
+         Dictionary<string, int> difficulty = new Dictionary<string, int>();
+
+         foreach (HtmlNode col in bosses)
+         {
+            string[] words = col.InnerHtml.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            for (int i = 0; i < words.Length; i++)
+            {
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
+               if (line.StartsWith("<div class=\"boss-name\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  bossFound = bossName.Equals(ReformatName(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()), StringComparison.OrdinalIgnoreCase);
+               }
+               else if (bossFound && line.StartsWith("<div class=\"hexagon difficulty", StringComparison.OrdinalIgnoreCase))
+               {
+                  difficulty.Add(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim(),
+                                 int.Parse(line.Remove(0, "<div class=\"hexagon difficulty".Length)[0].ToString())
+                                 );
+               }
+            }
+         }
+         return difficulty;
+      }
+
+      /// <summary>
+      /// Gets definitions for raid boss difficulty.
+      /// </summary>
+      /// <returns>Dictionary where name is key and description is value.</returns>
+      public static Dictionary<string, string> GetRaidBossDifficultyTable()
+      {
+         HtmlWeb web = new HtmlWeb();
+         HtmlDocument doc = web.Load(RaidBossUrl);
+         HtmlNodeCollection bosses = doc.DocumentNode.SelectNodes(DifficultyHTMLPattern);
+
+         Dictionary<string, string> difficulty = new Dictionary<string, string>();
+
+         foreach (HtmlNode col in bosses)
+         {
+            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            for (int i = 0; i < words.Length -1; i++)
+            {
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
+               if (i % 2 == 0)
+               {
+                  difficulty.Add(line.Trim(), "");
+               }
+               else
+               {
+                  int starIndex = line.IndexOf('*');
+                  difficulty[difficulty.Last().Key] = starIndex == -1 || starIndex == line.Length - 1 ? line.Trim() : line.Remove(starIndex + 1).Trim();
+               }
+            }
+            string note = words[words.Length - 1];
+            difficulty.Add("Note", "*No Weather or Friendship boosts required.");
+
+         }
+         return difficulty;
       }
 
       /// <summary>
@@ -109,7 +188,8 @@ namespace PokeStar.ConnectionInterface
       public static Dictionary<int, List<string>> GetEggs()
       {
          int eggCategory = 0;
-         int pokemonNameOffset = 0;
+         string poke = "";
+         bool pokemonFound = false;
          HtmlWeb web = new HtmlWeb();
          HtmlDocument doc = web.Load(EggUrl);
          HtmlNodeCollection eggs = doc.DocumentNode.SelectNodes(EggHTMLPattern);
@@ -118,23 +198,33 @@ namespace PokeStar.ConnectionInterface
 
          foreach (HtmlNode col in eggs)
          {
-            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
-            foreach (string word in words)
+            string[] words = col.InnerHtml.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            for (int i = 0; i < words.Length; i++)
             {
-               pokemonNameOffset--;
-               string line = word.Trim();
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
                if (line.Contains("KM"))
                {
-                  eggCategory = Global.EGG_TIER_TITLE[line];
+                  eggCategory = Global.EGG_TIER_TITLE[Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()];
                   eggList.Add(eggCategory, new List<string>());
                }
-               else if (line.IndexOf('#') != -1)
+               else if (line.StartsWith("<div class=\"speciesWrap unconfirmed", StringComparison.OrdinalIgnoreCase) ||
+                        line.StartsWith("<div class=\"speciesWrap regional unconfirmed", StringComparison.OrdinalIgnoreCase))
                {
-                  pokemonNameOffset = 2;
+                  poke += Global.UNVERIFIED_SYMBOL;
                }
-               else if (pokemonNameOffset == 0)
+               else if (line.Contains("<img class=\"regionalIcon\""))
                {
-                  eggList[eggCategory].Add(ReformatName(line));
+                  poke = $"\\{Global.EGG_REGIONAL_SYMBOL}{poke}";
+               }
+               else if (line.StartsWith("<p class=\"speciesName\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  pokemonFound = true;
+               }
+               else if (pokemonFound)
+               {
+                  eggList[eggCategory].Add(ReformatName(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty).Trim()) + poke);
+                  poke = "";
+                  pokemonFound = false;
                }
             }
          }
@@ -158,36 +248,47 @@ namespace PokeStar.ConnectionInterface
 
          foreach (HtmlNode col in rockets)
          {
-            int slot = 0;
-            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            int slot = -1;
+            string[] words = col.InnerHtml.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
             Rocket rocket = new Rocket();
             string type = "";
+            string phrase = "";
+            string poke = "";
 
             for (int i = 0; i < words.Length; i++)
             {
-               string line = words[i].Trim();
-               int numIndex = line.IndexOf('#');
-               if (numIndex != -1)
-               {
-                  if (slot == 0)
-                  {
-                     type = words[i - 1].Trim();
-                     StringBuilder sb = new StringBuilder();
-                     for (int j = 0; j < i - 1; j++)
-                     {
-                        sb.AppendLine(words[j]);
-                     }
-                     rocket.SetGrunt(type, sb.ToString());
-                  }
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
 
-                  slot = Convert.ToInt32(line.Substring(numIndex + 1));
-               }
-               else if (slot != 0)
+               if (line.StartsWith("<p class=\"quote\">", StringComparison.OrdinalIgnoreCase) || !string.IsNullOrEmpty(phrase))
                {
-                  if (line.Length != 1 && line.IndexOf('%') == -1 && line.IndexOf('/') == -1)
-                  {
-                     rocket.Slots[slot - 1].Add(line);
-                  }
+                  phrase += Regex.Replace(line, HTML_TAG_PATTERN, string.Empty) + '\n';
+               }
+               else if (line.StartsWith("<h3", StringComparison.OrdinalIgnoreCase))
+               {
+                  type = Regex.Replace(line, HTML_TAG_PATTERN, string.Empty);
+                  rocket.SetGrunt(type);
+               }
+               else if (line.StartsWith("<div class=\"lineupSlot\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  slot++;
+               }
+               else if (line.StartsWith("<p class=\"speciesName\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  rocket.Slots[slot].Add(ReformatName(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty)) + poke);
+                  poke = "";
+               }
+               else if (line.StartsWith("<img class=\"pokeballIcon", StringComparison.OrdinalIgnoreCase))
+               {
+                  poke = Global.ROCKET_CATCH_SYMBOL + poke;
+               }
+               else if (line.StartsWith("<span class=\"unverifiedIcon\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  poke += Global.UNVERIFIED_SYMBOL;
+               }
+               if (!string.IsNullOrEmpty(phrase) && line.EndsWith("</p>", StringComparison.OrdinalIgnoreCase))
+               {
+                  rocket.Phrase = phrase;
+                  phrase = "";
                }
             }
             rocketList.Add(type, rocket);
@@ -212,25 +313,37 @@ namespace PokeStar.ConnectionInterface
 
          foreach (HtmlNode col in leaders)
          {
-            int slot = 0;
-            string[] words = col.InnerText.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
+            int slot = -1;
+            string[] words = col.InnerHtml.Split('\n').Where(x => !string.IsNullOrEmpty(x.Trim())).ToArray();
             Rocket rocket = new Rocket();
-            rocket.SetLeader(words[0].Trim());
+            string name = "";
+            string poke = "";
 
-            foreach (string word in words)
+            for (int i = 0; i < words.Length; i++)
             {
-               string line = word.Trim();
-               int numIndex = line.IndexOf('#');
-               if (numIndex != -1)
+               string line = words[i] = words[i].Trim().Replace("&#39;", "\'");
+
+               if (line.StartsWith("<h3", StringComparison.OrdinalIgnoreCase))
                {
-                  slot = Convert.ToInt32(line.Substring(numIndex + 1));
+                  name = Regex.Replace(line, HTML_TAG_PATTERN, string.Empty);
+                  rocket.SetLeader(name);
                }
-               else if (slot != 0)
+               else if (line.StartsWith("<div class=\"lineupSlot\">", StringComparison.OrdinalIgnoreCase))
                {
-                  if (line.Length != 1 && line.IndexOf('%') == -1 && line.IndexOf('/') == -1)
-                  {
-                     rocket.Slots[slot - 1].Add(line);
-                  }
+                  slot++;
+               }
+               else if (line.StartsWith("<p class=\"speciesName\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  rocket.Slots[slot].Add(ReformatName(Regex.Replace(line, HTML_TAG_PATTERN, string.Empty)) + poke);
+                  poke = "";
+               }
+               else if (line.StartsWith("<img class=\"pokeballIcon", StringComparison.OrdinalIgnoreCase))
+               {
+                  poke = Global.ROCKET_CATCH_SYMBOL + poke;
+               }
+               else if (line.StartsWith("<span class=\"unverifiedIcon\">", StringComparison.OrdinalIgnoreCase))
+               {
+                  poke += Global.UNVERIFIED_SYMBOL;
                }
             }
             leaderList.Add(rocket.Name, rocket);
@@ -245,72 +358,8 @@ namespace PokeStar.ConnectionInterface
       /// <returns>Name formated for the database.</returns>
       private static string ReformatName(string name)
       {
-         if (name.Equals("GIRATINA (ORIGIN FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Origin Form Giratina";
-         }
-         else if (name.Equals("GIRATINA (ALTERED FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Altered Form Giratina";
-         }
-         else if (name.Equals("BURMY (PLANT CLOAK)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Plant Cloak Burmy";
-         }
-         else if (name.Equals("BURMY (TRASH CLOAK)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Trash Cloak Burmy";
-         }
-         else if (name.Equals("BURMY (SANDY CLOAK)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Sand Cloak Burmy";
-         }
-         else if (name.Equals("GENESECT (BURN DRIVE)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Burn Drive Genesect";
-         }
-         else if (name.Equals("GENESECT (CHILL DRIVE)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Chill Drive Genesect";
-         }
-         else if (name.Equals("GENESECT (DOUSE DRIVE)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Douse Drive Genesect";
-         }
-         else if (name.Equals("GENESECT (SHOCK DRIVE)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Shock Drive Genesect";
-         }
-         else if (name.Equals("LANDORUS (INCARNATE FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Incarnate Landorus";
-         }
-         else if (name.Equals("LANDORUS (THERIAN FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Therian Landorus";
-         }
-         else if (name.Equals("TORNADUS (INCARNATE FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Incarnate Tornadus";
-         }
-         else if (name.Equals("TORNADUS (THERIAN FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Therian Tornadus";
-         }
-         else if (name.Equals("THUNDURUS (INCARNATE FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Incarnate Thundurus";
-         }
-         else if (name.Equals("THUNDURUS (THERIAN FORME)", StringComparison.OrdinalIgnoreCase))
-         {
-            return "Therian Thundurus";
-         }
-         else if (name.IndexOf('’') != -1)
-         {
-            return name.Replace('’', '\'');
-         }
-
-         return name;
+         string silphName = name.IndexOf('’') != -1 ? name.Replace('’', '\'') : name;
+         return Connections.Instance().GetPokemonWithNickname(SILPH_GUILD_NUM, silphName) ?? name;
       }
    }
 }

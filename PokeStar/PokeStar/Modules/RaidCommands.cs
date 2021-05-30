@@ -40,7 +40,7 @@ namespace PokeStar.Modules
                              [Summary("Where the raid will be.")][Remainder] string location)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         Dictionary<int, List<string>> allBosses = Connections.Instance().GetFullBossList();
          List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          Raid raid;
          string fileName;
@@ -119,7 +119,7 @@ namespace PokeStar.Modules
                                  [Summary("Where the raid will be.")][Remainder] string location)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         Dictionary<int, List<string>> allBosses = Connections.Instance().GetFullBossList();
          List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          RaidMule raid;
          string fileName;
@@ -198,7 +198,7 @@ namespace PokeStar.Modules
                                   [Summary("Where the train will start.")][Remainder] string location)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         Dictionary<int, List<string>> allBosses = Connections.Instance().GetFullBossList();
          List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          Raid raid;
          string fileName;
@@ -277,7 +277,7 @@ namespace PokeStar.Modules
                                       [Summary("Where the train will start.")][Remainder] string location)
       {
          short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
-         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         Dictionary<int, List<string>> allBosses = Connections.Instance().GetFullBossList();
          List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
          RaidMule raid;
          string fileName;
@@ -333,6 +333,55 @@ namespace PokeStar.Modules
       }
 
       /// <summary>
+      /// Handle guide command.
+      /// </summary>
+      /// <param name="tier">Tier of the raid.</param>
+      /// <returns>Completed Task.</returns>
+      [Command("guide")]
+      [Alias("raidguide")]
+      [Summary("Creates a raid information for a raid boss.")]
+      [Remarks("Valid Tier values:\n" +
+         "0 (raid with no boss assigned)\n" +
+         "1, common, C\n" +
+         "2, uncommon, U\n" +
+         "3, rare, R\n" +
+         "4, premium, p\n" +
+         "5, legendary, L\n" +
+         "7, mega, M\n")]
+      [RegisterChannel('R')]
+      public async Task RaidGuide([Summary("Tier of the raid boss.")] string tier)
+      {
+         short calcTier = Global.RAID_TIER_STRING.ContainsKey(tier) ? Global.RAID_TIER_STRING[tier] : Global.INVALID_RAID_TIER;
+         Dictionary<int, List<string>> allBosses = Connections.Instance().GetFullBossList();
+         List<string> potentials = calcTier == Global.INVALID_RAID_TIER || !allBosses.ContainsKey(calcTier) ? new List<string>() : allBosses[calcTier];
+         string fileName;
+         if (potentials.Count > 1)
+         {
+            fileName = $"Egg{calcTier}.png";
+            Connections.CopyFile(fileName);
+            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+            guideMessages.Add(selectMsg.Id, potentials);
+            Connections.DeleteFile(fileName);
+            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
+         }
+         else if (potentials.Count == 1)
+         {
+            Pokemon pkmn = Connections.Instance().GetPokemon(potentials.First());
+            Connections.Instance().GetRaidBoss(ref pkmn);
+
+            fileName = Connections.GetPokemonPicture(pkmn.Name);
+            Connections.CopyFile(fileName);
+            await Context.Channel.SendFileAsync(fileName, embed: BuildRaidGuideEmbed(pkmn, fileName));
+            Connections.DeleteFile(fileName);
+         }
+         else
+         {
+            await ResponseMessage.SendErrorMessage(Context.Channel, "guide", $"No raid bosses found for tier {tier}");
+         }
+         RemoveOldRaids();
+      }
+
+      /// <summary>
       /// Handle boss command.
       /// </summary>
       /// <returns>Completed Task.</returns>
@@ -340,9 +389,9 @@ namespace PokeStar.Modules
       [Alias("bosses", "bosslist", "raidboss", "raidbosses", "raidbosslist")]
       [Summary("Get the current list of raid bosses.")]
       [RegisterChannel('I')]
-      public async Task BossList()
+      public async Task Boss()
       {
-         Dictionary<int, List<string>> allBosses = Connections.GetFullBossList();
+         Dictionary<int, List<string>> allBosses = Connections.Instance().GetFullBossList();
 
          EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Global.EMBED_COLOR_GAME_INFO_RESPONSE);
@@ -375,6 +424,33 @@ namespace PokeStar.Modules
          {
             embed.AddField($"Tier 1 Raids {BuildRaidTitle(Global.COMMON_RAID_TIER)}", BuildRaidBossListString(allBosses[Global.COMMON_RAID_TIER]), true);
          }
+
+         await Context.Channel.SendMessageAsync(embed: embed.Build());
+      }
+
+      /// <summary>
+      /// Handle difficulty command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("difficulty")]
+      [Alias("raiddifficulty", "bossdifficulty", "raidbossdifficulty")]
+      [Summary("Get the raid difficulty definitions.")]
+      [RegisterChannel('I')]
+      public async Task Difficulty()
+      {
+         Dictionary<string, string> table = Connections.GetRaidDifficultyTable();
+
+         EmbedBuilder embed = new EmbedBuilder();
+         embed.WithColor(Global.EMBED_COLOR_GAME_INFO_RESPONSE);
+         embed.WithTitle("Raid Boss Difficulty Scale:");
+
+         for (int i = 0; i < table.Count - 1; i++)
+         {
+            KeyValuePair<string, string> difficulty = table.ElementAt(i);
+            embed.AddField(difficulty.Key, difficulty.Value);
+         }
+
+         embed.WithFooter(table.ElementAt(table.Count - 1).Value);
 
          await Context.Channel.SendMessageAsync(embed: embed.Build());
       }

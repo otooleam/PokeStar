@@ -13,7 +13,6 @@ namespace PokeStar.Modules
    /// </summary>
    public class RocketCommands: ModuleBase<SocketCommandContext>
    {
-      /*
       /// <summary>
       /// Handle rocket command.
       /// </summary>
@@ -67,24 +66,12 @@ namespace PokeStar.Modules
                   embed.AddField($"Slot #{i + 1}:", sb.ToString(), true);
                }
 
+               embed.WithFooter($"{Global.ROCKET_CATCH_SYMBOL} denotes the Pokémon is catchable.\n" + 
+                                $"{Global.UNVERIFIED_SYMBOL} denotes Pokémon is not fully verified.");
+
                await ReplyAsync(embed: embed.Build());
             }
          }
       }
-
-      /// <summary>
-      /// Handle updateRocketList command.
-      /// </summary>
-      /// <returns>Completed Task.</returns>
-      [Command("updateRocketList")]
-      [Summary("Updates the saved list of Rocket Grunts from The Silph Road.")]
-      [RequireUserPermission(GuildPermission.Administrator)]
-      [NonaAdmin()]
-      public async Task UpdateRocketList()
-      {
-         Connections.Instance().UpdateEggList();
-         await ResponseMessage.SendInfoMessage(Context.Channel, $"Egg list has been updated.");
-      }
-      /**/
    }
 }

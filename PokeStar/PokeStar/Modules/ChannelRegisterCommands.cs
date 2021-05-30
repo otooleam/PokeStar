@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Discord;
@@ -26,10 +27,12 @@ namespace PokeStar.Modules
                "PokéDex..........................pokedex / dex / d\n" +
                //"EX Raids..........................ex / e\n" +
                "Information....................info / i\n" +
+               "Raid Notifications.........react / notification / n\n" +
                "Player Registration.......role / p\n" +
                "Raids................................raid / r\n" +
-               "Point of Interest............poi / pokestop / stop / gym / s\n" + 
-               "Leave blank to register for all command types.")]
+               "Point of Interest............poi / pokestop / stop / gym / s\n" +
+               "Leave blank to register for all command types." + 
+               "Raid notifications must be the only type of registration in the channel and only one channel per server.")]
       [RequireUserPermission(GuildPermission.Administrator)]
       public async Task Register([Summary("(Optional) Register the channel for these commands.")] string register = null)
       {
@@ -40,13 +43,31 @@ namespace PokeStar.Modules
 
          if (result.HasValue)
          {
-            registration = result.Value.RegistrationString;
-            Connections.Instance().UpdateRegistration(guild, channel, registration);
-            await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
-
-            if (result.Value.CheckSetupComplete && !Connections.Instance().GetSetupComplete(guild))
+            if (registration != null && result.Value.RegistrationString.Contains(Global.REGISTER_STRING_NOTIFICATION.ToString()) &&
+                !result.Value.RegistrationString.Equals(Global.REGISTER_STRING_NOTIFICATION.ToString(), StringComparison.OrdinalIgnoreCase))
             {
-               await ResponseMessage.SendWarningMessage(Context.Channel, "register", "Please run the .setup command to ensure required roles have been setup.");
+               await ResponseMessage.SendErrorMessage(Context.Channel, "register", "Raid Notifications must be the only registration in the channel.");
+            }
+            else if (Connections.Instance().CheckNotificationRegister(guild) &&
+                     !result.Value.RegistrationString.Equals(Global.REGISTER_STRING_NOTIFICATION.ToString(), StringComparison.OrdinalIgnoreCase))
+            {
+               await ResponseMessage.SendErrorMessage(Context.Channel, "register", "Only one channel per server may be registerd for Raid Notifications.");
+            }
+            else
+            {
+               Connections.Instance().UpdateRegistration(guild, channel, result.Value.RegistrationString);
+               await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(result.Value.RegistrationString)}");
+
+               if (result.Value.CheckSetupComplete && !Connections.Instance().GetSetupComplete(guild))
+               {
+                  await ResponseMessage.SendWarningMessage(Context.Channel, "register", "Please run the .setup command to ensure required roles have been setup.");
+               }
+
+               if (result.Value.RegistrationString.Contains(Global.REGISTER_STRING_NOTIFICATION.ToString()) && registration == null)
+               {
+                  await Connections.SetNotifyMessage(Context.Guild, Context.Channel,
+                     Context.Client.Guilds.FirstOrDefault(x => x.Name.Equals(Global.EMOTE_SERVER, StringComparison.OrdinalIgnoreCase)).Emotes.ToArray());
+               }
             }
          }
          else
@@ -68,6 +89,7 @@ namespace PokeStar.Modules
                "PokéDex..........................pokedex / dex / d\n" +
                //"EX Raids..........................ex / e\n" +
                "Information....................info / i\n" +
+               "Raid Notifications.........react / notification / n\n" +
                "Player Registration.......role / p\n" +
                "Raids................................raid / r\n" +
                "Point of Interest............poi / pokestop / stop / gym / s\n" +
@@ -79,6 +101,7 @@ namespace PokeStar.Modules
          ulong channel = Context.Channel.Id;
 
          string registration = Connections.Instance().GetRegistration(guild, channel);
+         bool notify = registration.Contains(Global.REGISTER_STRING_NOTIFICATION.ToString());
 
          if (registration != null)
          {
@@ -91,11 +114,21 @@ namespace PokeStar.Modules
             {
                Connections.Instance().DeleteRegistration(guild, channel);
                await ResponseMessage.SendInfoMessage(Context.Channel, $"Removed all registrations from this channel.");
+               if (notify)
+               {
+                  await Connections.ClearNotifyMessage(Context.Guild, Context.Channel.Id,
+                     Context.Client.Guilds.FirstOrDefault(x => x.Name.Equals(Global.EMOTE_SERVER, StringComparison.OrdinalIgnoreCase)).Emotes.ToArray());
+               }
             }
             else
             {
                Connections.Instance().UpdateRegistration(guild, channel, registration);
                await ResponseMessage.SendInfoMessage(Context.Channel, $"Channel is now registered for the following command types {GenerateSummaryString(registration)}");
+               if (notify)
+               {
+                  await Connections.ClearNotifyMessage(Context.Guild, Context.Channel.Id,
+                     Context.Client.Guilds.FirstOrDefault(x => x.Name.Equals(Global.EMOTE_SERVER, StringComparison.OrdinalIgnoreCase)).Emotes.ToArray());
+               }
             }
          }
          else
@@ -185,7 +218,7 @@ namespace PokeStar.Modules
       {
          StringBuilder sb = new StringBuilder();
 
-         foreach(char ch in reg.ToCharArray())
+         foreach (char ch in reg.ToCharArray())
          {
             sb.Append($"{Global.REGISTER_STRING_TYPE[ch.ToString()]}, ");
          }

@@ -61,9 +61,9 @@ namespace PokeStar.DataModels
       public List<string> Resistance { get; set; }
 
       /// <summary>
-      /// Is the Pokémon obtainable.
+      /// Is the Pokémon released.
       /// </summary>
-      public bool Obtainable { get; set; }
+      public bool Released { get; set; }
 
       /// <summary>
       /// Is the Pokémon shinyable.
@@ -128,12 +128,12 @@ namespace PokeStar.DataModels
       /// <summary>
       /// List of the Pokémon's fast moves.
       /// </summary>
-      public List<PokemonMove> FastMove { get; set; }
+      public List<Move> FastMove { get; set; }
 
       /// <summary>
       /// List of the Pokémon's charge moves.
       /// </summary>
-      public List<PokemonMove> ChargeMove { get; set; }
+      public List<Move> ChargeMove { get; set; }
 
       /// <summary>
       /// List of counters of the Pokémon.
@@ -196,6 +196,16 @@ namespace PokeStar.DataModels
       public int CPHatchMax { get; set; }
 
       /// <summary>
+      /// CP of the Pokémon as a shadow.
+      /// </summary>
+      public int CPShadow { get; set; }
+
+      /// <summary>
+      /// Weather boosted CP of the Pokémonas a shadow.
+      /// </summary>
+      public int CPShadowBoosted { get; set; }
+
+      /// <summary>
       /// List of maximum wild CP of the Pokémon.
       /// </summary>
       public List<int> CPWild { get; } = new List<int>();
@@ -251,6 +261,12 @@ namespace PokeStar.DataModels
       public Dictionary<string, string> Evolutions { get; set; }
 
       /// <summary>
+      /// Difficulty of fighting the Pokémon as a raid boss.
+      /// Only used for raid boss guide.
+      /// </summary>
+      public Dictionary<string, string> Difficulty { get; set; } = null;
+
+      /// <summary>
       /// When the Pokémon was created.
       /// </summary>
       public DateTime CreatedAt { get; private set; }
@@ -286,10 +302,19 @@ namespace PokeStar.DataModels
       public string StatusToString()
       {
          StringBuilder sb = new StringBuilder();
-         sb.AppendLine($"**Can be Obtained:** {(Obtainable ? "Yes" : "No")}");
+         sb.AppendLine($"**Can be Obtained:** {(Released ? "Yes" : "No")}");
          sb.AppendLine($"**Can be Shiny:** {(Shiny ? "Yes" : "No")}");
          sb.AppendLine($"**Can be Shadow:** {(Shadow ? "Yes" : "No")}");
          return sb.ToString();
+      }
+
+      /// <summary>
+      /// Gets the shiny status of the Pokémon as a string.
+      /// </summary>
+      /// <returns>Pokémon shiny status as a string.</returns>
+      public string ShinyToString()
+      {
+         return Shiny ? "Yes" : "No";
       }
 
       /// <summary>
@@ -419,8 +444,9 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the fast moves of the Pokémon as a string.
       /// </summary>
+      /// <param name="showLegacyMoves">Include legacy moves in the string.</param>
       /// <returns>Pokémon fast moves as a string.</returns>
-      public string FastMoveToString()
+      public string FastMoveToString(bool showLegacyMoves = true)
       {
          if (FastMove.Count == 0)
          {
@@ -428,21 +454,24 @@ namespace PokeStar.DataModels
          }
 
          StringBuilder sb = new StringBuilder();
-         foreach (PokemonMove fastMove in FastMove)
+         foreach (Move fastMove in FastMove)
          {
-            if (Name.Equals("Mew"))
+            if (showLegacyMoves || !fastMove.IsLegacy)
             {
-               sb.Append($"{fastMove.Name} ({fastMove.Type})");
+               if (Name.Equals("Mew", StringComparison.OrdinalIgnoreCase))
+               {
+                  sb.Append($"{fastMove.Name} ({fastMove.Type})");
+               }
+               else
+               {
+                  sb.Append(fastMove.PokemonMoveToString());
+               }
+               if (Type.Contains(fastMove.Type))
+               {
+                  sb.Append($" {Global.STAB_SYMBOL}");
+               }
+               sb.AppendLine();
             }
-            else
-            {
-               sb.Append(fastMove.ToString());
-            }
-            if (Type.Contains(fastMove.Type))
-            {
-               sb.Append($" {Global.STAB_SYMBOL}");
-            }
-            sb.AppendLine();
          }
          return sb.ToString();
       }
@@ -450,8 +479,9 @@ namespace PokeStar.DataModels
       /// <summary>
       /// Gets the charge moves of the Pokémon as a string.
       /// </summary>
+      /// <param name="showLegacyMoves">Include legacy moves in the string.</param>
       /// <returns>Pokémon charge moves as a string.</returns>
-      public string ChargeMoveToString()
+      public string ChargeMoveToString(bool showLegacyMoves = true)
       {
          if (ChargeMove.Count == 0)
          {
@@ -459,42 +489,65 @@ namespace PokeStar.DataModels
          }
 
          StringBuilder sb = new StringBuilder();
-         foreach (PokemonMove chargeMove in ChargeMove)
+         foreach (Move chargeMove in ChargeMove)
          {
-            if (Name.Equals("Mew"))
+            if (showLegacyMoves || !chargeMove.IsLegacy)
             {
-               sb.Append($"{chargeMove.Name} ({chargeMove.Type})");
+               if (Name.Equals("Mew", StringComparison.OrdinalIgnoreCase))
+               {
+                  sb.Append($"{chargeMove.Name} ({chargeMove.Type})");
+               }
+               else
+               {
+                  sb.Append(chargeMove.PokemonMoveToString());
+               }
+               if (Type.Contains(chargeMove.Type))
+               {
+                  sb.Append($" {Global.STAB_SYMBOL}");
+               }
+               sb.AppendLine();
             }
-            else
-            {
-               sb.Append(chargeMove.ToString());
-            }
-            if (Type.Contains(chargeMove.Type))
-            {
-               sb.Append($" {Global.STAB_SYMBOL}");
-            }
-            sb.AppendLine();
          }
          return sb.ToString();
       }
 
       /// <summary>
-      /// Gets the top counters of the Pokémon as a string.
+      /// Gets the top regular counters of the Pokémon as a string.
       /// </summary>
-      /// <returns>Pokémon counters as a string.</returns>
+      /// <returns>Pokémon regular counters as a string.</returns>
       public string CounterToString()
       {
          if (Counter.Count == 0)
          {
             return "No Counters Listed.";
          }
-         string str = "";
+         StringBuilder sb = new StringBuilder();
          int num = 1;
-         foreach (Counter counter in Counter)
+         foreach (Counter counter in Counter.Take(Counter.Count / 2).ToList())
          {
-            str += $"#{num++} {counter}\n";
+            sb.AppendLine($"#{num++} {counter}");
          }
-         return str;
+         return sb.ToString();
+      }
+
+      /// <summary>
+      /// Gets the top special counters of the Pokémon as a string.
+      /// Special counters are Mega and Shadow Pokémon.
+      /// </summary>
+      /// <returns>Pokémon special counters as a string.</returns>
+      public string SpecialCounterToString()
+      {
+         if (Counter.Count == 0)
+         {
+            return "No Counters Listed.";
+         }
+         StringBuilder sb = new StringBuilder();
+         int num = 1;
+         foreach (Counter counter in Counter.Skip(Counter.Count / 2).ToList())
+         {
+            sb.AppendLine($"#{num++} {counter}");
+         }
+         return sb.ToString();
       }
 
       /// <summary>
@@ -502,7 +555,7 @@ namespace PokeStar.DataModels
       /// Includes min and max CPs and weather boosted
       /// min and max CPs.
       /// </summary>
-      /// <returns>Pokémon raid CPas a string.</returns>
+      /// <returns>Pokémon raid CPs as a string.</returns>
       public string RaidCPToString()
       {
          return $"{CPRaidMin} - {CPRaidMax}\n{CPRaidBoostedMin}{Global.WEATHER_BOOST_SYMBOL} - {CPRaidBoostedMax}{Global.WEATHER_BOOST_SYMBOL}";
@@ -527,6 +580,16 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
+      /// Gets CPs of the Pokémon as a shadow as a string.
+      /// Includes normal and weather boosted CPs.
+      /// </summary>
+      /// <returns>Pokémon shadow CPs as a string.</returns>
+      public string ShadowCPToString()
+      {
+         return $"{CPShadow}, {CPShadowBoosted}{Global.WEATHER_BOOST_SYMBOL}";
+      }
+
+      /// <summary>
       /// Gets all max wild CPs of the Pokémon as a string.
       /// Wild CP goes from level 1 to 35 in full level 
       /// increments.
@@ -546,6 +609,20 @@ namespace PokeStar.DataModels
             sb.Append($"**{column1level}** {(i < 10 ? "--" : "-")} {CPWild[column1level - 1]} . ");
             sb.Append($"**{column2level}** - {CPWild[column2level - 1]}");
             sb.AppendLine($"{(column3level <= Global.MAX_WILD_LEVEL ? $" . **{column3level}** - {CPWild[column3level - 1]}{(column3level > maxNonBoostedLevel ? Global.WEATHER_BOOST_SYMBOL.ToString() : "")}" : "")}");
+         }
+         return sb.ToString();
+      }
+
+      /// <summary>
+      /// Gets difficulty as a raid boss as a string
+      /// </summary>
+      /// <returns>Raid boss difficulty as a string.</returns>
+      public string DifficultyToString()
+      {
+         StringBuilder sb = new StringBuilder();
+         foreach(KeyValuePair<string, string> party in Difficulty)
+         {
+            sb.AppendLine($"{party.Key}: {party.Value}");
          }
          return sb.ToString();
       }

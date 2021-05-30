@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Collections.Generic;
+using Discord;
+using Discord.WebSocket;
 using DuoVia.FuzzyStrings;
 using PokeStar.DataModels;
 using PokeStar.Calculators;
@@ -21,6 +24,7 @@ namespace PokeStar.ConnectionInterface
 
       private List<string> PokemonNames;
       private List<string> MoveNames;
+      private Dictionary<int, List<string>> RaidBosses;
       private Dictionary<int, List<string>> Eggs;
       private Dictionary<string, Rocket> Rockets;
 
@@ -32,13 +36,8 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       private Connections()
       {
-
          POGODBConnector = new POGODatabaseConnector(Global.POGO_DB_CONNECTION_STRING);
          NONADBConnector = new NONADatabaseConnector(Global.NONA_DB_CONNECTION_STRING);
-         UpdatePokemonNameList();
-         UpdateMoveNameList();
-         UpdateEggList();
-         UpdateRocketList();
       }
 
       /// <summary>
@@ -50,6 +49,11 @@ namespace PokeStar.ConnectionInterface
          if (connections == null)
          {
             connections = new Connections();
+            connections.UpdatePokemonNameList();
+            connections.UpdateMoveNameList();
+            connections.UpdateRaidBossList();
+            connections.UpdateEggList();
+            connections.UpdateRocketList();
          }
          return connections;
       }
@@ -79,7 +83,7 @@ namespace PokeStar.ConnectionInterface
       /// <returns>Pokémon picture file name.</returns>
       public static string GetPokemonPicture(string pokemonName)
       {
-         int x = pokemonName.IndexOf('`');
+         pokemonName = pokemonName.Replace("`", "");
          pokemonName = pokemonName.Replace(" ", "_");
          pokemonName = pokemonName.Replace(".", "");
          pokemonName = pokemonName.Replace("%", "");
@@ -90,12 +94,21 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Gets raid difficulty table.
+      /// </summary>
+      /// <returns>List of difficulties and definitions.</returns>
+      public static Dictionary<string, string> GetRaidDifficultyTable()
+      {
+         return SilphData.GetRaidBossDifficultyTable();
+      }
+
+      /// <summary>
       /// Get the full list of raid bosses.
       /// </summary>
       /// <returns>List of raid bosses sorted by tier.</returns>
-      public static Dictionary<int, List<string>> GetFullBossList()
+      public Dictionary<int, List<string>> GetFullBossList()
       {
-         return SilphData.GetRaidBosses();
+         return RaidBosses;
       }
 
       /// <summary>
@@ -146,8 +159,15 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Updates the list of raidbosses.
+      /// </summary>
+      public void UpdateRaidBossList()
+      {
+         RaidBosses = SilphData.GetRaidBosses();
+      }
+
+      /// <summary>
       /// Updates the list of eggs.
-      /// Only needs to be ran when egg pool has changed.
       /// </summary>
       public void UpdateEggList()
       {
@@ -156,11 +176,153 @@ namespace PokeStar.ConnectionInterface
 
       /// <summary>
       /// Updates the list of current Team Rockets.
-      /// Only needs to be ran when rocket line ups has changed.
       /// </summary>
       public void UpdateRocketList()
       {
-         // Rockets = SilphData.GetRockets().Union(SilphData.GetRocketLeaders()).ToDictionary(k => k.Key, v => v.Value, StringComparer.OrdinalIgnoreCase);
+         Rockets = SilphData.GetRockets().Union(SilphData.GetRocketLeaders()).ToDictionary(k => k.Key, v => v.Value, StringComparer.OrdinalIgnoreCase);
+      }
+
+      /// <summary>
+      /// Runs updates to the system read from the Silph road.
+      /// </summary>
+      /// <param name="guilds">List of guilds the bot is currently in.</param>
+      /// <returns>Completed Task.</returns>
+      public async Task RunSilphUpdate(List<SocketGuild> guilds)
+      {
+         UpdatePokemonNameList();
+         UpdateMoveNameList();
+         UpdateEggList();
+         UpdateRocketList();
+
+         Dictionary<int, List<string>> newBosses = SilphData.GetRaidBosses();
+
+         bool bossesChanged = RaidBosses.Keys.Count != newBosses.Keys.Count || !RaidBosses.Keys.All(newBosses.Keys.Contains);
+
+         foreach (int tier in RaidBosses.Keys)
+         {
+            bossesChanged = bossesChanged || RaidBosses[tier].Count != newBosses[tier].Count || !RaidBosses[tier].All(newBosses[tier].Contains);
+         }
+
+         if (bossesChanged)
+         {
+            if (SilphData.GetRaidBossesConfirmed())
+            {
+               UpdateRaidBossList();
+               SocketGuild emoteServer = guilds.FirstOrDefault(x => x.Name.Equals(Global.EMOTE_SERVER, StringComparison.OrdinalIgnoreCase));
+               GuildEmote[] previousEmotes = emoteServer.Emotes.ToArray();
+
+               foreach (GuildEmote emote in emoteServer.Emotes)
+               {
+                  await emoteServer.DeleteEmoteAsync(emote);
+               }
+
+               foreach (KeyValuePair<int, List<string>> tier in RaidBosses)
+               {
+                  foreach (string boss in tier.Value)
+                  {
+                     string fileName = GetPokemonPicture(boss);
+                     CopyFile(fileName);
+                     Image img = new Image(fileName);
+                     await emoteServer.CreateEmoteAsync(fileName.Remove(fileName.Length - 4), img);
+                     img.Dispose();
+                     DeleteFile(fileName);
+                  }
+               }
+
+               Dictionary<ulong, ulong> channels = Instance().GetNotificationChannels();
+
+               foreach (KeyValuePair<ulong, ulong> chan in channels)
+               {
+                  SocketGuild guild = guilds.FirstOrDefault(x => x.Id == chan.Key);
+                  ISocketMessageChannel channel = (ISocketMessageChannel)guild.Channels.FirstOrDefault(x => x.Id == chan.Value);
+                  await ClearNotifyMessage(guild, channel.Id, previousEmotes.ToArray());
+                  await SetNotifyMessage(guild, channel, emoteServer.Emotes.ToArray());
+               }
+            }
+         }
+      }
+
+      /// <summary>
+      /// Checks if a message is a raid notification message.
+      /// </summary>
+      /// <param name="id">Id of the message.</param>
+      /// <returns>True if the message is a raid notification message, otherwise false.</returns>
+      public static bool IsNotifyMessage(ulong id)
+      {
+         return Connections.Instance().CheckNotificationMessage(id);
+      }
+
+      /// <summary>
+      /// Handles a reaction on a raid notification message.
+      /// </summary>
+      /// <param name="message">Message that was reacted on.</param>
+      /// <param name="reaction">Reaction that was sent.</param>
+      /// <param name="guild">Guild the reaction was made in.</param>
+      /// <returns>Completed Task.</returns>
+      public static async Task NotifyMessageReactionHandle(IMessage message, SocketReaction reaction, SocketGuild guild)
+      {
+         SocketRole role = guild.Roles.FirstOrDefault(x => x.Name.Equals(reaction.Emote.Name, StringComparison.OrdinalIgnoreCase));
+
+         if (role != null)
+         {
+            SocketGuildUser user = guild.Users.FirstOrDefault(x => x.Id == reaction.User.Value.Id);
+
+            SocketRole currentRole = user.Roles.FirstOrDefault(x => x.Name.Equals(reaction.Emote.Name, StringComparison.OrdinalIgnoreCase));
+
+            if (currentRole == null)
+            {
+               await user.AddRoleAsync(role);
+            }
+            else
+            {
+               await user.RemoveRoleAsync(role);
+            }
+         }
+
+         await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
+      }
+
+      /// <summary>
+      /// Sets values for a raid notification message.
+      /// </summary>
+      /// <param name="guild">Guild to set notify message.</param>
+      /// <param name="channel">Registered channel.</param>
+      /// <param name="emotes">Emotes to represent roles.</param>
+      /// <returns></returns>
+      public static async Task SetNotifyMessage(SocketGuild guild, ISocketMessageChannel channel, Emote[] emotes)
+      {
+         foreach (GuildEmote emote in emotes)
+         {
+            await guild.CreateRoleAsync(emote.Name, null, null, false, true, null);
+         }
+
+         IUserMessage message = await ResponseMessage.SendInfoMessage(channel,
+            "React to this message to be notified when a specific raid is called.\n" +
+            "When the raid bosses change your role will be removed and you will have to re-select desired bosses.\n" +
+            "If you no longer wish to be notified for a boss, re-react for the desired boss.");
+         message.AddReactionsAsync(emotes);
+
+         Connections.Instance().UpdateNotificationMessage(guild.Id, channel.Id, message.Id);
+      }
+
+      /// <summary>
+      /// Clears values for a raid notification message.
+      /// </summary>
+      /// <param name="guild">Guild to clear notify message.</param>
+      /// <param name="channel">Id of registered channel.</param>
+      /// <param name="emotes">Emotes that represent roles.</param>
+      /// <returns></returns>
+      public static async Task ClearNotifyMessage(SocketGuild guild, ulong channel, Emote[] emotes)
+      {
+         foreach (GuildEmote emote in emotes)
+         {
+            SocketRole role = guild.Roles.FirstOrDefault(x => x.Name.Equals(emote.Name, StringComparison.OrdinalIgnoreCase));
+            if (role != null)
+            {
+               await role.DeleteAsync();
+            }
+         }
+         Instance().ClearNotificationMessage(guild.Id, channel);
       }
 
       /// <summary>
@@ -224,6 +386,25 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Gets needed information for a raid boss.
+      /// </summary>
+      /// <param name="pokemon">Reference to a Pokémon.</param>
+      public void GetRaidBoss(ref Pokemon pokemon)
+      {
+         GetPokemonStats(ref pokemon);
+         GetPokemonCP(ref pokemon);
+         GetPokemonCounter(ref pokemon);
+         Dictionary<string, int> difficulty = SilphData.GetRaidBossDifficulty(pokemon.Name);
+         Dictionary<string, string> definition = SilphData.GetRaidBossDifficultyTable();
+         pokemon.Difficulty = new Dictionary<string, string>();
+
+         foreach (KeyValuePair<string, int> party in difficulty)
+         {
+            pokemon.Difficulty.Add(party.Key, definition.ElementAt(party.Value).Key);
+         }
+      }
+
+      /// <summary>
       /// Calculates all of the relevant Stats of a Pokémon. This
       /// includes the Forms, Moves, League IVs, Type interactions, and weather boosts.
       /// </summary>
@@ -238,13 +419,6 @@ namespace PokeStar.ConnectionInterface
             pokemon.Weather = GetWeather(pokemon.Type);
             pokemon.FastMove = POGODBConnector.GetPokemonMoves(ReformatName(pokemon.Name), Global.FAST_MOVE_CATEGORY);
             pokemon.ChargeMove = POGODBConnector.GetPokemonMoves(ReformatName(pokemon.Name), Global.CHARGE_MOVE_CATEGORY, pokemon.Shadow);
-            pokemon.Counter = POGODBConnector.GetCounters(ReformatName(pokemon.Name));
-
-            foreach (Counter counter in pokemon.Counter)
-            {
-               counter.FastAttack = POGODBConnector.GetPokemonMove(ReformatName(counter.Name), counter.FastAttack.Name);
-               counter.ChargeAttack = POGODBConnector.GetPokemonMove(ReformatName(counter.Name), counter.ChargeAttack.Name);
-            }
 
             pokemon.CPMax = CPCalculator.CalcCPPerLevel(
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
@@ -254,7 +428,7 @@ namespace PokeStar.ConnectionInterface
 
       /// <summary>
       /// Calculates all of the relevant CP valus of a Pokémon. This
-      /// includes the raid, quest, hatch, and wild perfect IV values.
+      /// includes the raid, quest, hatch, shadow, and wild perfect IV values.
       /// </summary>
       /// <param name="pokemon">Reference to a Pokémon.</param>
       public static void GetPokemonCP(ref Pokemon pokemon)
@@ -311,6 +485,15 @@ namespace PokeStar.ConnectionInterface
                pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.HATCH_LEVEL);
 
+            pokemon.CPShadow = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV, Global.SHADOW_LEVEL);
+
+            pokemon.CPShadowBoosted = CPCalculator.CalcCPPerLevel(
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
+               Global.MAX_IV, Global.MAX_IV, Global.MAX_IV,
+               Global.SHADOW_LEVEL + Global.WEATHER_BOOST);
+
             for (int level = Global.MIN_WILD_LEVEL; level <= Global.MAX_WILD_LEVEL; level++)
             {
                pokemon.CPWild.Add(CPCalculator.CalcCPPerLevel(
@@ -330,19 +513,19 @@ namespace PokeStar.ConnectionInterface
          if (pokemon != null)
          {
             pokemon.GreatIVs = CPCalculator.CalcPvPIVsPerLeague(
-               pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                Global.MAX_GREAT_CP, Global.MAX_REG_LEVEL + Global.BUDDY_BOOST);
 
             pokemon.UltraIVs = CPCalculator.CalcPvPIVsPerLeague(
-               pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                Global.MAX_ULTRA_CP, Global.MAX_REG_LEVEL + Global.BUDDY_BOOST);
 
             pokemon.GreatXLIVs = CPCalculator.CalcPvPIVsPerLeague(
-               pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                Global.MAX_GREAT_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
 
             pokemon.UltraXLIVs = CPCalculator.CalcPvPIVsPerLeague(
-               pokemon.Attack, pokemon.Defense, pokemon.Stamina, 
+               pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                Global.MAX_ULTRA_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
 
             pokemon.CanBeLittleLeague = CanBeLittleLeague(ReformatName(pokemon.Name));
@@ -356,6 +539,23 @@ namespace PokeStar.ConnectionInterface
                   pokemon.Attack, pokemon.Defense, pokemon.Stamina,
                   Global.MAX_LITTLE_CP, Global.MAX_XL_LEVEL + Global.BUDDY_BOOST);
             }
+         }
+      }
+
+      /// <summary>
+      /// Calculates the counters of a Pokémon.
+      /// </summary>
+      /// <param name="pokemon"></param>
+      public void GetPokemonCounter(ref Pokemon pokemon)
+      {
+         pokemon.Counter = new List<Counter>();
+         pokemon.Counter.AddRange(POGODBConnector.GetCounters(ReformatName(pokemon.Name), false));
+         pokemon.Counter.AddRange(POGODBConnector.GetCounters(ReformatName(pokemon.Name), true));
+
+         foreach (Counter counter in pokemon.Counter)
+         {
+            counter.FastAttack = POGODBConnector.GetPokemonMove(ReformatName(counter.Name.Replace($"{Global.SHADOW_TAG} ", string.Empty)), counter.FastAttack.Name);
+            counter.ChargeAttack = POGODBConnector.GetPokemonMove(ReformatName(counter.Name.Replace($"{Global.SHADOW_TAG} ", string.Empty)), counter.ChargeAttack.Name);
          }
       }
 
@@ -465,6 +665,17 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Checks if the Pokémon already has a move.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="moveName">Name of the Move.</param>
+      /// <returns>True if the Pokémon has the Move, otherwise false.</returns>
+      public bool PokemonHasMove(string pokemonName, string moveName)
+      {
+         return POGODBConnector.GetPokemonMove(pokemonName, moveName) != null;
+      }
+
+      /// <summary>
       /// Gets all Pokémon that have a given number.
       /// </summary>
       /// <param name="pokemonNumber">Number of the Pokémon</param>
@@ -475,14 +686,49 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Gets list of Pokémon to use in counter sims.
+      /// </summary>
+      /// <returns>List of Pokémon to use.</returns>
+      public List<Pokemon> GetPokemonForSim()
+      {
+         List<Pokemon> simPokemon = POGODBConnector.GetSimPokemon();
+
+         foreach (Pokemon poke in simPokemon)
+         {
+            string name = ReformatName(poke.Name);
+
+            List<Move> initFastMove = POGODBConnector.GetPokemonMoves(name, "Fast", poke.Shadow);
+            List<Move> initChargeMove = POGODBConnector.GetPokemonMoves(name, "Charge", poke.Shadow);
+
+            poke.FastMove = new List<Move>();
+            poke.ChargeMove = new List<Move>();
+
+            foreach (Move fast in initFastMove)
+            {
+               Move fullFast = POGODBConnector.GetMove(fast.Name);
+               fullFast.IsLegacy = fast.IsLegacy;
+               poke.FastMove.Add(fullFast);
+            }
+
+            foreach (Move charge in initChargeMove)
+            {
+               Move fullCharge = POGODBConnector.GetMove(charge.Name);
+               fullCharge.IsLegacy = charge.IsLegacy;
+               poke.ChargeMove.Add(fullCharge);
+            }
+         }
+
+         return simPokemon;
+      }
+
+      /// <summary>
       /// Reformats the name from user input to the POGO database format.
       /// </summary>
       /// <param name="originalName">User input name.</param>
       /// <returns>Name formated for the POGO database</returns>
       private static string ReformatName(string originalName)
       {
-         int index = originalName.IndexOf('\'');
-         return index == -1 ? originalName : originalName.Insert(index, "\'");
+         return originalName.Replace("\'", "\'\'");
       }
 
       /// <summary>
@@ -495,8 +741,8 @@ namespace PokeStar.ConnectionInterface
       {
          Dictionary<string, int> allRelations = POGODBConnector.GetTypeDefenseRelations(types);
          return new TypeRelation(
-            allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value),
-            allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value)
+            allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => TypeCalculator.CalcTypeEffectivness(v.Value)),
+            allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => TypeCalculator.CalcTypeEffectivness(v.Value))
          );
       }
 
@@ -510,8 +756,8 @@ namespace PokeStar.ConnectionInterface
       {
          Dictionary<string, int> allRelations = POGODBConnector.GetTypeAttackRelations(type);
          return new TypeRelation(
-            allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => v.Value),
-            allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => v.Value)
+            allRelations.Where(x => x.Value > 0).ToDictionary(k => k.Key, v => TypeCalculator.CalcTypeEffectivness(v.Value)),
+            allRelations.Where(x => x.Value < 0).ToDictionary(k => k.Key, v => TypeCalculator.CalcTypeEffectivness(v.Value))
          );
       }
 
@@ -543,9 +789,39 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="moveName">Name of the move.</param>
       /// <param name="isLegacy">Is the move a legacy move.</param>
-      public void UpdatePokemonMove(string pokemonName, string moveName, int isLegacy)
+      public void UpdatePokemonMove(string pokemonName, string moveName, int isLegacy, bool moveAssigned)
       {
-         POGODBConnector.SetPokemonMove(ReformatName(pokemonName), moveName, isLegacy);
+         if (moveAssigned)
+         {
+            POGODBConnector.UpdatePokemonMove(ReformatName(pokemonName), moveName, isLegacy);
+         }
+         else
+         {
+            POGODBConnector.SetPokemonMove(ReformatName(pokemonName), moveName, isLegacy);
+         }
+      }
+
+      /// <summary>
+      /// Updates counters for a Pokémon.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="counters">List of normal counters.</param>
+      /// <param name="specialCounters">List of special counters.</param>
+      public void UpdateCounters(string pokemonName, List<Counter> counters, List<Counter> specialCounters)
+      {
+         string name = ReformatName(pokemonName);
+
+         POGODBConnector.ClearPokemonCounters(name);
+
+         foreach (Counter counter in counters)
+         {
+            POGODBConnector.AddCounter(name, ReformatName(counter.Name), ReformatName(counter.FastAttack.Name), ReformatName(counter.ChargeAttack.Name), counter.Rating, false);
+         }
+
+         foreach (Counter counter in specialCounters)
+         {
+            POGODBConnector.AddCounter(name, ReformatName(counter.Name), ReformatName(counter.FastAttack.Name), ReformatName(counter.ChargeAttack.Name), counter.Rating, true);
+         }
       }
 
       /// <summary>
@@ -617,6 +893,25 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Checks if guild has a channel registered for raid notifications.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <returns>True if registered channel exists, otherwise false.</returns>
+      public bool CheckNotificationRegister(ulong guild)
+      {
+         return NONADBConnector.CheckNotificationRegister(guild);
+      }
+
+      /// <summary>
+      /// Get all channels registerd for raid notifications.
+      /// </summary>
+      /// <returns>Dictionary of channels where key is the guild id and value is channel id.</returns>
+      public Dictionary<ulong, ulong> GetNotificationChannels()
+      {
+         return NONADBConnector.GetNotificationChannels();
+      }
+
+      /// <summary>
       /// Updates the registration of a channel.
       /// </summary>
       /// <param name="guild">Id of the guild.</param>
@@ -632,6 +927,37 @@ namespace PokeStar.ConnectionInterface
          {
             NONADBConnector.UpdateRegistration(guild, channel, register);
          }
+      }
+
+      /// <summary>
+      /// Checks if guild has a channel registered for raid notifications.
+      /// </summary>
+      /// <param name="message">Id of the message.</param>
+      /// <returns>True if message is a raid notification message, otherwise false.</returns>
+      public bool CheckNotificationMessage(ulong message)
+      {
+         return NONADBConnector.CheckNotificationMessage(message);
+      }
+
+      /// <summary>
+      /// Updates the notification message for a channel.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="channel">Id of the channel.</param>
+      /// <param name="message">Id of the message</param>
+      public void UpdateNotificationMessage(ulong guild, ulong channel, ulong message)
+      {
+         NONADBConnector.UpdateNotificationMessage(guild, channel, message);
+      }
+
+      /// <summary>
+      /// Clears the notification message for a channel.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="channel">Id of the channel.</param>
+      public void ClearNotificationMessage(ulong guild, ulong channel)
+      {
+         NONADBConnector.UpdateNotificationMessage(guild, channel, null);
       }
 
       /// <summary>

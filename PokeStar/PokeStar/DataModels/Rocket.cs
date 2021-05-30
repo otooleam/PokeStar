@@ -26,7 +26,7 @@ namespace PokeStar.DataModels
       /// Phrase said by the rocket.
       /// Only set for grunts.
       /// </summary>
-      public string Phrase { get; private set; } = null;
+      public string Phrase { get; set; } = null;
 
       /// <summary>
       /// Pokémon used by rockets.
@@ -49,14 +49,12 @@ namespace PokeStar.DataModels
       }
 
       /// <summary>
-      /// Sets the name and phrase for a rocket grunt.
+      /// Sets the name for a rocket grunt.
       /// </summary>
       /// <param name="type">Type of rocket grunt.</param>
-      /// <param name="phrase">Phrase said by the rocket grunt.</param>
-      public void SetGrunt(string type, string phrase)
+      public void SetGrunt(string type)
       {
          Name = $"{type} {GRUNT_TITLE}";
-         Phrase = phrase;
       }
    }
 }

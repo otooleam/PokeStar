@@ -26,9 +26,9 @@ namespace PokeStar.ConnectionInterface
       public string GetPrefix(ulong guild)
       {
          string prefix = null;
-         string queryString = $@"SELECT prefix 
-                                 FROM guild_settings 
-                                 WHERE guild={guild};";
+         string queryString = $@"SELECT Prefix 
+                                 FROM GuildSettings 
+                                 WHERE GuildID={guild};";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -37,7 +37,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  prefix = Convert.ToString(reader["prefix"]);
+                  prefix = Convert.ToString(reader["Prefix"]);
                }
             }
             conn.Close();
@@ -53,9 +53,9 @@ namespace PokeStar.ConnectionInterface
       public bool GetSetupComplete(ulong guild)
       {
          bool setupComplete = false;
-         string queryString = $@"SELECT setup 
-                                 FROM guild_settings 
-                                 WHERE guild={guild};";
+         string queryString = $@"SELECT SetupComplete 
+                                 FROM GuildSettings 
+                                 WHERE GuildID={guild};";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -64,12 +64,66 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  setupComplete = Convert.ToInt32(reader["setup"]) == TRUE;
+                  setupComplete = Convert.ToInt32(reader["SetupComplete"]) == TRUE;
                }
             }
             conn.Close();
          }
          return setupComplete;
+      }
+
+      /// <summary>
+      /// Gets the player limit for raids set for the guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <returns>Limit of players for a raid.</returns>
+      public int GetLimitRaidPlayer(ulong guild)
+      {
+         int player_limit = Global.LIMIT_RAID_PLAYER;
+         string queryString = $@"SELECT LimitRaidPlayer 
+                                 FROM GuildSettings 
+                                 WHERE GuildID={guild};";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  player_limit = Convert.ToInt32(reader["LimitRaidPlayer"]);
+               }
+            }
+            conn.Close();
+         }
+         return player_limit;
+      }
+      
+      /// <summary>
+      /// Gets the invite limit for raids set for the guild.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <returns>Limit of invites for a raid.</returns>
+      public int GetLimitRaidInvite(ulong guild)
+      {
+         int invite_limit = Global.LIMIT_RAID_INVITE;
+         string queryString = $@"SELECT LimitRaidInvite
+                                 FROM GuildSettings 
+                                 WHERE GuildID={guild};";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  invite_limit = Convert.ToInt32(reader["LimitRaidInvite"]);
+               }
+            }
+            conn.Close();
+         }
+         return invite_limit;
       }
 
       /// <summary>
@@ -79,8 +133,8 @@ namespace PokeStar.ConnectionInterface
       /// <param name="guild">Id of the guild.</param>
       public void AddSettings(ulong guild)
       {
-         string queryString = $@"INSERT INTO guild_settings (guild, prefix, setup)
-                                 VALUES ({guild}, '{Global.DEFAULT_PREFIX}', 0)";
+         string queryString = $@"INSERT INTO GuildSettings (GuildID, Prefix, SetupComplete, LimitRaidPlayer, LimitRaidInvite)
+                                 VALUES ({guild}, '{Global.DEFAULT_PREFIX}', 0, {Global.LIMIT_RAID_PLAYER}, {Global.LIMIT_RAID_INVITE})";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -97,9 +151,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="prefix">New prefix value.</param>
       public void UpdatePrefix(ulong guild, string prefix)
       {
-         string queryString = $@"UPDATE guild_settings 
-                                 SET prefix = '{prefix}'
-                                 WHERE guild={guild};";
+         string queryString = $@"UPDATE GuildSettings 
+                                 SET Prefix='{prefix}'
+                                 WHERE GuildID={guild};";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -115,9 +169,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="guild">Id of the guild.</param>
       public void CompleteSetup(ulong guild)
       {
-         string queryString = $@"UPDATE guild_settings 
-                                 SET setup = 1
-                                 WHERE guild={guild};";
+         string queryString = $@"UPDATE GuildSettings 
+                                 SET SetupComplete=1
+                                 WHERE GuildID={guild};";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -133,8 +187,8 @@ namespace PokeStar.ConnectionInterface
       /// <param name="guild">Id of the guild.</param>
       public void DeleteSettings(ulong guild)
       {
-         string queryString = $@"DELETE FROM guild_settings
-                                 WHERE guild={guild};";
+         string queryString = $@"DELETE FROM GuildSettings
+                                 WHERE GuildID={guild};";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -155,10 +209,10 @@ namespace PokeStar.ConnectionInterface
       public string GetRegistration(ulong guild, ulong channel)
       {
          string registration = null;
-         string queryString = $@"SELECT register 
-                                 FROM channel_registration 
-                                 WHERE guild={guild}
-                                 AND channel={channel};";
+         string queryString = $@"SELECT Register 
+                                 FROM ChannelRegistration 
+                                 WHERE GuildID={guild}
+                                 AND ChannelID={channel};";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -167,9 +221,9 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  if (reader["register"].GetType() != typeof(DBNull))
+                  if (reader["Register"].GetType() != typeof(DBNull))
                   {
-                     registration = Convert.ToString(reader["register"]);
+                     registration = Convert.ToString(reader["Register"]);
                   }
                }
             }
@@ -180,6 +234,87 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
+      /// Checks if guild has a channel registered for raid notifications.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <returns>True if registered channel exists, otherwise false.</returns>
+      public bool CheckNotificationRegister(ulong guild)
+      {
+         bool registerFound = false;
+         string queryString = $@"SELECT COUNT(*) AS count 
+                                 FROM ChannelRegistration
+                                 WHERE Register LIKE '%{Global.REGISTER_STRING_NOTIFICATION}%'
+                                 AND GuildID={guild};";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  registerFound = Convert.ToInt32(reader["count"]) != 0;
+               }
+            }
+            conn.Close();
+         }
+         return registerFound;
+      }
+
+      /// <summary>
+      /// Checks if guild has a channel registered for raid notifications.
+      /// </summary>
+      /// <param name="message">Id of the message.</param>
+      /// <returns>True if message is a raid notification message, otherwise false.</returns>
+      public bool CheckNotificationMessage(ulong message)
+      {
+         bool registerFound = false;
+         string queryString = $@"SELECT COUNT(*) AS count 
+                                 FROM ChannelRegistration
+                                 WHERE NotifyMessageID={message};";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  registerFound = Convert.ToInt32(reader["count"]) != 0;
+               }
+            }
+            conn.Close();
+         }
+         return registerFound;
+      }
+
+      /// <summary>
+      /// Get all channels registerd for raid notifications.
+      /// </summary>
+      /// <returns>Dictionary of channels where key is the guild id and value is channel id.</returns>
+      public Dictionary<ulong, ulong> GetNotificationChannels()
+      {
+         Dictionary<ulong, ulong> channels = new Dictionary<ulong, ulong>();
+         string queryString = $@"SELECT GuildID, ChannelID 
+                                 FROM ChannelRegistration
+                                 WHERE Register LIKE '%{Global.REGISTER_STRING_NOTIFICATION}%';";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  channels.Add(Convert.ToUInt64(reader["GuildID"]), Convert.ToUInt64(reader["ChannelID"]));
+               }
+            }
+            conn.Close();
+         }
+         return channels;
+      }
+
+      /// <summary>
       /// Adds a new registration to a channel.
       /// </summary>
       /// <param name="guild">Id of the guild.</param>
@@ -187,8 +322,8 @@ namespace PokeStar.ConnectionInterface
       /// <param name="registration">New registration value.</param>
       public void AddRegistration(ulong guild, ulong channel, string registration)
       {
-         string queryString = $@"INSERT INTO channel_registration (guild, channel, register)
-                                 VALUES ({guild}, {channel}, '{registration}')";
+         string queryString = $@"INSERT INTO ChannelRegistration (GuildID, ChannelID, Register, NotifyMessageID)
+                                 VALUES ({guild}, {channel}, '{registration}', NULL)";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -206,10 +341,34 @@ namespace PokeStar.ConnectionInterface
       /// <param name="registration">New registration value.</param>
       public void UpdateRegistration(ulong guild, ulong channel, string registration)
       {
-         string queryString = $@"UPDATE channel_registration 
-                                 SET register = '{registration}'
-                                 WHERE guild={guild}
-                                 AND channel={channel};";
+         string queryString = $@"UPDATE ChannelRegistration 
+                                 SET Register='{registration}'
+                                 WHERE GuildID={guild}
+                                 AND ChannelID={channel};";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+      /// <summary>
+      /// Updates the notification message for a channel.
+      /// </summary>
+      /// <param name="guild">Id of the guild.</param>
+      /// <param name="channel">Id of the channel.</param>
+      /// <param name="message">Id of the message</param>
+      public void UpdateNotificationMessage(ulong guild, ulong channel, ulong? message=null)
+      {
+
+         string messageID = message.HasValue ? $"{message.Value}" : "NULL" ;
+
+         string queryString = $@"UPDATE ChannelRegistration 
+                                 SET NotifyMessageID={messageID}
+                                 WHERE GuildID={guild}
+                                 AND ChannelID={channel};";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -225,8 +384,8 @@ namespace PokeStar.ConnectionInterface
       /// <param name="guild">Id of the guild.</param>
       public void DeleteAllRegistration(ulong guild)
       {
-         string queryString = $@"DELETE FROM channel_registration
-                                 WHERE guild={guild};";
+         string queryString = $@"DELETE FROM ChannelRegistration
+                                 WHERE GuildID={guild};";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -243,9 +402,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="channel">Id of the channel.</param>
       public void DeleteRegistration(ulong guild, ulong channel)
       {
-         string queryString = $@"DELETE FROM channel_registration
-                                 WHERE guild={guild}
-                                 AND channel={channel};";
+         string queryString = $@"DELETE FROM ChannelRegistration
+                                 WHERE GuildID={guild}
+                                 AND ChannelID={channel};";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -266,10 +425,10 @@ namespace PokeStar.ConnectionInterface
       public string GetPokemonByNickname(ulong guild, string nickname)
       {
          string pokemonName = null;
-         string queryString = $@"SELECT name 
-                                 FROM nickname 
-                                 WHERE guild={guild}
-                                 AND nickname = '{nickname}';";
+         string queryString = $@"SELECT BaseName 
+                                 FROM Nickname 
+                                 WHERE GuildID={guild}
+                                 AND Nickname='{nickname}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -278,7 +437,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  pokemonName = Convert.ToString(reader["name"]);
+                  pokemonName = Convert.ToString(reader["BaseName"]);
                }
             }
             conn.Close();
@@ -295,10 +454,10 @@ namespace PokeStar.ConnectionInterface
       public List<string> GetNicknames(ulong guild, string pokemon)
       {
          List<string> nicknames = new List<string>();
-         string queryString = $@"SELECT nickname 
-                                 FROM nickname 
-                                 WHERE guild={guild}
-                                 AND name = '{pokemon}';";
+         string queryString = $@"SELECT Nickname 
+                                 FROM Nickname 
+                                 WHERE GuildID={guild}
+                                 AND BaseName='{pokemon}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -307,7 +466,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  nicknames.Add(Convert.ToString(reader["nickname"]));
+                  nicknames.Add(Convert.ToString(reader["Nickname"]));
                }
             }
             conn.Close();
@@ -323,7 +482,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="nickname">Nickname of the Pokémon.</param>
       public void AddNickname(ulong guild, string pokemonName, string nickname)
       {
-         string queryString = $@"INSERT INTO nickname (guild, name, nickname)
+         string queryString = $@"INSERT INTO Nickname (GuildID, BaseName, Nickname)
                                  VALUES ({guild}, '{pokemonName}', '{nickname}')";
 
          using (SqlConnection conn = GetConnection())
@@ -342,10 +501,10 @@ namespace PokeStar.ConnectionInterface
       /// <param name="originalNickname">Old nickname.</param>
       public void UpdateNickname(ulong guild, string newNickname, string originalNickname)
       {
-         string queryString = $@"UPDATE nickname 
-                                 SET nickname = '{newNickname}'
-                                 WHERE guild={guild}
-                                 AND nickname = '{originalNickname}';";
+         string queryString = $@"UPDATE Nickname 
+                                 SET Nickname='{newNickname}'
+                                 WHERE GuildID={guild}
+                                 AND Nickname='{originalNickname}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -362,9 +521,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="nickname">Nickname of a Pokémon.</param>
       public void DeleteNickname(ulong guild, string nickname)
       {
-         string queryString = $@"DELETE FROM nickname
-                                 WHERE guild={guild}
-                                 AND nickname='{nickname}';";
+         string queryString = $@"DELETE FROM Nickname
+                                 WHERE GuildID={guild}
+                                 AND Nickname='{nickname}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -385,9 +544,9 @@ namespace PokeStar.ConnectionInterface
       {
          POI poi = null;
          string queryString = $@"SELECT *
-                                 FROM poi 
-                                 WHERE guild={guild}
-                                 AND name='{poiName}';";
+                                 FROM POI 
+                                 WHERE GuildID={guild}
+                                 AND Name='{poiName}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -398,12 +557,12 @@ namespace PokeStar.ConnectionInterface
                {
                   poi = new POI
                   {
-                     Name = Convert.ToString(reader["name"]),
-                     Latitude = Convert.ToString(reader["latitude"]),
-                     Longitude = Convert.ToString(reader["longitude"]),
-                     IsGym = Convert.ToInt32(reader["gym"]) == TRUE,
-                     IsSponsored = Convert.ToInt32(reader["sponsored"]) == TRUE,
-                     IsExGym = Convert.ToInt32(reader["ex"]) == TRUE,
+                     Name = Convert.ToString(reader["Name"]),
+                     Latitude = Convert.ToString(reader["Latitude"]),
+                     Longitude = Convert.ToString(reader["Longitude"]),
+                     IsGym = Convert.ToInt32(reader["IsGym"]) == TRUE,
+                     IsSponsored = Convert.ToInt32(reader["IsSponsored"]) == TRUE,
+                     IsExGym = Convert.ToInt32(reader["IsEx"]) == TRUE,
                   };
                }
             }
@@ -421,10 +580,10 @@ namespace PokeStar.ConnectionInterface
       public string GetPOIByNickname(ulong guild, string nickname)
       {
          string poi = null;
-         string queryString = $@"SELECT name 
-                                 FROM poi_nickname 
-                                 WHERE guild={guild}
-                                 AND nickname = '{nickname}';";
+         string queryString = $@"SELECT BaseName 
+                                 FROM POINickname 
+                                 WHERE GuildID={guild}
+                                 AND Nickname='{nickname}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -433,7 +592,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  poi = Convert.ToString(reader["name"]);
+                  poi = Convert.ToString(reader["BaseName"]);
                }
             }
             conn.Close();
@@ -450,10 +609,10 @@ namespace PokeStar.ConnectionInterface
       public List<string> GetPOINicknames(ulong guild, string poi)
       {
          List<string> nicknames = new List<string>();
-         string queryString = $@"SELECT nickname 
-                                 FROM poi_nickname 
-                                 WHERE guild={guild}
-                                 AND name = '{poi}';";
+         string queryString = $@"SELECT Nickname 
+                                 FROM POINickname 
+                                 WHERE GuildID={guild}
+                                 AND BaseName='{poi}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -462,7 +621,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  nicknames.Add(Convert.ToString(reader["nickname"]));
+                  nicknames.Add(Convert.ToString(reader["Nickname"]));
                }
             }
             conn.Close();
@@ -478,9 +637,9 @@ namespace PokeStar.ConnectionInterface
       public List<string> GetGuildPOIs(ulong guild)
       {
          List<string> pois = new List<string>();
-         string queryString = $@"SELECT name 
-                                 FROM poi 
-                                 WHERE guild={guild};";
+         string queryString = $@"SELECT Name 
+                                 FROM POI 
+                                 WHERE GuildID={guild};";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -489,7 +648,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  pois.Add(Convert.ToString(reader["name"]));
+                  pois.Add(Convert.ToString(reader["Name"]));
                }
             }
             conn.Close();
@@ -516,7 +675,7 @@ namespace PokeStar.ConnectionInterface
             return;
          }
 
-         string queryString = $@"INSERT INTO poi (guild, name, latitude, longitude, gym, sponsored, ex)
+         string queryString = $@"INSERT INTO POI (GuildID, Name, Latitude, Longitude, IsGym, IsSponsored, IsEx)
                                  VALUES ({guild}, '{poiName}', '{latitude}', '{longitude}', {gym}, {sponsored}, {ex})";
 
          using (SqlConnection conn = GetConnection())
@@ -542,10 +701,10 @@ namespace PokeStar.ConnectionInterface
             return;
          }
 
-         string queryString = $@"UPDATE poi 
-                                 SET {attribute} = {value}
-                                 WHERE guild = {guild}
-                                 AND name = '{poiName}';";
+         string queryString = $@"UPDATE POI 
+                                 SET {attribute}={value}
+                                 WHERE GuildID={guild}
+                                 AND Name='{poiName}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -562,9 +721,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="poiName">Name of the Point of Interest.</param>
       public void RemovePOI(ulong guild, string poiName)
       {
-         string queryString = $@"DELETE FROM poi
-                                 WHERE guild={guild}
-                                 AND name = '{poiName}';";
+         string queryString = $@"DELETE FROM POI
+                                 WHERE GuildID={guild}
+                                 AND Name='{poiName}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -582,7 +741,7 @@ namespace PokeStar.ConnectionInterface
       /// <param name="nickname">Nickname of the Point of Interest.</param>
       public void AddPOINickname(ulong guild, string poiName, string nickname)
       {
-         string queryString = $@"INSERT INTO poi_nickname (guild, name, nickname)
+         string queryString = $@"INSERT INTO POINickname (GuildID, BaseName, Nickname)
                                  VALUES ({guild}, '{poiName}', '{nickname}')";
 
          using (SqlConnection conn = GetConnection())
@@ -601,10 +760,10 @@ namespace PokeStar.ConnectionInterface
       /// <param name="originalNickname">Old nickname.</param>
       public void UpdatePOINickname(ulong guild, string newNickname, string originalNickname)
       {
-         string queryString = $@"UPDATE poi_nickname 
-                                 SET nickname = '{newNickname}'
-                                 WHERE guild={guild}
-                                 AND nickname = '{originalNickname}';";
+         string queryString = $@"UPDATE POINickname 
+                                 SET Nickname='{newNickname}'
+                                 WHERE GuildID={guild}
+                                 AND Nickname='{originalNickname}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -621,9 +780,9 @@ namespace PokeStar.ConnectionInterface
       /// <param name="nickname">Nickname of a Pokémon.</param>
       public void DeletePOINickname(ulong guild, string nickname)
       {
-         string queryString = $@"DELETE FROM poi_nickname
-                                 WHERE guild={guild}
-                                 AND nickname='{nickname}';";
+         string queryString = $@"DELETE FROM POINickname
+                                 WHERE GuildID={guild}
+                                 AND Nickname='{nickname}';";
 
          using (SqlConnection conn = GetConnection())
          {

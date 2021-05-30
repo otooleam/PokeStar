@@ -29,7 +29,7 @@ namespace PokeStar.Modules
       /// <summary>
       /// Emotes for a help message.
       /// </summary>
-      private static readonly Emoji[] helpEmojis = {
+      private static readonly Emoji[] HELP_EMOJIS = {
          new Emoji("⬅️"),
          new Emoji("➡️")
       };
@@ -57,18 +57,17 @@ namespace PokeStar.Modules
          SocketGuildUser user = Context.Guild.Users.FirstOrDefault(x => x.Id == Context.User.Id);
          bool isAdmin = (user.Roles.Where(role => role.Permissions.Administrator).ToList().Count != 0 || Context.Guild.OwnerId == user.Id);
          bool isNona = Context.Guild.Name.Equals(Global.HOME_SERVER, StringComparison.OrdinalIgnoreCase);
+         string prefix = Connections.Instance().GetPrefix(Context.Guild.Id);
 
          if (command == null)
          {
             List<CommandInfo> validCommands = Global.COMMAND_INFO.Where(cmdInfo => CheckShowCommand(cmdInfo.Name, isAdmin, isNona)).ToList();
-            string prefix = Connections.Instance().GetPrefix(Context.Guild.Id);
-
 
             IUserMessage msg = await ReplyAsync(embed: BuildGeneralHelpEmbed(validCommands.Take(MAX_COMMANDS).ToList(), prefix, 1));
             if (validCommands.Count > MAX_COMMANDS)
             {
                helpMessages.Add(msg.Id, new HelpMessage(validCommands));
-               msg.AddReactionsAsync(helpEmojis);
+               msg.AddReactionsAsync(HELP_EMOJIS);
             }
          }
          else if (Global.COMMAND_INFO.FirstOrDefault(x => x.Name.Equals(command, StringComparison.OrdinalIgnoreCase) || x.Aliases.Contains(command)) is CommandInfo cmdInfo
@@ -76,7 +75,7 @@ namespace PokeStar.Modules
          {
             EmbedBuilder embed = new EmbedBuilder();
             embed.WithColor(Global.EMBED_COLOR_HELP_RESPONSE);
-            embed.WithTitle($"**{command} command help**");
+            embed.WithTitle($"**{prefix}{cmdInfo.Name} command help**");
             embed.WithDescription(cmdInfo.Summary ?? "No description available");
             if (cmdInfo.Aliases.Count > 1)
             {
@@ -94,14 +93,22 @@ namespace PokeStar.Modules
             {
                embed.AddField("**Additional Information:**", cmdInfo.Remarks);
             }
-            foreach (ParameterInfo param in cmdInfo.Parameters)
-            {
-               embed.AddField($"**<{param.Name}>**", param.Summary ?? "No description available");
-            }
+
             if (cmdInfo.Parameters.Count == 0)
             {
                embed.WithFooter("*This command does not take any parameters.");
             }
+            else
+            {
+               StringBuilder sb = new StringBuilder();
+               foreach (ParameterInfo param in cmdInfo.Parameters)
+               {
+                  embed.AddField($"**<{param.Name}>**", param.Summary ?? "No description available");
+                  sb.Append($" {param.Name}");
+               }
+               embed.AddField($"**Example:**", $"{prefix}{cmdInfo.Name}{sb}");
+            }
+
             await ReplyAsync(embed: embed.Build());
          }
          else
@@ -155,11 +162,11 @@ namespace PokeStar.Modules
          int offset = helpMessage.Page;
          string prefix = Connections.Instance().GetPrefix(guildId);
 
-         if (reaction.Emote.Equals(helpEmojis[(int)HELP_EMOJI_INDEX.BACK_ARROW]) && offset > 0)
+         if (reaction.Emote.Equals(HELP_EMOJIS[(int)HELP_EMOJI_INDEX.BACK_ARROW]) && offset > 0)
          {
             offset--;
          }
-         else if (reaction.Emote.Equals(helpEmojis[(int)HELP_EMOJI_INDEX.FORWARD_ARROR]) && helpMessage.Commands.Count > (offset + 1) * MAX_COMMANDS)
+         else if (reaction.Emote.Equals(HELP_EMOJIS[(int)HELP_EMOJI_INDEX.FORWARD_ARROR]) && helpMessage.Commands.Count > (offset + 1) * MAX_COMMANDS)
          {
             offset++;
          }

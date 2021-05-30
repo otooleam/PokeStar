@@ -3,6 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
+using System.Threading;
 using System.Collections.Generic;
 using Discord;
 using Discord.Commands;
@@ -50,6 +51,7 @@ namespace PokeStar
          string token = Global.ENV_FILE.GetValue("token").ToString();
          Global.VERSION = Global.ENV_FILE.GetValue("version").ToString();
          Global.HOME_SERVER = Global.ENV_FILE.GetValue("home_server").ToString();
+         Global.EMOTE_SERVER = Global.ENV_FILE.GetValue("emote_server").ToString();
          Global.POGO_DB_CONNECTION_STRING = Global.ENV_FILE.GetValue("pogo_db_sql").ToString();
          Global.NONA_DB_CONNECTION_STRING = Global.ENV_FILE.GetValue("nona_db_sql").ToString();
          Global.DEFAULT_PREFIX = Global.ENV_FILE.GetValue("default_prefix").ToString();
@@ -105,6 +107,7 @@ namespace PokeStar
          client.Ready += HandleReady;
          client.JoinedGuild += HandleJoinGuild;
          client.LeftGuild += HandleLeftGuild;
+         Timer SilphUpdate = new Timer(async _ => await Connections.Instance().RunSilphUpdate(client.Guilds.ToList()), new AutoResetEvent(false), 0, 300000);
          return Task.CompletedTask;
       }
 
@@ -184,12 +187,14 @@ namespace PokeStar
       private async Task<Task> HandleReactionAdded(Cacheable<IUserMessage, ulong> cachedMessage,
           ISocketMessageChannel originChannel, SocketReaction reaction)
       {
-         IUserMessage message = cachedMessage.Value;
+         IMessage message = await originChannel.GetMessageAsync(cachedMessage.Id);
 
          SocketGuildChannel chnl = message.Channel as SocketGuildChannel;
          ulong guild = chnl.Guild.Id;
 
          IUser user = reaction.User.Value;
+
+
          if (message != null && reaction.User.IsSpecified && !user.IsBot)
          {
             if (RaidCommandParent.IsRaidMessage(message.Id))
@@ -199,6 +204,10 @@ namespace PokeStar
             else if (RaidCommandParent.IsRaidSubMessage(message.Id))
             {
                await RaidCommandParent.RaidSubMessageReactionHandle(message, reaction);
+            }
+            else if (RaidCommandParent.IsRaidGuideMessage(message.Id))
+            {
+               await RaidCommandParent.RaidGuideMessageReactionHandle(message, reaction);
             }
             else if (DexCommandParent.IsDexSelectMessage(message.Id))
             {
@@ -219,6 +228,10 @@ namespace PokeStar
             else if (HelpCommands.IsHelpMessage(message.Id))
             {
                await HelpCommands.HelpMessageReactionHandle(message, reaction, guild);
+            }
+            else if (Connections.IsNotifyMessage(message.Id))
+            {
+               await Connections.NotifyMessageReactionHandle(message, reaction, chnl.Guild);
             }
          }
          return Task.CompletedTask;

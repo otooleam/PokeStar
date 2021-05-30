@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using System.Text;
 using System.Data.SqlClient;
 using System.Collections.Generic;
@@ -11,25 +12,6 @@ namespace PokeStar.ConnectionInterface
    /// </summary>
    public class POGODatabaseConnector : DatabaseConnector
    {
-      /// <summary>
-      /// List of moves added for shadow Pokémon.
-      /// </summary>
-      private readonly List<PokemonMove> ShadowMoves = new List<PokemonMove>()
-      {
-         new PokemonMove
-         {
-            Name = "Frustration",
-            Type = "Normal",
-            IsLegacy = false
-         },
-         new PokemonMove
-         {
-            Name = "Return",
-            Type = "Normal",
-            IsLegacy = false
-         }
-      };
-
       /// <summary>
       /// Creates a new POGO database connector.
       /// </summary>
@@ -45,13 +27,15 @@ namespace PokeStar.ConnectionInterface
          List<string> names = new List<string>();
          using (SqlConnection conn = GetConnection())
          {
-            string queryString = $@"select name from pokemon;";
+            string queryString = $@"SELECT Name 
+                                    FROM Pokemon
+                                    WHERE Name<>'{Global.DUMMY_POKE_NAME}';";
             conn.Open();
             using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
                {
-                  names.Add(Convert.ToString(reader["name"]));
+                  names.Add(Convert.ToString(reader["Name"]));
                }
             }
             conn.Close();
@@ -68,18 +52,59 @@ namespace PokeStar.ConnectionInterface
          List<string> names = new List<string>();
          using (SqlConnection conn = GetConnection())
          {
-            string queryString = $@"select name from move;";
+            string queryString = $@"Select Name 
+                                    FROM Move;";
             conn.Open();
             using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
             {
                while (reader.Read())
                {
-                  names.Add(Convert.ToString(reader["name"]));
+                  names.Add(Convert.ToString(reader["Name"]));
                }
             }
             conn.Close();
          }
          return names;
+      }
+
+      /// <summary>
+      /// Gets list of Pokémon to use in counter sims.
+      /// </summary>
+      /// <returns>List of Pokémon to use.</returns>
+      public List<Pokemon> GetSimPokemon()
+      {
+         List<Pokemon> pokemon = new List<Pokemon>();
+         using (SqlConnection conn = GetConnection())
+         {
+            string queryString = $@"SELECT Number, Name, Type1, Type2, Attack, Defense, Stamina, IsShadow, IsReleased 
+                                    FROM Pokemon
+                                    ORDER BY Number;";
+            conn.Open();
+            using (SqlDataReader reader = new SqlCommand(queryString, conn).ExecuteReader())
+            {
+               while (reader.Read())
+               {
+                  Pokemon pkmn = new Pokemon
+                  {
+                     Number = Convert.ToInt32(reader["Number"]),
+                     Name = Convert.ToString(reader["Name"]),
+                     Attack = Convert.ToInt32(reader["Attack"]),
+                     Defense = Convert.ToInt32(reader["Defense"]),
+                     Stamina = Convert.ToInt32(reader["Stamina"]),
+                     Shadow = Convert.ToInt32(reader["IsShadow"]) == 1,
+                     Released = Convert.ToInt32(reader["IsReleased"]) == 1,
+                  };
+                  pkmn.Type.Add(Convert.ToString(reader["Type1"]));
+                  if (reader["Type2"].GetType() != typeof(DBNull))
+                  {
+                     pkmn.Type.Add(Convert.ToString(reader["Type2"]));
+                  }
+                  pokemon.Add(pkmn);
+               }
+            }
+            conn.Close();
+         }
+         return pokemon;
       }
 
       /// <summary>
@@ -91,8 +116,8 @@ namespace PokeStar.ConnectionInterface
       {
          Pokemon pokemon = null;
          string queryString = $@"SELECT *
-                                 FROM pokemon 
-                                 WHERE name='{pokemonName}';";
+                                 FROM Pokemon 
+                                 WHERE Name='{pokemonName}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -103,30 +128,30 @@ namespace PokeStar.ConnectionInterface
                {
                   pokemon = new Pokemon
                   {
-                     Number = Convert.ToInt32(reader["number"]),
-                     Name = Convert.ToString(reader["name"]),
-                     Description = Convert.ToString(reader["description"]),
-                     Attack = Convert.ToInt32(reader["attack"]),
-                     Defense = Convert.ToInt32(reader["defense"]),
-                     Stamina = Convert.ToInt32(reader["stamina"]),
-                     Region = Convert.ToString(reader["region"]),
-                     Category = Convert.ToString(reader["category"]),
-                     BuddyDistance = Convert.ToInt32(reader["buddy_distance"]),
-                     Shadow = Convert.ToInt32(reader["shadow"]) == TRUE,
-                     Shiny = Convert.ToInt32(reader["shiny"]) == TRUE,
-                     Obtainable = Convert.ToInt32(reader["obtainable"]) == TRUE,
-                     Regional = (reader["regional"].GetType() == typeof(DBNull))? null :Convert.ToString(reader["regional"]),
-                     CatchRate = Convert.ToDouble(reader["catch_rate"]),
-                     FleeRate = Convert.ToDouble(reader["flee_rate"]),
-                     SecondMoveCandy = Convert.ToInt32(reader["second_move_candy"]),
-                     SecondMoveStardust = Convert.ToInt32(reader["second_move_stardust"]),
-                     Height = Convert.ToDouble(reader["height"]),
-                     Weight = Convert.ToDouble(reader["weight"]),
+                     Number = Convert.ToInt32(reader["Number"]),
+                     Name = Convert.ToString(reader["Name"]),
+                     Description = Convert.ToString(reader["Description"]),
+                     Attack = Convert.ToInt32(reader["Attack"]),
+                     Defense = Convert.ToInt32(reader["Defense"]),
+                     Stamina = Convert.ToInt32(reader["Stamina"]),
+                     Region = Convert.ToString(reader["Region"]),
+                     Category = Convert.ToString(reader["Category"]),
+                     BuddyDistance = Convert.ToInt32(reader["BuddyDistance"]),
+                     Shadow = Convert.ToInt32(reader["IsShadow"]) == TRUE,
+                     Shiny = Convert.ToInt32(reader["IsShiny"]) == TRUE,
+                     Released = Convert.ToInt32(reader["IsReleased"]) == TRUE,
+                     Regional = (reader["Regional"].GetType() == typeof(DBNull)) ? null : Convert.ToString(reader["regional"]),
+                     CatchRate = Convert.ToDouble(reader["CatchRate"]),
+                     FleeRate = Convert.ToDouble(reader["FleeRate"]),
+                     SecondMoveCandy = Convert.ToInt32(reader["SecondMoveCandy"]),
+                     SecondMoveStardust = Convert.ToInt32(reader["SecondMoveStardust"]),
+                     Height = Convert.ToDouble(reader["Height"]),
+                     Weight = Convert.ToDouble(reader["Weight"]),
                   };
-                  pokemon.Type.Add(Convert.ToString(reader["type_1"]));
-                  if (reader["type_2"].GetType() != typeof(DBNull))
+                  pokemon.Type.Add(Convert.ToString(reader["Type1"]));
+                  if (reader["Type2"].GetType() != typeof(DBNull))
                   {
-                     pokemon.Type.Add(Convert.ToString(reader["type_2"]));
+                     pokemon.Type.Add(Convert.ToString(reader["Type2"]));
                   }
                }
             }
@@ -145,9 +170,9 @@ namespace PokeStar.ConnectionInterface
          List<string> pokemon = new List<string>();
          string order = (pokemonNumber == Global.ARCEUS_NUMBER || pokemonNumber == Global.UNOWN_NUMBER) ? "ORDER BY NEWID()" : "";
 
-         string queryString = $@"SELECT name 
-                                 FROM pokemon 
-                                 WHERE number={pokemonNumber}
+         string queryString = $@"SELECT Name 
+                                 FROM Pokemon 
+                                 WHERE Number={pokemonNumber}
                                  {order};";
 
          using (SqlConnection conn = GetConnection())
@@ -157,7 +182,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  pokemon.Add(Convert.ToString(reader["name"]));
+                  pokemon.Add(Convert.ToString(reader["Name"]));
                }
             }
             conn.Close();
@@ -173,10 +198,10 @@ namespace PokeStar.ConnectionInterface
       public List<string> GetWeather(List<string> types)
       {
          List<string> weather = new List<string>();
-         string queryString = $@"SELECT weather 
-                                 FROM weather 
-                                 WHERE {GetTypeWhere(types, "type")}
-                                 GROUP BY weather;";
+         string queryString = $@"SELECT Weather 
+                                 FROM Weather 
+                                 WHERE {GetTypeWhere(types, "Type")}
+                                 GROUP BY Weather;";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -185,9 +210,9 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  if (!weather.Contains(Convert.ToString(reader["weather"])))
+                  if (!weather.Contains(Convert.ToString(reader["Weather"])))
                   {
-                     weather.Add(Convert.ToString(reader["weather"]));
+                     weather.Add(Convert.ToString(reader["Weather"]));
                   }
                }
             }
@@ -204,15 +229,15 @@ namespace PokeStar.ConnectionInterface
       public Dictionary<string, int> GetTypeDefenseRelations(List<string> types)
       {
          Dictionary<string, int> relations = new Dictionary<string, int>();
-         string queryString = $@"SELECT attacker, SUM(modifier) AS total_relation 
+         string queryString = $@"SELECT Attacker, SUM(Modifier) AS TotalRelation 
                                  FROM (
-                                 SELECT attacker, modifier
-                                 FROM type_match_up
-                                 WHERE {GetTypeWhere(types, "defender")}
-                                 ) AS relations
-                                 GROUP BY attacker
-                                 HAVING SUM(modifier) <> 0
-                                 ORDER BY total_relation;";
+                                 SELECT Attacker, Modifier
+                                 FROM TypeMatchUp
+                                 WHERE {GetTypeWhere(types, "Defender")}
+                                 ) AS Relations
+                                 GROUP BY Attacker
+                                 HAVING SUM(Modifier) <> 0
+                                 ORDER BY TotalRelation;";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -221,7 +246,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  relations.Add(Convert.ToString(reader["attacker"]), Convert.ToInt32(reader["total_relation"]));
+                  relations.Add(Convert.ToString(reader["Attacker"]), Convert.ToInt32(reader["TotalRelation"]));
                }
             }
             conn.Close();
@@ -237,10 +262,10 @@ namespace PokeStar.ConnectionInterface
       public Dictionary<string, int> GetTypeAttackRelations(string type)
       {
          Dictionary<string, int> relations = new Dictionary<string, int>();
-         string queryString = $@"SELECT defender, modifier
-                                 FROM type_match_up
-                                 WHERE attacker = '{type}'
-                                 ORDER BY modifier;";
+         string queryString = $@"SELECT Defender, Modifier
+                                 FROM TypeMatchUp
+                                 WHERE Attacker='{type}'
+                                 ORDER BY Modifier;";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -249,7 +274,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  relations.Add(Convert.ToString(reader["defender"]), Convert.ToInt32(reader["modifier"]));
+                  relations.Add(Convert.ToString(reader["Defender"]), Convert.ToInt32(reader["Modifier"]));
                }
             }
             conn.Close();
@@ -264,27 +289,16 @@ namespace PokeStar.ConnectionInterface
       /// <param name="category">Category of moves.</param>
       /// <param name="shadowable">Is the Pokémon shadowable.</param>
       /// <returns>List of moves of the Pokémon.</returns>
-      public List<PokemonMove> GetPokemonMoves(string pokemonName, string category, bool shadowable = false)
+      public List<Move> GetPokemonMoves(string pokemonName, string category, bool shadowable = false)
       {
-         List<PokemonMove> moves = new List<PokemonMove>();
+         List<Move> moves = new List<Move>();
 
-         var index = pokemonName.IndexOf(' ');
-         var name = pokemonName;
-         if (index != -1 && pokemonName.Substring(0, index).Equals(Global.MEGA_TAG, StringComparison.OrdinalIgnoreCase))
-         {
-            name = pokemonName.Substring(index);
-            if (pokemonName.Split(' ').Length == Global.MAX_LEN_MEGA)
-            {
-               name = name.TrimEnd(name[name.Length - 1]);
-            }
-         }
-
-         string queryString = $@"SELECT name, type, is_legacy
-                                 FROM pokemon_move
-                                 INNER JOIN move 
-                                 ON pokemon_move.move=move.name
-                                 WHERE pokemon='{name.Trim()}'
-                                 AND category='{category}';";
+         string queryString = $@"SELECT Name, Type, IsLegacy
+                                 FROM MoveSet
+                                 INNER JOIN Move 
+                                 ON MoveSet.Move=Move.Name
+                                 WHERE Pokemon='{GetMegaBase(pokemonName)}'
+                                 AND Category='{category}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -293,11 +307,11 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  moves.Add(new PokemonMove
+                  moves.Add(new Move
                   {
-                     Name = Convert.ToString(reader["name"]),
-                     Type = Convert.ToString(reader["type"]),
-                     IsLegacy = Convert.ToInt32(reader["is_legacy"]) == TRUE
+                     Name = Convert.ToString(reader["Name"]),
+                     Type = Convert.ToString(reader["Type"]),
+                     IsLegacy = Convert.ToInt32(reader["IsLegacy"]) == TRUE
                   });
                }
             }
@@ -305,7 +319,7 @@ namespace PokeStar.ConnectionInterface
          }
          if (shadowable && category.Equals(Global.CHARGE_MOVE_CATEGORY, StringComparison.OrdinalIgnoreCase))
          {
-            moves.AddRange(ShadowMoves);
+            moves.AddRange(Global.SHADOW_MOVES);
          }
          return moves;
       }
@@ -315,17 +329,15 @@ namespace PokeStar.ConnectionInterface
       /// </summary>
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <returns>List of counters to a Pokémon.</returns>
-      public List<Counter> GetCounters(string pokemonName)
+      public List<Counter> GetCounters(string pokemonName, bool IsSpecial)
       {
          List<Counter> counters = new List<Counter>();
-         int numCounters = 6;
-         string queryString = $@"SELECT TOP {numCounters} counter, type_1, type_2, fastAttack, chargeAttack
-                                 FROM pokemon_counter 
-                                 INNER JOIN pokemon
-                                 ON pokemon_counter.counter = pokemon.name
-                                 WHERE pokemon = '{pokemonName}' 
-                                 AND obtainable = 1
-                                 ORDER BY rank;";
+         int special = IsSpecial ? TRUE : FALSE;
+         string queryString = $@"SELECT Counter, Fast, Charge, Value
+                                 FROM Counter
+                                 WHERE Pokemon='{pokemonName}' 
+                                 AND IsSpecial = {special}
+                                 ORDER BY Value DESC, Counter;";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -334,11 +346,13 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
+                  string name = Convert.ToString(reader["Counter"]);
                   Counter counter = new Counter
                   {
-                     Name = Convert.ToString(reader["counter"]),
-                     FastAttack = new PokemonMove { Name = Convert.ToString(reader["fastAttack"]) },
-                     ChargeAttack = new PokemonMove { Name = Convert.ToString(reader["chargeAttack"]) },
+                     Name = name.Contains($"{Global.MEGA_TAG} ") || !IsSpecial ? name : $"{Global.SHADOW_TAG} {name}",
+                     FastAttack = new Move { Name = Convert.ToString(reader["Fast"]) },
+                     ChargeAttack = new Move { Name = Convert.ToString(reader["Charge"]) },
+                     Rating = Convert.ToDouble(reader["value"])
                   };
                   counters.Add(counter);
                }
@@ -354,15 +368,15 @@ namespace PokeStar.ConnectionInterface
       /// <param name="pokemonName">Name of the Pokémon.</param>
       /// <param name="moveName">Name of the move.</param>
       /// <returns>Move that the pokemon can learn, otherwise null.</returns>
-      public PokemonMove GetPokemonMove(string pokemonName, string moveName)
+      public Move GetPokemonMove(string pokemonName, string moveName)
       {
-         PokemonMove move = null;
-         string queryString = $@"SELECT move, type, is_legacy
-                                 FROM pokemon_move
-                                 INNER JOIN move
-                                 ON pokemon_move.move = move.name
-                                 WHERE pokemon = '{pokemonName}' 
-                                 AND move = '{moveName}';";
+         Move move = null;
+         string queryString = $@"SELECT Move, Type, IsLegacy
+                                 FROM MoveSet
+                                 INNER JOIN Move
+                                 ON MoveSet.Move=Move.Name
+                                 WHERE Pokemon='{GetMegaBase(pokemonName)}' 
+                                 AND Move='{moveName}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -371,11 +385,11 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  move = new PokemonMove
+                  move = new Move
                   {
-                     Name = Convert.ToString(reader["move"]),
-                     Type = Convert.ToString(reader["type"]),
-                     IsLegacy = Convert.ToInt32(reader["is_legacy"]) == TRUE,
+                     Name = Convert.ToString(reader["Move"]),
+                     Type = Convert.ToString(reader["Type"]),
+                     IsLegacy = Convert.ToInt32(reader["IsLegacy"]) == TRUE,
                   };
                }
             }
@@ -393,8 +407,8 @@ namespace PokeStar.ConnectionInterface
       {
          Move move = null;
          string queryString = $@"SELECT *
-                                 FROM move 
-                                 WHERE name='{moveName}';";
+                                 FROM Move 
+                                 WHERE Name='{moveName}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -405,17 +419,22 @@ namespace PokeStar.ConnectionInterface
                {
                   move = new Move
                   {
-                     Name = Convert.ToString(reader["name"]),
-                     Type = Convert.ToString(reader["type"]),
-                     Category = Convert.ToString(reader["category"]),
-                     PvEPower = Convert.ToInt32(reader["power"]),
-                     PvEEnergy = Convert.ToInt32(reader["energy"]),
-                     PvPPower = Convert.ToInt32(reader["pvp_power"]),
-                     PvPEnergy = Convert.ToInt32(reader["pvp_energy"]),
-                     PvPTurns = Convert.ToInt32(reader["pvp_turns"]),
-                     Cooldown = Convert.ToInt32(reader["cooldown"]),
-                     DamageWindowStart = Convert.ToInt32(reader["damage_window_start"]),
-                     DamageWindowEnd = Convert.ToInt32(reader["damage_window_end"])
+                     Name = Convert.ToString(reader["Name"]),
+                     Type = Convert.ToString(reader["Type"]),
+                     Category = Convert.ToString(reader["Category"]),
+                     PvEPower = Convert.ToInt32(reader["PvePower"]),
+                     PvEEnergy = Convert.ToInt32(reader["PveEnergy"]),
+                     PvPPower = Convert.ToInt32(reader["PvpPower"]),
+                     PvPEnergy = Convert.ToInt32(reader["PvpEnergy"]),
+                     PvPTurns = Convert.ToInt32(reader["PvpTurns"]),
+                     Cooldown = Convert.ToInt32(reader["PveCooldown"]),
+                     DamageWindowStart = Convert.ToInt32(reader["PveDmgWinStart"]),
+                     DamageWindowEnd = Convert.ToInt32(reader["PveDmgWinEnd"]),
+                     AttackerAtk = Convert.ToInt32(reader["AttackerAtk"]),
+                     AttackerDef = Convert.ToInt32(reader["AttackerDef"]),
+                     TargetAtk = Convert.ToInt32(reader["TargetAtk"]),
+                     TargetDef = Convert.ToInt32(reader["TargetDef"]),
+                     BuffChance = Convert.ToDouble(reader["BuffChance"]),
                   };
                }
             }
@@ -425,17 +444,16 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Gets all Pokémon with a given move.
-      /// PokemonMove is used to track legacy moves.
+      /// Gets the number of Pokémon with a given move.
       /// </summary>
       /// <param name="moveName">Name of the move.</param>
-      /// <returns>List of Pokémon that learn the move.</returns>
-      public List<PokemonMove> GetPokemonWithMove(string moveName)
+      /// <returns>Number of Pokémon that learn the move.</returns>
+      public int GetPokemonWithMove(string moveName)
       {
-         List<PokemonMove> pokemon = new List<PokemonMove>();
-         string queryString = $@"SELECT * 
-                                 FROM pokemon_move 
-                                 WHERE move = '{moveName}';";
+         int count = 0;
+         string queryString = $@"SELECT COUNT(*) as Count
+                                 FROM MoveSet 
+                                 WHERE Move='{moveName}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -444,16 +462,12 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  pokemon.Add(new PokemonMove
-                  {
-                     Name = Convert.ToString(reader["pokemon"]),
-                     IsLegacy = Convert.ToInt32(reader["is_legacy"]) == TRUE
-                  });
+                  count = Convert.ToInt32(reader["Count"]);
                }
             }
             conn.Close();
          }
-         return pokemon;
+         return count;
       }
 
       /// <summary>
@@ -465,11 +479,11 @@ namespace PokeStar.ConnectionInterface
       public List<string> GetMoveByType(string type, string category)
       {
          List<string> moves = new List<string>();
-         string queryString = $@"SELECT name
-                                 FROM move 
-                                 WHERE type = '{type}'
-                                 AND category = '{category}'
-                                 ORDER BY category DESC, name;";
+         string queryString = $@"SELECT Name
+                                 FROM Move 
+                                 WHERE Type='{type}'
+                                 AND Category='{category}'
+                                 ORDER BY Category DESC, Name;";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -478,7 +492,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  moves.Add(Convert.ToString(reader["name"]));
+                  moves.Add(Convert.ToString(reader["Name"]));
                }
             }
             conn.Close();
@@ -495,9 +509,9 @@ namespace PokeStar.ConnectionInterface
       {
          List<Evolution> evolutions = new List<Evolution>();
          string queryString = $@"SELECT * 
-                                 FROM evolution 
-                                 WHERE start_pokemon = '{pokemonName}' 
-                                 OR end_pokemon = '{pokemonName}';";
+                                 FROM Evolution 
+                                 WHERE StartPokemon='{pokemonName}' 
+                                 OR EndPokemon='{pokemonName}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -508,10 +522,10 @@ namespace PokeStar.ConnectionInterface
                {
                   evolutions.Add(new Evolution
                   {
-                     Start = Convert.ToString(reader["start_pokemon"]),
-                     End = Convert.ToString(reader["end_pokemon"]),
-                     Candy = Convert.ToInt32(reader["candy"]),
-                     Item = (reader["item"].GetType() == typeof(DBNull)) ? null : Convert.ToString(reader["item"])
+                     Start = Convert.ToString(reader["StartPokemon"]),
+                     End = Convert.ToString(reader["EndPokemon"]),
+                     Candy = Convert.ToInt32(reader["Candy"]),
+                     Item = (reader["Item"].GetType() == typeof(DBNull)) ? null : Convert.ToString(reader["Item"])
                   });
                }
             }
@@ -528,13 +542,13 @@ namespace PokeStar.ConnectionInterface
       public bool IsBaseForm(string pokemonName)
       {
          bool isBaseForm = false;
-         string queryString = $@"SELECT COUNT(*) AS base_form
-                                 FROM evolution
-                                 WHERE (start_pokemon = '{pokemonName}'
-                                 OR end_pokemon = '{pokemonName}')
+         string queryString = $@"SELECT COUNT(*) AS Base
+                                 FROM Evolution
+                                 WHERE (StartPokemon='{pokemonName}'
+                                 OR EndPokemon='{pokemonName}')
                                  AND '{pokemonName}' NOT IN (
-                                 SELECT end_pokemon
-                                 FROM evolution);";
+                                 SELECT EndPokemon
+                                 FROM Evolution);";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -543,7 +557,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  isBaseForm = Convert.ToInt32(reader["base_form"]) == TRUE;
+                  isBaseForm = Convert.ToInt32(reader["Base"]) == TRUE;
                }
             }
             conn.Close();
@@ -560,9 +574,9 @@ namespace PokeStar.ConnectionInterface
       {
          List<string> formList = new List<string>();
          string default_form = null;
-         string queryString = $@"SELECT form_tag, is_default
-                                 FROM form 
-                                 WHERE pokemon = '{pokemonName}';";
+         string queryString = $@"SELECT Tag, IsDefault
+                                 FROM Form 
+                                 WHERE Base='{pokemonName}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -571,10 +585,10 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  formList.Add(Convert.ToString(reader["form_tag"]));
-                  if (Convert.ToInt32(reader["is_default"]) == TRUE)
+                  formList.Add(Convert.ToString(reader["tag"]));
+                  if (Convert.ToInt32(reader["IsDefault"]) == TRUE)
                   {
-                     default_form = Convert.ToString(reader["form_tag"]);
+                     default_form = Convert.ToString(reader["tag"]);
                   }
                }
             }
@@ -590,9 +604,9 @@ namespace PokeStar.ConnectionInterface
       public List<string> GetPokemonWithTags()
       {
          List<string> pokemon = new List<string>();
-         string queryString = $@"SELECT pokemon 
-                                 FROM form 
-                                 GROUP BY pokemon;";
+         string queryString = $@"SELECT Base 
+                                 FROM Form 
+                                 GROUP BY Base;";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -601,7 +615,7 @@ namespace PokeStar.ConnectionInterface
             {
                while (reader.Read())
                {
-                  pokemon.Add(Convert.ToString(reader["pokemon"]));
+                  pokemon.Add(Convert.ToString(reader["Base"]));
                }
             }
             conn.Close();
@@ -623,9 +637,9 @@ namespace PokeStar.ConnectionInterface
             return;
          }
 
-         string queryString = $@"UPDATE pokemon 
-                                 SET {attribute} = {value}
-                                 WHERE name = '{pokemonName}';";
+         string queryString = $@"UPDATE Pokemon 
+                                 SET {attribute}={value}
+                                 WHERE Name='{pokemonName}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -643,12 +657,75 @@ namespace PokeStar.ConnectionInterface
       /// <param name="isLegacy">Is the move a legacy move.</param>
       public void SetPokemonMove(string pokemonName, string moveName, int isLegacy)
       {
-         if (isLegacy != TRUE && isLegacy != FALSE)
+         if (isLegacy == TRUE || isLegacy == FALSE)
          {
-            return;
+            string queryString = $@"INSERT INTO MoveSet
+                                 VALUES ('{pokemonName}', '{moveName}', {isLegacy});";
+
+            using (SqlConnection conn = GetConnection())
+            {
+               conn.Open();
+               _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+               conn.Close();
+            }
          }
-         string queryString = $@"INSERT INTO pokemon_move (pokemon, move, is_legacy)
-                                 VALUES ('{pokemonName}', '{moveName}', {isLegacy})";
+      }
+
+      /// <summary>
+      /// Update the legacy status of a move for a Pokémon.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="moveName">Name of the move.</param>
+      /// <param name="isLegacy">Is the move a legacy move.</param>
+      public void UpdatePokemonMove(string pokemonName, string moveName, int isLegacy)
+      {
+         if (isLegacy == TRUE || isLegacy == FALSE)
+         {
+            string queryString = $@"UPDATE MoveSet
+                                 SET IsLegacy={isLegacy}
+                                 WHERE Pokemon='{pokemonName}'
+                                 AND Move='{moveName}';";
+
+            using (SqlConnection conn = GetConnection())
+            {
+               conn.Open();
+               _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+               conn.Close();
+            }
+         }
+      }
+
+      /// <summary>
+      /// Add a counter to a Pokémon.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <param name="counterName">Name of the counter.</param>
+      /// <param name="fastName">Name of the counter's fast move.</param>
+      /// <param name="chargeName">Name of the counter's charge move.</param>
+      /// <param name="rating">Rating value of the counter.</param>
+      /// <param name="isSpecial">Is the counter a special counter.</param>
+      public void AddCounter(string pokemonName, string counterName, string fastName, string chargeName, double rating, bool isSpecial)
+      {
+         int special = isSpecial ? TRUE : FALSE;
+         string queryString = $@"INSERT INTO Counter
+                                 VALUES ('{pokemonName}', '{counterName}', '{fastName}', '{chargeName}', {rating}, {special})";
+
+         using (SqlConnection conn = GetConnection())
+         {
+            conn.Open();
+            _ = new SqlCommand(queryString, conn).ExecuteNonQuery();
+            conn.Close();
+         }
+      }
+
+      /// <summary>
+      /// Remove all counters for a Pokémon.
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      public void ClearPokemonCounters(string pokemonName)
+      {
+         string queryString = $@"DELETE FROM Counter
+                                 WHERE Pokemon='{pokemonName}';";
 
          using (SqlConnection conn = GetConnection())
          {
@@ -662,19 +739,39 @@ namespace PokeStar.ConnectionInterface
       /// Generates the where string for types.
       /// </summary>
       /// <param name="types">List of pokemon types.</param>
-      /// <param name="variable">Name of the variable to check.</param>
+      /// <param name="variableName">Name of the variable to check.</param>
       /// <returns>SQL where string for pokemon types.</returns>
-      private static string GetTypeWhere(List<string> types, string variable)
+      private static string GetTypeWhere(List<string> types, string variableName)
       {
          StringBuilder sb = new StringBuilder();
 
-         sb.Append($@"({variable}='{types[0]}'");
+         sb.Append($@"({variableName}='{types[0]}'");
          if (types.Count == 2)
          {
-            sb.Append($@" OR {variable}='{types[1]}'");
+            sb.Append($@" OR {variableName}='{types[1]}'");
          }
          sb.Append(')');
          return sb.ToString();
+      }
+
+      /// <summary>
+      /// Gets the base name of a Mega Pokémon
+      /// </summary>
+      /// <param name="pokemonName">Name of the Pokémon.</param>
+      /// <returns>Base name of the Mega Pokémon.</returns>
+      private static string GetMegaBase(string pokemonName)
+      {
+         int index = pokemonName.IndexOf(' ');
+         string name = pokemonName;
+         if (index != -1 && pokemonName.Substring(0, index).Equals(Global.MEGA_TAG, StringComparison.OrdinalIgnoreCase))
+         {
+            name = pokemonName.Substring(index);
+            if (pokemonName.Split(' ').Length == Global.MAX_LEN_MEGA)
+            {
+               name = name.TrimEnd(name[name.Length - 1]);
+            }
+         }
+         return name.Trim();
       }
    }
 }
