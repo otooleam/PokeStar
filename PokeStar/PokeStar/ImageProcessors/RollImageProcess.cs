@@ -60,9 +60,9 @@ namespace PokeStar.ImageProcessors
             if (plainText != null)
             {
                int nameEndIndex = Math.Min(plainText.IndexOf('\n'), plainText.IndexOf(' '));
+               string nickname = plainText.Substring(0, nameEndIndex);
                try
                {
-                  string nickname = plainText.Substring(0, nameEndIndex);
                   await user.ModifyAsync(x => { x.Nickname = nickname; });
 
                   await ResponseMessage.SendInfoMessage(context.Channel, $"{user.Username} now has the nickname {nickname}");
@@ -71,7 +71,7 @@ namespace PokeStar.ImageProcessors
                {
                   
                   Console.WriteLine(e.Message);
-                  await ResponseMessage.SendWarningMessage(context.Channel, "Roll image proccessing", $"Unable to set nickname for {user.Username}. Please set your nickname to your in game name in \"{context.Guild.Name}\"");
+                  await ResponseMessage.SendWarningMessage(context.Channel, "Roll image proccessing", $"Unable to set nickname for {user.Username} to {nickname}. Please set your nickname to your in game name in \"{context.Guild.Name}\"");
                }
             }
 
