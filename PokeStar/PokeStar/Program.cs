@@ -31,6 +31,8 @@ namespace PokeStar
 
       private bool loggingInProgress;
 
+      private Timer SilphUpdate;
+
       /// <summary>
       /// Main function for the system.
       /// Allows the system to run asyncronously.
@@ -107,7 +109,7 @@ namespace PokeStar
          client.Ready += HandleReady;
          client.JoinedGuild += HandleJoinGuild;
          client.LeftGuild += HandleLeftGuild;
-         Timer SilphUpdate = new Timer(async _ => await Connections.Instance().RunSilphUpdate(client.Guilds.ToList()), new AutoResetEvent(false), 0, 300000);
+         SilphUpdate = new Timer(async _ => await Connections.Instance().RunSilphUpdate(client.Guilds.ToList()), new AutoResetEvent(false), 0, 300000);
          return Task.CompletedTask;
       }
 
