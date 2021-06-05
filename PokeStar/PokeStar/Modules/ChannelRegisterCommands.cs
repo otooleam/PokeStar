@@ -49,7 +49,7 @@ namespace PokeStar.Modules
                await ResponseMessage.SendErrorMessage(Context.Channel, "register", "Raid Notifications must be the only registration in the channel.");
             }
             else if (Connections.Instance().CheckNotificationRegister(guild) &&
-                     !result.Value.RegistrationString.Equals(Global.REGISTER_STRING_NOTIFICATION.ToString(), StringComparison.OrdinalIgnoreCase))
+                     result.Value.RegistrationString.Contains(Global.REGISTER_STRING_NOTIFICATION.ToString()))
             {
                await ResponseMessage.SendErrorMessage(Context.Channel, "register", "Only one channel per server may be registerd for Raid Notifications.");
             }
