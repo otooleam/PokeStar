@@ -873,6 +873,7 @@ namespace PokeStar
       {
          [FULL_REGISTER_STRING] = FULL_REGISTER_STRING,
          ["ACCOUNT"]            = REGISTER_STRING_ACCOUNT.ToString(),
+         ["PROFILE"]            = REGISTER_STRING_ACCOUNT.ToString(),
          ["A"]                  = REGISTER_STRING_ACCOUNT.ToString(),
          ["POKEDEX"]            = REGISTER_STRING_DEX.ToString(),
          ["DEX"]                = REGISTER_STRING_DEX.ToString(),

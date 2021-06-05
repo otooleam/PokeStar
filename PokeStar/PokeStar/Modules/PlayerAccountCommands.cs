@@ -7,6 +7,7 @@ using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
 using PokeStar.DataModels;
+using PokeStar.PreConditions;
 using PokeStar.ConnectionInterface;
 
 namespace PokeStar.Modules
@@ -19,10 +20,12 @@ namespace PokeStar.Modules
       /// <param name="user">(Optional) See profile for this user Must be mentioned using @.</param>
       /// <returns>Completed Task.</returns>
       [Command("profile")]
+      [Alias("account")]
       [Summary("View current profile of a user.")]
       [Remarks("Leave blank to view your own profile.\n" +
                "Viewing other user's profiles will show \n" +
                "only friend code, referal code, and location.")]
+      [RegisterChannel('A')]
       public async Task Profile([Summary("(Optional) See profile for this user Must be mentioned using @.")] string user = null)
       {
          ulong accountId = user == null ? Context.User.Id : Context.Message.MentionedUsers.Count == 0 ? 0 : Context.Message.MentionedUsers.First().Id;
@@ -62,6 +65,7 @@ namespace PokeStar.Modules
       [Command("exp")]
       [Summary("Set your current total in game experiance.")]
       [Remarks("Does not take into account completion of level up quests.")]
+      [RegisterChannel('A')]
       public async Task Exp([Summary("Current total experiance points.")] uint totalExp)
       {
          SocketGuildUser user = (SocketGuildUser)Context.User;
@@ -78,6 +82,7 @@ namespace PokeStar.Modules
       [Command("level")]
       [Summary("Set your current in game trainer level.")]
       [Remarks("Experiance will be set to minimum needed for level.")]
+      [RegisterChannel('A')]
       public async Task Level([Summary("Current trainer level.")] int level)
       {
          if (level < 1 || level > Global.LEVEL_UP_EXP.Length)
@@ -101,6 +106,7 @@ namespace PokeStar.Modules
       [Command("trainer")]
       [Alias("friend")]
       [Summary("Set your trainer friend code.")]
+      [RegisterChannel('A')]
       public async Task Trainer([Summary("Twelve digit trainer code with or without spaces.")][Remainder] string code)
       {
          string trimCode = string.Concat(code.Where(c => !char.IsWhiteSpace(c)));
@@ -133,6 +139,7 @@ namespace PokeStar.Modules
       [Command("refer")]
       [Alias("referal")]
       [Summary("Set your trainer referal code.")]
+      [RegisterChannel('A')]
       public async Task Refer([Summary("Nine character referal code.")] string code)
       {
          if (code.Length != Global.REFERAL_CODE_LENGTH)
@@ -158,6 +165,7 @@ namespace PokeStar.Modules
       [Summary("Set the country you typically play in.")]
       [Remarks("Leave blank to clear saved location.\n" +
                "Please note some countries are not supported.")]
+      [RegisterChannel('A')]
       public async Task Country([Summary("(Optional) Country typically played in.")][Remainder] string location = null)
       {
          List<RegionInfo> regions = CultureInfo.GetCultures(CultureTypes.SpecificCultures).Select(culture => new RegionInfo(culture.LCID)).ToList();
