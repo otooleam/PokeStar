@@ -335,13 +335,24 @@ namespace PokeStar
       /// </summary>
       public static readonly string EMPTY_FIELD            = "-----";
 
+      // Profile values *******************************************************
+
+      /// <summary>
+      /// Length of a trainer's friend code.
+      /// </summary>
+      public static int FRIEND_CODE_LENGTH  = 12;
+
+      /// <summary>
+      /// Length of a trainer's referal code.
+      /// </summary>
+      public static int REFERAL_CODE_LENGTH = 9;
 
       // Level constents ******************************************************
 
       /// <summary>
       /// Player experiance requirement.
       /// </summary>
-      public static readonly int[] LEVEL_UP_EXP = {
+      public static readonly uint[] LEVEL_UP_EXP = {
          0       , 1000     , 3000     , 6000     , 10000    , 
          15000   , 21000    , 28000    , 36000    , 45000    , 
          55000   , 65000    , 75000    , 85000    , 100000   , 

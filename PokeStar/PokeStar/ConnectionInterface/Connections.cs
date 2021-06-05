@@ -28,8 +28,6 @@ namespace PokeStar.ConnectionInterface
       private Dictionary<int, List<string>> Eggs;
       private Dictionary<string, Rocket> Rockets;
 
-      private const int NumSuggestions = 10;
-
       /// <summary>
       /// Creates a new Connections object.
       /// Private to implement the singleton design patturn.
@@ -372,7 +370,7 @@ namespace PokeStar.ConnectionInterface
          List<KeyValuePair<string, double>> myList = fuzzy.ToList();
          myList.Sort((pair1, pair2) => pair2.Value.CompareTo(pair1.Value));
          fuzzy = myList.ToDictionary(x => x.Key, x => x.Value);
-         return fuzzy.Keys.Take(NumSuggestions).ToList();
+         return fuzzy.Keys.Take(Global.NUM_SELECTIONS).ToList();
       }
 
       /// <summary>
@@ -1153,6 +1151,73 @@ namespace PokeStar.ConnectionInterface
       public void DeletePOINickname(ulong guild, string nickname)
       {
          NONADBConnector.DeletePOINickname(guild, nickname);
+      }
+
+      /// <summary>
+      /// Gets a profile.
+      /// </summary>
+      /// <param name="account">Id of the account.</param>
+      /// <returns>Profile if one has been created, otherwise null.</returns>
+      public Profile GetProfile(ulong account)
+      {
+         return NONADBConnector.GetProfile(account);
+      }
+
+      /// <summary>
+      /// Creates an empty profile.
+      /// </summary>
+      /// <param name="account">Id of the account.</param>
+      public void CreateProfile(ulong account)
+      {
+         NONADBConnector.CreateProfile(account);
+      }
+
+      /// <summary>
+      /// Update the total experiance of a profie.
+      /// </summary>
+      /// <param name="account">Id of the account.</param>
+      /// <param name="exp">Total experiance.</param>
+      public void UpdateProfileExp(ulong account, uint exp)
+      {
+         NONADBConnector.UpdateProfileExp(account, exp);
+      }
+
+      /// <summary>
+      /// Update friend code of a profile.
+      /// </summary>
+      /// <param name="account">Id of the account.</param>
+      /// <param name="code">Friend code.</param>
+      public void UpdateProfileCode(ulong account, long code)
+      {
+         NONADBConnector.UpdateFriendCode(account, code);
+      }
+
+      /// <summary>
+      /// Update the referal code of a profile.
+      /// </summary>
+      /// <param name="account">Id of the account.</param>
+      /// <param name="code">Referal Code.</param>
+      public void UpdateProfileCode(ulong account, string code)
+      {
+         NONADBConnector.UpdateReferalCode(account, code);
+      }
+
+      /// <summary>
+      /// Update the location of a profile.
+      /// Sending a null or empty country will clear the value from the profile.
+      /// </summary>
+      /// <param name="account">Id of the account.</param>
+      /// <param name="country">Country name.</param>
+      public void UpdateProfileCountry(ulong account, string country)
+      {
+         if (string.IsNullOrEmpty(country))
+         {
+            NONADBConnector.ClearLocation(account);
+         }
+         else
+         {
+            NONADBConnector.UpdateLocation(account, country);
+         }
       }
    }
 }

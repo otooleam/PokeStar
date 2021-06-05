@@ -25,11 +25,13 @@ namespace PokeStar
       private static DiscordSocketClient client;
       private static CommandService commands;
       private static IServiceProvider services;
-      
+
       private readonly int SizeMessageCashe = 100;
       private readonly LogSeverity DefaultLogLevel = LogSeverity.Info;
 
       private bool loggingInProgress;
+
+      private static Timer SilphUpdate;
 
       /// <summary>
       /// Main function for the system.
@@ -65,8 +67,7 @@ namespace PokeStar
          DiscordSocketConfig clientConfig = new DiscordSocketConfig
          {
             MessageCacheSize = SizeMessageCashe,
-            LogLevel = Global.LOG_LEVEL,
-            ExclusiveBulkDelete = true
+            LogLevel = Global.LOG_LEVEL
          };
          client = new DiscordSocketClient(clientConfig);
          CommandServiceConfig commandConfig = new CommandServiceConfig
@@ -107,7 +108,7 @@ namespace PokeStar
          client.Ready += HandleReady;
          client.JoinedGuild += HandleJoinGuild;
          client.LeftGuild += HandleLeftGuild;
-         Timer SilphUpdate = new Timer(async _ => await Connections.Instance().RunSilphUpdate(client.Guilds.ToList()), new AutoResetEvent(false), 0, 300000);
+         SilphUpdate = new Timer(async _ => await Connections.Instance().RunSilphUpdate(client.Guilds.ToList()), new AutoResetEvent(false), 0, 300000);
          return Task.CompletedTask;
       }
 
@@ -142,8 +143,8 @@ namespace PokeStar
       /// <returns>Task Complete.</returns>
       private async Task<Task> HandleCommandAsync(SocketMessage cmdMessage)
       {
-         if (!(cmdMessage is SocketUserMessage message) || 
-             (message.Author.IsBot && 
+         if (!(cmdMessage is SocketUserMessage message) ||
+             (message.Author.IsBot &&
              (!Global.USE_NONA_TEST || !message.Author.Username.Equals("NonaTest", StringComparison.OrdinalIgnoreCase)))
              || cmdMessage.Channel is IPrivateChannel)
          {
@@ -185,15 +186,14 @@ namespace PokeStar
       /// <param name="reaction">Reaction made on the message.</param>
       /// <returns>Task Complete.</returns>
       private async Task<Task> HandleReactionAdded(Cacheable<IUserMessage, ulong> cachedMessage,
-          ISocketMessageChannel originChannel, SocketReaction reaction)
+          Cacheable<IMessageChannel, ulong> originChannel, SocketReaction reaction)
       {
-         IMessage message = await originChannel.GetMessageAsync(cachedMessage.Id);
+         IMessage message = await reaction.Channel.GetMessageAsync(cachedMessage.Id);
 
          SocketGuildChannel chnl = message.Channel as SocketGuildChannel;
          ulong guild = chnl.Guild.Id;
 
          IUser user = reaction.User.Value;
-
 
          if (message != null && reaction.User.IsSpecified && !user.IsBot)
          {
@@ -305,7 +305,7 @@ namespace PokeStar
             Global.NUM_EMOJIS.Add(Emote.Parse(
                server.Emotes.FirstOrDefault(
                   x => x.Name.Equals(
-                     Global.NUM_EMOJI_NAMES[emote], 
+                     Global.NUM_EMOJI_NAMES[emote],
                      StringComparison.OrdinalIgnoreCase)
                   ).ToString()));
          }
