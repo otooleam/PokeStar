@@ -948,6 +948,11 @@ namespace PokeStar
       /// </summary>
       public static readonly Color ROLE_COLOR_INSTINCT = new Color(241, 196, 15);
 
+      /// <summary>
+      /// Raid role color.
+      /// </summary>
+      public static readonly Color ROLE_COLOR_RAID     = new Color(235, 52, 204);
+
       // Image processing *****************************************************
 
       /// <summary>

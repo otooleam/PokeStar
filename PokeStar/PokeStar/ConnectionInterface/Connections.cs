@@ -253,33 +253,37 @@ namespace PokeStar.ConnectionInterface
       }
 
       /// <summary>
-      /// Handles a reaction on a raid notification message.
+      /// Handles a reaction added to a raid notification message.
       /// </summary>
-      /// <param name="message">Message that was reacted on.</param>
       /// <param name="reaction">Reaction that was sent.</param>
       /// <param name="guild">Guild the reaction was made in.</param>
       /// <returns>Completed Task.</returns>
-      public static async Task NotifyMessageReactionHandle(IMessage message, SocketReaction reaction, SocketGuild guild)
+      public static async Task NotifyMessageReactionAddedHandle(SocketReaction reaction, SocketGuild guild)
       {
          SocketRole role = guild.Roles.FirstOrDefault(x => x.Name.Equals(reaction.Emote.Name, StringComparison.OrdinalIgnoreCase));
 
          if (role != null)
          {
             SocketGuildUser user = guild.Users.FirstOrDefault(x => x.Id == reaction.User.Value.Id);
-
-            SocketRole currentRole = user.Roles.FirstOrDefault(x => x.Name.Equals(reaction.Emote.Name, StringComparison.OrdinalIgnoreCase));
-
-            if (currentRole == null)
-            {
-               await user.AddRoleAsync(role);
-            }
-            else
-            {
-               await user.RemoveRoleAsync(role);
-            }
+            await user.AddRoleAsync(role);
          }
+      }
 
-         await message.RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
+      /// <summary>
+      /// Handles a reaction removed to a raid notification message.
+      /// </summary>
+      /// <param name="reaction">Reaction that was sent.</param>
+      /// <param name="guild">Guild the reaction was made in.</param>
+      /// <returns>Completed Task.</returns>
+      public static async Task NotifyMessageReactionRemovedHandle(SocketReaction reaction, SocketGuild guild)
+      {
+         SocketRole role = guild.Roles.FirstOrDefault(x => x.Name.Equals(reaction.Emote.Name, StringComparison.OrdinalIgnoreCase));
+
+         if (role != null)
+         {
+            SocketGuildUser user = guild.Users.FirstOrDefault(x => x.Id == reaction.User.Value.Id);
+            await user.RemoveRoleAsync(role);
+         }
       }
 
       /// <summary>
@@ -293,7 +297,7 @@ namespace PokeStar.ConnectionInterface
       {
          foreach (GuildEmote emote in emotes)
          {
-            await guild.CreateRoleAsync(emote.Name, null, null, false, true, null);
+            await guild.CreateRoleAsync(emote.Name, null, Global.ROLE_COLOR_RAID, false, true, null);
          }
 
          IUserMessage message = await ResponseMessage.SendInfoMessage(channel,
@@ -302,7 +306,7 @@ namespace PokeStar.ConnectionInterface
             "If you no longer wish to be notified for a boss, re-react for the desired boss.");
          message.AddReactionsAsync(emotes);
 
-         Connections.Instance().UpdateNotificationMessage(guild.Id, channel.Id, message.Id);
+         Instance().UpdateNotificationMessage(guild.Id, channel.Id, message.Id);
       }
 
       /// <summary>
@@ -316,7 +320,7 @@ namespace PokeStar.ConnectionInterface
       {
          foreach (GuildEmote emote in emotes)
          {
-            SocketRole role = guild.Roles.FirstOrDefault(x => x.Name.Equals(emote.Name, StringComparison.OrdinalIgnoreCase));
+            SocketRole role = guild.Roles.FirstOrDefault(x => x.Color.Equals(Global.ROLE_COLOR_RAID));
             if (role != null)
             {
                await role.DeleteAsync();
