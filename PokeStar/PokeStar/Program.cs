@@ -67,8 +67,7 @@ namespace PokeStar
          DiscordSocketConfig clientConfig = new DiscordSocketConfig
          {
             MessageCacheSize = SizeMessageCashe,
-            LogLevel = Global.LOG_LEVEL,
-            ExclusiveBulkDelete = true
+            LogLevel = Global.LOG_LEVEL
          };
          client = new DiscordSocketClient(clientConfig);
          CommandServiceConfig commandConfig = new CommandServiceConfig
@@ -187,9 +186,9 @@ namespace PokeStar
       /// <param name="reaction">Reaction made on the message.</param>
       /// <returns>Task Complete.</returns>
       private async Task<Task> HandleReactionAdded(Cacheable<IUserMessage, ulong> cachedMessage,
-          ISocketMessageChannel originChannel, SocketReaction reaction)
+          Cacheable<IMessageChannel, ulong> originChannel, SocketReaction reaction)
       {
-         IMessage message = await originChannel.GetMessageAsync(cachedMessage.Id);
+         IMessage message = await reaction.Channel.GetMessageAsync(cachedMessage.Id);
 
          SocketGuildChannel chnl = message.Channel as SocketGuildChannel;
          ulong guild = chnl.Guild.Id;
