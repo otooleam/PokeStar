@@ -71,8 +71,9 @@ namespace PokeStar.Modules
                      parent.BossEditingPlayer = author;
                   }
                   parent.SelectionTier = calcTier;
+                  int selectType = parent.AllBosses[calcTier].Count > Global.SELECTION_EMOJIS.Length ? (int)SELECTION_TYPES.PAGE_EDIT : (int)SELECTION_TYPES.STANDARD_EDIT;
                   RestUserMessage bossMsg = await Context.Channel.SendMessageAsync(text: $"{author.Mention}",
-                     embed: BuildBossSelectEmbed(parent.AllBosses[calcTier], null, true));
+                     embed: BuildBossSelectEmbed(parent.AllBosses[calcTier], selectType, parent.BossPage, null));
                   subMessages.Add(bossMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.EDIT_BOSS_SUB_MESSAGE, raidMessage.Id));
                   IEmote[] emotes = Global.SELECTION_EMOJIS.Take(parent.AllBosses[calcTier].Count).ToArray();
                   bossMsg.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());

@@ -52,11 +52,15 @@ namespace PokeStar.Modules
                AllBosses = allBosses
             };
 
+            int selectType = allBosses[calcTier].Count > Global.SELECTION_EMOJIS.Length ? (int)SELECTION_TYPES.PAGE : (int)SELECTION_TYPES.STANDARD;
+
             Connections.CopyFile(fileName);
-            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, selectType, raid.BossPage, fileName));
             raidMessages.Add(selectMsg.Id, raid);
             Connections.DeleteFile(fileName);
-            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
+            List<IEmote> select = new List<IEmote>(Global.SELECTION_EMOJIS.Take(potentials.Count));
+            List<IEmote> extras = allBosses[calcTier].Count > Global.SELECTION_EMOJIS.Length ? new List<IEmote>(extraEmojis.Take(2)) : new List<IEmote>();
+            selectMsg.AddReactionsAsync(extras.Concat(select).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -85,7 +89,7 @@ namespace PokeStar.Modules
             Connections.CopyFile(fileName);
             RestUserMessage raidMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
             raidMessages.Add(raidMsg.Id, raid);
-            Connections.DeleteFile(fileName);            
+            Connections.DeleteFile(fileName);
             SetEmojis(raidMsg, raidEmojis);
          }
          else
@@ -131,11 +135,15 @@ namespace PokeStar.Modules
                AllBosses = allBosses
             };
 
+            int selectType = allBosses[calcTier].Count > Global.SELECTION_EMOJIS.Length ? (int)SELECTION_TYPES.PAGE : (int)SELECTION_TYPES.STANDARD;
+
             Connections.CopyFile(fileName);
-            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, selectType, raid.BossPage, fileName));
             raidMessages.Add(selectMsg.Id, raid);
-            Connections.DeleteFile(fileName);
-            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
+            Connections.DeleteFile(fileName); 
+            List<IEmote> select = new List<IEmote>(Global.SELECTION_EMOJIS.Take(potentials.Count));
+            List<IEmote> extras = allBosses[calcTier].Count > Global.SELECTION_EMOJIS.Length ? new List<IEmote>(extraEmojis.Take(2)) : new List<IEmote>();
+            selectMsg.AddReactionsAsync(extras.Concat(select).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -210,11 +218,15 @@ namespace PokeStar.Modules
                AllBosses = allBosses
             };
 
+            int selectType = allBosses[calcTier].Count > Global.SELECTION_EMOJIS.Length ? (int)SELECTION_TYPES.PAGE : (int)SELECTION_TYPES.STANDARD;
+
             Connections.CopyFile(fileName);
-            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, selectType, raid.BossPage, fileName));
             raidMessages.Add(selectMsg.Id, raid);
-            Connections.DeleteFile(fileName);
-            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
+            Connections.DeleteFile(fileName); 
+            List<IEmote> select = new List<IEmote>(Global.SELECTION_EMOJIS.Take(potentials.Count));
+            List<IEmote> extras = allBosses[calcTier].Count > Global.SELECTION_EMOJIS.Length ? new List<IEmote>(extraEmojis.Take(2)) : new List<IEmote>();
+            selectMsg.AddReactionsAsync(extras.Concat(select).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -289,11 +301,15 @@ namespace PokeStar.Modules
                AllBosses = allBosses
             };
 
+            int selectType = allBosses[calcTier].Count > Global.SELECTION_EMOJIS.Length ? (int)SELECTION_TYPES.PAGE : (int)SELECTION_TYPES.STANDARD;
+
             Connections.CopyFile(fileName);
-            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, selectType, raid.BossPage, fileName));
             raidMessages.Add(selectMsg.Id, raid);
             Connections.DeleteFile(fileName);
-            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
+            List<IEmote> select = new List<IEmote>(Global.SELECTION_EMOJIS.Take(potentials.Count));
+            List<IEmote> extras = allBosses[calcTier].Count > Global.SELECTION_EMOJIS.Length ? new List<IEmote>(extraEmojis.Take(2)) : new List<IEmote>();
+            selectMsg.AddReactionsAsync(extras.Concat(select).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -358,11 +374,15 @@ namespace PokeStar.Modules
          if (potentials.Count > 1)
          {
             fileName = $"Egg{calcTier}.png";
+            int selectType = allBosses[calcTier].Count > Global.SELECTION_EMOJIS.Length ? (int)SELECTION_TYPES.PAGE : (int)SELECTION_TYPES.STANDARD;
+
             Connections.CopyFile(fileName);
-            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, fileName));
+            RestUserMessage selectMsg = await Context.Channel.SendFileAsync(fileName, embed: BuildBossSelectEmbed(potentials, selectType, 0, fileName));
             guideMessages.Add(selectMsg.Id, potentials);
             Connections.DeleteFile(fileName);
-            selectMsg.AddReactionsAsync(Global.SELECTION_EMOJIS.Take(potentials.Count).ToArray());
+            List<IEmote> select = new List<IEmote>(Global.SELECTION_EMOJIS.Take(potentials.Count));
+            List<IEmote> extras = allBosses[calcTier].Count > Global.SELECTION_EMOJIS.Length ? new List<IEmote>(extraEmojis.Take(2)) : new List<IEmote>();
+            selectMsg.AddReactionsAsync(extras.Concat(select).ToArray());
          }
          else if (potentials.Count == 1)
          {
