@@ -44,7 +44,7 @@ namespace PokeStar.ModuleParents
       /// Saved raid guide messages.
       /// Elements are removed upon usage.
       /// </summary>
-      protected static readonly Dictionary<ulong, List<string>> guideMessages = new Dictionary<ulong, List<string>>();
+      protected static readonly Dictionary<ulong, RaidGuideSelect> guideMessages = new Dictionary<ulong, RaidGuideSelect>();
 
       // Emotes ***************************************************************
 
@@ -468,23 +468,61 @@ namespace PokeStar.ModuleParents
       /// <returns>Completed Task.</returns>
       public static async Task RaidGuideMessageReactionHandle(IMessage message, SocketReaction reaction)
       {
-         List<string> potentials = guideMessages[message.Id];
+         RaidGuideSelect guide = guideMessages[message.Id];
+         bool messageExists = true;
 
-         for (int i = 0; i < potentials.Count; i++)
+         if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]) && guide.Page > 0)
          {
-            if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[i]))
+            guideMessages[message.Id] = new RaidGuideSelect(guide.Page - 1, guide.Tier, guide.Bosses);
+            guide = guideMessages[message.Id];
+            string fileName = $"Egg{guide.Tier}.png";
+            int selectType = guide.Bosses.Count > Global.SELECTION_EMOJIS.Length ? (int)SELECTION_TYPES.PAGE : (int)SELECTION_TYPES.STANDARD;
+            Connections.CopyFile(fileName);
+            await ((SocketUserMessage)message).ModifyAsync(x =>
             {
-               guideMessages.Remove(message.Id);
-               message.DeleteAsync();
+               x.Embed = BuildBossSelectEmbed(guide.Bosses, selectType, guide.Page, fileName);
+            });
+            Connections.DeleteFile(fileName);
+         }
+         else if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]) &&
+                  guide.Bosses.Count > (guide.Page + 1) * Global.SELECTION_EMOJIS.Length)
+         {
+            guideMessages[message.Id] = new RaidGuideSelect(guide.Page + 1, guide.Tier, guide.Bosses);
+            guide = guideMessages[message.Id];
+            string fileName = $"Egg{guide.Tier}.png";
+            int selectType = guide.Bosses.Count > Global.SELECTION_EMOJIS.Length ? (int)SELECTION_TYPES.PAGE : (int)SELECTION_TYPES.STANDARD;
+            Connections.CopyFile(fileName);
+            await ((SocketUserMessage)message).ModifyAsync(x =>
+            {
+               x.Embed = BuildBossSelectEmbed(guide.Bosses, selectType, guide.Page, fileName);
+            });
+            Connections.DeleteFile(fileName);
+         }
+         else
+         {
+            int options = guide.Bosses.Skip(guide.Page * Global.SELECTION_EMOJIS.Length).Take(Global.SELECTION_EMOJIS.Length).ToList().Count;
+            for (int i = 0; i < options; i++)
+            {
+               if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[i]))
+               {
+                  guideMessages.Remove(message.Id);
+                  messageExists = false;
+                  message.DeleteAsync();
 
-               Pokemon pkmn = Connections.Instance().GetPokemon(potentials[i]);
-               Connections.Instance().GetRaidBoss(ref pkmn);
+                  Pokemon pkmn = Connections.Instance().GetPokemon(guide.Bosses[(guide.Page * Global.SELECTION_EMOJIS.Length) + i]);
+                  Connections.Instance().GetRaidBoss(ref pkmn);
 
-               string fileName = Connections.GetPokemonPicture(pkmn.Name);
-               Connections.CopyFile(fileName);
-               await reaction.Channel.SendFileAsync(fileName, embed: BuildRaidGuideEmbed(pkmn, fileName));
-               Connections.DeleteFile(fileName);
+                  string fileName = Connections.GetPokemonPicture(pkmn.Name);
+                  Connections.CopyFile(fileName);
+                  await reaction.Channel.SendFileAsync(fileName, embed: BuildRaidGuideEmbed(pkmn, fileName));
+                  Connections.DeleteFile(fileName);
+               }
             }
+         }
+
+         if (messageExists)
+         {
+            await ((SocketUserMessage)message).RemoveReactionAsync(reaction.Emote, (SocketGuildUser)reaction.User);
          }
       }
 
@@ -1219,8 +1257,11 @@ namespace PokeStar.ModuleParents
             sb.AppendLine($"{Global.SELECTION_EMOJIS[i]} {potentials[(page * Global.SELECTION_EMOJIS.Length) + i]}");
          }
 
+         EmbedBuilder embed = new EmbedBuilder();
+
          if (type == (int)SELECTION_TYPES.PAGE)
          {
+            embed.WithDescription($"Current Page: {page}");
             sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]} Next Page");
             sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]} Previous Page");
          }
@@ -1231,13 +1272,13 @@ namespace PokeStar.ModuleParents
          }
          else if (type == (int)SELECTION_TYPES.PAGE_EDIT)
          {
+            embed.WithDescription($"Current Page: {page}");
             sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]} Next Page");
             sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]} Previous Page");
             sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]} Change Tier");
             sb.AppendLine($"{extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]} Cancel");
          }
 
-         EmbedBuilder embed = new EmbedBuilder();
          embed.WithColor(Global.EMBED_COLOR_RAID_RESPONSE);
          embed.WithTitle($"Boss Selection");
          if (!string.IsNullOrEmpty(fileName))
