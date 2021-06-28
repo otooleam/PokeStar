@@ -75,8 +75,9 @@ namespace PokeStar.Modules
                   RestUserMessage bossMsg = await Context.Channel.SendMessageAsync(text: $"{author.Mention}",
                      embed: BuildBossSelectEmbed(parent.AllBosses[calcTier], selectType, parent.BossPage, null));
                   subMessages.Add(bossMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.EDIT_BOSS_SUB_MESSAGE, raidMessage.Id));
-                  IEmote[] emotes = Global.SELECTION_EMOJIS.Take(parent.AllBosses[calcTier].Count).ToArray();
-                  bossMsg.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
+                  bossMsg.AddReactionsAsync(new List<IEmote>(Global.SELECTION_EMOJIS.Take(parent.AllBosses[calcTier].Count)).ToArray()
+                     .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR])
+                     .Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
                }
             }
             else

@@ -364,6 +364,7 @@ namespace PokeStar.ModuleParents
                   if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[i]))
                   {
                      parent.UpdateBoss((parent.BossPage * Global.SELECTION_EMOJIS.Length) + i);
+                     parent.BossPage = 0;
                      messageExists = false;
                      await message.DeleteAsync();
                      raidMessages.Remove(message.Id);
@@ -1021,6 +1022,7 @@ namespace PokeStar.ModuleParents
          {
             if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]))
             {
+               parent.BossPage = 0;
                subMessages.Remove(message.Id);
                await message.DeleteAsync();
             }
@@ -1028,6 +1030,7 @@ namespace PokeStar.ModuleParents
             {
                if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]))
                {
+                  parent.BossPage = 0;
                   await message.RemoveAllReactionsAsync();
                   await ((SocketUserMessage)message).ModifyAsync(x =>
                   {
@@ -1035,13 +1038,40 @@ namespace PokeStar.ModuleParents
                   });
                   ((SocketUserMessage)message).AddReactionsAsync(tierEmojis.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
                }
+               else if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]) && parent.BossPage > 0)
+               {
+                  parent.BossPage--;
+                  string fileName = $"Egg{parent.Tier}.png";
+                  int selectType = parent.AllBosses[parent.Tier].Count > Global.SELECTION_EMOJIS.Length ? (int)SELECTION_TYPES.PAGE : (int)SELECTION_TYPES.STANDARD;
+                  Connections.CopyFile(fileName);
+                  await ((SocketUserMessage)message).ModifyAsync(x =>
+                  {
+                     x.Embed = BuildBossSelectEmbed(parent.AllBosses[parent.Tier], selectType, parent.BossPage, fileName);
+                  });
+                  Connections.DeleteFile(fileName);
+               }
+               else if (reaction.Emote.Equals(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]) &&
+                        parent.AllBosses[parent.Tier].Count > (parent.BossPage + 1) * Global.SELECTION_EMOJIS.Length)
+               {
+                  parent.BossPage++;
+                  string fileName = $"Egg{parent.Tier}.png";
+                  int selectType = parent.AllBosses[parent.Tier].Count > Global.SELECTION_EMOJIS.Length ? (int)SELECTION_TYPES.PAGE : (int)SELECTION_TYPES.STANDARD;
+                  Connections.CopyFile(fileName);
+                  await ((SocketUserMessage)message).ModifyAsync(x =>
+                  {
+                     x.Embed = BuildBossSelectEmbed(parent.AllBosses[parent.Tier], selectType, parent.BossPage, fileName);
+                  });
+                  Connections.DeleteFile(fileName);
+               }
                else
                {
-                  for (int i = 0; i < Global.SELECTION_EMOJIS.Length; i++)
+                  int options = parent.AllBosses[parent.Tier].Skip(parent.BossPage * Global.SELECTION_EMOJIS.Length).Take(Global.SELECTION_EMOJIS.Length).ToList().Count;
+                  for (int i = 0; i < options; i++)
                   {
                      if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[i]))
                      {
-                        parent.UpdateBoss(i);
+                        parent.UpdateBoss((parent.BossPage * Global.SELECTION_EMOJIS.Length) + i);
+                        parent.BossPage = 0;
                         SocketUserMessage msg = (SocketUserMessage)await reaction.Channel.GetMessageAsync(raidMessageId);
 
                         if (parent.IsSingleStop())
@@ -1108,8 +1138,9 @@ namespace PokeStar.ModuleParents
                {
                   x.Embed = BuildBossSelectEmbed(raidBosses, selectType, parent.BossPage, null);
                });
-               IEmote[] emotes = Global.SELECTION_EMOJIS.Take(raidBosses.Count).ToArray();
-               msg.AddReactionsAsync(emotes.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
+               msg.AddReactionsAsync(new List<IEmote>(Global.SELECTION_EMOJIS.Take(parent.AllBosses[parent.Tier].Count)).ToArray()
+                  .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR])
+                  .Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
             }
          }
       }
