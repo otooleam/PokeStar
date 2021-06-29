@@ -59,7 +59,7 @@ namespace PokeStar.Modules
             raidMessages.Add(selectMsg.Id, raid);
             Connections.DeleteFile(fileName);
             selectMsg.AddReactionsAsync(new List<IEmote>(Global.SELECTION_EMOJIS.Take(potentials.Count)).ToArray()
-               .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).ToArray());
+               .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -141,7 +141,7 @@ namespace PokeStar.Modules
             raidMessages.Add(selectMsg.Id, raid);
             Connections.DeleteFile(fileName);
             selectMsg.AddReactionsAsync(new List<IEmote>(Global.SELECTION_EMOJIS.Take(potentials.Count)).ToArray()
-               .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).ToArray());
+               .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -223,7 +223,7 @@ namespace PokeStar.Modules
             raidMessages.Add(selectMsg.Id, raid);
             Connections.DeleteFile(fileName);
             selectMsg.AddReactionsAsync(new List<IEmote>(Global.SELECTION_EMOJIS.Take(potentials.Count)).ToArray()
-               .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).ToArray());
+               .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -305,7 +305,7 @@ namespace PokeStar.Modules
             raidMessages.Add(selectMsg.Id, raid);
             Connections.DeleteFile(fileName);
             selectMsg.AddReactionsAsync(new List<IEmote>(Global.SELECTION_EMOJIS.Take(potentials.Count)).ToArray()
-               .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).ToArray());
+               .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).ToArray());
          }
          else if (potentials.Count == 1)
          {
@@ -377,7 +377,7 @@ namespace PokeStar.Modules
             guideMessages.Add(selectMsg.Id, new RaidGuideSelect(calcTier, potentials));
             Connections.DeleteFile(fileName);
             selectMsg.AddReactionsAsync(new List<IEmote>(Global.SELECTION_EMOJIS.Take(potentials.Count)).ToArray()
-               .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).ToArray());
+               .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).ToArray());
          }
          else if (potentials.Count == 1)
          {

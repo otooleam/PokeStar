@@ -76,7 +76,7 @@ namespace PokeStar.Modules
                      embed: BuildBossSelectEmbed(parent.AllBosses[calcTier], selectType, parent.BossPage, null));
                   subMessages.Add(bossMsg.Id, new RaidSubMessage((int)SUB_MESSAGE_TYPES.EDIT_BOSS_SUB_MESSAGE, raidMessage.Id));
                   bossMsg.AddReactionsAsync(new List<IEmote>(Global.SELECTION_EMOJIS.Take(parent.AllBosses[calcTier].Count)).ToArray()
-                     .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR])
+                     .Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.FORWARD_ARROR]).Prepend(extraEmojis[(int)EXTRA_EMOJI_INDEX.BACK_ARROW])
                      .Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CHANGE_TIER]).Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
                }
             }
@@ -437,6 +437,143 @@ namespace PokeStar.Modules
             }
             Connections.DeleteFile(fileName);
          }
+         await Context.Message.DeleteAsync();
+      }
+
+      /// <summary>
+      /// Handle cancel command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("cancel")]
+      [Summary("Cancel a raid sub message.")]
+      [Remarks("Must be a reply to a raid sub message.")]
+      [RegisterChannel('R')]
+      [RaidSubMessageReply()]
+      public async Task Cancel()
+      {
+         ulong subMessageId = Context.Message.Reference.MessageId.Value;
+         raidMessages[subMessages[subMessageId].MainMessageId].BossPage = 0;
+         await (await Context.Channel.GetMessageAsync(Context.Message.Reference.MessageId.Value)).DeleteAsync();
+         await Context.Message.DeleteAsync();
+      }
+
+      /// <summary>
+      /// Handle next command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("next")]
+      [Alias("nextPage", "nPage")]
+      [Summary("Move to next page of raid select message.")]
+      [Remarks("Must be a reply to a raid select message or raid edit message.")]
+      [RegisterChannel('R')]
+      [BossSelectReply()]
+      public async Task Next()
+      {
+         ulong selectMessageId = Context.Message.Reference.MessageId.Value;
+         RaidParent parent = raidMessages.ContainsKey(selectMessageId) ? raidMessages[selectMessageId] : raidMessages[subMessages[selectMessageId].MainMessageId];
+
+         if (parent.AllBosses[parent.SelectionTier].Count > (parent.BossPage + 1) * Global.SELECTION_EMOJIS.Length)
+         {
+            parent.BossPage++;
+            string fileName = $"Egg{parent.SelectionTier}.png";
+            bool messageType = IsRaidSelectMessage(Context.Message.Reference.MessageId.Value);
+            int selectType = parent.AllBosses[parent.SelectionTier].Count > Global.SELECTION_EMOJIS.Length ? messageType ? (int)SELECTION_TYPES.PAGE : (int)SELECTION_TYPES.PAGE_EDIT : messageType ? (int)SELECTION_TYPES.STANDARD : (int)SELECTION_TYPES.STANDARD_EDIT;
+            Connections.CopyFile(fileName);
+            await ((SocketUserMessage)await Context.Channel.GetMessageAsync(selectMessageId)).ModifyAsync(x =>
+            {
+               x.Embed = BuildBossSelectEmbed(parent.AllBosses[parent.SelectionTier], selectType, parent.BossPage, fileName);
+            });
+            Connections.DeleteFile(fileName);
+         }
+
+         await Context.Message.DeleteAsync();
+      }
+
+      /// <summary>
+      /// Handle previous command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("previous")]
+      [Alias("prev", "previousPage", "prevPage", "pPage")]
+      [Summary("Move to previous page of raid select message.")]
+      [Remarks("Must be a reply to a raid select message or raid edit message.")]
+      [RegisterChannel('R')]
+      [BossSelectReply()]
+      public async Task Previous()
+      {
+         ulong selectMessageId = Context.Message.Reference.MessageId.Value;
+         RaidParent parent = raidMessages.ContainsKey(selectMessageId) ? raidMessages[selectMessageId] : raidMessages[subMessages[selectMessageId].MainMessageId];
+
+         if (parent.BossPage > 0)
+         {
+            parent.BossPage--;
+            string fileName = $"Egg{parent.SelectionTier}.png";
+            bool messageType = IsRaidSelectMessage(Context.Message.Reference.MessageId.Value);
+            int selectType = parent.AllBosses[parent.SelectionTier].Count > Global.SELECTION_EMOJIS.Length ? messageType ? (int)SELECTION_TYPES.PAGE : (int)SELECTION_TYPES.PAGE_EDIT : messageType ? (int)SELECTION_TYPES.STANDARD : (int)SELECTION_TYPES.STANDARD_EDIT;
+            Connections.CopyFile(fileName);
+            await ((SocketUserMessage)await Context.Channel.GetMessageAsync(selectMessageId)).ModifyAsync(x =>
+            {
+               x.Embed = BuildBossSelectEmbed(parent.AllBosses[parent.SelectionTier], selectType, parent.BossPage, fileName);
+            });
+            Connections.DeleteFile(fileName);
+         }
+
+         await Context.Message.DeleteAsync();
+      }
+
+      /// <summary>
+      /// Handle select command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("select")]
+      [Summary("Select an option on a raid select message.")]
+      [Remarks("Must be a reply to a raid select message or raid edit message.")]
+      [RegisterChannel('R')]
+      [BossSelectReply()]
+      public async Task Select([Summary("Option to select.")] int selection)
+      {
+         ulong selectMessageId = Context.Message.Reference.MessageId.Value;
+         RaidParent parent = raidMessages.ContainsKey(selectMessageId) ? raidMessages[selectMessageId] : raidMessages[subMessages[selectMessageId].MainMessageId];
+         int pageMax = (parent.BossPage + 1) * Global.SELECTION_EMOJIS.Length;
+         if (selection > 0 && selection < (pageMax > parent.AllBosses[parent.SelectionTier].Count ? parent.AllBosses[parent.SelectionTier].Count - (pageMax - Global.SELECTION_EMOJIS.Length) : Global.SELECTION_EMOJIS.Length))
+         {
+            if (IsRaidSelectMessage(Context.Message.Reference.MessageId.Value))
+            {
+               await SelectBoss((SocketUserMessage)await Context.Channel.GetMessageAsync(selectMessageId), Context.Channel, parent, 
+                  (parent.BossPage * Global.SELECTION_EMOJIS.Length) + (selection - 1));
+            }
+            else
+            {
+
+            }
+         }
+
+         await Context.Message.DeleteAsync();
+      }
+
+      /// <summary>
+      /// Handle tier command.
+      /// </summary>
+      /// <returns>Completed Task.</returns>
+      [Command("tier")]
+      [Summary("Move to the select tier menu of a raid edit message.")]
+      [Remarks("Must be a reply to a raid edit message.")]
+      [RegisterChannel('R')]
+      [BossEditReply()]
+      public async Task Tier()
+      {
+         ulong editMessageId = Context.Message.Reference.MessageId.Value;
+         RaidParent parent = raidMessages[subMessages[editMessageId].MainMessageId];
+         var message = await Context.Channel.GetMessageAsync(Context.Message.Reference.MessageId.Value);
+
+         parent.BossPage = 0;
+         await message.RemoveAllReactionsAsync();
+         await ((SocketUserMessage)message).ModifyAsync(x =>
+         {
+            x.Embed = BuildTierSelectEmbed();
+         });
+         ((SocketUserMessage)message).AddReactionsAsync(tierEmojis.Append(extraEmojis[(int)EXTRA_EMOJI_INDEX.CANCEL]).ToArray());
+
          await Context.Message.DeleteAsync();
       }
    }

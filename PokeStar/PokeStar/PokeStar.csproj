@@ -232,8 +232,11 @@
     <Compile Include="DataModels\Counter.cs" />
     <Compile Include="Modules\SystemEditCommands.cs" />
     <Compile Include="Modules\TypeCommands.cs" />
+    <Compile Include="PreConditions\BossEditReplyAttribute.cs" />
     <Compile Include="PreConditions\CatchReplyAttribute.cs" />
     <Compile Include="PreConditions\NonaAdminAttribute.cs" />
+    <Compile Include="PreConditions\BossSelectReplyAttribute.cs" />
+    <Compile Include="PreConditions\RaidSubMessageReplyAttribute.cs" />
     <Compile Include="PreConditions\RegisterChannelAttribute.cs" />
     <Compile Include="PreConditions\RaidReplyAttribute.cs" />
     <Compile Include="Program.cs" />
