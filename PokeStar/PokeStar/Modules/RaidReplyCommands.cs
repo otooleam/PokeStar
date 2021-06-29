@@ -544,7 +544,9 @@ namespace PokeStar.Modules
             }
             else
             {
-
+               await EditBoss((SocketUserMessage)await Context.Channel.GetMessageAsync(selectMessageId), Context.Channel, parent,
+                  subMessages[selectMessageId].MainMessageId, (parent.BossPage * Global.SELECTION_EMOJIS.Length) + (selection - 1));
+               parent.BossEditingPlayer = null;
             }
          }
 

@@ -1048,38 +1048,7 @@ namespace PokeStar.ModuleParents
                   {
                      if (reaction.Emote.Equals(Global.SELECTION_EMOJIS[i]))
                      {
-                        parent.UpdateBoss((parent.BossPage * Global.SELECTION_EMOJIS.Length) + i);
-                        parent.BossPage = 0;
-                        SocketUserMessage msg = (SocketUserMessage)await reaction.Channel.GetMessageAsync(raidMessageId);
-
-                        if (parent.IsSingleStop())
-                        {
-                           await msg.DeleteAsync();
-                           raidMessages.Remove(raidMessageId);
-
-                           string fileName = Connections.GetPokemonPicture(parent.GetCurrentBoss());
-                           Connections.CopyFile(fileName);
-                           if (parent is Raid raid)
-                           {
-                              RestUserMessage raidMessage = await reaction.Channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
-                              raidMessages.Add(raidMessage.Id, raid);
-                              SetEmojis(raidMessage, raidEmojis);
-                           }
-                           else if (parent is RaidMule mule)
-                           {
-                              RestUserMessage raidMessage = await reaction.Channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(mule, fileName));
-                              raidMessages.Add(raidMessage.Id, mule);
-                              SetEmojis(raidMessage, muleEmojis);
-                           }
-                           Connections.DeleteFile(fileName);
-                        }
-                        else
-                        {
-                           await ModifyMessage(msg, parent);
-                        }
-                        subMessages.Remove(message.Id);
-                        await message.DeleteAsync();
-
+                        await EditBoss(message, reaction.Channel, parent, raidMessageId, (parent.BossPage * Global.SELECTION_EMOJIS.Length) + i);
                         parent.BossEditingPlayer = null;
                      }
                   }
@@ -1866,12 +1835,17 @@ namespace PokeStar.ModuleParents
          }
       }
 
-      protected static async Task SelectBoss(IMessage message, ISocketMessageChannel channel, RaidParent parent, int selection)
+      /// <summary>
+      /// Select a boss for an empty raid.
+      /// </summary>
+      /// <param name="raidMessage">Selection message for a raid.</param>
+      /// <param name="channel">Channel message was sent in.</param>
+      /// <param name="parent">Raid that the boss is part of.</param>
+      /// <param name="selection">Index of selected boss.</param>
+      /// <returns>Completed Task.</returns>
+      protected static async Task SelectBoss(IMessage raidMessage, ISocketMessageChannel channel, RaidParent parent, int selection)
       {
          parent.UpdateBoss(selection);
-         parent.BossPage = 0;
-         await message.DeleteAsync();
-         raidMessages.Remove(message.Id);
 
          if (parent is Raid raid)
          {
@@ -1915,6 +1889,55 @@ namespace PokeStar.ModuleParents
                SetEmojis(raidMsg, raidEmojis.Concat(trainEmojis).ToArray());
             }
          }
+
+         parent.BossPage = 0;
+         await raidMessage.DeleteAsync();
+         raidMessages.Remove(raidMessage.Id);
+      }
+
+      /// <summary>
+      /// Select a boss to edit a raid.
+      /// </summary>
+      /// <param name="subMessage">Boss edit message for a raid.</param>
+      /// <param name="channel">Channel message was sent in.</param>
+      /// <param name="parent">Raid that the boss is part of.</param>
+      /// <param name="raidMessageId">Id of the base raid message.</param>
+      /// <param name="selection">Index of selected boss.</param>
+      /// <returns>Completed Task.</returns>
+      protected static async Task EditBoss(IMessage subMessage, ISocketMessageChannel channel, RaidParent parent, ulong raidMessageId, int selection)
+      {
+         parent.UpdateBoss(selection);
+         SocketUserMessage msg = (SocketUserMessage)await channel.GetMessageAsync(raidMessageId);
+
+         if (parent.IsSingleStop())
+         {
+            await msg.DeleteAsync();
+            raidMessages.Remove(raidMessageId);
+
+            string fileName = Connections.GetPokemonPicture(parent.GetCurrentBoss());
+            Connections.CopyFile(fileName);
+            if (parent is Raid raid)
+            {
+               RestUserMessage raidMessage = await channel.SendFileAsync(fileName, embed: BuildRaidEmbed(raid, fileName));
+               raidMessages.Add(raidMessage.Id, raid);
+               SetEmojis(raidMessage, raidEmojis);
+            }
+            else if (parent is RaidMule mule)
+            {
+               RestUserMessage raidMessage = await channel.SendFileAsync(fileName, embed: BuildRaidMuleEmbed(mule, fileName));
+               raidMessages.Add(raidMessage.Id, mule);
+               SetEmojis(raidMessage, muleEmojis);
+            }
+            Connections.DeleteFile(fileName);
+         }
+         else
+         {
+            await ModifyMessage(msg, parent);
+         }
+
+         parent.BossPage = 0;
+         subMessages.Remove(subMessage.Id);
+         await subMessage.DeleteAsync();
       }
    }
 }
