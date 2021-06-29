@@ -105,6 +105,7 @@ namespace PokeStar
          client.MessageReceived += HandleCommandAsync;
          await commands.AddModulesAsync(Assembly.GetEntryAssembly(), services);
          client.ReactionAdded += HandleReactionAdded;
+         client.ReactionRemoved += HandleReactionRemoved;
          client.Ready += HandleReady;
          client.JoinedGuild += HandleJoinGuild;
          client.LeftGuild += HandleLeftGuild;
@@ -232,7 +233,35 @@ namespace PokeStar
             }
             else if (Connections.IsNotifyMessage(message.Id))
             {
-               await Connections.NotifyMessageReactionHandle(message, reaction, chnl.Guild);
+               await Connections.NotifyMessageReactionAddedHandle(reaction, chnl.Guild);
+            }
+         }
+         return Task.CompletedTask;
+      }
+
+      /// <summary>
+      /// Handles the Reaction Removed event.
+      /// </summary>
+      /// <param name="cachedMessage">Message that was reaction is on.</param>
+      /// <param name="originChannel">Channel where the message is located.</param>
+      /// <param name="reaction">Reaction made on the message.</param>
+      /// <returns>Task Complete.</returns>
+      private async Task<Task> HandleReactionRemoved(Cacheable<IUserMessage, ulong> cachedMessage,
+          Cacheable<IMessageChannel, ulong> originChannel, SocketReaction reaction)
+      {
+         IMessage message = await reaction.Channel.GetMessageAsync(cachedMessage.Id);
+
+         SocketGuildChannel chnl = message.Channel as SocketGuildChannel;
+         ulong guild = chnl.Guild.Id;
+
+         IUser user = reaction.User.Value;
+
+
+         if (message != null && reaction.User.IsSpecified && !user.IsBot)
+         {
+            if (Connections.IsNotifyMessage(message.Id))
+            {
+               await Connections.NotifyMessageReactionRemovedHandle(reaction, chnl.Guild);
             }
          }
          return Task.CompletedTask;
