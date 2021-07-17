@@ -308,6 +308,11 @@ namespace PokeStar
       /// </summary>
       public static readonly int LIMIT_RAID_MULE_GROUP  = 6;
 
+      /// <summary>
+      /// Boss emotes on a notify message limit.
+      /// </summary>
+      public static readonly int LIMIT_RAID_BOSS_NOTIFY = 10;
+
       // Raid Group bits ******************************************************
 
       /// <summary>
@@ -951,7 +956,7 @@ namespace PokeStar
       /// <summary>
       /// Raid role color.
       /// </summary>
-      public static readonly Color ROLE_COLOR_RAID = new Color(235, 52, 204);
+      public static readonly Color ROLE_COLOR_RAID     = new Color(235, 52, 204);
 
       // Image processing *****************************************************
 

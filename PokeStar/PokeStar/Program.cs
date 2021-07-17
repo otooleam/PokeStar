@@ -109,7 +109,6 @@ namespace PokeStar
          client.Ready += HandleReady;
          client.JoinedGuild += HandleJoinGuild;
          client.LeftGuild += HandleLeftGuild;
-         SilphUpdate = new Timer(async _ => await Connections.Instance().RunSilphUpdate(client.Guilds.ToList()), new AutoResetEvent(false), 0, 300000);
          return Task.CompletedTask;
       }
 
@@ -285,6 +284,8 @@ namespace PokeStar
                Connections.Instance().InitSettings(guild.Id);
             }
          }
+
+         SilphUpdate = new Timer(async _ => await Connections.Instance().RunSilphUpdate(client.Guilds.ToList()), new AutoResetEvent(false), 0, 300000);
 
          return Task.CompletedTask;
       }
