@@ -99,6 +99,11 @@ namespace PokeStar.DataModels
       public Dictionary<int, List<string>> AllBosses { get; set; }
 
       /// <summary>
+      /// Current page for selecting a boss.
+      /// </summary>
+      public int BossPage { get; set; }
+
+      /// <summary>
       /// Creates a new RaidParent.
       /// </summary>
       /// <param name="groupLimit">Max number of groups.</param>
